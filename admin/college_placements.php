@@ -1,0 +1,175 @@
+<?php
+session_start();
+if (!isset($_SESSION['admin_id'])) {
+    header('Location: index.php');
+    exit;
+}
+require_once 'db.php';
+
+$college_id = isset($_GET['college_id']) ? $_GET['college_id'] : null;
+if (!$college_id) { header('Location: colleges.php'); exit; }
+
+$stmt = $pdo->prepare("SELECT id, name FROM colleges WHERE id = ?");
+$stmt->execute([$college_id]);
+$college = $stmt->fetch();
+if (!$college) { header('Location: colleges.php'); exit; }
+
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (isset($_POST['action']) && $_POST['action'] == 'add') {
+        try {
+            $stmt = $pdo->prepare("
+                INSERT INTO college_placements (id, college_id, placement_year, avg_lpa, highest_lpa, median_lpa, placed_pct, students_placed, international_placements, top_recruiters) 
+                VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $college_id,
+                $_POST['placement_year'],
+                $_POST['avg_lpa'] ?: null,
+                $_POST['highest_lpa'] ?: null,
+                $_POST['median_lpa'] ?: null,
+                $_POST['placed_pct'] ?: null,
+                $_POST['students_placed'] ?: null,
+                $_POST['international_placements'] ?: 0,
+                $_POST['top_recruiters'] ?: null
+            ]);
+            header("Location: college_placements.php?college_id=$college_id&msg=added");
+            exit;
+        } catch (Exception $e) {
+            $error = "Error adding placement: " . $e->getMessage();
+        }
+    } elseif (isset($_POST['action']) && $_POST['action'] == 'delete') {
+        $stmt = $pdo->prepare("DELETE FROM college_placements WHERE id = ? AND college_id = ?");
+        $stmt->execute([$_POST['p_id'], $college_id]);
+        header("Location: college_placements.php?college_id=$college_id&msg=deleted");
+        exit;
+    }
+}
+
+$stmt = $pdo->prepare("SELECT * FROM college_placements WHERE college_id = ? ORDER BY placement_year DESC");
+$stmt->execute([$college_id]);
+$placements = $stmt->fetchAll();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Placements</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body { background-color: var(--bg-light); }
+        .admin-layout { display: flex; min-height: 100vh; }
+        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; }
+        .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
+        .user-profile { display: flex; align-items: center; gap: 12px; font-weight: 500; }
+        .content-area { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .page-header { margin-bottom: 24px; }
+        .page-header h2 { font-size: 1.8rem; font-weight: 700; display:flex; align-items:center; gap: 12px; }
+        
+        .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding-bottom: 12px; }
+        .tab-link { padding: 8px 16px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
+        .tab-link:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
+        .tab-link.active { background: var(--primary); color: white; }
+        
+        .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-layout">
+        <?php include 'sidebar.php'; ?>
+        <main class="main-content">
+            <header class="topbar">
+                <div class="user-profile">
+                    <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
+                    <a href="logout.php" style="margin-left: 16px; color: #19376d;"><i class="ph ph-sign-out" style="font-size: 1.5rem;"></i></a>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <div class="page-header">
+                    <h2><a href="colleges.php" style="color:var(--text-muted);"><i class="ph ph-arrow-left"></i></a> Edit College: <?php echo htmlspecialchars($college['name']); ?></h2>
+                </div>
+
+                <div class="tabs-nav">
+                    <a href="college_form.php?id=<?php echo $college_id; ?>&tab=identity" class="tab-link">Identity & Contact</a>
+                    <a href="college_form.php?id=<?php echo $college_id; ?>&tab=about" class="tab-link">About & Amenities</a>
+                    <a href="college_form.php?id=<?php echo $college_id; ?>&tab=seo" class="tab-link">SEO & Publish</a>
+                    <a href="college_courses.php?college_id=<?php echo $college_id; ?>" class="tab-link">Courses & Fees</a>
+                    <a href="college_placements.php?college_id=<?php echo $college_id; ?>" class="tab-link active">Placements</a>
+                    <a href="college_cutoffs.php?college_id=<?php echo $college_id; ?>" class="tab-link">Cutoffs</a>
+                    <a href="college_media.php?college_id=<?php echo $college_id; ?>" class="tab-link">Media & Gallery</a>
+                    <a href="college_faqs.php?college_id=<?php echo $college_id; ?>" class="tab-link">FAQs</a>
+                    <a href="college_faculty.php?college_id=<?php echo $college_id; ?>" class="tab-link">Faculty</a>
+                    <a href="college_scholarships.php?college_id=<?php echo $college_id; ?>" class="tab-link">Scholarships</a>
+                </div>
+
+                <?php if(isset($_GET['msg'])): ?>
+                    <div style="padding: 16px; background: #dcfce7; color: #166534; border-radius: 8px; margin-bottom: 24px; border: 1px solid #bbf7d0;">Action completed successfully!</div>
+                <?php endif; ?>
+                <?php if($error): ?>
+                    <div style="padding: 16px; background: #fee2e2; color: #991b1b; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fecaca;"><?php echo htmlspecialchars($error); ?></div>
+                <?php endif; ?>
+
+                <div class="panel">
+                    <h3><i class="ph ph-plus-circle"></i> Add Placement Record</h3>
+                    <form action="" method="POST" style="margin-top:16px;">
+                        <input type="hidden" name="action" value="add">
+                        <div class="form-grid">
+                            <div class="form-group"><label>Year</label><input type="number" name="placement_year" class="form-control" required></div>
+                            <div class="form-group"><label>Average Package (LPA)</label><input type="number" step="0.01" name="avg_lpa" class="form-control"></div>
+                            <div class="form-group"><label>Highest Package (LPA)</label><input type="number" step="0.01" name="highest_lpa" class="form-control"></div>
+                            <div class="form-group"><label>Median Package (LPA)</label><input type="number" step="0.01" name="median_lpa" class="form-control"></div>
+                            <div class="form-group"><label>Placement Percentage</label><input type="number" step="0.01" name="placed_pct" class="form-control"></div>
+                            <div class="form-group"><label>Students Placed</label><input type="number" name="students_placed" class="form-control"></div>
+                            <div class="form-group full"><label>Top Recruiters (JSON List)</label><input type="text" name="top_recruiters" class="form-control" placeholder='["Amazon", "Microsoft", "TCS"]'></div>
+                        </div>
+                        <div style="text-align: right; margin-top:16px;"><button type="submit" class="btn btn-primary">Add Placement</button></div>
+                    </form>
+                </div>
+
+                <div class="panel">
+                    <h3><i class="ph ph-list"></i> Placement Records</h3>
+                    <?php if(empty($placements)): ?>
+                        <p style="color:var(--text-muted); margin-top:16px;">No records yet.</p>
+                    <?php else: ?>
+                        <div style="overflow-x:auto;">
+                            <table>
+                                <thead><tr><th>Year</th><th>Avg LPA</th><th>Highest LPA</th><th>Placed %</th><th>Actions</th></tr></thead>
+                                <tbody>
+                                    <?php foreach($placements as $p): ?>
+                                    <tr>
+                                        <td style="font-weight:600;"><?php echo htmlspecialchars($p['placement_year']); ?></td>
+                                        <td><?php echo $p['avg_lpa'] ? '₹'.$p['avg_lpa'].' L' : '-'; ?></td>
+                                        <td><?php echo $p['highest_lpa'] ? '₹'.$p['highest_lpa'].' L' : '-'; ?></td>
+                                        <td><?php echo $p['placed_pct'] ? $p['placed_pct'].'%' : '-'; ?></td>
+                                        <td>
+                                            <form action="" method="POST" style="display:inline;" onsubmit="return confirm('Delete this record?');">
+                                                <input type="hidden" name="action" value="delete"><input type="hidden" name="p_id" value="<?php echo $p['id']; ?>">
+                                                <button type="submit" style="background:none; border:none; color:#dc2626; cursor:pointer;"><i class="ph ph-trash" style="font-size:1.2rem;"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</body>
+</html>
