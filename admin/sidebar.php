@@ -27,10 +27,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="universities.php" class="<?php echo ($current_page == 'universities.php' || $current_page == 'university_form.php') ? 'active' : ''; ?>">
             <i class="ph ph-bank"></i> Universities
         </a>
-        <a href="exams.php" class="<?php echo ($current_page == 'exams.php' || $current_page == 'exam_form.php') ? 'active' : ''; ?>">
-            <i class="ph ph-exam"></i> Exams
-        </a>
-        <a href="#"><i class="ph ph-books"></i> Courses</a>
+        <a href="exams.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'exams.php' || basename($_SERVER['PHP_SELF']) == 'exam_form.php' ? 'active' : ''; ?>"><i class="ph ph-exam"></i> Exams</a>
+        <a href="courses.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['courses.php', 'course_form.php', 'course_specializations.php', 'course_career_paths.php']) ? 'active' : ''; ?>"><i class="ph ph-books"></i> Courses</a>
+        <a href="course_categories.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'course_categories.php' ? 'active' : ''; ?>"><i class="ph ph-folders"></i> Course Categories</a>
         
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Engagement</div>
         
