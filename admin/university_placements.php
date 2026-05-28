@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 if (!isset($_SESSION['admin_id'])) {
     header('Location: index.php');
@@ -16,23 +16,30 @@ if (!$university) { header('Location: universities.php'); exit; }
 
 $error = '';
 
+function generateUUID() {
+    return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'add') {
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO university_placements (id, university_id, placement_year, avg_lpa, highest_lpa, median_lpa, placed_pct, students_placed, international_placements, top_recruiters) 
-                VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO university_placements (id, university_id, placement_year, avg_package_lpa, highest_package_lpa, median_package_lpa, placement_percentage, students_placed, international_placements, top_recruiters, sector_wise_json, placement_report_pdf) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
+                generateUUID(),
                 $university_id,
                 $_POST['placement_year'],
-                $_POST['avg_lpa'] ?: null,
-                $_POST['highest_lpa'] ?: null,
-                $_POST['median_lpa'] ?: null,
-                $_POST['placed_pct'] ?: null,
+                $_POST['avg_package_lpa'] ?: null,
+                $_POST['highest_package_lpa'] ?: null,
+                $_POST['median_package_lpa'] ?: null,
+                $_POST['placement_percentage'] ?: null,
                 $_POST['students_placed'] ?: null,
                 $_POST['international_placements'] ?: 0,
-                $_POST['top_recruiters'] ?: null
+                $_POST['top_recruiters'] ?: null,
+                $_POST['sector_wise_json'] ?: null,
+                $_POST['placement_report_pdf'] ?: null
             ]);
             header("Location: university_placements.php?university_id=$university_id&msg=added");
             exit;
@@ -68,18 +75,15 @@ $placements = $stmt->fetchAll();
         .content-area { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
         .page-header { margin-bottom: 24px; }
         .page-header h2 { font-size: 1.8rem; font-weight: 700; display:flex; align-items:center; gap: 12px; }
-        
         .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding-bottom: 12px; }
         .tab-link { padding: 8px 16px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
         .tab-link:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
         .tab-link.active { background: var(--primary); color: white; }
-        
         .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
         .form-group { margin-bottom: 16px; }
         .form-group.full { grid-column: 1 / -1; }
-        .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; }
-        
+        .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; }
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
@@ -92,8 +96,7 @@ $placements = $stmt->fetchAll();
         <main class="main-content">
             <header class="topbar">
                 <div class="user-profile">
-                    <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
-                    <a href="logout.php" style="margin-left: 16px; color: #19376d;"><i class="ph ph-sign-out" style="font-size: 1.5rem;"></i></a>
+                    <span>Admin</span>
                 </div>
             </header>
 
@@ -127,13 +130,16 @@ $placements = $stmt->fetchAll();
                     <form action="" method="POST" style="margin-top:16px;">
                         <input type="hidden" name="action" value="add">
                         <div class="form-grid">
-                            <div class="form-group"><label>Year</label><input type="number" name="placement_year" class="form-control" required></div>
-                            <div class="form-group"><label>Average Package (LPA)</label><input type="number" step="0.01" name="avg_lpa" class="form-control"></div>
-                            <div class="form-group"><label>Highest Package (LPA)</label><input type="number" step="0.01" name="highest_lpa" class="form-control"></div>
-                            <div class="form-group"><label>Median Package (LPA)</label><input type="number" step="0.01" name="median_lpa" class="form-control"></div>
-                            <div class="form-group"><label>Placement Percentage</label><input type="number" step="0.01" name="placed_pct" class="form-control"></div>
+                            <div class="form-group"><label>Placement Year *</label><input type="number" name="placement_year" class="form-control" required></div>
+                            <div class="form-group"><label>Average Package (LPA)</label><input type="number" step="0.01" name="avg_package_lpa" class="form-control"></div>
+                            <div class="form-group"><label>Highest Package (LPA)</label><input type="number" step="0.01" name="highest_package_lpa" class="form-control"></div>
+                            <div class="form-group"><label>Median Package (LPA)</label><input type="number" step="0.01" name="median_package_lpa" class="form-control"></div>
+                            <div class="form-group"><label>Placement Percentage (%)</label><input type="number" step="0.01" name="placement_percentage" class="form-control"></div>
                             <div class="form-group"><label>Students Placed</label><input type="number" name="students_placed" class="form-control"></div>
-                            <div class="form-group full"><label>Top Recruiters (JSON List)</label><input type="text" name="top_recruiters" class="form-control" placeholder='["Amazon", "Microsoft", "TCS"]'></div>
+                            <div class="form-group"><label>International Placements</label><input type="number" name="international_placements" class="form-control" value="0"></div>
+                            <div class="form-group"><label>Placement Report PDF (URL)</label><input type="url" name="placement_report_pdf" class="form-control"></div>
+                            <div class="form-group full"><label>Top Recruiters (JSON List)</label><input type="text" name="top_recruiters" class="form-control" placeholder='[{"name": "Amazon", "logo_url": "...", "count": 10}]'></div>
+                            <div class="form-group full"><label>Sector Wise Distribution (JSON List)</label><input type="text" name="sector_wise_json" class="form-control" placeholder='[{"sector": "IT", "pct": 45}, {"sector": "Finance", "pct": 20}]'></div>
                         </div>
                         <div style="text-align: right; margin-top:16px;"><button type="submit" class="btn btn-primary">Add Placement</button></div>
                     </form>
@@ -146,14 +152,15 @@ $placements = $stmt->fetchAll();
                     <?php else: ?>
                         <div style="overflow-x:auto;">
                             <table>
-                                <thead><tr><th>Year</th><th>Avg LPA</th><th>Highest LPA</th><th>Placed %</th><th>Actions</th></tr></thead>
+                                <thead><tr><th>Year</th><th>Avg LPA</th><th>Highest LPA</th><th>Placed %</th><th>Students</th><th>Actions</th></tr></thead>
                                 <tbody>
                                     <?php foreach($placements as $p): ?>
                                     <tr>
                                         <td style="font-weight:600;"><?php echo htmlspecialchars($p['placement_year']); ?></td>
-                                        <td><?php echo $p['avg_lpa'] ? '₹'.$p['avg_lpa'].' L' : '-'; ?></td>
-                                        <td><?php echo $p['highest_lpa'] ? '₹'.$p['highest_lpa'].' L' : '-'; ?></td>
-                                        <td><?php echo $p['placed_pct'] ? $p['placed_pct'].'%' : '-'; ?></td>
+                                        <td><?php echo $p['avg_package_lpa'] ? 'â‚¹'.$p['avg_package_lpa'].' L' : '-'; ?></td>
+                                        <td><?php echo $p['highest_package_lpa'] ? 'â‚¹'.$p['highest_package_lpa'].' L' : '-'; ?></td>
+                                        <td><?php echo $p['placement_percentage'] ? $p['placement_percentage'].'%' : '-'; ?></td>
+                                        <td><?php echo $p['students_placed'] ?: '-'; ?></td>
                                         <td>
                                             <form action="" method="POST" style="display:inline;" onsubmit="return confirm('Delete this record?');">
                                                 <input type="hidden" name="action" value="delete"><input type="hidden" name="p_id" value="<?php echo $p['id']; ?>">
@@ -173,3 +180,4 @@ $placements = $stmt->fetchAll();
     </div>
 </body>
 </html>
+

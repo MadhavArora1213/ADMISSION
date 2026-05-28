@@ -6,17 +6,50 @@ require_once 'db.php';
 $exam_id = isset($_GET['exam_id']) ? $_GET['exam_id'] : null;
 if (!$exam_id) { header('Location: exams.php'); exit; }
 
-$stmt = $pdo->prepare("SELECT name FROM exams WHERE id = ?");
+$stmt = $pdo->prepare("SELECT exam_name FROM exams WHERE id = ?");
 $stmt->execute([$exam_id]);
 $exam = $stmt->fetch();
 if (!$exam) { header('Location: exams.php'); exit; }
 
-// Handle Add
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'add') {
-    $id = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
-    $stmt = $pdo->prepare("INSERT INTO exam_dates (id, exam_id, event_name, event_date, is_tentative, year) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$id, $exam_id, $_POST['event_name'], $_POST['event_date'], isset($_POST['is_tentative']) ? 1 : 0, $_POST['year']]);
-    header("Location: exam_dates.php?exam_id=$exam_id&msg=added");
+// Handle Save Year Profile
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'save_year') {
+    $year = $_POST['year'];
+    
+    // Check if year profile exists for this exam
+    $stmtCheck = $pdo->prepare("SELECT id FROM exam_dates WHERE exam_id = ? AND year = ?");
+    $stmtCheck->execute([$exam_id, $year]);
+    $existing = $stmtCheck->fetch();
+    
+    $is_tentative = isset($_POST['is_tentative']) ? 1 : 0;
+    
+    if ($existing) {
+        $stmt = $pdo->prepare("UPDATE exam_dates SET 
+            event_name = ?, event_date = ?, application_start = ?, application_end = ?, exam_date = ?, 
+            result_date = ?, admit_card_date = ?, counselling_start = ?, 
+            answer_key_date = ?, is_tentative = ? 
+            WHERE id = ?");
+        $stmt->execute([
+            $_POST['event_name'] ?: null, $_POST['event_date'] ?: null,
+            $_POST['application_start'] ?: null, $_POST['application_end'] ?: null, 
+            $_POST['exam_date'] ?: null, $_POST['result_date'] ?: null, 
+            $_POST['admit_card_date'] ?: null, $_POST['counselling_start'] ?: null, 
+            $_POST['answer_key_date'] ?: null, $is_tentative, $existing['id']
+        ]);
+    } else {
+        $id = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
+        $stmt = $pdo->prepare("INSERT INTO exam_dates 
+            (id, exam_id, year, event_name, event_date, application_start, application_end, exam_date, result_date, admit_card_date, counselling_start, answer_key_date, is_tentative) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([
+            $id, $exam_id, $year,
+            $_POST['event_name'] ?: null, $_POST['event_date'] ?: null,
+            $_POST['application_start'] ?: null, $_POST['application_end'] ?: null, 
+            $_POST['exam_date'] ?: null, $_POST['result_date'] ?: null, 
+            $_POST['admit_card_date'] ?: null, $_POST['counselling_start'] ?: null, 
+            $_POST['answer_key_date'] ?: null, $is_tentative
+        ]);
+    }
+    header("Location: exam_dates.php?exam_id=$exam_id&msg=saved");
     exit;
 }
 
@@ -28,9 +61,15 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
     exit;
 }
 
-$dates = $pdo->prepare("SELECT * FROM exam_dates WHERE exam_id = ? ORDER BY year DESC, event_date ASC");
+$dates = $pdo->prepare("SELECT * FROM exam_dates WHERE exam_id = ? ORDER BY year DESC");
 $dates->execute([$exam_id]);
 $datesList = $dates->fetchAll();
+
+// Determine max year to default to
+$defaultYear = date('Y');
+if (!empty($datesList)) {
+    $defaultYear = $datesList[0]['year'] + 1;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -62,77 +101,156 @@ $datesList = $dates->fetchAll();
         th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
         .action-btn { width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .action-btn.edit { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; margin-right: 8px; }
         .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding-bottom: 12px; }
         .tab-link { padding: 8px 16px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
         .tab-link:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
         .tab-link.active { background: var(--primary); color: white; }
+        .msg-alert { padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 24px; border: 1px solid #bbf7d0; }
     </style>
 </head>
 <body>
     <div class="admin-layout">
-        <main class="main-content" style="margin-left: 0;">
+        <?php include 'sidebar.php'; ?>
+        
+        <main class="main-content">
+            <header class="topbar">
+                <div class="user-profile">
+                    <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
+                    <a href="logout.php" style="margin-left: 16px; color: #19376d;"><i class="ph ph-sign-out" style="font-size: 1.5rem;"></i></a>
+                </div>
+            </header>
+
             <div class="content-area">
                 <div class="page-header">
-                    <h2><a href="exam_form.php?id=<?php echo $exam_id; ?>&tab=basic" style="color:var(--text-muted);"><i class="ph ph-arrow-left"></i></a> Exam Dates: <?php echo htmlspecialchars($exam['name']); ?></h2>
+                    <h2><a href="exam_form.php?id=<?php echo $exam_id; ?>&tab=basic" style="color:var(--text-muted);"><i class="ph ph-arrow-left"></i></a> All Dates: <?php echo htmlspecialchars($exam['exam_name']); ?></h2>
                 </div>
                 
                 <div class="tabs-nav">
                     <a href="exam_form.php?id=<?php echo $exam_id; ?>&tab=basic" class="tab-link">Basic Info</a>
-                    <a href="exam_form.php?id=<?php echo $exam_id; ?>&tab=dates" class="tab-link">Important Dates</a>
                     <a href="exam_form.php?id=<?php echo $exam_id; ?>&tab=eligibility" class="tab-link">Eligibility & Pattern</a>
                     <a href="exam_form.php?id=<?php echo $exam_id; ?>&tab=links" class="tab-link">Fees & Links</a>
-                    <a href="exam_dates.php?exam_id=<?php echo $exam_id; ?>" class="tab-link active">All Dates & Events</a>
+                    <a href="exam_form.php?id=<?php echo $exam_id; ?>&tab=resources" class="tab-link">Resources</a>
+                    <a href="exam_form.php?id=<?php echo $exam_id; ?>&tab=results_data" class="tab-link">Results Data</a>
+                    <a href="exam_dates.php?exam_id=<?php echo $exam_id; ?>" class="tab-link active">All Dates</a>
                     <a href="exam_syllabus.php?exam_id=<?php echo $exam_id; ?>" class="tab-link">Syllabus</a>
-                    <a href="exam_cutoffs.php?exam_id=<?php echo $exam_id; ?>" class="tab-link">Cutoffs</a>
                 </div>
 
-                <form action="" method="POST" class="form-section">
-                    <input type="hidden" name="action" value="add">
-                    <h3>Add New Event Date</h3>
+                <?php if(isset($_GET['msg']) && $_GET['msg'] == 'saved'): ?>
+                <div class="msg-alert"><i class="ph ph-check-circle"></i> Year dates saved successfully!</div>
+                <?php endif; ?>
+                <?php if(isset($_GET['msg']) && $_GET['msg'] == 'deleted'): ?>
+                <div class="msg-alert"><i class="ph ph-check-circle"></i> Year dates deleted successfully!</div>
+                <?php endif; ?>
+
+                <form action="" method="POST" class="form-section" id="dateForm">
+                    <input type="hidden" name="action" value="save_year">
+                    <h3>Add/Update Year Profile</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.9rem;">Select a year to set its dates. If the year already exists, it will be updated.</p>
+                    
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label>Event Name</label>
-                            <input type="text" name="event_name" class="form-control" required placeholder="e.g. Registration Phase 1">
-                        </div>
-                        <div class="form-group">
-                            <label>Event Date</label>
-                            <input type="date" name="event_date" class="form-control" required>
-                        </div>
-                        <div class="form-group">
+                        <div class="form-group full">
                             <label>Year</label>
-                            <input type="number" name="year" class="form-control" required value="<?php echo date('Y'); ?>">
+                            <input type="number" name="year" id="yearInput" class="form-control" required value="<?php echo $defaultYear; ?>" style="max-width: 200px;">
+                        </div>
+                        <div class="form-group">
+                            <label>Event Name (e.g. Session 1)</label>
+                            <input type="text" name="event_name" id="ev_name" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Event Date (Specific date if applicable)</label>
+                            <input type="date" name="event_date" id="ev_date" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Application Start Date</label>
+                            <input type="date" name="application_start" id="app_start" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Application End Date</label>
+                            <input type="date" name="application_end" id="app_end" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Exam Date</label>
+                            <input type="date" name="exam_date" id="exam_d" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Admit Card Release Date</label>
+                            <input type="date" name="admit_card_date" id="admit_d" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Answer Key Release Date</label>
+                            <input type="date" name="answer_key_date" id="ans_key_d" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Result Date</label>
+                            <input type="date" name="result_date" id="res_d" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Counselling Start Date</label>
+                            <input type="date" name="counselling_start" id="counselling_d" class="form-control">
                         </div>
                         <div class="form-group" style="display:flex; align-items:center; gap:8px; padding-top:28px;">
                             <input type="checkbox" name="is_tentative" id="tentative">
-                            <label for="tentative" style="margin:0;">Is Tentative?</label>
+                            <label for="tentative" style="margin:0;">Are these dates Tentative?</label>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Add Event</button>
+                    <button type="submit" class="btn btn-primary" style="margin-top:16px;">Save Year Dates</button>
                 </form>
 
                 <div class="form-section">
-                    <h3>Events List</h3>
-                    <table>
-                        <tr>
-                            <th>Year</th>
-                            <th>Event Name</th>
-                            <th>Date</th>
-                            <th>Tentative</th>
-                            <th>Action</th>
-                        </tr>
-                        <?php foreach($datesList as $d): ?>
-                        <tr>
-                            <td><?php echo $d['year']; ?></td>
-                            <td><?php echo htmlspecialchars($d['event_name']); ?></td>
-                            <td><?php echo date('M d, Y', strtotime($d['event_date'])); ?></td>
-                            <td><?php echo $d['is_tentative'] ? 'Yes' : 'No'; ?></td>
-                            <td><a href="?exam_id=<?php echo $exam_id; ?>&action=delete&id=<?php echo $d['id']; ?>" class="action-btn"><i class="ph ph-trash"></i></a></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </table>
+                    <h3>Existing Year Profiles</h3>
+                    <?php if (empty($datesList)): ?>
+                        <p style="color:var(--text-muted); text-align:center; padding: 20px;">No dates added yet.</p>
+                    <?php else: ?>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <tr>
+                                <th>Year</th>
+                                <th>Event Name</th>
+                                <th>Event Date</th>
+                                <th>App Start</th>
+                                <th>Exam Date</th>
+                                <th>Tentative</th>
+                                <th>Action</th>
+                            </tr>
+                            <?php foreach($datesList as $d): ?>
+                            <tr>
+                                <td style="font-weight: 600; color: var(--primary);"><?php echo $d['year']; ?></td>
+                                <td><?php echo htmlspecialchars($d['event_name'] ?: '-'); ?></td>
+                                <td><?php echo $d['event_date'] ? date('M d, Y', strtotime($d['event_date'])) : '-'; ?></td>
+                                <td><?php echo $d['application_start'] ? date('M d, Y', strtotime($d['application_start'])) : '-'; ?></td>
+                                <td><?php echo $d['exam_date'] ? date('M d, Y', strtotime($d['exam_date'])) : '-'; ?></td>
+                                <td><?php echo $d['is_tentative'] ? '<span style="color:#b45309;">Yes</span>' : 'No'; ?></td>
+                                <td>
+                                    <button type="button" class="action-btn edit" onclick='editYear(<?php echo json_encode($d); ?>)' title="Edit"><i class="ph ph-pencil-simple"></i></button>
+                                    <a href="?exam_id=<?php echo $exam_id; ?>&action=delete&id=<?php echo $d['id']; ?>" class="action-btn" onclick="return confirm('Delete this year profile?');" title="Delete"><i class="ph ph-trash"></i></a>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </table>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </main>
     </div>
+
+    <script>
+    function editYear(data) {
+        document.getElementById('yearInput').value = data.year || '';
+        document.getElementById('ev_name').value = data.event_name || '';
+        document.getElementById('ev_date').value = data.event_date || '';
+        document.getElementById('app_start').value = data.application_start || '';
+        document.getElementById('app_end').value = data.application_end || '';
+        document.getElementById('exam_d').value = data.exam_date || '';
+        document.getElementById('admit_d').value = data.admit_card_date || '';
+        document.getElementById('ans_key_d').value = data.answer_key_date || '';
+        document.getElementById('res_d').value = data.result_date || '';
+        document.getElementById('counselling_d').value = data.counselling_start || '';
+        document.getElementById('tentative').checked = data.is_tentative == 1;
+        
+        window.scrollTo({top: document.getElementById('dateForm').offsetTop - 100, behavior: 'smooth'});
+    }
+    </script>
 </body>
 </html>

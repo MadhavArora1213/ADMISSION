@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 if (!isset($_SESSION['admin_id'])) {
     header('Location: index.php');
@@ -169,3 +169,4 @@ $faqs = $stmt->fetchAll();
     </div>
 </body>
 </html>
+

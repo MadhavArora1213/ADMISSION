@@ -17,7 +17,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'archive' && isset($_GET['id'])
 
 // Fetch Universities with City and State Names
 $query = "
-    SELECT c.id, c.name, c.university_type, c.status, c.is_verified, 
+    SELECT c.id, c.name, c.university_type, c.status, c.publish_status, c.is_verified, 
            ci.name as city_name, s.name as state_name 
     FROM universities c
     LEFT JOIN cities ci ON c.city_id = ci.id
@@ -133,6 +133,7 @@ $universities = $stmt->fetchAll();
                                         <th>Type</th>
                                         <th>Location</th>
                                         <th>Status</th>
+                                        <th>Publish Status</th>
                                         <th>Verification</th>
                                         <th>Actions</th>
                                     </tr>
@@ -158,6 +159,15 @@ $universities = $stmt->fetchAll();
                                         <td>
                                             <span class="status-badge status-<?php echo $university['status']; ?>">
                                                 <?php echo htmlspecialchars($university['status']); ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <?php 
+                                            $ps = $university['publish_status'] ?: 'draft';
+                                            $ps_class = $ps == 'published' ? 'status-active' : ($ps == 'draft' ? 'status-pending' : 'status-archived');
+                                            ?>
+                                            <span class="status-badge <?php echo $ps_class; ?>">
+                                                <?php echo htmlspecialchars(ucfirst($ps)); ?>
                                             </span>
                                         </td>
                                         <td>

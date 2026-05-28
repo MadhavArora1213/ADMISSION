@@ -12,9 +12,9 @@ $current_tab = isset($_GET['tab']) ? $_GET['tab'] : 'basic';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
-    $slug = !empty($_POST['slug']) ? $_POST['slug'] : strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $_POST['name'])));
+    $slug = !empty($_POST['exam_slug']) ? $_POST['exam_slug'] : strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $_POST['exam_name'])));
     
-    $slugCheckQ = "SELECT id FROM exams WHERE slug = :slug";
+    $slugCheckQ = "SELECT id FROM exams WHERE exam_slug = :slug";
     if ($is_edit) $slugCheckQ .= " AND id != :id";
     $slugCheckStmt = $pdo->prepare($slugCheckQ);
     $slugCheckParams = ['slug' => $slug];
@@ -26,12 +26,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
     } else {
         try {
             $data = [
-                'name' => $_POST['name'],
-                'slug' => $slug,
-                'conducting_body' => $_POST['conducting_body'],
-                'level' => $_POST['level'],
+                'exam_name' => $_POST['exam_name'],
+                'exam_slug' => $slug,
+                'exam_abbreviation' => $_POST['exam_abbreviation'] ?: null,
+                'conducting_body' => $_POST['conducting_body'] ?: null,
+                'conducting_body_logo' => $_POST['conducting_body_logo'] ?: null,
+                'exam_level' => $_POST['exam_level'] ?: null,
                 'exam_mode' => $_POST['exam_mode'] ?: null,
-                'frequency' => $_POST['frequency'] ?: null,
+                'exam_frequency' => $_POST['exam_frequency'] ?: null,
+                'participating_colleges_count' => $_POST['participating_colleges_count'] ?: 0,
+                'applicants_last_year' => $_POST['applicants_last_year'] ?: 0,
                 'status' => $_POST['status'] ?: 'upcoming',
                 'is_national' => isset($_POST['is_national']) ? 1 : 0
             ];
@@ -61,26 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
             $error = "Error saving: " . $e->getMessage();
         }
     }
-} elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'dates') {
-    try {
-        $data = [
-            'id' => $id,
-            'application_start' => !empty($_POST['application_start']) ? $_POST['application_start'] : null,
-            'application_end' => !empty($_POST['application_end']) ? $_POST['application_end'] : null,
-            'exam_date' => !empty($_POST['exam_date']) ? $_POST['exam_date'] : null,
-            'result_date' => !empty($_POST['result_date']) ? $_POST['result_date'] : null,
-            'admit_card_date' => !empty($_POST['admit_card_date']) ? $_POST['admit_card_date'] : null,
-            'counselling_start' => !empty($_POST['counselling_start']) ? $_POST['counselling_start'] : null,
-            'answer_key_date' => !empty($_POST['answer_key_date']) ? $_POST['answer_key_date'] : null,
-            'is_tentative' => isset($_POST['is_tentative']) ? 1 : 0
-        ];
-        $fields = [];
-        foreach($data as $key => $val) { if($key=='id') continue; $fields[] = "$key = :$key"; }
-        $stmt = $pdo->prepare("UPDATE exams SET " . implode(', ', $fields) . " WHERE id = :id");
-        $stmt->execute($data);
-        header("Location: exam_form.php?id=$id&tab=dates&msg=saved");
-        exit;
-    } catch (Exception $e) { $error = "Error: " . $e->getMessage(); }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'eligibility') {
     try {
         $data = [
@@ -88,12 +72,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
             'age_min' => $_POST['age_min'] ?: null,
             'age_max' => $_POST['age_max'] ?: null,
             'min_percentage_required' => $_POST['min_percentage_required'] ?: null,
-            'qualifying_exam' => $_POST['qualifying_exam'],
+            'qualifying_exam' => $_POST['qualifying_exam'] ?: null,
+            'nationality' => $_POST['nationality'] ?: null,
             'total_marks' => $_POST['total_marks'] ?: null,
             'total_questions' => $_POST['total_questions'] ?: null,
             'duration_minutes' => $_POST['duration_minutes'] ?: null,
-            'subjects_json' => $_POST['subjects_json'],
-            'marking_scheme' => $_POST['marking_scheme']
+            'subjects_json' => $_POST['subjects_json'] ?: null,
+            'marking_scheme' => $_POST['marking_scheme'] ?: null,
+            'sections' => $_POST['sections'] ?: null,
+            'language_options' => $_POST['language_options'] ?: null
         ];
         $fields = [];
         foreach($data as $key => $val) { if($key=='id') continue; $fields[] = "$key = :$key"; }
@@ -109,14 +96,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
             'application_fee_general' => $_POST['application_fee_general'] ?: null,
             'application_fee_obc' => $_POST['application_fee_obc'] ?: null,
             'application_fee_sc_st' => $_POST['application_fee_sc_st'] ?: null,
-            'application_url' => $_POST['application_url'],
-            'official_website' => $_POST['official_website'],
-            'syllabus_pdf_url' => $_POST['syllabus_pdf_url'],
-            'result_url' => $_POST['result_url'],
-            'scorecard_url' => $_POST['scorecard_url'],
-            'counselling_authority' => $_POST['counselling_authority'],
+            'application_fee_pwd' => $_POST['application_fee_pwd'] ?: null,
+            'application_fee_female' => $_POST['application_fee_female'] ?: null,
+            'application_url' => $_POST['application_url'] ?: null,
+            'official_website' => $_POST['official_website'] ?: null,
+            'syllabus_pdf_url' => $_POST['syllabus_pdf_url'] ?: null,
+            'result_url' => $_POST['result_url'] ?: null,
+            'scorecard_url' => $_POST['scorecard_url'] ?: null,
+            'counselling_authority' => $_POST['counselling_authority'] ?: null,
             'counselling_rounds' => $_POST['counselling_rounds'] ?: null,
-            'merit_list_url' => $_POST['merit_list_url']
+            'merit_list_url' => $_POST['merit_list_url'] ?: null,
+            'normalisation_method' => $_POST['normalisation_method'] ?: null
         ];
         $fields = [];
         foreach($data as $key => $val) { if($key=='id') continue; $fields[] = "$key = :$key"; }
@@ -125,9 +115,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
         header("Location: exam_form.php?id=$id&tab=links&msg=saved");
         exit;
     } catch (Exception $e) { $error = "Error: " . $e->getMessage(); }
+} elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'resources') {
+    try {
+        $stmtCheck = $pdo->prepare("SELECT id FROM exam_resources WHERE exam_id = ?");
+        $stmtCheck->execute([$id]);
+        if ($stmtCheck->rowCount() > 0) {
+            $stmt = $pdo->prepare("UPDATE exam_resources SET sample_papers_json = ? WHERE exam_id = ?");
+            $stmt->execute([$_POST['sample_papers_json'] ?: null, $id]);
+        } else {
+            $newId = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
+            $stmt = $pdo->prepare("INSERT INTO exam_resources (id, exam_id, sample_papers_json) VALUES (?, ?, ?)");
+            $stmt->execute([$newId, $id, $_POST['sample_papers_json'] ?: null]);
+        }
+        header("Location: exam_form.php?id=$id&tab=resources&msg=saved");
+        exit;
+    } catch (Exception $e) { $error = "Error: " . $e->getMessage(); }
+} elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'results_data') {
+    try {
+        $stmtCheck = $pdo->prepare("SELECT id FROM exam_results WHERE exam_id = ?");
+        $stmtCheck->execute([$id]);
+        if ($stmtCheck->rowCount() > 0) {
+            $stmt = $pdo->prepare("UPDATE exam_results SET percentile_vs_marks_json = ? WHERE exam_id = ?");
+            $stmt->execute([$_POST['percentile_vs_marks_json'] ?: null, $id]);
+        } else {
+            $newId = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
+            $stmt = $pdo->prepare("INSERT INTO exam_results (id, exam_id, percentile_vs_marks_json) VALUES (?, ?, ?)");
+            $stmt->execute([$newId, $id, $_POST['percentile_vs_marks_json'] ?: null]);
+        }
+        header("Location: exam_form.php?id=$id&tab=results_data&msg=saved");
+        exit;
+    } catch (Exception $e) { $error = "Error: " . $e->getMessage(); }
 }
 
 $exam = [];
+$exam_resources = [];
+$exam_results = [];
 if ($is_edit) {
     $stmt = $pdo->prepare("SELECT * FROM exams WHERE id = ?");
     $stmt->execute([$id]);
@@ -135,6 +157,18 @@ if ($is_edit) {
     if (!$exam) {
         header('Location: exams.php');
         exit;
+    }
+
+    $stmtRes = $pdo->prepare("SELECT sample_papers_json FROM exam_resources WHERE exam_id = ?");
+    $stmtRes->execute([$id]);
+    if ($res = $stmtRes->fetch(PDO::FETCH_ASSOC)) {
+        $exam_resources = $res;
+    }
+
+    $stmtRst = $pdo->prepare("SELECT percentile_vs_marks_json FROM exam_results WHERE exam_id = ?");
+    $stmtRst->execute([$id]);
+    if ($rst = $stmtRst->fetch(PDO::FETCH_ASSOC)) {
+        $exam_results = $rst;
     }
 }
 
@@ -210,27 +244,30 @@ function getValue($arr, $key, $default = '') {
                 <div class="page-header">
                     <h2>
                         <a href="exams.php" style="color:var(--text-muted);"><i class="ph ph-arrow-left"></i></a> 
-                        <?php echo $is_edit ? 'Edit Exam: ' . htmlspecialchars($exam['name']) : 'Add New Exam'; ?>
+                        <?php echo $is_edit ? 'Edit Exam: ' . htmlspecialchars($exam['exam_name']) : 'Add New Exam'; ?>
                     </h2>
                 </div>
 
                 <?php if($is_edit): ?>
                 <div class="tabs-nav">
                     <a href="?id=<?php echo $id; ?>&tab=basic" class="tab-link <?php echo $current_tab=='basic'?'active':''; ?>">Basic Info</a>
-                    <a href="?id=<?php echo $id; ?>&tab=dates" class="tab-link <?php echo $current_tab=='dates'?'active':''; ?>">Important Dates</a>
                     <a href="?id=<?php echo $id; ?>&tab=eligibility" class="tab-link <?php echo $current_tab=='eligibility'?'active':''; ?>">Eligibility & Pattern</a>
                     <a href="?id=<?php echo $id; ?>&tab=links" class="tab-link <?php echo $current_tab=='links'?'active':''; ?>">Fees & Links</a>
+                    <a href="?id=<?php echo $id; ?>&tab=resources" class="tab-link <?php echo $current_tab=='resources'?'active':''; ?>">Resources</a>
+                    <a href="?id=<?php echo $id; ?>&tab=results_data" class="tab-link <?php echo $current_tab=='results_data'?'active':''; ?>">Results Data</a>
                     
-                    <a href="exam_dates.php?exam_id=<?php echo $id; ?>" class="tab-link">All Dates & Events</a>
+                    <a href="exam_dates.php?exam_id=<?php echo $id; ?>" class="tab-link">All Dates</a>
                     <a href="exam_syllabus.php?exam_id=<?php echo $id; ?>" class="tab-link">Syllabus</a>
-                    <a href="exam_cutoffs.php?exam_id=<?php echo $id; ?>" class="tab-link">Cutoffs</a>
                 </div>
                 <?php else: ?>
                 <div class="tabs-nav">
                     <span class="tab-link active">Basic Info</span>
-                    <span class="tab-link disabled">Important Dates</span>
                     <span class="tab-link disabled">Eligibility & Pattern</span>
                     <span class="tab-link disabled">Fees & Links</span>
+                    <span class="tab-link disabled">Resources</span>
+                    <span class="tab-link disabled">Results Data</span>
+                    <span class="tab-link disabled">All Dates</span>
+                    <span class="tab-link disabled">Syllabus</span>
                 </div>
                 <?php endif; ?>
 
@@ -249,23 +286,34 @@ function getValue($arr, $key, $default = '') {
                         <div class="form-grid">
                             <div class="form-group full">
                                 <label>Exam Name *</label>
-                                <input type="text" name="name" class="form-control" required value="<?php echo getValue($exam, 'name'); ?>">
+                                <input type="text" name="exam_name" class="form-control" required value="<?php echo getValue($exam, 'exam_name'); ?>">
                             </div>
                             <div class="form-group">
                                 <label>URL Slug (Leave blank to auto-generate)</label>
-                                <input type="text" name="slug" class="form-control" value="<?php echo getValue($exam, 'slug'); ?>">
+                                <input type="text" name="exam_slug" class="form-control" value="<?php echo getValue($exam, 'exam_slug'); ?>">
                             </div>
+                            <div class="form-group">
+                                <label>Exam Abbreviation</label>
+                                <input type="text" name="exam_abbreviation" class="form-control" value="<?php echo getValue($exam, 'exam_abbreviation'); ?>">
+                            </div>
+                            
                             <div class="form-group">
                                 <label>Conducting Body</label>
                                 <input type="text" name="conducting_body" class="form-control" value="<?php echo getValue($exam, 'conducting_body'); ?>">
                             </div>
+                            <div class="form-group">
+                                <label>Conducting Body Logo URL</label>
+                                <input type="url" name="conducting_body_logo" class="form-control" value="<?php echo getValue($exam, 'conducting_body_logo'); ?>">
+                            </div>
                             
                             <div class="form-group">
-                                <label>Exam Level *</label>
-                                <select name="level" class="form-control" required>
-                                    <option value="National" <?php echo getValue($exam, 'level') == 'National' ? 'selected' : ''; ?>>National</option>
-                                    <option value="State" <?php echo getValue($exam, 'level') == 'State' ? 'selected' : ''; ?>>State</option>
-                                    <option value="University" <?php echo getValue($exam, 'level') == 'University' ? 'selected' : ''; ?>>University</option>
+                                <label>Exam Level</label>
+                                <select name="exam_level" class="form-control">
+                                    <option value="">Select</option>
+                                    <option value="national" <?php echo getValue($exam, 'exam_level') == 'national' ? 'selected' : ''; ?>>National</option>
+                                    <option value="state" <?php echo getValue($exam, 'exam_level') == 'state' ? 'selected' : ''; ?>>State</option>
+                                    <option value="university" <?php echo getValue($exam, 'exam_level') == 'university' ? 'selected' : ''; ?>>University</option>
+                                    <option value="institute" <?php echo getValue($exam, 'exam_level') == 'institute' ? 'selected' : ''; ?>>Institute</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -277,13 +325,15 @@ function getValue($arr, $key, $default = '') {
                                     <option value="both" <?php echo getValue($exam, 'exam_mode') == 'both' ? 'selected' : ''; ?>>Both</option>
                                 </select>
                             </div>
+                            
                             <div class="form-group">
                                 <label>Frequency</label>
-                                <select name="frequency" class="form-control">
+                                <select name="exam_frequency" class="form-control">
                                     <option value="">Select</option>
-                                    <option value="annual" <?php echo getValue($exam, 'frequency') == 'annual' ? 'selected' : ''; ?>>Annual</option>
-                                    <option value="biannual" <?php echo getValue($exam, 'frequency') == 'biannual' ? 'selected' : ''; ?>>Biannual</option>
-                                    <option value="monthly" <?php echo getValue($exam, 'frequency') == 'monthly' ? 'selected' : ''; ?>>Monthly</option>
+                                    <option value="annual" <?php echo getValue($exam, 'exam_frequency') == 'annual' ? 'selected' : ''; ?>>Annual</option>
+                                    <option value="biannual" <?php echo getValue($exam, 'exam_frequency') == 'biannual' ? 'selected' : ''; ?>>Biannual</option>
+                                    <option value="quarterly" <?php echo getValue($exam, 'exam_frequency') == 'quarterly' ? 'selected' : ''; ?>>Quarterly</option>
+                                    <option value="monthly" <?php echo getValue($exam, 'exam_frequency') == 'monthly' ? 'selected' : ''; ?>>Monthly</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -292,8 +342,19 @@ function getValue($arr, $key, $default = '') {
                                     <option value="active" <?php echo getValue($exam, 'status') == 'active' ? 'selected' : ''; ?>>Active</option>
                                     <option value="upcoming" <?php echo getValue($exam, 'status') == 'upcoming' ? 'selected' : ''; ?>>Upcoming</option>
                                     <option value="completed" <?php echo getValue($exam, 'status') == 'completed' ? 'selected' : ''; ?>>Completed</option>
+                                    <option value="cancelled" <?php echo getValue($exam, 'status') == 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
                                 </select>
                             </div>
+                            
+                            <div class="form-group">
+                                <label>Participating Colleges Count</label>
+                                <input type="number" name="participating_colleges_count" class="form-control" value="<?php echo getValue($exam, 'participating_colleges_count'); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label>Applicants Last Year</label>
+                                <input type="number" name="applicants_last_year" class="form-control" value="<?php echo getValue($exam, 'applicants_last_year'); ?>">
+                            </div>
+                            
                             <div class="form-group checkbox-group" style="grid-column: 1 / -1;">
                                 <input type="checkbox" id="is_national" name="is_national" <?php echo !empty($exam['is_national']) ? 'checked' : ''; ?>>
                                 <label for="is_national">Is National Level Exam?</label>
@@ -302,51 +363,6 @@ function getValue($arr, $key, $default = '') {
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Save Basic Details</button>
-                    </div>
-                </form>
-
-                <?php elseif($current_tab == 'dates'): ?>
-                <form action="" method="POST">
-                    <div class="form-section">
-                        <h3><i class="ph ph-calendar"></i> Important Dates</h3>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Application Start Date</label>
-                                <input type="date" name="application_start" class="form-control" value="<?php echo getValue($exam, 'application_start'); ?>">
-                            </div>
-                            <div class="form-group">
-                                <label>Application End Date</label>
-                                <input type="date" name="application_end" class="form-control" value="<?php echo getValue($exam, 'application_end'); ?>">
-                            </div>
-                            <div class="form-group">
-                                <label>Admit Card Release Date</label>
-                                <input type="date" name="admit_card_date" class="form-control" value="<?php echo getValue($exam, 'admit_card_date'); ?>">
-                            </div>
-                            <div class="form-group">
-                                <label>Exam Date</label>
-                                <input type="date" name="exam_date" class="form-control" value="<?php echo getValue($exam, 'exam_date'); ?>">
-                            </div>
-                            <div class="form-group">
-                                <label>Answer Key Release Date</label>
-                                <input type="date" name="answer_key_date" class="form-control" value="<?php echo getValue($exam, 'answer_key_date'); ?>">
-                            </div>
-                            <div class="form-group">
-                                <label>Result Date</label>
-                                <input type="date" name="result_date" class="form-control" value="<?php echo getValue($exam, 'result_date'); ?>">
-                            </div>
-                            <div class="form-group">
-                                <label>Counselling Start Date</label>
-                                <input type="date" name="counselling_start" class="form-control" value="<?php echo getValue($exam, 'counselling_start'); ?>">
-                            </div>
-                            
-                            <div class="form-group checkbox-group" style="grid-column: 1 / -1;">
-                                <input type="checkbox" id="is_tentative" name="is_tentative" <?php echo !empty($exam['is_tentative']) ? 'checked' : ''; ?>>
-                                <label for="is_tentative">Are these dates Tentative?</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Save Dates</button>
                     </div>
                 </form>
 
@@ -371,6 +387,16 @@ function getValue($arr, $key, $default = '') {
                                 <label>Min Percentage Required (%)</label>
                                 <input type="number" step="0.1" name="min_percentage_required" class="form-control" value="<?php echo getValue($exam, 'min_percentage_required'); ?>">
                             </div>
+                            <div class="form-group">
+                                <label>Nationality</label>
+                                <select name="nationality" class="form-control">
+                                    <option value="">Select</option>
+                                    <option value="indian" <?php echo getValue($exam, 'nationality') == 'indian' ? 'selected' : ''; ?>>Indian</option>
+                                    <option value="nri" <?php echo getValue($exam, 'nationality') == 'nri' ? 'selected' : ''; ?>>NRI</option>
+                                    <option value="both" <?php echo getValue($exam, 'nationality') == 'both' ? 'selected' : ''; ?>>Both</option>
+                                </select>
+                            </div>
+                            <div class="form-group"></div>
                             
                             <div class="form-group">
                                 <label>Total Marks</label>
@@ -386,12 +412,20 @@ function getValue($arr, $key, $default = '') {
                             </div>
                             
                             <div class="form-group full">
+                                <label>Language Options (JSON Array)</label>
+                                <textarea name="language_options" class="form-control" rows="2" placeholder='["English", "Hindi"]'><?php echo getValue($exam, 'language_options'); ?></textarea>
+                            </div>
+                            <div class="form-group full">
                                 <label>Subjects (JSON Array)</label>
-                                <textarea name="subjects_json" class="form-control" rows="3" placeholder='["Physics", "Chemistry", "Maths"]'><?php echo getValue($exam, 'subjects_json'); ?></textarea>
+                                <textarea name="subjects_json" class="form-control" rows="3" placeholder='[{"subject": "Physics", "questions": 30, "marks": 120}]'><?php echo getValue($exam, 'subjects_json'); ?></textarea>
+                            </div>
+                            <div class="form-group full">
+                                <label>Sections (JSON Array)</label>
+                                <textarea name="sections" class="form-control" rows="3" placeholder='[{"name": "Section A", "questions": 20, "time": 60}]'><?php echo getValue($exam, 'sections'); ?></textarea>
                             </div>
                             <div class="form-group full">
                                 <label>Marking Scheme (JSON Object)</label>
-                                <textarea name="marking_scheme" class="form-control" rows="3" placeholder='{"correct": 4, "incorrect": -1}'><?php echo getValue($exam, 'marking_scheme'); ?></textarea>
+                                <textarea name="marking_scheme" class="form-control" rows="3" placeholder='{"correct": 4, "wrong": -1, "unattempted": 0}'><?php echo getValue($exam, 'marking_scheme'); ?></textarea>
                             </div>
                         </div>
                     </div>
@@ -403,7 +437,7 @@ function getValue($arr, $key, $default = '') {
                 <?php elseif($current_tab == 'links'): ?>
                 <form action="" method="POST">
                     <div class="form-section">
-                        <h3><i class="ph ph-currency-inr"></i> Fees & Official Links</h3>
+                        <h3><i class="ph ph-currency-inr"></i> Fees & Links</h3>
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Application Fee (General) ₹</label>
@@ -417,6 +451,15 @@ function getValue($arr, $key, $default = '') {
                                 <label>Application Fee (SC/ST) ₹</label>
                                 <input type="number" step="0.01" name="application_fee_sc_st" class="form-control" value="<?php echo getValue($exam, 'application_fee_sc_st'); ?>">
                             </div>
+                            <div class="form-group">
+                                <label>Application Fee (PwD) ₹</label>
+                                <input type="number" step="0.01" name="application_fee_pwd" class="form-control" value="<?php echo getValue($exam, 'application_fee_pwd'); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label>Application Fee (Female) ₹</label>
+                                <input type="number" step="0.01" name="application_fee_female" class="form-control" value="<?php echo getValue($exam, 'application_fee_female'); ?>">
+                            </div>
+                            <div class="form-group"></div>
                             
                             <div class="form-group full">
                                 <label>Official Website</label>
@@ -454,12 +497,49 @@ function getValue($arr, $key, $default = '') {
                                 <label>Merit List URL</label>
                                 <input type="url" name="merit_list_url" class="form-control" value="<?php echo getValue($exam, 'merit_list_url'); ?>">
                             </div>
+                            <div class="form-group full">
+                                <label>Normalisation Method</label>
+                                <textarea name="normalisation_method" class="form-control" rows="3"><?php echo getValue($exam, 'normalisation_method'); ?></textarea>
+                            </div>
                         </div>
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Save Fees & Links</button>
                     </div>
                 </form>
+                
+                <?php elseif($current_tab == 'resources'): ?>
+                <form action="" method="POST">
+                    <div class="form-section">
+                        <h3><i class="ph ph-files"></i> Resources</h3>
+                        <div class="form-grid">
+                            <div class="form-group full">
+                                <label>Sample Papers (JSON Array)</label>
+                                <textarea name="sample_papers_json" class="form-control" rows="6" placeholder='[{"year": "2023", "url": "https://example.com/2023.pdf"}]'><?php echo getValue($exam_resources, 'sample_papers_json'); ?></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Save Resources</button>
+                    </div>
+                </form>
+                
+                <?php elseif($current_tab == 'results_data'): ?>
+                <form action="" method="POST">
+                    <div class="form-section">
+                        <h3><i class="ph ph-chart-bar"></i> Results Data</h3>
+                        <div class="form-grid">
+                            <div class="form-group full">
+                                <label>Percentile vs Marks (JSON Data)</label>
+                                <textarea name="percentile_vs_marks_json" class="form-control" rows="10" placeholder='{"2023": [{"marks": 250, "percentile": 99.5}, ...]}'><?php echo getValue($exam_results, 'percentile_vs_marks_json'); ?></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Save Results Data</button>
+                    </div>
+                </form>
+                
                 <?php endif; ?>
 
             </div>

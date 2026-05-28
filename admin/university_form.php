@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
                 'status' => $_POST['status'],
                 'logo_url' => $_POST['logo_url'],
                 'cover_image_url' => $_POST['cover_image_url'],
-                'established_year' => $_POST['established_year'] ?: null,
+                'founded_year' => $_POST['founded_year'] ?: null,
                 'autonomous' => isset($_POST['autonomous']) ? 1 : 0,
                 'ugc_approved' => isset($_POST['ugc_approved']) ? 1 : 0,
                 'aicte_approved' => isset($_POST['aicte_approved']) ? 1 : 0,
@@ -58,7 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
                 'rejection_reason' => $_POST['rejection_reason'] ?: null,
                 'duplicate_of' => !empty($_POST['duplicate_of']) ? $_POST['duplicate_of'] : null,
                 'data_quality_score' => $_POST['data_quality_score'] ?: 0,
-                'import_batch_id' => !empty($_POST['import_batch_id']) ? $_POST['import_batch_id'] : null
+                'import_batch_id' => !empty($_POST['import_batch_id']) ? $_POST['import_batch_id'] : null,
+                'type_label' => $_POST['type_label'] ?: null,
+                'campus_type' => $_POST['campus_type'] ?: null
             ];
 
             if ($is_edit) {
@@ -135,13 +137,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
     }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'about') {
     try {
-        $updateData = [
-            'id' => $id,
+        $pdo->beginTransaction();
+        
+        // 1. university_content
+        $contentData = [
             'about_text' => $_POST['about_text'],
             'highlights_json' => $_POST['highlights_json'],
-            'accreditations' => $_POST['accreditations'],
+            'accreditations_json' => $_POST['accreditations'],
             'rankings_json' => $_POST['rankings_json'],
-            'awards_json' => $_POST['awards_json'],
+            'awards_json' => $_POST['awards_json']
+        ];
+        $chk = $pdo->prepare("SELECT id FROM university_content WHERE university_id = ?"); $chk->execute([$id]);
+        if($chk->rowCount() > 0) {
+            $fields = []; foreach($contentData as $k=>$v) $fields[] = "$k = :$k";
+            $contentData['university_id'] = $id;
+            $pdo->prepare("UPDATE university_content SET " . implode(", ", $fields) . " WHERE university_id = :university_id")->execute($contentData);
+        } else {
+            $contentData['id'] = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)); 
+            $contentData['university_id'] = $id;
+            $keys = array_keys($contentData);
+            $pdo->prepare("INSERT INTO university_content (" . implode(", ", $keys) . ") VALUES (:" . implode(", :", $keys) . ")")->execute($contentData);
+        }
+
+        // 2. university_admissions
+        $admData = [
             'admission_process' => $_POST['admission_process'],
             'accepted_exams' => $_POST['accepted_exams'],
             'admission_start_date' => !empty($_POST['admission_start_date']) ? $_POST['admission_start_date'] : null,
@@ -149,32 +168,66 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
             'merit_based' => isset($_POST['merit_based']) ? 1 : 0,
             'direct_admission' => isset($_POST['direct_admission']) ? 1 : 0,
             'management_quota_seats' => $_POST['management_quota_seats'] ?: 0,
-            'nri_quota_seats' => $_POST['nri_quota_seats'] ?: 0,
+            'nri_quota_seats' => $_POST['nri_quota_seats'] ?: 0
+        ];
+        $chk = $pdo->prepare("SELECT id FROM university_admissions WHERE university_id = ?"); $chk->execute([$id]);
+        if($chk->rowCount() > 0) {
+            $fields = []; foreach($admData as $k=>$v) $fields[] = "$k = :$k";
+            $admData['university_id'] = $id;
+            $pdo->prepare("UPDATE university_admissions SET " . implode(", ", $fields) . " WHERE university_id = :university_id")->execute($admData);
+        } else {
+            $admData['id'] = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)); 
+            $admData['university_id'] = $id;
+            $keys = array_keys($admData);
+            $pdo->prepare("INSERT INTO university_admissions (" . implode(", ", $keys) . ") VALUES (:" . implode(", :", $keys) . ")")->execute($admData);
+        }
+
+        // 3. university_infrastructure
+        $infData = [
             'library' => isset($_POST['library']) ? 1 : 0,
-            'sports_facilities' => $_POST['sports_facilities'],
-            'labs' => $_POST['labs'],
             'auditorium' => isset($_POST['auditorium']) ? 1 : 0,
             'cafeteria' => isset($_POST['cafeteria']) ? 1 : 0,
             'wifi' => isset($_POST['wifi']) ? 1 : 0,
             'medical_facility' => isset($_POST['medical_facility']) ? 1 : 0,
             'transport' => isset($_POST['transport']) ? 1 : 0,
+            'sports_facilities' => $_POST['sports_facilities'],
+            'labs' => $_POST['labs']
+        ];
+        $chk = $pdo->prepare("SELECT id FROM university_infrastructure WHERE university_id = ?"); $chk->execute([$id]);
+        if($chk->rowCount() > 0) {
+            $fields = []; foreach($infData as $k=>$v) $fields[] = "$k = :$k";
+            $infData['university_id'] = $id;
+            $pdo->prepare("UPDATE university_infrastructure SET " . implode(", ", $fields) . " WHERE university_id = :university_id")->execute($infData);
+        } else {
+            $infData['id'] = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)); 
+            $infData['university_id'] = $id;
+            $keys = array_keys($infData);
+            $pdo->prepare("INSERT INTO university_infrastructure (" . implode(", ", $keys) . ") VALUES (:" . implode(", :", $keys) . ")")->execute($infData);
+        }
+
+        // 4. university_hostels
+        $hstData = [
             'hostel_available' => isset($_POST['hostel_available']) ? 1 : 0,
             'hostel_type' => $_POST['hostel_type'] ?: null,
-            'hostel_capacity' => $_POST['hostel_capacity'] ?: 0,
+            'hostel_capacity' => $_POST['hostel_capacity'] ?: null,
             'hostel_fee_annual' => $_POST['hostel_fee_annual'] ?: null,
             'mess_available' => isset($_POST['mess_available']) ? 1 : 0,
             'mess_type' => $_POST['mess_type'] ?: null,
             'ac_available' => isset($_POST['ac_available']) ? 1 : 0
         ];
-        
-        $fields = [];
-        foreach($updateData as $key => $val) {
-            if($key == 'id') continue;
-            $fields[] = "$key = :$key";
+        $chk = $pdo->prepare("SELECT id FROM university_hostels WHERE university_id = ?"); $chk->execute([$id]);
+        if($chk->rowCount() > 0) {
+            $fields = []; foreach($hstData as $k=>$v) $fields[] = "$k = :$k";
+            $hstData['university_id'] = $id;
+            $pdo->prepare("UPDATE university_hostels SET " . implode(", ", $fields) . " WHERE university_id = :university_id")->execute($hstData);
+        } else {
+            $hstData['id'] = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)); 
+            $hstData['university_id'] = $id;
+            $keys = array_keys($hstData);
+            $pdo->prepare("INSERT INTO university_hostels (" . implode(", ", $keys) . ") VALUES (:" . implode(", :", $keys) . ")")->execute($hstData);
         }
-        $sql = "UPDATE universities SET " . implode(', ', $fields) . " WHERE id = :id";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($updateData);
+
+        $pdo->commit();
         
         header('Location: university_form.php?id=' . $id . '&tab=about&msg=saved');
         exit;
@@ -186,27 +239,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
         $publish_status = $_POST['publish_status'];
         $published_at = ($publish_status == 'published' && getValue($university, 'publish_status') != 'published') ? date('Y-m-d H:i:s') : getValue($university, 'published_at');
         
-        $updateData = [
-            'id' => $id,
+        $pdo->beginTransaction();
+        
+        $pdo->prepare("UPDATE universities SET publish_status = ? WHERE id = ?")->execute([$_POST['publish_status'], $id]);
+        
+        $seoData = [
             'meta_title' => $_POST['meta_title'],
             'meta_description' => $_POST['meta_description'],
-            'meta_keywords' => $_POST['meta_keywords'],
             'og_image_url' => $_POST['og_image_url'],
             'canonical_url' => $_POST['canonical_url'],
             'schema_markup' => $_POST['schema_markup'],
-            'publish_status' => $publish_status,
-            'published_at' => $published_at,
             'noindex' => isset($_POST['noindex']) ? 1 : 0
         ];
         
-        $fields = [];
-        foreach($updateData as $key => $val) {
-            if($key == 'id') continue;
-            $fields[] = "$key = :$key";
+        $chk = $pdo->prepare("SELECT id FROM seo_meta WHERE entity_type = 'university' AND entity_id = ?"); 
+        $chk->execute([$id]);
+        if($chk->rowCount() > 0) {
+            $fields = []; foreach($seoData as $k=>$v) $fields[] = "$k = :$k";
+            $seoData['entity_id'] = $id;
+            $pdo->prepare("UPDATE seo_meta SET " . implode(", ", $fields) . " WHERE entity_type = 'university' AND entity_id = :entity_id")->execute($seoData);
+        } else {
+            $seoData['id'] = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)); 
+            $seoData['entity_type'] = 'university';
+            $seoData['entity_id'] = $id;
+            $keys = array_keys($seoData);
+            $pdo->prepare("INSERT INTO seo_meta (" . implode(", ", $keys) . ") VALUES (:" . implode(", :", $keys) . ")")->execute($seoData);
         }
-        $sql = "UPDATE universities SET " . implode(', ', $fields) . " WHERE id = :id";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($updateData);
+        
+        $pdo->commit();
         
         header('Location: university_form.php?id=' . $id . '&tab=seo&msg=saved');
         exit;
@@ -226,13 +286,30 @@ $allUniversities = $pdo->query("SELECT id, name FROM universities ORDER BY name 
 $university = [];
 $contact = [];
 if ($is_edit) {
-    $stmt = $pdo->prepare("SELECT * FROM universities WHERE id = ?");
+    $query = "
+        SELECT 
+            c.*, 
+            cc.website_url, cc.email, cc.phone, cc.address, cc.latitude, cc.longitude, cc.pincode, cc.google_maps_embed_url as google_maps_url, cc.nearest_railway_km, cc.nearest_airport_km,
+            ct.about_text, ct.highlights_json, ct.accreditations_json AS accreditations, ct.rankings_json, ct.awards_json,
+            ca.admission_process, ca.accepted_exams, ca.admission_start_date, ca.admission_end_date, ca.merit_based, ca.direct_admission, ca.management_quota_seats, ca.nri_quota_seats, ca.lateral_entry_available, ca.application_mode,
+            ci.library, ci.auditorium, ci.cafeteria, ci.wifi, ci.medical_facility, ci.transport, ci.ev_charging, ci.solar_power, ci.sports_facilities, ci.labs,
+            ch.hostel_available, ch.hostel_type, ch.hostel_capacity, ch.hostel_fee_annual, ch.mess_available, ch.mess_type, ch.ac_available, ch.laundry_available,
+            sm.meta_title, sm.meta_description, sm.og_image_url, sm.canonical_url, sm.schema_markup, sm.noindex
+        FROM universities c
+        LEFT JOIN university_contacts cc ON c.id = cc.university_id
+        LEFT JOIN university_content ct ON c.id = ct.university_id
+        LEFT JOIN university_admissions ca ON c.id = ca.university_id
+        LEFT JOIN university_infrastructure ci ON c.id = ci.university_id
+        LEFT JOIN university_hostels ch ON c.id = ch.university_id
+        LEFT JOIN seo_meta sm ON c.id = sm.entity_id AND sm.entity_type = 'university'
+        WHERE c.id = ?
+    ";
+    $stmt = $pdo->prepare($query);
     $stmt->execute([$id]);
     $university = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    $cStmt = $pdo->prepare("SELECT * FROM university_contacts WHERE university_id = ?");
-    $cStmt->execute([$id]);
-    $contact = $cStmt->fetch(PDO::FETCH_ASSOC);
+    // Fallback for $contact variables since we merged everything into $university row
+    $contact = $university;
     
     if (!$university) {
         header('Location: universities.php');
@@ -391,10 +468,22 @@ function getValue($arr, $key, $default = '') {
                                     <option value="society" <?php echo getValue($university, 'ownership') == 'society' ? 'selected' : ''; ?>>Society</option>
                                 </select>
                             </div>
-                            
                             <div class="form-group">
-                                <label>Established Year</label>
-                                <input type="number" name="established_year" class="form-control" min="1800" max="2099" value="<?php echo getValue($university, 'established_year'); ?>">
+                                <label>Type Label (Display Text)</label>
+                                <input type="text" name="type_label" class="form-control" value="<?php echo getValue($university, 'type_label'); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label>Founded Year</label>
+                                <input type="number" name="founded_year" class="form-control" min="1800" max="2099" value="<?php echo getValue($university, 'founded_year'); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label>Campus Type</label>
+                                <select name="campus_type" class="form-control">
+                                    <option value="">Select Type</option>
+                                    <option value="urban" <?php echo getValue($university, 'campus_type') == 'urban' ? 'selected' : ''; ?>>Urban</option>
+                                    <option value="semi-urban" <?php echo getValue($university, 'campus_type') == 'semi-urban' ? 'selected' : ''; ?>>Semi-Urban</option>
+                                    <option value="rural" <?php echo getValue($university, 'campus_type') == 'rural' ? 'selected' : ''; ?>>Rural</option>
+                                </select>
                             </div>
                             
                             <div class="form-group checkbox-group">

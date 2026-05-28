@@ -14,8 +14,8 @@ if (!$exam) { header('Location: exams.php'); exit; }
 // Handle Add
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'add') {
     $id = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
-    $stmt = $pdo->prepare("INSERT INTO exam_syllabus (id, exam_id, subject, topic, subtopics, weightage_pct) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$id, $exam_id, $_POST['subject'], $_POST['topic'], $_POST['subtopics'], $_POST['weightage_pct'] ?: null]);
+    $stmt = $pdo->prepare("INSERT INTO exam_syllabus (id, exam_id, subject, topic, subtopics, weightage_pct, chapter_pdf_url) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$id, $exam_id, $_POST['subject'], $_POST['topic'], $_POST['subtopics'], $_POST['weightage_pct'] ?: null, $_POST['chapter_pdf_url'] ?: null]);
     header("Location: exam_syllabus.php?exam_id=$exam_id&msg=added");
     exit;
 }
@@ -100,6 +100,10 @@ $list = $syl->fetchAll();
                             <label>Weightage (%)</label>
                             <input type="number" step="0.1" name="weightage_pct" class="form-control">
                         </div>
+                        <div class="form-group">
+                            <label>Chapter PDF URL</label>
+                            <input type="url" name="chapter_pdf_url" class="form-control">
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary" style="margin-top:16px;">Add Topic</button>
                 </form>
@@ -111,6 +115,7 @@ $list = $syl->fetchAll();
                             <th>Subject</th>
                             <th>Topic</th>
                             <th>Weightage</th>
+                            <th>PDF</th>
                             <th>Action</th>
                         </tr>
                         <?php foreach($list as $d): ?>
@@ -118,6 +123,7 @@ $list = $syl->fetchAll();
                             <td><?php echo htmlspecialchars($d['subject']); ?></td>
                             <td><?php echo htmlspecialchars($d['topic']); ?></td>
                             <td><?php echo $d['weightage_pct'] ? $d['weightage_pct'].'%' : '-'; ?></td>
+                            <td><?php echo $d['chapter_pdf_url'] ? '<a href="'.htmlspecialchars($d['chapter_pdf_url']).'" target="_blank"><i class="ph ph-file-pdf"></i></a>' : '-'; ?></td>
                             <td><a href="?exam_id=<?php echo $exam_id; ?>&action=delete&id=<?php echo $d['id']; ?>" class="action-btn"><i class="ph ph-trash"></i></a></td>
                         </tr>
                         <?php endforeach; ?>

@@ -123,14 +123,15 @@ $exams = $stmt->fetchAll();
                                     <?php foreach($exams as $exam): ?>
                                     <tr>
                                         <td style="font-weight: 600; color: var(--primary);">
-                                            <?php echo htmlspecialchars($exam['name']); ?><br>
+                                            <?php echo htmlspecialchars($exam['exam_name']); ?><br>
                                             <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);"><?php echo htmlspecialchars($exam['conducting_body']); ?></span>
                                         </td>
                                         <td>
-                                            <span class="level-badge"><?php echo htmlspecialchars($exam['level']); ?></span>
+                                            <span class="level-badge"><?php echo htmlspecialchars($exam['exam_level']); ?></span>
                                         </td>
                                         <td>
-                                            <?php echo !empty($exam['exam_date']) ? date('M d, Y', strtotime($exam['exam_date'])) : '<span style="color:#94a3b8;">TBA</span>'; ?>
+                                            <!-- Date is managed via Dates Table per year -->
+                                            <a href="exam_dates.php?exam_id=<?php echo $exam['id']; ?>" style="font-size: 0.85rem; color: var(--primary);">View Dates</a>
                                         </td>
                                         <td style="text-transform: capitalize;">
                                             <?php echo htmlspecialchars($exam['exam_mode']); ?>

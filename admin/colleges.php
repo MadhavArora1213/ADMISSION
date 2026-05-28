@@ -17,7 +17,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'archive' && isset($_GET['id'])
 
 // Fetch Colleges with City and State Names
 $query = "
-    SELECT c.id, c.name, c.college_type, c.status, c.is_verified, 
+    SELECT c.id, c.name, c.college_type, c.status, c.publish_status, c.is_verified, 
            ci.name as city_name, s.name as state_name 
     FROM colleges c
     LEFT JOIN cities ci ON c.city_id = ci.id
@@ -133,6 +133,7 @@ $colleges = $stmt->fetchAll();
                                         <th>Type</th>
                                         <th>Location</th>
                                         <th>Status</th>
+                                        <th>Publish Status</th>
                                         <th>Verification</th>
                                         <th>Actions</th>
                                     </tr>
@@ -158,6 +159,15 @@ $colleges = $stmt->fetchAll();
                                         <td>
                                             <span class="status-badge status-<?php echo $college['status']; ?>">
                                                 <?php echo htmlspecialchars($college['status']); ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <?php 
+                                            $ps = $college['publish_status'] ?: 'draft';
+                                            $ps_class = $ps == 'published' ? 'status-active' : ($ps == 'draft' ? 'status-pending' : 'status-archived');
+                                            ?>
+                                            <span class="status-badge <?php echo $ps_class; ?>">
+                                                <?php echo htmlspecialchars(ucfirst($ps)); ?>
                                             </span>
                                         </td>
                                         <td>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 if (!isset($_SESSION['admin_id'])) {
     header('Location: index.php');
@@ -156,7 +156,7 @@ $scholarships = $stmt->fetchAll();
                                     <tr>
                                         <td style="font-weight:600;"><?php echo htmlspecialchars($s['scholarship_name']); ?></td>
                                         <td style="text-transform:capitalize;"><?php echo htmlspecialchars(str_replace('_', ' ', $s['scholarship_type'])); ?></td>
-                                        <td><?php echo $s['amount'] ? '₹'.number_format($s['amount'], 2) : 'Variable'; ?></td>
+                                        <td><?php echo $s['amount'] ? 'â‚¹'.number_format($s['amount'], 2) : 'Variable'; ?></td>
                                         <td><?php echo $s['renewable'] ? 'Yes' : 'No'; ?></td>
                                         <td>
                                             <form action="" method="POST" style="display:inline;" onsubmit="return confirm('Delete?');">
@@ -177,3 +177,4 @@ $scholarships = $stmt->fetchAll();
     </div>
 </body>
 </html>
+
