@@ -16,19 +16,50 @@ if (!$college) { header('Location: colleges.php'); exit; }
 
 $error = '';
 
+function generateUUID() {
+    return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'add') {
         try {
+            $media_type = $_POST['media_type'];
+            
+            $image_url = null;
+            $image_type = null;
+            $video_url = null;
+            $video_type = null;
+            $document_url = null;
+            $document_type = null;
+            $tour_360_url = null;
+
+            if($media_type == 'image') {
+                $image_url = $_POST['url'];
+                $image_type = $_POST['sub_type'] ?: null;
+            } elseif ($media_type == 'video') {
+                $video_url = $_POST['url'];
+                $video_type = $_POST['sub_type'] ?: null;
+            } elseif ($media_type == 'document') {
+                $document_url = $_POST['url'];
+                $document_type = $_POST['sub_type'] ?: null;
+            } elseif ($media_type == '360') {
+                $tour_360_url = $_POST['url'];
+            }
+            
             $stmt = $pdo->prepare("
-                INSERT INTO college_media (id, college_id, media_type, sub_type, url, thumbnail_url, caption, sort_order) 
-                VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO college_media (id, college_id, image_url, image_type, video_url, video_type, document_url, document_type, `360_tour_url`, caption, sort_order) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
+                generateUUID(),
                 $college_id,
-                $_POST['media_type'],
-                $_POST['sub_type'] ?: null,
-                $_POST['url'],
-                $_POST['thumbnail_url'] ?: null,
+                $image_url,
+                $image_type,
+                $video_url,
+                $video_type,
+                $document_url,
+                $document_type,
+                $tour_360_url,
                 $_POST['caption'] ?: null,
                 $_POST['sort_order'] ?: 0
             ]);
@@ -42,12 +73,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute([$_POST['m_id'], $college_id]);
         header("Location: college_media.php?college_id=$college_id&msg=deleted");
         exit;
+    } elseif (isset($_POST['action']) && $_POST['action'] == 'update_tour') {
+        $stmt = $pdo->prepare("UPDATE college_media SET virtual_tour_enabled = ? WHERE college_id = ? AND image_type IS NULL"); // Apply to identity row
+        $stmt->execute([isset($_POST['virtual_tour_enabled']) ? 1 : 0, $college_id]);
+        header("Location: college_media.php?college_id=$college_id&msg=updated");
+        exit;
     }
 }
 
-$stmt = $pdo->prepare("SELECT * FROM college_media WHERE college_id = ? ORDER BY media_type ASC, sort_order ASC");
+// Fetch all media items
+$stmt = $pdo->prepare("SELECT * FROM college_media WHERE college_id = ? AND (image_url IS NOT NULL OR video_url IS NOT NULL OR document_url IS NOT NULL OR `360_tour_url` IS NOT NULL) ORDER BY sort_order ASC");
 $stmt->execute([$college_id]);
 $media = $stmt->fetchAll();
+
+// Fetch virtual tour setting
+$stmtTour = $pdo->prepare("SELECT virtual_tour_enabled FROM college_media WHERE college_id = ? AND image_type IS NULL LIMIT 1");
+$stmtTour->execute([$college_id]);
+$tourSetting = $stmtTour->fetch();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -66,18 +108,15 @@ $media = $stmt->fetchAll();
         .content-area { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
         .page-header { margin-bottom: 24px; }
         .page-header h2 { font-size: 1.8rem; font-weight: 700; display:flex; align-items:center; gap: 12px; }
-        
         .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding-bottom: 12px; }
         .tab-link { padding: 8px 16px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
         .tab-link:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
         .tab-link.active { background: var(--primary); color: white; }
-        
         .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
         .form-group { margin-bottom: 16px; }
         .form-group.full { grid-column: 1 / -1; }
         .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; }
-        
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
@@ -89,8 +128,7 @@ $media = $stmt->fetchAll();
         <main class="main-content">
             <header class="topbar">
                 <div class="user-profile">
-                    <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
-                    <a href="logout.php" style="margin-left: 16px; color: #19376d;"><i class="ph ph-sign-out" style="font-size: 1.5rem;"></i></a>
+                    <span>Admin</span>
                 </div>
             </header>
 
@@ -120,29 +158,48 @@ $media = $stmt->fetchAll();
                 <?php endif; ?>
 
                 <div class="panel">
+                    <form action="" method="POST" style="display:flex; gap:16px; align-items:center;">
+                        <input type="hidden" name="action" value="update_tour">
+                        <input type="checkbox" name="virtual_tour_enabled" id="vt" <?php echo !empty($tourSetting['virtual_tour_enabled']) ? 'checked' : ''; ?>>
+                        <label for="vt" style="font-weight:600; cursor:pointer;">Virtual Tour Enabled</label>
+                        <button type="submit" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.9rem;">Save Setting</button>
+                    </form>
+                </div>
+
+                <div class="panel">
                     <h3><i class="ph ph-plus-circle"></i> Add Media/Document</h3>
                     <form action="" method="POST" style="margin-top:16px;">
                         <input type="hidden" name="action" value="add">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Media Type</label>
-                                <select name="media_type" class="form-control" required>
-                                    <option value="image">Image</option><option value="video">Video</option><option value="document">Document</option>
+                                <select name="media_type" class="form-control" required id="media_type_select">
+                                    <option value="image">Image</option>
+                                    <option value="video">Video</option>
+                                    <option value="document">Document</option>
+                                    <option value="360">360 Tour Embed</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Sub Type / Category</label>
                                 <select name="sub_type" class="form-control">
                                     <option value="">None</option>
-                                    <option value="campus">Campus</option><option value="lab">Lab</option>
-                                    <option value="hostel">Hostel</option><option value="event">Event</option>
-                                    <option value="tour">Tour</option><option value="placement">Placement</option>
-                                    <option value="brochure">Brochure</option><option value="prospectus">Prospectus</option>
-                                    <option value="ranking">Ranking</option>
+                                    <optgroup label="Images">
+                                        <option value="campus">Campus</option><option value="lab">Lab</option>
+                                        <option value="hostel">Hostel</option><option value="event">Event</option>
+                                        <option value="classroom">Classroom</option>
+                                    </optgroup>
+                                    <optgroup label="Videos">
+                                        <option value="tour">Tour</option><option value="placement">Placement</option>
+                                        <option value="event">Event</option><option value="alumni_talk">Alumni Talk</option>
+                                    </optgroup>
+                                    <optgroup label="Documents">
+                                        <option value="brochure">Brochure</option><option value="prospectus">Prospectus</option>
+                                        <option value="annual_report">Annual Report</option><option value="ranking_cert">Ranking Cert</option>
+                                    </optgroup>
                                 </select>
                             </div>
-                            <div class="form-group full"><label>URL (Direct Link)</label><input type="url" name="url" class="form-control" required></div>
-                            <div class="form-group full"><label>Thumbnail URL (For Videos)</label><input type="url" name="thumbnail_url" class="form-control"></div>
+                            <div class="form-group full"><label>URL (Direct Link or Embed)</label><input type="url" name="url" class="form-control" required></div>
                             <div class="form-group full"><label>Caption / Title</label><input type="text" name="caption" class="form-control"></div>
                             <div class="form-group"><label>Sort Order</label><input type="number" name="sort_order" class="form-control" value="0"></div>
                         </div>
@@ -157,23 +214,33 @@ $media = $stmt->fetchAll();
                     <?php else: ?>
                         <div style="overflow-x:auto;">
                             <table>
-                                <thead><tr><th>Preview</th><th>Type</th><th>Sub-Type</th><th>Caption</th><th>Order</th><th>Actions</th></tr></thead>
+                                <thead><tr><th>Preview</th><th>Category</th><th>Sub-Type</th><th>Caption</th><th>Order</th><th>Actions</th></tr></thead>
                                 <tbody>
-                                    <?php foreach($media as $m): ?>
+                                    <?php foreach($media as $m): 
+                                        $typeStr = '';
+                                        $subStr = '';
+                                        $link = '';
+                                        if ($m['image_url']) { $typeStr = 'Image'; $subStr = $m['image_type']; $link = $m['image_url']; }
+                                        elseif ($m['video_url']) { $typeStr = 'Video'; $subStr = $m['video_type']; $link = $m['video_url']; }
+                                        elseif ($m['document_url']) { $typeStr = 'Document'; $subStr = $m['document_type']; $link = $m['document_url']; }
+                                        elseif ($m['360_tour_url']) { $typeStr = '360 Tour'; $link = $m['360_tour_url']; }
+                                    ?>
                                     <tr>
                                         <td>
-                                            <?php if($m['media_type'] == 'image'): ?>
-                                                <img src="<?php echo htmlspecialchars($m['url']); ?>" alt="" style="width:60px; height:60px; object-fit:cover; border-radius:4px;">
+                                            <?php if($typeStr == 'Image'): ?>
+                                                <img src="<?php echo htmlspecialchars($link); ?>" alt="" style="width:60px; height:60px; object-fit:cover; border-radius:4px;">
+                                            <?php elseif($typeStr == 'Document'): ?>
+                                                <i class="ph ph-file-pdf" style="font-size:2rem; color:var(--text-muted);"></i>
                                             <?php else: ?>
-                                                <i class="ph ph-file-text" style="font-size:2rem; color:var(--text-muted);"></i>
+                                                <i class="ph ph-video-camera" style="font-size:2rem; color:var(--text-muted);"></i>
                                             <?php endif; ?>
                                         </td>
-                                        <td style="text-transform:capitalize;"><?php echo htmlspecialchars($m['media_type']); ?></td>
-                                        <td style="text-transform:capitalize;"><?php echo htmlspecialchars($m['sub_type']?:'-'); ?></td>
+                                        <td style="text-transform:capitalize;"><?php echo $typeStr; ?></td>
+                                        <td style="text-transform:capitalize;"><?php echo htmlspecialchars($subStr?:'-'); ?></td>
                                         <td><?php echo htmlspecialchars($m['caption']); ?></td>
                                         <td><?php echo htmlspecialchars($m['sort_order']); ?></td>
                                         <td>
-                                            <a href="<?php echo htmlspecialchars($m['url']); ?>" target="_blank" style="margin-right:8px; color:var(--primary);"><i class="ph ph-eye" style="font-size:1.2rem;"></i></a>
+                                            <a href="<?php echo htmlspecialchars($link); ?>" target="_blank" style="margin-right:8px; color:var(--primary);"><i class="ph ph-eye" style="font-size:1.2rem;"></i></a>
                                             <form action="" method="POST" style="display:inline;" onsubmit="return confirm('Delete?');">
                                                 <input type="hidden" name="action" value="delete"><input type="hidden" name="m_id" value="<?php echo $m['id']; ?>">
                                                 <button type="submit" style="background:none; border:none; color:#dc2626; cursor:pointer;"><i class="ph ph-trash" style="font-size:1.2rem;"></i></button>
@@ -186,7 +253,6 @@ $media = $stmt->fetchAll();
                         </div>
                     <?php endif; ?>
                 </div>
-
             </div>
         </main>
     </div>

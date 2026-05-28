@@ -12,7 +12,6 @@ if (!$college_id) {
     exit;
 }
 
-// Fetch College
 $stmt = $pdo->prepare("SELECT id, name FROM colleges WHERE id = ?");
 $stmt->execute([$college_id]);
 $college = $stmt->fetch();
@@ -24,23 +23,32 @@ if (!$college) {
 $msg = '';
 $error = '';
 
-// Handle POST
+function generateUUID() {
+    return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'add_course') {
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO college_courses (id, college_id, course_id, duration_years, total_fee, semester_fee, annual_fee, seats, specializations) 
-                VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO college_courses 
+                (id, college_id, course_name, course_level, duration_years, total_fee, semester_fee, annual_fee, seats_available, specializations, eligibility_criteria, application_fee, emi_available) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
+                generateUUID(),
                 $college_id,
-                $_POST['course_id'],
+                $_POST['course_name'],
+                $_POST['course_level'],
                 $_POST['duration_years'] ?: null,
                 $_POST['total_fee'] ?: null,
                 $_POST['semester_fee'] ?: null,
                 $_POST['annual_fee'] ?: null,
-                $_POST['seats'] ?: null,
-                $_POST['specializations'] ?: null
+                $_POST['seats_available'] ?: null,
+                $_POST['specializations'] ?: null,
+                $_POST['eligibility_criteria'] ?: null,
+                $_POST['application_fee'] ?: null,
+                isset($_POST['emi_available']) ? 1 : 0
             ]);
             header("Location: college_courses.php?college_id=$college_id&msg=added");
             exit;
@@ -55,21 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Fetch all global courses for dropdown
-$all_courses = $pdo->query("SELECT id, name, level FROM courses ORDER BY name ASC")->fetchAll();
-
-// Fetch college courses
-$stmt = $pdo->prepare("
-    SELECT cc.*, c.name as course_name, c.level 
-    FROM college_courses cc
-    JOIN courses c ON cc.course_id = c.id
-    WHERE cc.college_id = ?
-    ORDER BY c.name ASC
-");
+$stmt = $pdo->prepare("SELECT * FROM college_courses WHERE college_id = ? ORDER BY course_name ASC");
 $stmt->execute([$college_id]);
 $college_courses = $stmt->fetchAll();
-
-$current_tab = 'courses';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -84,43 +80,32 @@ $current_tab = 'courses';
         .admin-layout { display: flex; min-height: 100vh; }
         .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; }
         .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
-        .user-profile { display: flex; align-items: center; gap: 12px; font-weight: 500; }
         .content-area { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
-        
         .page-header { margin-bottom: 24px; }
         .page-header h2 { font-size: 1.8rem; font-weight: 700; display:flex; align-items:center; gap: 12px; }
-        
-        /* Tabs Styling */
         .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding-bottom: 12px; }
         .tab-link { padding: 8px 16px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
         .tab-link:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
         .tab-link.active { background: var(--primary); color: white; }
-        
         .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
-        
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
         .form-group { margin-bottom: 16px; }
         .form-group.full { grid-column: 1 / -1; }
-        .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; }
-        
+        .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; }
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
     </style>
 </head>
 <body>
-
     <div class="admin-layout">
         <?php include 'sidebar.php'; ?>
-
         <main class="main-content">
             <header class="topbar">
                 <div class="user-profile">
-                    <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
-                    <a href="logout.php" style="margin-left: 16px; color: #19376d;"><i class="ph ph-sign-out" style="font-size: 1.5rem;"></i></a>
+                    <span>Admin</span>
                 </div>
             </header>
-
             <div class="content-area">
                 <div class="page-header">
                     <h2>
@@ -128,7 +113,6 @@ $current_tab = 'courses';
                         Edit College: <?php echo htmlspecialchars($college['name']); ?>
                     </h2>
                 </div>
-
                 <div class="tabs-nav">
                     <a href="college_form.php?id=<?php echo $college_id; ?>&tab=identity" class="tab-link">Identity & Contact</a>
                     <a href="college_form.php?id=<?php echo $college_id; ?>&tab=about" class="tab-link">About & Amenities</a>
@@ -153,19 +137,24 @@ $current_tab = 'courses';
                     </div>
                 <?php endif; ?>
 
-                <!-- Add New Course Form -->
                 <div class="panel">
                     <h3><i class="ph ph-plus-circle"></i> Add Course to College</h3>
                     <form action="" method="POST" style="margin-top:16px;">
                         <input type="hidden" name="action" value="add_course">
                         <div class="form-grid">
                             <div class="form-group">
-                                <label>Select Course</label>
-                                <select name="course_id" class="form-control" required>
-                                    <option value="">-- Choose Global Course --</option>
-                                    <?php foreach($all_courses as $c): ?>
-                                        <option value="<?php echo $c['id']; ?>"><?php echo htmlspecialchars($c['name'] . ' (' . $c['level'] . ')'); ?></option>
-                                    <?php endforeach; ?>
+                                <label>Course Name *</label>
+                                <input type="text" name="course_name" class="form-control" required placeholder="e.g. B.Tech Computer Science">
+                            </div>
+                            <div class="form-group">
+                                <label>Course Level *</label>
+                                <select name="course_level" class="form-control" required>
+                                    <option value="">Select Level</option>
+                                    <option value="UG">Undergraduate (UG)</option>
+                                    <option value="PG">Postgraduate (PG)</option>
+                                    <option value="Diploma">Diploma</option>
+                                    <option value="PhD">PhD</option>
+                                    <option value="Certificate">Certificate</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -174,19 +163,35 @@ $current_tab = 'courses';
                             </div>
                             <div class="form-group">
                                 <label>Total Intake (Seats)</label>
-                                <input type="number" name="seats" class="form-control">
+                                <input type="number" name="seats_available" class="form-control">
                             </div>
                             <div class="form-group">
                                 <label>Total Fee (Rs)</label>
                                 <input type="number" step="0.01" name="total_fee" class="form-control">
                             </div>
                             <div class="form-group">
+                                <label>Semester Fee (Rs)</label>
+                                <input type="number" step="0.01" name="semester_fee" class="form-control">
+                            </div>
+                            <div class="form-group">
                                 <label>Annual Fee (Rs)</label>
                                 <input type="number" step="0.01" name="annual_fee" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Application Fee (Rs)</label>
+                                <input type="number" step="0.01" name="application_fee" class="form-control">
+                            </div>
+                            <div class="form-group full">
+                                <label>Eligibility Criteria</label>
+                                <textarea name="eligibility_criteria" class="form-control" rows="2"></textarea>
                             </div>
                             <div class="form-group full">
                                 <label>Specializations (JSON List)</label>
                                 <input type="text" name="specializations" class="form-control" placeholder='["CSE", "IT", "Data Science"]'>
+                            </div>
+                            <div class="form-group full" style="display:flex; gap:8px; align-items:center;">
+                                <input type="checkbox" name="emi_available" id="emi_available">
+                                <label for="emi_available" style="margin:0; font-weight:normal;">EMI Options Available for Fees</label>
                             </div>
                         </div>
                         <div style="text-align: right; margin-top:16px;">
@@ -195,7 +200,6 @@ $current_tab = 'courses';
                     </form>
                 </div>
 
-                <!-- List College Courses -->
                 <div class="panel">
                     <h3><i class="ph ph-list"></i> Associated Courses</h3>
                     <?php if(empty($college_courses)): ?>
@@ -217,10 +221,10 @@ $current_tab = 'courses';
                                     <?php foreach($college_courses as $cc): ?>
                                     <tr>
                                         <td style="font-weight:600; color:var(--primary);"><?php echo htmlspecialchars($cc['course_name']); ?></td>
-                                        <td><?php echo htmlspecialchars($cc['level']); ?></td>
+                                        <td><?php echo htmlspecialchars($cc['course_level']); ?></td>
                                         <td><?php echo $cc['duration_years'] ? $cc['duration_years'].' Yrs' : '-'; ?></td>
                                         <td><?php echo $cc['total_fee'] ? '₹'.number_format($cc['total_fee'], 2) : '-'; ?></td>
-                                        <td><?php echo $cc['seats'] ?: '-'; ?></td>
+                                        <td><?php echo $cc['seats_available'] ?: '-'; ?></td>
                                         <td>
                                             <form action="" method="POST" style="display:inline;" onsubmit="return confirm('Delete this course?');">
                                                 <input type="hidden" name="action" value="delete_course">
@@ -239,6 +243,5 @@ $current_tab = 'courses';
             </div>
         </main>
     </div>
-
 </body>
 </html>
