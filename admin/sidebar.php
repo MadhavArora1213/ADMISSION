@@ -16,7 +16,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <i class="ph ph-squares-four"></i> Dashboard
         </a>
         
-        <a href="#" style="display:flex; justify-content:space-between; align-items:center;">
+        <a href="leads.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['leads.php','lead_form.php']) ? 'active' : ''; ?>" style="display:flex; justify-content:space-between; align-items:center;">
             <span style="display:flex; align-items:center; gap:12px;"><i class="ph ph-funnel"></i> Leads</span>
             <span style="background: #ef4444; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: 700;">109</span>
         </a>
@@ -33,7 +33,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Engagement</div>
         
-        <a href="#" style="display:flex; justify-content:space-between; align-items:center;">
+        <a href="reviews.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['reviews.php', 'review_moderation.php']) ? 'active' : ''; ?>" style="display:flex; justify-content:space-between; align-items:center;">
             <span style="display:flex; align-items:center; gap:12px;"><i class="ph ph-star"></i> Reviews</span>
             <span style="background: rgba(255,255,255,0.1); color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px;">23</span>
         </a>
