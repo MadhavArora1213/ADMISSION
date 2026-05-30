@@ -62,6 +62,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="ad_products.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['ad_products.php', 'ad_product_form.php']) ? 'active' : ''; ?>"><i class="ph ph-megaphone-simple"></i> Ad Products</a>
         <a href="commissions.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['commissions.php', 'commission_form.php']) ? 'active' : ''; ?>"><i class="ph ph-money"></i> Commissions</a>
 
+        <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Analytics & Reports</div>
+        <a href="page_analytics.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['page_analytics.php', 'page_analytic_form.php']) ? 'active' : ''; ?>"><i class="ph ph-chart-line-up"></i> Traffic</a>
+        <a href="funnel_analytics.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['funnel_analytics.php', 'funnel_analytic_form.php']) ? 'active' : ''; ?>"><i class="ph ph-funnel"></i> Funnels</a>
+        <a href="ab_tests.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['ab_tests.php', 'ab_test_form.php']) ? 'active' : ''; ?>"><i class="ph ph-flask"></i> A/B Tests</a>
+        <a href="retention_cohorts.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['retention_cohorts.php', 'retention_cohort_form.php']) ? 'active' : ''; ?>"><i class="ph ph-users-three"></i> Retention</a>
+        <a href="analytics_reports.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['analytics_reports.php', 'analytics_report_form.php']) ? 'active' : ''; ?>"><i class="ph ph-file-pdf"></i> Reports</a>
+
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">CMS</div>
         
         <a href="articles.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['articles.php','article_form.php','article_categories.php']) ? 'active' : ''; ?>"><i class="ph ph-newspaper"></i> Articles</a>
