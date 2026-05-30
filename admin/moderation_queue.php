@@ -51,7 +51,7 @@ if ($search !== '') {
 
 $whereSQL = count($where) ? "WHERE " . implode(" AND ", $where) : "";
 
-$stmt = $pdo->prepare("SELECT m.*, u.name as reporter_name FROM moderation_queue m LEFT JOIN users u ON m.reporter_id = u.id $whereSQL ORDER BY m.created_at DESC LIMIT 100");
+$stmt = $pdo->prepare("SELECT m.*, u.full_name as reporter_name FROM moderation_queue m LEFT JOIN users u ON m.reporter_id = u.id $whereSQL ORDER BY m.created_at DESC LIMIT 100");
 $stmt->execute($params);
 $tickets = $stmt->fetchAll();
 

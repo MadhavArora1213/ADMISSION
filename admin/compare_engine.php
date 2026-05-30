@@ -42,7 +42,7 @@ if (!$config) {
 
 // Fetch compare sessions
 $stmt = $pdo->prepare("
-    SELECT cs.*, u.name as user_name 
+    SELECT cs.*, u.full_name as user_name 
     FROM compare_sessions cs 
     LEFT JOIN users u ON cs.user_id = u.id 
     ORDER BY cs.created_at DESC 

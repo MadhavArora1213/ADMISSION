@@ -5,7 +5,7 @@ require_once 'db.php';
 
 // Fetch Reviews
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
-$query = "SELECT r.*, u.name as user_name, c.name as college_name, (SELECT COUNT(*) FROM review_reports rr WHERE rr.review_id = r.id AND rr.status = 'open') as open_reports FROM reviews r LEFT JOIN users u ON r.user_id = u.id LEFT JOIN colleges c ON r.college_id = c.id";
+$query = "SELECT r.*, u.full_name as user_name, c.name as college_name, (SELECT COUNT(*) FROM review_reports rr WHERE rr.review_id = r.id AND rr.status = 'open') as open_reports FROM reviews r LEFT JOIN users u ON r.user_id = u.id LEFT JOIN colleges c ON r.college_id = c.id";
 
 if ($status_filter !== 'all') {
     $query .= " WHERE r.moderation_status = :status";

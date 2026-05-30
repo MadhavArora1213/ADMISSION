@@ -46,7 +46,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <span style="background: rgba(255,255,255,0.1); color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px;">23</span>
         </a>
         <a href="users.php"><i class="ph ph-users"></i> Users</a>
-        <a href="#"><i class="ph ph-chart-line-up"></i> Reports</a>
+        <a href="user_reports.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['user_reports.php']) ? 'active' : ''; ?>"><i class="ph ph-flag"></i> User Reports</a>
         <a href="community_dashboard.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['community_dashboard.php','questions_manager.php','answers_manager.php','experts.php','qa_moderation.php']) ? 'active' : ''; ?>"><i class="ph ph-users-three"></i> Community & Q&A</a>
         
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Study Abroad</div>

@@ -32,10 +32,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'revoke' && isset($_GET['id'])
 }
 
 if ($tab === 'bans') {
-    $stmt = $pdo->query("SELECT b.*, u.name as added_by_name FROM blacklisted_entities b LEFT JOIN users u ON b.added_by = u.id ORDER BY b.created_at DESC LIMIT 100");
+    $stmt = $pdo->query("SELECT b.*, u.full_name as added_by_name FROM blacklisted_entities b LEFT JOIN users u ON b.added_by = u.id ORDER BY b.created_at DESC LIMIT 100");
     $bans = $stmt->fetchAll();
 } else {
-    $stmt = $pdo->query("SELECT s.*, u.name as user_name FROM spam_detection_logs s LEFT JOIN users u ON s.user_id = u.id ORDER BY s.created_at DESC LIMIT 100");
+    $stmt = $pdo->query("SELECT s.*, u.full_name as user_name FROM spam_detection_logs s LEFT JOIN users u ON s.user_id = u.id ORDER BY s.created_at DESC LIMIT 100");
     $logs = $stmt->fetchAll();
 }
 ?>

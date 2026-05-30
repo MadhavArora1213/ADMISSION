@@ -115,7 +115,7 @@ if ($is_edit) {
     $seo->execute([$id]);
     $seo = $seo->fetch(PDO::FETCH_ASSOC) ?: [];
 
-    $revisions = $pdo->prepare("SELECT ar.*, u.name as user_name FROM article_revisions ar LEFT JOIN users u ON ar.user_id = u.id WHERE ar.article_id = ? ORDER BY ar.version DESC LIMIT 10");
+    $revisions = $pdo->prepare("SELECT ar.*, u.full_name as user_name FROM article_revisions ar LEFT JOIN users u ON ar.user_id = u.id WHERE ar.article_id = ? ORDER BY ar.version DESC LIMIT 10");
     $revisions->execute([$id]);
     $revisions = $revisions->fetchAll();
 

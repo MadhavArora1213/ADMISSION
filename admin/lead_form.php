@@ -108,7 +108,7 @@ $current_tab = isset($_GET['tab']) ? $_GET['tab'] : 'lead';
 // Call logs
 $callLogs = [];
 if ($is_edit) {
-    $stmt = $pdo->prepare("SELECT cl.*, u.name as caller_name FROM lead_call_logs cl LEFT JOIN users u ON cl.called_by = u.id WHERE cl.lead_id = ? ORDER BY cl.call_at DESC");
+    $stmt = $pdo->prepare("SELECT cl.*, u.full_name as caller_name FROM lead_call_logs cl LEFT JOIN users u ON cl.called_by = u.id WHERE cl.lead_id = ? ORDER BY cl.call_at DESC");
     $stmt->execute([$id]);
     $callLogs = $stmt->fetchAll();
 }

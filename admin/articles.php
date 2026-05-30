@@ -21,7 +21,7 @@ if ($status_filter !== 'all') { $where[] = "a.status = ?"; $params[] = $status_f
 if ($search !== '') { $where[] = "(a.article_title LIKE ? OR a.excerpt LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; }
 $whereSQL = count($where) ? "WHERE " . implode(" AND ", $where) : "";
 
-$stmt = $pdo->prepare("SELECT a.*, u.name AS author_name, ac.category_name FROM articles a LEFT JOIN users u ON a.author_id = u.id LEFT JOIN article_categories ac ON a.category_id = ac.id $whereSQL ORDER BY a.created_at DESC LIMIT 100");
+$stmt = $pdo->prepare("SELECT a.*, u.full_name AS author_name, ac.category_name FROM articles a LEFT JOIN users u ON a.author_id = u.id LEFT JOIN article_categories ac ON a.category_id = ac.id $whereSQL ORDER BY a.created_at DESC LIMIT 100");
 $stmt->execute($params);
 $articles = $stmt->fetchAll();
 

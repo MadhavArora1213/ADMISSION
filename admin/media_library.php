@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 
 $type_filter = isset($_GET['type']) ? $_GET['type'] : 'all';
 $where = $type_filter !== 'all' ? "WHERE file_type = '$type_filter'" : '';
-$files = $pdo->query("SELECT mf.*, u.name as uploader FROM media_files mf LEFT JOIN users u ON mf.uploaded_by = u.id $where ORDER BY mf.created_at DESC LIMIT 200")->fetchAll();
+$files = $pdo->query("SELECT mf.*, u.full_name as uploader FROM media_files mf LEFT JOIN users u ON mf.uploaded_by = u.id $where ORDER BY mf.created_at DESC LIMIT 200")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
