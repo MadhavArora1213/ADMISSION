@@ -54,6 +54,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="visa_guides.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['visa_guides.php', 'visa_guide_form.php']) ? 'active' : ''; ?>"><i class="ph ph-airplane-tilt"></i> Visa Guides</a>
         <a href="consultants.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['consultants.php', 'consultant_form.php']) ? 'active' : ''; ?>"><i class="ph ph-users-four"></i> Consultants</a>
 
+        <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Billing & Revenue</div>
+        <a href="invoices.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['invoices.php', 'invoice_form.php']) ? 'active' : ''; ?>"><i class="ph ph-receipt"></i> Invoices</a>
+        <a href="subscriptions.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['subscriptions.php', 'subscription_form.php']) ? 'active' : ''; ?>"><i class="ph ph-arrows-clockwise"></i> Subscriptions</a>
+        <a href="subscription_plans.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['subscription_plans.php', 'subscription_plan_form.php']) ? 'active' : ''; ?>"><i class="ph ph-list-dashes"></i> Sub. Plans</a>
+        <a href="lead_credits.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['lead_credits.php', 'lead_credit_form.php']) ? 'active' : ''; ?>"><i class="ph ph-coins"></i> Lead Credits</a>
+        <a href="ad_products.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['ad_products.php', 'ad_product_form.php']) ? 'active' : ''; ?>"><i class="ph ph-megaphone-simple"></i> Ad Products</a>
+        <a href="commissions.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['commissions.php', 'commission_form.php']) ? 'active' : ''; ?>"><i class="ph ph-money"></i> Commissions</a>
+
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">CMS</div>
         
         <a href="articles.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['articles.php','article_form.php','article_categories.php']) ? 'active' : ''; ?>"><i class="ph ph-newspaper"></i> Articles</a>
