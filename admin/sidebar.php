@@ -27,6 +27,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="universities.php" class="<?php echo ($current_page == 'universities.php' || $current_page == 'university_form.php') ? 'active' : ''; ?>">
             <i class="ph ph-bank"></i> Universities
         </a>
+        <a href="rankings.php" class="<?php echo ($current_page == 'rankings.php') ? 'active' : ''; ?>">
+            <i class="ph ph-medal"></i> Rankings
+        </a>
+        <a href="seat_matrix.php" class="<?php echo ($current_page == 'seat_matrix.php') ? 'active' : ''; ?>">
+            <i class="ph ph-table"></i> Seat Matrix
+        </a>
         <a href="exams.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'exams.php' || basename($_SERVER['PHP_SELF']) == 'exam_form.php' ? 'active' : ''; ?>"><i class="ph ph-exam"></i> Exams</a>
         <a href="courses.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['courses.php', 'course_form.php', 'course_specializations.php', 'course_career_paths.php']) ? 'active' : ''; ?>"><i class="ph ph-books"></i> Courses</a>
         <a href="course_categories.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'course_categories.php' ? 'active' : ''; ?>"><i class="ph ph-folders"></i> Course Categories</a>
@@ -55,6 +61,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
         
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Communications</div>
         <a href="notifications_dashboard.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['notifications_dashboard.php','notification_templates.php','audience_segments.php','notification_campaigns.php','notification_logs.php']) ? 'active' : ''; ?>"><i class="ph ph-megaphone"></i> Notifications</a>
+        
+        <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">AI Systems</div>
+        <a href="ai_dashboard.php" class="<?php echo ($current_page == 'ai_dashboard.php') ? 'active' : ''; ?>"><i class="ph ph-robot"></i> AI Engine</a>
         
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Dashboard Engine</div>
         <a href="manage_widgets.php" class="<?php echo ($current_page == 'manage_widgets.php') ? 'active' : ''; ?>"><i class="ph ph-squares-four"></i> Widget Engine</a>
