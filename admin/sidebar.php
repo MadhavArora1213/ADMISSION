@@ -99,6 +99,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="spam_logs.php" class="<?php echo ($current_page == 'spam_logs.php') ? 'active' : ''; ?>"><i class="ph ph-warning-circle"></i> Spam & Bans</a>
         
         <a href="users.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['users.php']) ? 'active' : ''; ?>"><i class="ph ph-users"></i> User Management</a>
+        <a href="shortlists.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['shortlists.php']) ? 'active' : ''; ?>"><i class="ph ph-heart"></i> Student Shortlists</a>
         <a href="roles.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['roles.php']) ? 'active' : ''; ?>"><i class="ph ph-shield-star"></i> Roles & Permissions</a>
         
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Partner Management</div>
