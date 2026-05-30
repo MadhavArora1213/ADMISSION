@@ -21,7 +21,7 @@ CREATE TABLE moderation_queue (
     escalated_to VARCHAR(36) DEFAULT NULL,
     
     -- SLAs & Timestamps
-    sla_due_at TIMESTAMP NOT NULL,
+    sla_due_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     

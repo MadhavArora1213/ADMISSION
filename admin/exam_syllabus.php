@@ -43,6 +43,12 @@ $list = $syl->fetchAll();
     <style>
         body { background-color: var(--bg-light); }
         .admin-layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; }
+        .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header .logo { font-size: 1.3rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
+        .sidebar-nav { padding: 24px 0; flex: 1; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; text-decoration: none;}
+        .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
         .main-content { flex: 1; display: flex; flex-direction: column; padding-bottom: 60px; }
         .content-area { padding: 32px; max-width: 1000px; margin: 0 auto; width: 100%; }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }

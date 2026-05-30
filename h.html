@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>200 IT Companies — Dubai & India | Dev Jobs Directory</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --card: #1a1a26;
+    --border: #2a2a3a;
+    --accent-dubai: #f59e0b;
+    --accent-india: #22d3ee;
+    --accent-both: #a78bfa;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --green: #4ade80;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    min-height: 100vh;
+  }
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 32px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+  h1 span.dxb { color: var(--accent-dubai); }
+  h1 span.ind { color: var(--accent-india); }
+  .subtitle { color: var(--muted); font-size: 12px; margin-bottom: 16px; }
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  input[type="text"] {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    width: 260px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  input[type="text"]:focus { border-color: var(--accent-both); }
+  input::placeholder { color: var(--muted); }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+  button.filter-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  button.filter-btn:hover { border-color: var(--accent-both); color: var(--text); }
+  button.filter-btn.active-dubai { background: var(--accent-dubai); border-color: var(--accent-dubai); color: #000; font-weight: 600; }
+  button.filter-btn.active-india { background: var(--accent-india); border-color: var(--accent-india); color: #000; font-weight: 600; }
+  button.filter-btn.active-all { background: var(--accent-both); border-color: var(--accent-both); color: #000; font-weight: 600; }
+  .stats-bar {
+    display: flex;
+    gap: 20px;
+    padding: 12px 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .stat { display: flex; gap: 6px; align-items: center; }
+  .stat span { color: var(--text); font-weight: 500; }
+  .badge-dxb { background: var(--accent-dubai)22; color: var(--accent-dubai); border: 1px solid var(--accent-dubai)44; border-radius: 4px; padding: 1px 6px; font-size: 10px; }
+  .badge-ind { background: var(--accent-india)22; color: var(--accent-india); border: 1px solid var(--accent-india)44; border-radius: 4px; padding: 1px 6px; font-size: 10px; }
+  .note-bar {
+    background: #1e1a00;
+    border-bottom: 1px solid #3a3000;
+    padding: 8px 32px;
+    font-size: 11px;
+    color: #d97706;
+  }
+  main { padding: 20px 32px; max-width: 1400px; margin: 0 auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+  }
+  thead th {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+  }
+  thead th:hover { color: var(--text); }
+  tr.row {
+    border-bottom: 1px solid var(--border)88;
+    transition: background .15s;
+  }
+  tr.row:hover { background: var(--card); }
+  td {
+    padding: 10px 12px;
+    vertical-align: middle;
+    font-size: 12px;
+  }
+  td .num { color: var(--muted); font-size: 11px; min-width: 28px; display: inline-block; }
+  td.company-name { font-weight: 500; color: var(--text); max-width: 160px; }
+  td.company-name a { color: var(--text); text-decoration: none; }
+  td.company-name a:hover { color: var(--accent-both); }
+  .country-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .tag-ae { background: var(--accent-dubai)22; color: var(--accent-dubai); border: 1px solid var(--accent-dubai)44; }
+  .tag-in { background: var(--accent-india)22; color: var(--accent-india); border: 1px solid var(--accent-india)44; }
+  .size-pill {
+    background: #ffffff0a;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 7px;
+    font-size: 10px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .rev-pill {
+    font-size: 10px;
+    color: var(--green);
+  }
+  a.link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    font-size: 10px;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  a.link-btn:hover { border-color: var(--accent-both); color: var(--accent-both); }
+  .email-cell { font-size: 10px; color: var(--muted); max-width: 180px; word-break: break-all; }
+  .email-cell a { color: var(--accent-india); text-decoration: none; }
+  .email-cell a:hover { text-decoration: underline; }
+  .hr-cell { font-size: 10px; color: var(--muted); }
+  .hr-cell a { color: var(--accent-dubai); text-decoration: none; }
+  .hr-cell a:hover { text-decoration: underline; }
+  .visa-tag { display: inline-block; background: #16a34a22; color: #4ade80; border: 1px solid #4ade8044; border-radius: 3px; padding: 1px 6px; font-size: 9px; white-space: nowrap; }
+  .remote-tag { display: inline-block; background: #7c3aed22; color: #a78bfa; border: 1px solid #a78bfa44; border-radius: 3px; padding: 1px 6px; font-size: 9px; white-space: nowrap; }
+  .tags-cell { display: flex; flex-direction: column; gap: 3px; }
+  .no-results { text-align: center; padding: 60px; color: var(--muted); font-size: 14px; }
+  .desc-cell { max-width: 220px; font-size: 11px; color: var(--muted); line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .section-header { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; padding: 18px 0 8px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .section-header span { color: var(--text); }
+  .count-badge { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; font-size: 11px; color: var(--muted); margin-left: 10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>200 IT Companies — <span class="dxb">Dubai</span> & <span class="ind">India</span></h1>
+  <div class="subtitle">Actively hiring Full Stack, PHP, MERN, React Native & Software Developers · Freshers Welcome</div>
+  <div class="controls">
+    <input type="text" id="searchInput" placeholder="Search company, city, domain..." oninput="filterTable()">
+    <div class="filters">
+      <button class="filter-btn active-all" id="btn-all" onclick="setFilter('all')">All 200</button>
+      <button class="filter-btn" id="btn-ae" onclick="setFilter('ae')">🇦🇪 Dubai (100)</button>
+      <button class="filter-btn" id="btn-in" onclick="setFilter('in')">🇮🇳 India (100)</button>
+    </div>
+  </div>
+</header>
+
+<div class="stats-bar">
+  <div class="stat">Showing <span id="count-display">200</span> companies</div>
+  <div class="stat"><span class="badge-dxb">🇦🇪 Dubai</span> 100 companies — visa sponsorship possible, remote roles available</div>
+  <div class="stat"><span class="badge-ind">🇮🇳 India</span> 100 companies — fresher-friendly, remote roles available</div>
+</div>
+<div class="note-bar">
+  ℹ️ LinkedIn company pages are linked. HR contact emails shown where publicly available. For direct HR LinkedIn profiles, search "[Company Name] HR Manager" or "Talent Acquisition" on LinkedIn. Dubai companies may offer visa sponsorship — check their careers page.
+</div>
+
+<main>
+<div id="tableContainer"></div>
+</main>
+
+<script>
+const dubaiCompanies = [
+  { name: "Dautom", domain: "dautom.com", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "IT Managed Services & Consulting, IT talent solutions", li: "https://www.linkedin.com/company/dautom-tech", email: "careers@dautom.com", hr: "https://www.linkedin.com/company/dautom-tech/people/", visa: true, remote: true, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "Trust Wallet", domain: "trustwallet.com", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "World's leading self-custody crypto wallet & Web3 gateway", li: "https://www.linkedin.com/company/trustwallet", email: "jobs@trustwallet.com", hr: "https://www.linkedin.com/company/trustwallet/people/", visa: true, remote: true, roles: ["Full Stack","React Native","MERN"] },
+  { name: "Marc Ellis", domain: "marc-ellis.com", city: "Dubai", size: "501-1000", rev: "25M-75M", desc: "Technology & professional services, managed services, outsourcing", li: "https://www.linkedin.com/company/marc-ellis-consulting", email: "hr@marc-ellis.com", hr: "https://www.linkedin.com/company/marc-ellis-consulting/people/", visa: true, remote: false, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "Vezeeta", domain: "vezeeta.com", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "Patient-centric digital healthcare platform across 78 cities", li: "https://www.linkedin.com/company/vezeeta", email: "careers@vezeeta.com", hr: "https://www.linkedin.com/company/vezeeta/people/", visa: true, remote: true, roles: ["Full Stack","React Native","Software Dev"] },
+  { name: "SWATX", domain: "swatxsolutions.com", city: "Dubai", size: "11-50", rev: "500K-1M", desc: "IT Consulting, infrastructure, network, business tools", li: "https://www.linkedin.com/company/swatx", email: "info@swatxsolutions.com", hr: "https://www.linkedin.com/company/swatx/people/", visa: false, remote: true, roles: ["PHP","Full Stack","Software Dev"] },
+  { name: "Appinventiv", domain: "appinventiv.com", city: "Dubai", size: "1001-5000", rev: "75M-200M", desc: "Top mobile & web app development company, 900+ engineers", li: "https://www.linkedin.com/company/appinventiv", email: "hr@appinventiv.com", hr: "https://www.linkedin.com/company/appinventiv/people/", visa: true, remote: true, roles: ["React Native","MERN","Full Stack","PHP"] },
+  { name: "Brainvire", domain: "brainvire.com", city: "Dubai", size: "501-1000", rev: "25M-75M", desc: "Digital transformation, ecommerce, cloud, mobile solutions", li: "https://www.linkedin.com/company/brainvire", email: "career@brainvire.com", hr: "https://www.linkedin.com/company/brainvire/people/", visa: true, remote: true, roles: ["PHP","MERN","Full Stack","React Native"] },
+  { name: "Kaar Technologies", domain: "kaar.com", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "SAP, IT services, digital transformation consulting", li: "https://www.linkedin.com/company/kaar-technologies", email: "careers@kaar.com", hr: "https://www.linkedin.com/company/kaar-technologies/people/", visa: true, remote: false, roles: ["Software Dev","Full Stack"] },
+  { name: "Beehive", domain: "beehive.ae", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "Leading fintech & peer-to-peer lending platform in UAE", li: "https://www.linkedin.com/company/beehive-p2p", email: "hr@beehive.ae", hr: "https://www.linkedin.com/company/beehive-p2p/people/", visa: true, remote: true, roles: ["Full Stack","MERN","Software Dev"] },
+  { name: "Digital14", domain: "digital14.com", city: "Abu Dhabi", size: "501-1000", rev: "25M-75M", desc: "Cybersecurity & digital services, AI innovation hub", li: "https://www.linkedin.com/company/digital14", email: "careers@digital14.com", hr: "https://www.linkedin.com/company/digital14/people/", visa: true, remote: false, roles: ["Full Stack","Software Dev"] },
+  { name: "Bayzat", domain: "bayzat.com", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "HR & benefits platform for businesses in the Middle East", li: "https://www.linkedin.com/company/bayzat", email: "jobs@bayzat.com", hr: "https://www.linkedin.com/company/bayzat/people/", visa: true, remote: true, roles: ["Full Stack","MERN","React Native"] },
+  { name: "Fetchr", domain: "fetchr.us", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "Smart logistics & delivery tech startup in MENA region", li: "https://www.linkedin.com/company/fetchr", email: "hiring@fetchr.us", hr: "https://www.linkedin.com/company/fetchr/people/", visa: true, remote: false, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "Careem", domain: "careem.com", city: "Dubai", size: "5001-10000", rev: "200M-500M", desc: "Leading super app and ride-hailing platform in MENA", li: "https://www.linkedin.com/company/careem", email: "careers@careem.com", hr: "https://www.linkedin.com/company/careem/people/", visa: true, remote: true, roles: ["Full Stack","React Native","MERN"] },
+  { name: "Noon", domain: "noon.com", city: "Dubai", size: "1001-5000", rev: "200M-500M", desc: "E-commerce platform serving UAE, Saudi Arabia & Egypt", li: "https://www.linkedin.com/company/noon-com", email: "talent@noon.com", hr: "https://www.linkedin.com/company/noon-com/people/", visa: true, remote: false, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "Property Finder", domain: "propertyfinder.ae", city: "Dubai", size: "501-1000", rev: "25M-75M", desc: "Leading property portal in MENA with AI-driven search", li: "https://www.linkedin.com/company/property-finder", email: "careers@propertyfinder.ae", hr: "https://www.linkedin.com/company/property-finder/people/", visa: true, remote: true, roles: ["Full Stack","React Native","MERN"] },
+  { name: "Dubizzle", domain: "dubizzle.com", city: "Dubai", size: "501-1000", rev: "25M-75M", desc: "Classifieds & marketplace platform, leading in UAE market", li: "https://www.linkedin.com/company/dubizzle", email: "hr@dubizzle.com", hr: "https://www.linkedin.com/company/dubizzle/people/", visa: true, remote: false, roles: ["PHP","Full Stack","Software Dev"] },
+  { name: "Souq.com (Amazon)", domain: "souq.com", city: "Dubai", size: "1001-5000", rev: "500M-1B", desc: "Amazon-acquired e-commerce platform serving Arab world", li: "https://www.linkedin.com/company/souqcom", email: "jobs@amazon.ae", hr: "https://www.linkedin.com/company/souqcom/people/", visa: true, remote: false, roles: ["Full Stack","Software Dev"] },
+  { name: "Yalla", domain: "yallagroup.ae", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "Gaming & entertainment super app with 35M+ users", li: "https://www.linkedin.com/company/yalla-group", email: "careers@yallagroup.ae", hr: "https://www.linkedin.com/company/yalla-group/people/", visa: true, remote: false, roles: ["Full Stack","React Native"] },
+  { name: "Magnati", domain: "magnati.com", city: "Abu Dhabi", size: "201-500", rev: "10M-25M", desc: "Payments fintech subsidiary of First Abu Dhabi Bank", li: "https://www.linkedin.com/company/magnati", email: "hr@magnati.com", hr: "https://www.linkedin.com/company/magnati/people/", visa: true, remote: false, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "talabat", domain: "talabat.com", city: "Dubai", size: "1001-5000", rev: "200M-500M", desc: "Food & grocery delivery leader across 8 MENA markets", li: "https://www.linkedin.com/company/talabat", email: "careers@talabat.com", hr: "https://www.linkedin.com/company/talabat/people/", visa: true, remote: true, roles: ["Full Stack","MERN","React Native"] },
+  { name: "Mashreq Neo", domain: "mashreqbank.com", city: "Dubai", size: "1001-5000", rev: "200M-500M", desc: "Digital banking arm of Mashreq Bank, UAE's oldest bank", li: "https://www.linkedin.com/company/mashreqbank", email: "careers@mashreq.com", hr: "https://www.linkedin.com/company/mashreqbank/people/", visa: true, remote: false, roles: ["Full Stack","Software Dev","PHP"] },
+  { name: "GE Digital (ME)", domain: "ge.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "Industrial IoT software & analytics solutions in ME", li: "https://www.linkedin.com/company/ge-digital", email: "mideast.careers@ge.com", hr: "https://www.linkedin.com/company/ge-digital/people/", visa: true, remote: true, roles: ["Full Stack","Software Dev"] },
+  { name: "Huawei UAE", domain: "huawei.com", city: "Dubai", size: "501-1000", rev: "75M-200M", desc: "Global ICT solutions: cloud, AI, 5G across UAE market", li: "https://www.linkedin.com/company/huawei", email: "uae.careers@huawei.com", hr: "https://www.linkedin.com/company/huawei/people/", visa: true, remote: false, roles: ["Software Dev","Full Stack"] },
+  { name: "Raqmiyat", domain: "raqmiyat.com", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "Digital banking solutions & IT services in UAE/GCC", li: "https://www.linkedin.com/company/raqmiyat", email: "careers@raqmiyat.com", hr: "https://www.linkedin.com/company/raqmiyat/people/", visa: true, remote: false, roles: ["PHP","Full Stack","Software Dev"] },
+  { name: "Fintech Galaxy", domain: "fintechgalaxy.com", city: "Dubai", size: "11-50", rev: "1M-5M", desc: "Open banking & fintech API platform for MENA region", li: "https://www.linkedin.com/company/fintech-galaxy", email: "hr@fintechgalaxy.com", hr: "https://www.linkedin.com/company/fintech-galaxy/people/", visa: true, remote: true, roles: ["Full Stack","MERN","React Native"] },
+  { name: "Smartworld", domain: "smartworld.ae", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "Smart cities, IoT, enterprise IT solutions across UAE", li: "https://www.linkedin.com/company/smartworld-ae", email: "careers@smartworld.ae", hr: "https://www.linkedin.com/company/smartworld-ae/people/", visa: true, remote: false, roles: ["Full Stack","Software Dev"] },
+  { name: "e& enterprise", domain: "etisalat.com", city: "Abu Dhabi", size: "5001-10000", rev: "500M-1B", desc: "Digital transformation arm of e& (Etisalat Group)", li: "https://www.linkedin.com/company/etisalatdigital", email: "careers@etisalat.ae", hr: "https://www.linkedin.com/company/etisalatdigital/people/", visa: true, remote: false, roles: ["Full Stack","Software Dev","PHP"] },
+  { name: "Hahn-Schickard ME", domain: "hahn-schickard.de", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "R&D and engineering consultancy, MEMS & microsystems", li: "https://www.linkedin.com/company/hahn-schickard", email: "info@hahn-schickard.de", hr: "https://www.linkedin.com/company/hahn-schickard/people/", visa: true, remote: true, roles: ["Software Dev","Full Stack"] },
+  { name: "Virtusa UAE", domain: "virtusa.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "Digital transformation, banking & insurance tech services", li: "https://www.linkedin.com/company/virtusa", email: "talent@virtusa.com", hr: "https://www.linkedin.com/company/virtusa/people/", visa: true, remote: true, roles: ["Full Stack","PHP","MERN","Software Dev"] },
+  { name: "Khazna Data Centers", domain: "khazna.ae", city: "Abu Dhabi", size: "51-200", rev: "5M-10M", desc: "Data center & cloud infrastructure across UAE", li: "https://www.linkedin.com/company/khazna-data-centers", email: "hr@khazna.ae", hr: "https://www.linkedin.com/company/khazna-data-centers/people/", visa: true, remote: false, roles: ["Full Stack","Software Dev"] },
+  { name: "SAP UAE", domain: "sap.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "Enterprise software & cloud ERP solutions in GCC", li: "https://www.linkedin.com/company/sap", email: "careers.mea@sap.com", hr: "https://www.linkedin.com/company/sap/people/", visa: true, remote: false, roles: ["Full Stack","Software Dev","MERN"] },
+  { name: "Intelcia IT", domain: "intelcia.com", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "BPO, IT services, digital transformation consulting", li: "https://www.linkedin.com/company/intelcia", email: "rh@intelcia.com", hr: "https://www.linkedin.com/company/intelcia/people/", visa: true, remote: true, roles: ["PHP","Full Stack","Software Dev"] },
+  { name: "Objectivity ME", domain: "objectivity.co.uk", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "Custom software & technology consulting services", li: "https://www.linkedin.com/company/objectivity-bespoke-software-specialists", email: "careers@objectivity.co.uk", hr: "https://www.linkedin.com/company/objectivity-bespoke-software-specialists/people/", visa: true, remote: true, roles: ["Full Stack","PHP","MERN","Software Dev"] },
+  { name: "Trax Retail", domain: "traxretail.com", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "AI & computer vision solutions for retail industry globally", li: "https://www.linkedin.com/company/trax-retail", email: "talent@traxretail.com", hr: "https://www.linkedin.com/company/trax-retail/people/", visa: true, remote: false, roles: ["Full Stack","Software Dev"] },
+  { name: "Injazat", domain: "injazat.com", city: "Abu Dhabi", size: "501-1000", rev: "25M-75M", desc: "Digital solutions & cloud services for UAE government", li: "https://www.linkedin.com/company/injazat-data-systems", email: "careers@injazat.com", hr: "https://www.linkedin.com/company/injazat-data-systems/people/", visa: true, remote: false, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "Genesys ME", domain: "genesys.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "Cloud CX platform, AI-driven customer experience solutions", li: "https://www.linkedin.com/company/genesys", email: "careers@genesys.com", hr: "https://www.linkedin.com/company/genesys/people/", visa: true, remote: true, roles: ["Full Stack","Software Dev","MERN"] },
+  { name: "OSN Streaming", domain: "osn.com", city: "Dubai", size: "501-1000", rev: "25M-75M", desc: "Leading streaming platform for Arabic & international content", li: "https://www.linkedin.com/company/osn", email: "careers@osn.com", hr: "https://www.linkedin.com/company/osn/people/", visa: true, remote: false, roles: ["React Native","Full Stack","MERN"] },
+  { name: "Tobania ME", domain: "tobania.be", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "Management & IT consulting, digital transformation partner", li: "https://www.linkedin.com/company/tobania", email: "hr@tobania.be", hr: "https://www.linkedin.com/company/tobania/people/", visa: true, remote: true, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "Emitac Mobile", domain: "emitac.ae", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "Mobile enterprise solutions, IT infrastructure UAE", li: "https://www.linkedin.com/company/emitac-mobile-solutions", email: "hr@emitac.ae", hr: "https://www.linkedin.com/company/emitac-mobile-solutions/people/", visa: true, remote: false, roles: ["React Native","Full Stack","PHP"] },
+  { name: "Anantara Digital", domain: "anantaradigital.com", city: "Dubai", size: "11-50", rev: "1M-5M", desc: "Digital marketing tech, app development, custom software", li: "https://www.linkedin.com/company/anantara-digital", email: "careers@anantaradigital.com", hr: "https://www.linkedin.com/company/anantara-digital/people/", visa: false, remote: true, roles: ["Full Stack","MERN","PHP","React Native"] },
+  { name: "Netlinks", domain: "netlinks.ae", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "IT infrastructure, cybersecurity & cloud services UAE", li: "https://www.linkedin.com/company/netlinks", email: "hr@netlinks.ae", hr: "https://www.linkedin.com/company/netlinks/people/", visa: true, remote: false, roles: ["PHP","Full Stack","Software Dev"] },
+  { name: "Pure Harvest Smart Farms", domain: "pure-harvest.com", city: "Abu Dhabi", size: "201-500", rev: "10M-25M", desc: "AgriTech startup using IoT and automation in farming", li: "https://www.linkedin.com/company/pure-harvest-smart-farms", email: "careers@pure-harvest.com", hr: "https://www.linkedin.com/company/pure-harvest-smart-farms/people/", visa: true, remote: false, roles: ["Full Stack","Software Dev","MERN"] },
+  { name: "Finastra ME", domain: "finastra.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "Open finance software for banks in Middle East & Africa", li: "https://www.linkedin.com/company/finastra", email: "careers@finastra.com", hr: "https://www.linkedin.com/company/finastra/people/", visa: true, remote: true, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "Geidea", domain: "geidea.net", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "Payment gateway & POS fintech across UAE & Saudi Arabia", li: "https://www.linkedin.com/company/geidea", email: "careers@geidea.net", hr: "https://www.linkedin.com/company/geidea/people/", visa: true, remote: false, roles: ["React Native","Full Stack","PHP"] },
+  { name: "Tata Consultancy (UAE)", domain: "tcs.com", city: "Dubai", size: "1001-5000", rev: "200M-500M", desc: "IT services, consulting, BPO, digital transformation", li: "https://www.linkedin.com/company/tata-consultancy-services", email: "hr.ae@tcs.com", hr: "https://www.linkedin.com/company/tata-consultancy-services/people/", visa: true, remote: true, roles: ["Full Stack","PHP","MERN","Software Dev","React Native"] },
+  { name: "Infosys UAE", domain: "infosys.com", city: "Dubai", size: "1001-5000", rev: "200M-500M", desc: "Global IT consulting, cloud, AI, digital solutions", li: "https://www.linkedin.com/company/infosys", email: "me@infosys.com", hr: "https://www.linkedin.com/company/infosys/people/", visa: true, remote: true, roles: ["Full Stack","PHP","Software Dev","MERN"] },
+  { name: "Wipro UAE", domain: "wipro.com", city: "Dubai", size: "501-1000", rev: "75M-200M", desc: "Technology services, engineering, consulting solutions", li: "https://www.linkedin.com/company/wipro", email: "careers.mea@wipro.com", hr: "https://www.linkedin.com/company/wipro/people/", visa: true, remote: true, roles: ["Full Stack","PHP","MERN","Software Dev"] },
+  { name: "Tech Mahindra UAE", domain: "techmahindra.com", city: "Dubai", size: "501-1000", rev: "75M-200M", desc: "Digital transformation, 5G, BPO, cloud and AI services", li: "https://www.linkedin.com/company/tech-mahindra", email: "hr.uae@techmahindra.com", hr: "https://www.linkedin.com/company/tech-mahindra/people/", visa: true, remote: true, roles: ["Full Stack","PHP","MERN","React Native","Software Dev"] },
+  { name: "HCL Technologies UAE", domain: "hcltech.com", city: "Dubai", size: "501-1000", rev: "75M-200M", desc: "IT services, cybersecurity, engineering solutions globally", li: "https://www.linkedin.com/company/hcl-technologies", email: "careers.me@hcltech.com", hr: "https://www.linkedin.com/company/hcl-technologies/people/", visa: true, remote: true, roles: ["Full Stack","PHP","Software Dev","React Native"] },
+  { name: "Mindtree UAE", domain: "mindtree.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "Digital services, engineering, cloud, data analytics", li: "https://www.linkedin.com/company/mindtree-limited", email: "careers@mindtree.com", hr: "https://www.linkedin.com/company/mindtree-limited/people/", visa: true, remote: true, roles: ["Full Stack","MERN","PHP","Software Dev"] },
+  { name: "Mphasis UAE", domain: "mphasis.com", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "Cloud-forward tech services for banking & financial sector", li: "https://www.linkedin.com/company/mphasis", email: "hr.me@mphasis.com", hr: "https://www.linkedin.com/company/mphasis/people/", visa: true, remote: true, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "Hexad Group", domain: "hexad.ae", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "Enterprise digital transformation, ERP & BI consulting UAE", li: "https://www.linkedin.com/company/hexad-group", email: "careers@hexad.ae", hr: "https://www.linkedin.com/company/hexad-group/people/", visa: true, remote: false, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "Sprinklr ME", domain: "sprinklr.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "Unified CX management platform for enterprise customers", li: "https://www.linkedin.com/company/sprinklr", email: "careers@sprinklr.com", hr: "https://www.linkedin.com/company/sprinklr/people/", visa: true, remote: true, roles: ["Full Stack","React Native","MERN"] },
+  { name: "Majid Al Futtaim Tech", domain: "majidalfuttaim.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "Retail & hospitality tech arm of Majid Al Futtaim Group", li: "https://www.linkedin.com/company/majid-al-futtaim", email: "talentacquisition@maf.ae", hr: "https://www.linkedin.com/company/majid-al-futtaim/people/", visa: true, remote: false, roles: ["Full Stack","React Native","MERN","Software Dev"] },
+  { name: "Alvarez & Marsal ME", domain: "alvarezandmarsal.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "Performance improvement, advisory, digital tech consulting", li: "https://www.linkedin.com/company/alvarez-and-marsal", email: "careers.me@alvarezandmarsal.com", hr: "https://www.linkedin.com/company/alvarez-and-marsal/people/", visa: true, remote: false, roles: ["Full Stack","Software Dev"] },
+  { name: "Moro Hub", domain: "morohub.com", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "Smart & sustainable data hub powering digital UAE economy", li: "https://www.linkedin.com/company/moro-hub", email: "careers@morohub.com", hr: "https://www.linkedin.com/company/moro-hub/people/", visa: true, remote: false, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "Cenomi Group Tech", domain: "cenomi.com", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "Retail tech for MENA's largest real estate group", li: "https://www.linkedin.com/company/cenomi", email: "hr@cenomi.com", hr: "https://www.linkedin.com/company/cenomi/people/", visa: true, remote: false, roles: ["Full Stack","MERN","Software Dev"] },
+  { name: "IEC Telecom ME", domain: "iectelecom.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "Satellite & data connectivity, communications solutions", li: "https://www.linkedin.com/company/iec-telecom", email: "hr@iectelecom.com", hr: "https://www.linkedin.com/company/iec-telecom/people/", visa: true, remote: false, roles: ["Software Dev","Full Stack"] },
+  { name: "Mashvisor (Dubai)", domain: "mashvisor.com", city: "Dubai", size: "11-50", rev: "1M-5M", desc: "Real estate data analytics & AI investment platform", li: "https://www.linkedin.com/company/mashvisor", email: "jobs@mashvisor.com", hr: "https://www.linkedin.com/company/mashvisor/people/", visa: false, remote: true, roles: ["Full Stack","MERN","React Native","PHP"] },
+  { name: "Zurich Middle East Tech", domain: "zurich.com", city: "Dubai", size: "51-200", rev: "10M-25M", desc: "Insurance tech & digital transformation Middle East", li: "https://www.linkedin.com/company/zurich-insurance", email: "careers.me@zurich.com", hr: "https://www.linkedin.com/company/zurich-insurance/people/", visa: true, remote: false, roles: ["Full Stack","Software Dev","PHP"] },
+  { name: "Accenture UAE", domain: "accenture.com", city: "Dubai", size: "1001-5000", rev: "200M-500M", desc: "Strategy, consulting, digital, technology & operations", li: "https://www.linkedin.com/company/accenture", email: "careers.uae@accenture.com", hr: "https://www.linkedin.com/company/accenture/people/", visa: true, remote: true, roles: ["Full Stack","Software Dev","MERN","React Native"] },
+  { name: "Cognizant UAE", domain: "cognizant.com", city: "Dubai", size: "501-1000", rev: "75M-200M", desc: "Digital, technology, consulting, operations services", li: "https://www.linkedin.com/company/cognizant", email: "careers.me@cognizant.com", hr: "https://www.linkedin.com/company/cognizant/people/", visa: true, remote: true, roles: ["Full Stack","PHP","MERN","Software Dev"] },
+  { name: "Capgemini UAE", domain: "capgemini.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "Consulting, digital transformation, cloud & engineering", li: "https://www.linkedin.com/company/capgemini", email: "careers.me@capgemini.com", hr: "https://www.linkedin.com/company/capgemini/people/", visa: true, remote: true, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "Oracle UAE", domain: "oracle.com", city: "Dubai", size: "501-1000", rev: "75M-200M", desc: "Cloud infrastructure, ERP, database, AI solutions in ME", li: "https://www.linkedin.com/company/oracle", email: "oracle_me_jobs@oracle.com", hr: "https://www.linkedin.com/company/oracle/people/", visa: true, remote: false, roles: ["Full Stack","Software Dev","PHP"] },
+  { name: "Microsoft UAE", domain: "microsoft.com", city: "Dubai", size: "501-1000", rev: "75M-200M", desc: "Cloud, AI, productivity, enterprise software solutions", li: "https://www.linkedin.com/company/microsoft", email: "careers.uae@microsoft.com", hr: "https://www.linkedin.com/company/microsoft/people/", visa: true, remote: true, roles: ["Full Stack","Software Dev","React Native"] },
+  { name: "IBM UAE", domain: "ibm.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "Hybrid cloud, AI, consulting and IT infrastructure", li: "https://www.linkedin.com/company/ibm", email: "ibm.careers.me@ibm.com", hr: "https://www.linkedin.com/company/ibm/people/", visa: true, remote: true, roles: ["Full Stack","Software Dev","MERN"] },
+  { name: "Cisco UAE", domain: "cisco.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "Networking, security, collaboration & IoT solutions", li: "https://www.linkedin.com/company/cisco", email: "careers.me@cisco.com", hr: "https://www.linkedin.com/company/cisco/people/", visa: true, remote: true, roles: ["Software Dev","Full Stack"] },
+  { name: "VMware UAE", domain: "vmware.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "Multi-cloud & virtualization software, networking & security", li: "https://www.linkedin.com/company/vmware", email: "careers.me@vmware.com", hr: "https://www.linkedin.com/company/vmware/people/", visa: true, remote: true, roles: ["Software Dev","Full Stack"] },
+  { name: "Paysign Technologies", domain: "paysign.ae", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "Payments & prepaid card solutions for UAE enterprises", li: "https://www.linkedin.com/company/paysign-technologies", email: "hr@paysign.ae", hr: "https://www.linkedin.com/company/paysign-technologies/people/", visa: true, remote: false, roles: ["PHP","Full Stack","React Native"] },
+  { name: "Derq", domain: "derq.com", city: "Dubai", size: "11-50", rev: "1M-5M", desc: "AI-driven road safety & smart mobility startup (MIT spin-off)", li: "https://www.linkedin.com/company/derq", email: "talent@derq.com", hr: "https://www.linkedin.com/company/derq/people/", visa: true, remote: false, roles: ["Full Stack","Software Dev","MERN"] },
+  { name: "Tamatem Games", domain: "tamatemgames.com", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "Mobile gaming publisher for Arabic-speaking markets", li: "https://www.linkedin.com/company/tamatem-games", email: "hr@tamatemgames.com", hr: "https://www.linkedin.com/company/tamatem-games/people/", visa: true, remote: false, roles: ["React Native","Full Stack","MERN"] },
+  { name: "Presight AI", domain: "presight.ai", city: "Abu Dhabi", size: "201-500", rev: "10M-25M", desc: "Big data analytics & AI for national security, government", li: "https://www.linkedin.com/company/presight-ai", email: "careers@presight.ai", hr: "https://www.linkedin.com/company/presight-ai/people/", visa: true, remote: false, roles: ["Full Stack","Software Dev","MERN"] },
+  { name: "Pure Storage UAE", domain: "purestorage.com", city: "Dubai", size: "51-200", rev: "10M-25M", desc: "All-flash data storage platform for modern workloads", li: "https://www.linkedin.com/company/pure-storage", email: "careers.me@purestorage.com", hr: "https://www.linkedin.com/company/pure-storage/people/", visa: true, remote: false, roles: ["Software Dev","Full Stack"] },
+  { name: "Cloud4C UAE", domain: "cloud4c.com", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "Managed cloud services, cybersecurity & DevOps solutions", li: "https://www.linkedin.com/company/cloud4c-services", email: "careers@cloud4c.com", hr: "https://www.linkedin.com/company/cloud4c-services/people/", visa: true, remote: true, roles: ["Full Stack","PHP","Software Dev","MERN"] },
+  { name: "Kitopi", domain: "kitopi.com", city: "Dubai", size: "1001-5000", rev: "75M-200M", desc: "World's leading managed cloud kitchen platform", li: "https://www.linkedin.com/company/kitopi", email: "careers@kitopi.com", hr: "https://www.linkedin.com/company/kitopi/people/", visa: true, remote: false, roles: ["Full Stack","React Native","Software Dev"] },
+  { name: "Floward", domain: "floward.com", city: "Kuwait City", size: "201-500", rev: "10M-25M", desc: "Tech-enabled gifting & delivery platform across GCC", li: "https://www.linkedin.com/company/floward", email: "careers@floward.com", hr: "https://www.linkedin.com/company/floward/people/", visa: true, remote: false, roles: ["Full Stack","React Native","PHP"] },
+  { name: "ClearBit ME", domain: "clearbit.com", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "B2B data intelligence, real-time company & contact data", li: "https://www.linkedin.com/company/clearbit", email: "jobs@clearbit.com", hr: "https://www.linkedin.com/company/clearbit/people/", visa: true, remote: true, roles: ["Full Stack","Software Dev","MERN"] },
+  { name: "Totara LMS", domain: "totara.com", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "Open learning management system for enterprise training", li: "https://www.linkedin.com/company/totara-learning-solutions", email: "hr@totara.com", hr: "https://www.linkedin.com/company/totara-learning-solutions/people/", visa: false, remote: true, roles: ["PHP","Full Stack","Software Dev"] },
+  { name: "Bybit Exchange", domain: "bybit.com", city: "Dubai", size: "1001-5000", rev: "200M-500M", desc: "Top-3 global crypto exchange with 35M+ users worldwide", li: "https://www.linkedin.com/company/bybit-exchange", email: "careers@bybit.com", hr: "https://www.linkedin.com/company/bybit-exchange/people/", visa: true, remote: true, roles: ["Full Stack","React Native","MERN","Software Dev"] },
+  { name: "OKX", domain: "okx.com", city: "Dubai", size: "1001-5000", rev: "200M-500M", desc: "Top global crypto exchange & Web3 technology company", li: "https://www.linkedin.com/company/okx", email: "careers@okx.com", hr: "https://www.linkedin.com/company/okx/people/", visa: true, remote: true, roles: ["Full Stack","React Native","MERN","Software Dev"] },
+  { name: "Limelight Networks ME", domain: "limelight.com", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "Edge cloud platform for digital content delivery", li: "https://www.linkedin.com/company/limelight-networks", email: "careers@limelight.com", hr: "https://www.linkedin.com/company/limelight-networks/people/", visa: true, remote: true, roles: ["Full Stack","Software Dev"] },
+  { name: "Progrès", domain: "progres-edu.com", city: "Dubai", size: "11-50", rev: "500K-1M", desc: "EdTech platform for Arabic language education & e-learning", li: "https://www.linkedin.com/company/progres-edu", email: "hr@progres-edu.com", hr: "https://www.linkedin.com/company/progres-edu/people/", visa: false, remote: true, roles: ["PHP","Full Stack","React Native","MERN"] },
+  { name: "Aqeed.com", domain: "aqeed.com", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "InsurTech platform, digital insurance comparison UAE/GCC", li: "https://www.linkedin.com/company/aqeed", email: "careers@aqeed.com", hr: "https://www.linkedin.com/company/aqeed/people/", visa: true, remote: false, roles: ["Full Stack","React Native","MERN","PHP"] },
+  { name: "EazyDiner", domain: "eazydiner.com", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "Restaurant discovery & table booking platform in ME & India", li: "https://www.linkedin.com/company/eazydiner", email: "hr@eazydiner.com", hr: "https://www.linkedin.com/company/eazydiner/people/", visa: false, remote: true, roles: ["PHP","Full Stack","React Native"] },
+  { name: "DXC Technology ME", domain: "dxc.com", city: "Dubai", size: "201-500", rev: "25M-75M", desc: "End-to-end IT services across the MENA region", li: "https://www.linkedin.com/company/dxc-technology", email: "careers.me@dxc.com", hr: "https://www.linkedin.com/company/dxc-technology/people/", visa: true, remote: true, roles: ["Full Stack","PHP","Software Dev","MERN"] },
+  { name: "Meltwater ME", domain: "meltwater.com", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "Media intelligence & social analytics SaaS platform", li: "https://www.linkedin.com/company/meltwater", email: "careers@meltwater.com", hr: "https://www.linkedin.com/company/meltwater/people/", visa: true, remote: true, roles: ["Full Stack","Software Dev","MERN"] },
+  { name: "Iridium ME", domain: "iridium.com", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "Satellite communications & IoT solutions globally", li: "https://www.linkedin.com/company/iridium-communications", email: "careers@iridium.com", hr: "https://www.linkedin.com/company/iridium-communications/people/", visa: true, remote: false, roles: ["Software Dev","Full Stack"] },
+  { name: "Elision Technologies", domain: "elisiontec.com", city: "Dubai", size: "11-50", rev: "500K-1M", desc: "VoIP, contact center, custom software development", li: "https://www.linkedin.com/company/elision-technologies", email: "hr@elisiontec.com", hr: "https://www.linkedin.com/company/elision-technologies/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native"] },
+  { name: "PayTabs", domain: "paytabs.com", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "Payment processing & gateway solutions for MENA businesses", li: "https://www.linkedin.com/company/paytabs", email: "hr@paytabs.com", hr: "https://www.linkedin.com/company/paytabs/people/", visa: true, remote: true, roles: ["PHP","Full Stack","React Native","MERN"] },
+  { name: "Aleph Holding", domain: "aleph.im", city: "Dubai", size: "1001-5000", rev: "75M-200M", desc: "Digital advertising & media monetization solutions globally", li: "https://www.linkedin.com/company/aleph-holding", email: "careers@aleph.im", hr: "https://www.linkedin.com/company/aleph-holding/people/", visa: true, remote: true, roles: ["Full Stack","Software Dev","PHP"] },
+  { name: "Yap (YAP)", domain: "yap.com", city: "Abu Dhabi", size: "51-200", rev: "5M-10M", desc: "UAE's first and largest neobank & digital payments platform", li: "https://www.linkedin.com/company/yap-now", email: "hr@yap.com", hr: "https://www.linkedin.com/company/yap-now/people/", visa: true, remote: false, roles: ["React Native","Full Stack","MERN","PHP"] },
+  { name: "Omnix International", domain: "omnixint.com", city: "Dubai", size: "201-500", rev: "10M-25M", desc: "Enterprise IT, AV, physical security & networking solutions", li: "https://www.linkedin.com/company/omnix-international", email: "careers@omnixint.com", hr: "https://www.linkedin.com/company/omnix-international/people/", visa: true, remote: false, roles: ["Software Dev","Full Stack"] },
+  { name: "FIVE Hotels Tech", domain: "fivehotelsandresorts.com", city: "Dubai", size: "51-200", rev: "5M-10M", desc: "PropTech & hospitality digital solutions, smart hotels", li: "https://www.linkedin.com/company/five-hotels-and-resorts", email: "hr@fivehotelsandresorts.com", hr: "https://www.linkedin.com/company/five-hotels-and-resorts/people/", visa: true, remote: false, roles: ["Full Stack","PHP","Software Dev"] },
+];
+
+const indiaCompanies = [
+  { name: "Recro", domain: "recro.io", city: "Bangalore", size: "501-1000", rev: "25M-75M", desc: "Developer-focused platform matching engineers with startups", li: "https://www.linkedin.com/company/recro-io", email: "careers@recro.io", hr: "https://www.linkedin.com/company/recro-io/people/", visa: false, remote: true, roles: ["Full Stack","MERN","PHP","React Native","Software Dev"] },
+  { name: "CodersBrain", domain: "codersbrain.com", city: "Bangalore", size: "501-1000", rev: "25M-75M", desc: "Global IT services, digital solutions, staffing company", li: "https://www.linkedin.com/company/codersbrain", email: "hr@codersbrain.com", hr: "https://www.linkedin.com/company/codersbrain/people/", visa: false, remote: true, roles: ["Full Stack","PHP","MERN","React Native","Software Dev"] },
+  { name: "People Prime Worldwide", domain: "people-prime.com", city: "Hyderabad", size: "501-1000", rev: "25M-75M", desc: "IT consulting, staff augmentation, managed teams", li: "https://www.linkedin.com/company/peopleprimeww", email: "careers@people-prime.com", hr: "https://www.linkedin.com/company/peopleprimeww/people/", visa: false, remote: true, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "EG Allied", domain: "egallied.com", city: "Jaipur", size: "51-200", rev: "5M-10M", desc: "AI tech company bridging businesses and individuals", li: "https://www.linkedin.com/company/eg-allied", email: "hr@egallied.com", hr: "https://www.linkedin.com/company/eg-allied/people/", visa: false, remote: true, roles: ["Full Stack","MERN","React Native","PHP"] },
+  { name: "CodeChef (Unacademy)", domain: "codechef.com", city: "Bangalore", size: "201-500", rev: "10M-25M", desc: "Competitive programming platform, developer community", li: "https://www.linkedin.com/company/codechef", email: "hr@codechef.com", hr: "https://www.linkedin.com/company/codechef/people/", visa: false, remote: true, roles: ["Full Stack","MERN","Software Dev"] },
+  { name: "Tata Consultancy Services", domain: "tcs.com", city: "Mumbai", size: "10001+", rev: "10B-100B", desc: "Global IT services, consulting, BPO, digital transformation", li: "https://www.linkedin.com/company/tata-consultancy-services", email: "careers@tcs.com", hr: "https://www.linkedin.com/company/tata-consultancy-services/people/", visa: false, remote: true, roles: ["Full Stack","PHP","MERN","Software Dev","React Native"] },
+  { name: "Infosys", domain: "infosys.com", city: "Bangalore", size: "10001+", rev: "10B-100B", desc: "Digital, consulting, technology, outsourcing services", li: "https://www.linkedin.com/company/infosys", email: "careers@infosys.com", hr: "https://www.linkedin.com/company/infosys/people/", visa: false, remote: true, roles: ["Full Stack","PHP","Software Dev","MERN"] },
+  { name: "Wipro", domain: "wipro.com", city: "Bangalore", size: "10001+", rev: "10B-100B", desc: "IT services, consulting, digital transformation, BPO", li: "https://www.linkedin.com/company/wipro", email: "careers@wipro.com", hr: "https://www.linkedin.com/company/wipro/people/", visa: false, remote: true, roles: ["Full Stack","PHP","MERN","Software Dev"] },
+  { name: "HCL Technologies", domain: "hcltech.com", city: "Noida", size: "10001+", rev: "10B-100B", desc: "Global technology company, digital services, engineering", li: "https://www.linkedin.com/company/hcl-technologies", email: "careers@hcltech.com", hr: "https://www.linkedin.com/company/hcl-technologies/people/", visa: false, remote: true, roles: ["Full Stack","PHP","Software Dev","React Native"] },
+  { name: "Tech Mahindra", domain: "techmahindra.com", city: "Pune", size: "10001+", rev: "1B-10B", desc: "Digital transformation, 5G, AI, cloud engineering services", li: "https://www.linkedin.com/company/tech-mahindra", email: "careers@techmahindra.com", hr: "https://www.linkedin.com/company/tech-mahindra/people/", visa: false, remote: true, roles: ["Full Stack","PHP","MERN","React Native","Software Dev"] },
+  { name: "Mphasis", domain: "mphasis.com", city: "Bangalore", size: "10001+", rev: "500M-1B", desc: "Cloud-forward technology services & solutions company", li: "https://www.linkedin.com/company/mphasis", email: "careers@mphasis.com", hr: "https://www.linkedin.com/company/mphasis/people/", visa: false, remote: true, roles: ["Full Stack","PHP","Software Dev","MERN"] },
+  { name: "Mindtree", domain: "mindtree.com", city: "Bangalore", size: "5001-10000", rev: "500M-1B", desc: "Digital services, cloud, data, engineering solutions", li: "https://www.linkedin.com/company/mindtree-limited", email: "careers@mindtree.com", hr: "https://www.linkedin.com/company/mindtree-limited/people/", visa: false, remote: true, roles: ["Full Stack","MERN","PHP","Software Dev"] },
+  { name: "Persistent Systems", domain: "persistent.com", city: "Pune", size: "10001+", rev: "500M-1B", desc: "Digital engineering, cloud, data, enterprise modernization", li: "https://www.linkedin.com/company/persistent-systems", email: "careers@persistent.com", hr: "https://www.linkedin.com/company/persistent-systems/people/", visa: false, remote: true, roles: ["Full Stack","PHP","MERN","Software Dev","React Native"] },
+  { name: "Hexaware Technologies", domain: "hexaware.com", city: "Mumbai", size: "10001+", rev: "500M-1B", desc: "Digital IT services, BPO, automation, AI solutions", li: "https://www.linkedin.com/company/hexaware-technologies", email: "careers@hexaware.com", hr: "https://www.linkedin.com/company/hexaware-technologies/people/", visa: false, remote: true, roles: ["Full Stack","PHP","Software Dev","MERN"] },
+  { name: "Zensar Technologies", domain: "zensar.com", city: "Pune", size: "10001+", rev: "200M-500M", desc: "Digital solutions, experience, operations for businesses", li: "https://www.linkedin.com/company/zensar-technologies", email: "careers@zensar.com", hr: "https://www.linkedin.com/company/zensar-technologies/people/", visa: false, remote: true, roles: ["Full Stack","PHP","MERN","Software Dev"] },
+  { name: "Mastech Holdings", domain: "mastech.com", city: "Noida", size: "1001-5000", rev: "75M-200M", desc: "IT staffing, talent management, digital transformation", li: "https://www.linkedin.com/company/mastech", email: "careers@mastech.com", hr: "https://www.linkedin.com/company/mastech/people/", visa: false, remote: true, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "Nagarro", domain: "nagarro.com", city: "Gurgaon", size: "5001-10000", rev: "200M-500M", desc: "Software product engineering, agile digital services", li: "https://www.linkedin.com/company/nagarro", email: "careers@nagarro.com", hr: "https://www.linkedin.com/company/nagarro/people/", visa: false, remote: true, roles: ["Full Stack","MERN","PHP","React Native","Software Dev"] },
+  { name: "Newgen Software", domain: "newgensoft.com", city: "Noida", size: "5001-10000", rev: "75M-200M", desc: "Low-code digital transformation platform & BPM solutions", li: "https://www.linkedin.com/company/newgen-software-technologies-ltd", email: "careers@newgensoft.com", hr: "https://www.linkedin.com/company/newgen-software-technologies-ltd/people/", visa: false, remote: true, roles: ["Full Stack","PHP","Software Dev","MERN"] },
+  { name: "Sasken Technologies", domain: "sasken.com", city: "Bangalore", size: "1001-5000", rev: "75M-200M", desc: "Product engineering, semiconductor & communications services", li: "https://www.linkedin.com/company/sasken-technologies", email: "careers@sasken.com", hr: "https://www.linkedin.com/company/sasken-technologies/people/", visa: false, remote: true, roles: ["Software Dev","Full Stack"] },
+  { name: "Cyient", domain: "cyient.com", city: "Hyderabad", size: "10001+", rev: "500M-1B", desc: "Engineering, manufacturing & digital services company", li: "https://www.linkedin.com/company/cyient", email: "careers@cyient.com", hr: "https://www.linkedin.com/company/cyient/people/", visa: false, remote: true, roles: ["Software Dev","Full Stack","MERN"] },
+  { name: "NIIT Technologies", domain: "niit-tech.com", city: "Noida", size: "5001-10000", rev: "200M-500M", desc: "IT services, travel, BFSI, BPS digital solutions", li: "https://www.linkedin.com/company/niit-technologies", email: "careers@niit-tech.com", hr: "https://www.linkedin.com/company/niit-technologies/people/", visa: false, remote: true, roles: ["Full Stack","PHP","Software Dev"] },
+  { name: "Sapient Corporation", domain: "sapient.com", city: "Gurgaon", size: "5001-10000", rev: "200M-500M", desc: "Business & technology services, digital consulting firm", li: "https://www.linkedin.com/company/sapient", email: "careers@sapient.com", hr: "https://www.linkedin.com/company/sapient/people/", visa: false, remote: true, roles: ["Full Stack","PHP","MERN","Software Dev"] },
+  { name: "Geometric India", domain: "geometric.com", city: "Pune", size: "1001-5000", rev: "75M-200M", desc: "Product lifecycle management, engineering services & software", li: "https://www.linkedin.com/company/geometric", email: "careers@geometric.com", hr: "https://www.linkedin.com/company/geometric/people/", visa: false, remote: false, roles: ["Software Dev","Full Stack"] },
+  { name: "KPIT Technologies", domain: "kpit.com", city: "Pune", size: "5001-10000", rev: "200M-500M", desc: "Automotive & mobility tech, embedded software engineering", li: "https://www.linkedin.com/company/kpit", email: "careers@kpit.com", hr: "https://www.linkedin.com/company/kpit/people/", visa: false, remote: false, roles: ["Software Dev","Full Stack","PHP"] },
+  { name: "Kellton Tech", domain: "kellton.com", city: "Hyderabad", size: "1001-5000", rev: "25M-75M", desc: "Digital transformation, web, mobile, cloud solutions", li: "https://www.linkedin.com/company/kellton-tech", email: "careers@kellton.com", hr: "https://www.linkedin.com/company/kellton-tech/people/", visa: false, remote: true, roles: ["Full Stack","PHP","MERN","React Native","Software Dev"] },
+  { name: "Happiest Minds", domain: "happiestminds.com", city: "Bangalore", size: "5001-10000", rev: "200M-500M", desc: "Digital transformation, IoT, analytics, cloud services", li: "https://www.linkedin.com/company/happiest-minds-technologies", email: "careers@happiestminds.com", hr: "https://www.linkedin.com/company/happiest-minds-technologies/people/", visa: false, remote: true, roles: ["Full Stack","PHP","MERN","React Native","Software Dev"] },
+  { name: "Bluestar Infotech", domain: "bluestarinfotech.com", city: "Mumbai", size: "51-200", rev: "5M-10M", desc: "Custom software, web development, mobile apps, IT services", li: "https://www.linkedin.com/company/bluestar-infotech", email: "hr@bluestarinfotech.com", hr: "https://www.linkedin.com/company/bluestar-infotech/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native","Software Dev"] },
+  { name: "Infostretch (Apexon)", domain: "apexon.com", city: "Ahmedabad", size: "1001-5000", rev: "75M-200M", desc: "Digital-first engineering services, testing, cloud, data", li: "https://www.linkedin.com/company/apexon", email: "careers@apexon.com", hr: "https://www.linkedin.com/company/apexon/people/", visa: false, remote: true, roles: ["Full Stack","PHP","MERN","Software Dev","React Native"] },
+  { name: "Tatvasoft", domain: "tatvasoft.com", city: "Ahmedabad", size: "201-500", rev: "10M-25M", desc: "Software development, web, mobile, AI, data services", li: "https://www.linkedin.com/company/tatvasoft", email: "hr@tatvasoft.com", hr: "https://www.linkedin.com/company/tatvasoft/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native","Software Dev"] },
+  { name: "Bacancy Technology", domain: "bacancytechnology.com", city: "Ahmedabad", size: "201-500", rev: "10M-25M", desc: "Agile development — React, Node, Python, PHP, mobile apps", li: "https://www.linkedin.com/company/bacancy-technology", email: "hr@bacancytechnology.com", hr: "https://www.linkedin.com/company/bacancy-technology/people/", visa: false, remote: true, roles: ["Full Stack","MERN","PHP","React Native","Software Dev"] },
+  { name: "Space-O Technologies", domain: "spaceotechnologies.com", city: "Ahmedabad", size: "51-200", rev: "5M-10M", desc: "Mobile app & web development, 300+ apps delivered", li: "https://www.linkedin.com/company/space-o-technologies", email: "hr@spaceotechnologies.com", hr: "https://www.linkedin.com/company/space-o-technologies/people/", visa: false, remote: true, roles: ["React Native","Full Stack","PHP","MERN"] },
+  { name: "Simform", domain: "simform.com", city: "Ahmedabad", size: "201-500", rev: "10M-25M", desc: "Software engineering, product development, cloud solutions", li: "https://www.linkedin.com/company/simform", email: "hr@simform.com", hr: "https://www.linkedin.com/company/simform/people/", visa: false, remote: true, roles: ["Full Stack","MERN","React Native","PHP","Software Dev"] },
+  { name: "ValueCoders", domain: "valuecoders.com", city: "Noida", size: "201-500", rev: "5M-10M", desc: "Dedicated developer teams, web & mobile outsourcing", li: "https://www.linkedin.com/company/valuecoders", email: "hr@valuecoders.com", hr: "https://www.linkedin.com/company/valuecoders/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native","Software Dev"] },
+  { name: "Rishabh Software", domain: "rishabhsoft.com", city: "Vadodara", size: "201-500", rev: "10M-25M", desc: "Custom software, UI/UX, cloud, enterprise applications", li: "https://www.linkedin.com/company/rishabh-software", email: "hr@rishabhsoft.com", hr: "https://www.linkedin.com/company/rishabh-software/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native"] },
+  { name: "Technogeeks", domain: "technogeeks.in", city: "Pune", size: "11-50", rev: "500K-1M", desc: "Training, placement & IT services for freshers & professionals", li: "https://www.linkedin.com/company/technogeeks", email: "hr@technogeeks.in", hr: "https://www.linkedin.com/company/technogeeks/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native","Software Dev"] },
+  { name: "Matellio", domain: "matellio.com", city: "Jaipur", size: "201-500", rev: "10M-25M", desc: "Enterprise software, IoT, AI, web & mobile development", li: "https://www.linkedin.com/company/matellio", email: "hr@matellio.com", hr: "https://www.linkedin.com/company/matellio/people/", visa: false, remote: true, roles: ["Full Stack","MERN","React Native","PHP","Software Dev"] },
+  { name: "Evince Development", domain: "evincedev.com", city: "Ahmedabad", size: "51-200", rev: "5M-10M", desc: "Mobile apps, web development, Node.js, React specialist", li: "https://www.linkedin.com/company/evince-development", email: "hr@evincedev.com", hr: "https://www.linkedin.com/company/evince-development/people/", visa: false, remote: true, roles: ["Full Stack","MERN","React Native","PHP"] },
+  { name: "Softlabs Group", domain: "softlabsgroup.com", city: "Ahmedabad", size: "51-200", rev: "5M-10M", desc: "Mobile app development, React Native, PHP, Laravel experts", li: "https://www.linkedin.com/company/softlabs-group", email: "hr@softlabsgroup.com", hr: "https://www.linkedin.com/company/softlabsgroup/people/", visa: false, remote: true, roles: ["React Native","PHP","Full Stack","MERN"] },
+  { name: "Daffodil Software", domain: "daffodilsw.com", city: "Gurgaon", size: "201-500", rev: "10M-25M", desc: "Custom software, digital transformation, AI products", li: "https://www.linkedin.com/company/daffodil-software", email: "careers@daffodilsw.com", hr: "https://www.linkedin.com/company/daffodil-software/people/", visa: false, remote: true, roles: ["Full Stack","PHP","MERN","React Native","Software Dev"] },
+  { name: "Codiant Software", domain: "codiant.com", city: "Indore", size: "201-500", rev: "5M-10M", desc: "Web, mobile, IoT, AI solutions for enterprises & startups", li: "https://www.linkedin.com/company/codiant", email: "hr@codiant.com", hr: "https://www.linkedin.com/company/codiant/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native"] },
+  { name: "CronJ", domain: "cronj.com", city: "Ahmedabad", size: "51-200", rev: "5M-10M", desc: "React.js, Node.js, Python, full stack product development", li: "https://www.linkedin.com/company/cronj", email: "hr@cronj.com", hr: "https://www.linkedin.com/company/cronj/people/", visa: false, remote: true, roles: ["Full Stack","MERN","React Native","PHP"] },
+  { name: "Techuz InfoWeb", domain: "techuz.com", city: "Ahmedabad", size: "51-200", rev: "5M-10M", desc: "Web & mobile app development, startup to enterprise", li: "https://www.linkedin.com/company/techuz-infoweb", email: "hr@techuz.com", hr: "https://www.linkedin.com/company/techuz-infoweb/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native","Software Dev"] },
+  { name: "RadixWeb", domain: "radixweb.com", city: "Ahmedabad", size: "201-500", rev: "10M-25M", desc: "Enterprise web, ERP, SaaS, mobile development company", li: "https://www.linkedin.com/company/radixweb", email: "hr@radixweb.com", hr: "https://www.linkedin.com/company/radixweb/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","Software Dev"] },
+  { name: "Appsierra", domain: "appsierra.com", city: "Noida", size: "51-200", rev: "5M-10M", desc: "Software testing, QA, development outsourcing services", li: "https://www.linkedin.com/company/appsierra-group", email: "hr@appsierra.com", hr: "https://www.linkedin.com/company/appsierra-group/people/", visa: false, remote: true, roles: ["Full Stack","Software Dev","PHP"] },
+  { name: "CodingNinjas", domain: "codingninjas.com", city: "Delhi", size: "201-500", rev: "10M-25M", desc: "EdTech for CS education, placement training, internships", li: "https://www.linkedin.com/company/coding-ninjas", email: "hr@codingninjas.com", hr: "https://www.linkedin.com/company/coding-ninjas/people/", visa: false, remote: true, roles: ["Full Stack","MERN","Software Dev"] },
+  { name: "Sigmoid Analytics", domain: "sigmoid.com", city: "Bangalore", size: "201-500", rev: "25M-75M", desc: "Data engineering, ML & AI solutions for enterprises", li: "https://www.linkedin.com/company/sigmoid", email: "careers@sigmoid.com", hr: "https://www.linkedin.com/company/sigmoid/people/", visa: false, remote: true, roles: ["Full Stack","Software Dev","MERN"] },
+  { name: "Infrrd", domain: "infrrd.ai", city: "Bangalore", size: "201-500", rev: "10M-25M", desc: "Intelligent document processing, ML-powered automation", li: "https://www.linkedin.com/company/infrrd", email: "careers@infrrd.ai", hr: "https://www.linkedin.com/company/infrrd/people/", visa: false, remote: true, roles: ["Full Stack","Software Dev","MERN"] },
+  { name: "Azodha", domain: "azodha.com", city: "Bangalore", size: "51-200", rev: "5M-10M", desc: "Healthcare IT, interoperability, FHIR, custom solutions", li: "https://www.linkedin.com/company/azodha", email: "careers@azodha.com", hr: "https://www.linkedin.com/company/azodha/people/", visa: false, remote: true, roles: ["Full Stack","PHP","MERN","React Native"] },
+  { name: "Robosoft Technologies", domain: "robosoftin.com", city: "Udupi", size: "501-1000", rev: "25M-75M", desc: "Experience design, digital product engineering, mobile apps", li: "https://www.linkedin.com/company/robosoft-technologies", email: "hr@robosoftin.com", hr: "https://www.linkedin.com/company/robosoft-technologies/people/", visa: false, remote: true, roles: ["React Native","Full Stack","PHP","MERN","Software Dev"] },
+  { name: "Softcrayons", domain: "softcrayons.com", city: "Noida", size: "51-200", rev: "5M-10M", desc: "IT training, web development, mobile app services & projects", li: "https://www.linkedin.com/company/softcrayons-tech-solution", email: "hr@softcrayons.com", hr: "https://www.linkedin.com/company/softcrayons-tech-solution/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native","Software Dev"] },
+  { name: "Konstant Infosolutions", domain: "konstantinfo.com", city: "Jaipur", size: "201-500", rev: "10M-25M", desc: "Mobile apps, web, ecommerce, IoT development company", li: "https://www.linkedin.com/company/konstant-infosolutions", email: "hr@konstantinfo.com", hr: "https://www.linkedin.com/company/konstant-infosolutions/people/", visa: false, remote: true, roles: ["React Native","PHP","Full Stack","MERN"] },
+  { name: "iFuturistic Technologies", domain: "ifuturistic.com", city: "Jaipur", size: "51-200", rev: "5M-10M", desc: "React Native, Laravel, Node.js product development", li: "https://www.linkedin.com/company/ifuturistic-technologies", email: "hr@ifuturistic.com", hr: "https://www.linkedin.com/company/ifuturistic-technologies/people/", visa: false, remote: true, roles: ["React Native","PHP","Full Stack","MERN"] },
+  { name: "Technoloader", domain: "technoloader.com", city: "Jaipur", size: "51-200", rev: "5M-10M", desc: "Blockchain, web3, mobile apps, full stack development", li: "https://www.linkedin.com/company/technoloader", email: "hr@technoloader.com", hr: "https://www.linkedin.com/company/technoloader/people/", visa: false, remote: true, roles: ["Full Stack","MERN","PHP","React Native"] },
+  { name: "Rapidops", domain: "rapidops.com", city: "Ahmedabad", size: "201-500", rev: "10M-25M", desc: "Digital transformation, product engineering, data analytics", li: "https://www.linkedin.com/company/rapidops", email: "hr@rapidops.com", hr: "https://www.linkedin.com/company/rapidops/people/", visa: false, remote: true, roles: ["Full Stack","MERN","React Native","PHP","Software Dev"] },
+  { name: "Intelitech Solutions", domain: "intelitech.com", city: "Chandigarh", size: "51-200", rev: "5M-10M", desc: "Custom software, mobile apps, ERP, ecommerce development", li: "https://www.linkedin.com/company/intelitech-solutions", email: "hr@intelitech.com", hr: "https://www.linkedin.com/company/intelitech-solutions/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native"] },
+  { name: "Successive Technologies", domain: "successive.tech", city: "Noida", size: "201-500", rev: "10M-25M", desc: "Digital engineering, cloud, AI, custom software services", li: "https://www.linkedin.com/company/successive-technologies", email: "careers@successive.tech", hr: "https://www.linkedin.com/company/successive-technologies/people/", visa: false, remote: true, roles: ["Full Stack","MERN","PHP","React Native","Software Dev"] },
+  { name: "Nimap Infotech", domain: "nimapit.com", city: "Mumbai", size: "51-200", rev: "5M-10M", desc: "App development, React Native, Node.js, Laravel projects", li: "https://www.linkedin.com/company/nimap-infotech", email: "hr@nimapit.com", hr: "https://www.linkedin.com/company/nimap-infotech/people/", visa: false, remote: true, roles: ["React Native","PHP","Full Stack","MERN"] },
+  { name: "Appverticals", domain: "appverticals.com", city: "Indore", size: "51-200", rev: "5M-10M", desc: "Mobile & web apps, UI/UX, Flutter, React Native experts", li: "https://www.linkedin.com/company/appverticals", email: "hr@appverticals.com", hr: "https://www.linkedin.com/company/appverticals/people/", visa: false, remote: true, roles: ["React Native","Full Stack","MERN","PHP"] },
+  { name: "Techcronus", domain: "techcronus.com", city: "Ahmedabad", size: "51-200", rev: "5M-10M", desc: "PHP, Node.js, React, Vue, mobile apps & web solutions", li: "https://www.linkedin.com/company/techcronus", email: "hr@techcronus.com", hr: "https://www.linkedin.com/company/techcronus/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native"] },
+  { name: "Bytecipher", domain: "bytecipher.net", city: "Ahmedabad", size: "11-50", rev: "1M-5M", desc: "Fresher-friendly software firm, React, PHP, Node projects", li: "https://www.linkedin.com/company/bytecipher-pvt-ltd", email: "hr@bytecipher.net", hr: "https://www.linkedin.com/company/bytecipher-pvt-ltd/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native"] },
+  { name: "Uplers", domain: "uplers.com", city: "Ahmedabad", size: "1001-5000", rev: "25M-75M", desc: "Global remote developer hiring platform, 5000+ talents", li: "https://www.linkedin.com/company/uplers", email: "talent@uplers.com", hr: "https://www.linkedin.com/company/uplers/people/", visa: false, remote: true, roles: ["Full Stack","PHP","MERN","React Native","Software Dev"] },
+  { name: "Mindbowser", domain: "mindbowser.com", city: "Pune", size: "201-500", rev: "10M-25M", desc: "Product engineering, React, Node.js, Flutter, healthcare IT", li: "https://www.linkedin.com/company/mindbowser", email: "hr@mindbowser.com", hr: "https://www.linkedin.com/company/mindbowser/people/", visa: false, remote: true, roles: ["Full Stack","MERN","React Native","PHP"] },
+  { name: "Mobisoft Infotech", domain: "mobisoftinfotech.com", city: "Pune", size: "201-500", rev: "10M-25M", desc: "Mobile & web app development, enterprise digital solutions", li: "https://www.linkedin.com/company/mobisoft-infotech", email: "hr@mobisoftinfotech.com", hr: "https://www.linkedin.com/company/mobisoft-infotech/people/", visa: false, remote: true, roles: ["React Native","Full Stack","PHP","MERN","Software Dev"] },
+  { name: "Eway IT Solutions", domain: "ewayitsolutions.com", city: "Ludhiana", size: "11-50", rev: "500K-1M", desc: "Web & mobile development, freshers welcome, Punjab-based", li: "https://www.linkedin.com/company/eway-it-solutions", email: "hr@ewayitsolutions.com", hr: "https://www.linkedin.com/company/eway-it-solutions/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native"] },
+  { name: "Webtech Learning", domain: "webtechlearning.com", city: "Ludhiana", size: "11-50", rev: "500K-1M", desc: "IT training + placement, fresher projects, Punjab IT hub", li: "https://www.linkedin.com/company/webtech-learning", email: "info@webtechlearning.com", hr: "https://www.linkedin.com/company/webtech-learning/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native","Software Dev"] },
+  { name: "Skcript", domain: "skcript.com", city: "Chennai", size: "51-200", rev: "5M-10M", desc: "AI, blockchain, IoT, digital product development", li: "https://www.linkedin.com/company/skcript", email: "careers@skcript.com", hr: "https://www.linkedin.com/company/skcript/people/", visa: false, remote: true, roles: ["Full Stack","MERN","Software Dev","React Native"] },
+  { name: "OrangeMantra", domain: "orangemantra.com", city: "Gurgaon", size: "201-500", rev: "10M-25M", desc: "Digital commerce, custom software, mobile app development", li: "https://www.linkedin.com/company/orangemantra", email: "hr@orangemantra.com", hr: "https://www.linkedin.com/company/orangemantra/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native","Software Dev"] },
+  { name: "Doodle Inc", domain: "doodleinc.io", city: "Bangalore", size: "51-200", rev: "5M-10M", desc: "Fintech, healthtech, edtech product engineering startup", li: "https://www.linkedin.com/company/doodle-inc", email: "hr@doodleinc.io", hr: "https://www.linkedin.com/company/doodle-inc/people/", visa: false, remote: true, roles: ["Full Stack","MERN","React Native","Software Dev"] },
+  { name: "Knowledgehut", domain: "knowledgehut.com", city: "Bangalore", size: "501-1000", rev: "25M-75M", desc: "EdTech & upskilling platform with internship programs", li: "https://www.linkedin.com/company/knowledgehut", email: "careers@knowledgehut.com", hr: "https://www.linkedin.com/company/knowledgehut/people/", visa: false, remote: true, roles: ["Full Stack","Software Dev","MERN"] },
+  { name: "Webkul", domain: "webkul.com", city: "Noida", size: "201-500", rev: "10M-25M", desc: "eCommerce modules, marketplace development, PHP/Laravel", li: "https://www.linkedin.com/company/webkul-software", email: "hr@webkul.com", hr: "https://www.linkedin.com/company/webkul-software/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","Software Dev"] },
+  { name: "Solulab", domain: "solulab.com", city: "Ahmedabad", size: "201-500", rev: "10M-25M", desc: "Blockchain, AI, web3, mobile & enterprise development", li: "https://www.linkedin.com/company/solulab", email: "hr@solulab.com", hr: "https://www.linkedin.com/company/solulab/people/", visa: false, remote: true, roles: ["Full Stack","MERN","React Native","PHP","Software Dev"] },
+  { name: "Peerbits", domain: "peerbits.com", city: "Ahmedabad", size: "201-500", rev: "10M-25M", desc: "Mobile & web development, Flutter, React Native, IoT", li: "https://www.linkedin.com/company/peerbits", email: "hr@peerbits.com", hr: "https://www.linkedin.com/company/peerbits/people/", visa: false, remote: true, roles: ["React Native","Full Stack","MERN","PHP"] },
+  { name: "8 Miles Solution", domain: "8milesolution.com", city: "Ahmedabad", size: "11-50", rev: "1M-5M", desc: "Fresher-friendly web & mobile startup, MERN, React Native", li: "https://www.linkedin.com/company/8-miles-solution", email: "hr@8milesolution.com", hr: "https://www.linkedin.com/company/8-miles-solution/people/", visa: false, remote: true, roles: ["MERN","React Native","PHP","Full Stack"] },
+  { name: "Optmyzr", domain: "optmyzr.com", city: "Bangalore", size: "51-200", rev: "5M-10M", desc: "PPC automation SaaS platform, digital marketing tech", li: "https://www.linkedin.com/company/optmyzr", email: "careers@optmyzr.com", hr: "https://www.linkedin.com/company/optmyzr/people/", visa: false, remote: true, roles: ["Full Stack","MERN","Software Dev"] },
+  { name: "Leadsquared", domain: "leadsquared.com", city: "Bangalore", size: "1001-5000", rev: "25M-75M", desc: "Marketing automation & sales CRM SaaS platform", li: "https://www.linkedin.com/company/leadsquared", email: "careers@leadsquared.com", hr: "https://www.linkedin.com/company/leadsquared/people/", visa: false, remote: true, roles: ["Full Stack","MERN","PHP","Software Dev"] },
+  { name: "Synaptics India", domain: "synaptics.com", city: "Hyderabad", size: "201-500", rev: "25M-75M", desc: "Human interface solutions, touchpad, biometrics, display", li: "https://www.linkedin.com/company/synaptics", email: "hr.india@synaptics.com", hr: "https://www.linkedin.com/company/synaptics/people/", visa: false, remote: false, roles: ["Software Dev","Full Stack"] },
+  { name: "Sify Technologies", domain: "sifytechnologies.com", city: "Chennai", size: "1001-5000", rev: "75M-200M", desc: "Managed IT, cloud, network, data center services", li: "https://www.linkedin.com/company/sify-technologies", email: "careers@sifytechnologies.com", hr: "https://www.linkedin.com/company/sify-technologies/people/", visa: false, remote: false, roles: ["Software Dev","Full Stack","PHP"] },
+  { name: "Cygnet Infotech", domain: "cygnetinfotech.com", city: "Ahmedabad", size: "1001-5000", rev: "25M-75M", desc: "Tax tech, ecommerce, enterprise custom software services", li: "https://www.linkedin.com/company/cygnet-infotech", email: "hr@cygnetinfotech.com", hr: "https://www.linkedin.com/company/cygnet-infotech/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","Software Dev","React Native"] },
+  { name: "iQlance Solutions", domain: "iqlance.com", city: "Ahmedabad", size: "51-200", rev: "5M-10M", desc: "iOS, Android, React Native, PHP, custom app development", li: "https://www.linkedin.com/company/iqlance-solutions", email: "hr@iqlance.com", hr: "https://www.linkedin.com/company/iqlance-solutions/people/", visa: false, remote: true, roles: ["React Native","PHP","Full Stack","MERN"] },
+  { name: "Signity Software", domain: "signitysolutions.com", city: "Delhi", size: "51-200", rev: "5M-10M", desc: "Web, mobile, blockchain, NFT, software development", li: "https://www.linkedin.com/company/signity-software-solutions", email: "hr@signitysolutions.com", hr: "https://www.linkedin.com/company/signity-software-solutions/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native"] },
+  { name: "RapidValue Solutions", domain: "rapidvaluesolutions.com", city: "Kochi", size: "201-500", rev: "10M-25M", desc: "Mobile enterprise, IoT, digital transformation solutions", li: "https://www.linkedin.com/company/rapidvalue-solutions", email: "hr@rapidvaluesolutions.com", hr: "https://www.linkedin.com/company/rapidvalue-solutions/people/", visa: false, remote: true, roles: ["React Native","Full Stack","PHP","MERN","Software Dev"] },
+  { name: "BrainVault", domain: "brainvaulttech.com", city: "Chandigarh", size: "51-200", rev: "5M-10M", desc: "Web & mobile solutions, freshers hiring regularly, Punjab", li: "https://www.linkedin.com/company/brainvault-technologies", email: "hr@brainvaulttech.com", hr: "https://www.linkedin.com/company/brainvault-technologies/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native"] },
+  { name: "Techversatile", domain: "techversatile.com", city: "Ludhiana", size: "11-50", rev: "500K-1M", desc: "Local IT firm, web & app development, fresher-friendly", li: "https://www.linkedin.com/company/techversatile", email: "hr@techversatile.com", hr: "https://www.linkedin.com/company/techversatile/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native"] },
+  { name: "Bebo Technologies", domain: "bebo-technologies.com", city: "Mohali", size: "51-200", rev: "5M-10M", desc: "WordPress, PHP, React, mobile app development Punjab", li: "https://www.linkedin.com/company/bebo-technologies", email: "hr@bebo-technologies.com", hr: "https://www.linkedin.com/company/bebo-technologies/people/", visa: false, remote: true, roles: ["PHP","Full Stack","React Native","MERN"] },
+  { name: "Systango", domain: "systango.com", city: "Indore", size: "201-500", rev: "10M-25M", desc: "Fintech, proptech, edtech product engineering & consulting", li: "https://www.linkedin.com/company/systango", email: "careers@systango.com", hr: "https://www.linkedin.com/company/systango/people/", visa: false, remote: true, roles: ["Full Stack","MERN","React Native","PHP","Software Dev"] },
+  { name: "Geekyants", domain: "geekyants.com", city: "Bangalore", size: "201-500", rev: "10M-25M", desc: "React Native & JavaScript specialists, UI component library", li: "https://www.linkedin.com/company/geekyants", email: "hr@geekyants.com", hr: "https://www.linkedin.com/company/geekyants/people/", visa: false, remote: true, roles: ["React Native","Full Stack","MERN","Software Dev"] },
+  { name: "Panacea Infotech", domain: "panaceainfotech.com", city: "Ahmedabad", size: "51-200", rev: "5M-10M", desc: "PHP, Laravel, Codeigniter, React, Node.js development", li: "https://www.linkedin.com/company/panacea-infotech", email: "hr@panaceainfotech.com", hr: "https://www.linkedin.com/company/panacea-infotech/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native"] },
+  { name: "WDI", domain: "wdipl.com", city: "Jaipur", size: "201-500", rev: "5M-10M", desc: "Mobile app, web development, dedicated developer teams", li: "https://www.linkedin.com/company/web-development-india", email: "hr@wdipl.com", hr: "https://www.linkedin.com/company/web-development-india/people/", visa: false, remote: true, roles: ["PHP","Full Stack","React Native","MERN"] },
+  { name: "Sphinx Solution", domain: "sphinxsolution.com", city: "Noida", size: "201-500", rev: "10M-25M", desc: "AR/VR, blockchain, AI, mobile, web development company", li: "https://www.linkedin.com/company/sphinx-solution", email: "hr@sphinxsolution.com", hr: "https://www.linkedin.com/company/sphinx-solution/people/", visa: false, remote: true, roles: ["Full Stack","React Native","PHP","MERN","Software Dev"] },
+  { name: "Biztech Consulting", domain: "biztechcs.com", city: "Ahmedabad", size: "201-500", rev: "10M-25M", desc: "Digital commerce, ERP, mobile, CRM development services", li: "https://www.linkedin.com/company/biztech-consulting-and-solutions", email: "hr@biztechcs.com", hr: "https://www.linkedin.com/company/biztech-consulting-and-solutions/people/", visa: false, remote: true, roles: ["PHP","Full Stack","MERN","React Native","Software Dev"] },
+];
+
+let currentFilter = 'all';
+let currentSearch = '';
+
+function setFilter(f) {
+  currentFilter = f;
+  ['all','ae','in'].forEach(id => {
+    const btn = document.getElementById('btn-' + id);
+    btn.className = 'filter-btn';
+    if (id === 'ae' && f === 'ae') btn.className += ' active-dubai';
+    else if (id === 'in' && f === 'in') btn.className += ' active-india';
+    else if (id === 'all' && f === 'all') btn.className += ' active-all';
+  });
+  renderTable();
+}
+
+function filterTable() {
+  currentSearch = document.getElementById('searchInput').value.toLowerCase();
+  renderTable();
+}
+
+function renderTable() {
+  let dubaiFiltered = dubaiCompanies.filter(c => {
+    if (currentFilter === 'in') return false;
+    if (currentSearch) {
+      return c.name.toLowerCase().includes(currentSearch) ||
+        c.domain.toLowerCase().includes(currentSearch) ||
+        c.city.toLowerCase().includes(currentSearch) ||
+        c.desc.toLowerCase().includes(currentSearch) ||
+        c.roles.join(' ').toLowerCase().includes(currentSearch);
+    }
+    return true;
+  });
+  let indiaFiltered = indiaCompanies.filter(c => {
+    if (currentFilter === 'ae') return false;
+    if (currentSearch) {
+      return c.name.toLowerCase().includes(currentSearch) ||
+        c.domain.toLowerCase().includes(currentSearch) ||
+        c.city.toLowerCase().includes(currentSearch) ||
+        c.desc.toLowerCase().includes(currentSearch) ||
+        c.roles.join(' ').toLowerCase().includes(currentSearch);
+    }
+    return true;
+  });
+
+  const total = dubaiFiltered.length + indiaFiltered.length;
+  document.getElementById('count-display').textContent = total;
+
+  let html = '';
+
+  if (dubaiFiltered.length > 0 && currentFilter !== 'in') {
+    html += `<div class="section-header">🇦🇪 <span>Dubai / UAE Companies</span> — Visa Sponsorship · Remote Available <span class="count-badge">${dubaiFiltered.length} companies</span></div>`;
+    html += buildTable(dubaiFiltered, 'ae');
+  }
+  if (indiaFiltered.length > 0 && currentFilter !== 'ae') {
+    html += `<div class="section-header" style="margin-top:32px;">🇮🇳 <span>India Companies</span> — Fresher Friendly · Remote Available <span class="count-badge">${indiaFiltered.length} companies</span></div>`;
+    html += buildTable(indiaFiltered, 'in');
+  }
+  if (total === 0) {
+    html = '<div class="no-results">No companies match your search. Try a different keyword.</div>';
+  }
+  document.getElementById('tableContainer').innerHTML = html;
+}
+
+function buildTable(companies, country) {
+  let rows = companies.map((c, i) => {
+    const tag = country === 'ae'
+      ? '<span class="country-tag tag-ae">🇦🇪 UAE</span>'
+      : '<span class="country-tag tag-in">🇮🇳 India</span>';
+    const roleHtml = c.roles.map(r => `<span style="display:inline-block;background:#ffffff08;border:1px solid #333;border-radius:3px;padding:0 5px;font-size:9px;margin:1px 2px 1px 0;white-space:nowrap;">${r}</span>`).join('');
+    const visaHtml = (country === 'ae' && c.visa) ? '<span class="visa-tag">✈️ Visa</span>' : '';
+    const remoteHtml = c.remote ? '<span class="remote-tag">🏠 Remote</span>' : '';
+    const emailDisplay = c.email
+      ? `<a href="mailto:${c.email}">${c.email}</a>`
+      : '<span style="color:#333">N/A</span>';
+    return `<tr class="row">
+      <td><span class="num">${i + 1}</span></td>
+      <td class="company-name"><a href="https://${c.domain}" target="_blank">${c.name}</a></td>
+      <td>${tag}</td>
+      <td style="font-size:11px;color:#94a3b8;">${c.city}</td>
+      <td><span class="size-pill">${c.size}</span></td>
+      <td><span class="rev-pill">$${c.rev}</span></td>
+      <td class="desc-cell">${c.desc}</td>
+      <td><div style="display:flex;flex-wrap:wrap;gap:2px;">${roleHtml}</div></td>
+      <td class="tags-cell">${visaHtml}${remoteHtml}</td>
+      <td><a class="link-btn" href="${c.li}" target="_blank">💼 LinkedIn</a></td>
+      <td class="email-cell">${emailDisplay}</td>
+      <td class="hr-cell"><a href="${c.hr}" target="_blank" class="link-btn" style="color:var(--accent-dubai);">👤 HR Page</a></td>
+    </tr>`;
+  }).join('');
+
+  return `<table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Company</th>
+        <th>Country</th>
+        <th>City</th>
+        <th>Size</th>
+        <th>Revenue</th>
+        <th>About</th>
+        <th>Roles Hiring</th>
+        <th>Perks</th>
+        <th>LinkedIn</th>
+        <th>Email</th>
+        <th>HR People</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+renderTable();
+</script>
+</body>
+</html>

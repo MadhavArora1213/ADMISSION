@@ -39,12 +39,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ticket_id']) && isset
 $where = [];
 $params = [];
 
-if ($status_filter !== 'all') { $where[] = "status = ?"; $params[] = $status_filter; }
-if ($priority_filter !== 'all') { $where[] = "priority = ?"; $params[] = $priority_filter; }
-if ($type_filter !== 'all') { $where[] = "entity_type = ?"; $params[] = $type_filter; }
+if ($status_filter !== 'all') { $where[] = "m.status = ?"; $params[] = $status_filter; }
+if ($priority_filter !== 'all') { $where[] = "m.priority = ?"; $params[] = $priority_filter; }
+if ($type_filter !== 'all') { $where[] = "m.entity_type = ?"; $params[] = $type_filter; }
 
 if ($search !== '') { 
-    $where[] = "(entity_id LIKE ? OR flagged_reason LIKE ?)"; 
+    $where[] = "(m.entity_id LIKE ? OR m.flagged_reason LIKE ?)"; 
     $params[] = "%$search%"; 
     $params[] = "%$search%"; 
 }

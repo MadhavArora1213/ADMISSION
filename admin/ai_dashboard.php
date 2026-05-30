@@ -47,7 +47,7 @@ $config = $pdo->query("SELECT * FROM ai_config LIMIT 1")->fetch();
 $recs = $pdo->query("SELECT * FROM ai_recommendations LIMIT 1")->fetch();
 
 // Fetch Logs for display
-$predictor_logs = $pdo->query("SELECT p.*, e.name as exam_name, c.name as course_name FROM predictor_submissions p LEFT JOIN exams e ON p.predictor_exam_id = e.id LEFT JOIN courses c ON p.input_course_pref = c.id ORDER BY p.created_at DESC LIMIT 50")->fetchAll();
+$predictor_logs = $pdo->query("SELECT p.*, e.exam_name as exam_name, c.course_name as course_name FROM predictor_submissions p LEFT JOIN exams e ON p.predictor_exam_id = e.id LEFT JOIN courses c ON p.input_course_pref = c.id ORDER BY p.created_at DESC LIMIT 50")->fetchAll();
 $chat_logs = $pdo->query("SELECT * FROM ai_chat_sessions ORDER BY created_at DESC LIMIT 50")->fetchAll();
 
 ?>
@@ -239,7 +239,7 @@ $chat_logs = $pdo->query("SELECT * FROM ai_chat_sessions ORDER BY created_at DES
                                 <td style="font-size:0.8rem;"><?php echo date('d M Y, H:i', strtotime($log['created_at'])); ?></td>
                                 <td style="font-weight:600; color:var(--primary);"><?php echo htmlspecialchars($log['exam_name'] ?? 'Unknown'); ?></td>
                                 <td><?php echo $log['input_score'] ? $log['input_score'].' (Score)' : $log['input_rank'].' (Rank)'; ?></td>
-                                <td><?php echo htmlspecialchars($log['input_category']); ?> / <?php echo htmlspecialchars($log['input_state']); ?></td>
+                                <td><?php echo htmlspecialchars($log['input_category'] ?? ''); ?> / <?php echo htmlspecialchars($log['input_state'] ?? ''); ?></td>
                                 <td><?php echo htmlspecialchars($log['course_name'] ?? '-'); ?></td>
                                 <td>
                                     <?php 
@@ -248,7 +248,7 @@ $chat_logs = $pdo->query("SELECT * FROM ai_chat_sessions ORDER BY created_at DES
                                     ?>
                                     <span style="color:<?php echo $color; ?>; font-weight:700;"><?php echo round($conf); ?>%</span>
                                 </td>
-                                <td><button class="btn" style="padding:4px 8px; font-size:0.75rem;" onclick="alert('Raw Data: ' + <?php echo htmlspecialchars(json_encode($log['predicted_colleges'])); ?>)">View Match</button></td>
+                                <td><button class="btn" style="padding:4px 8px; font-size:0.75rem;" onclick="alert('Raw Data: ' + <?php echo htmlspecialchars(json_encode($log['predicted_colleges'] ?? '[]')); ?>)">View Match</button></td>
                             </tr>
                             <?php endforeach; ?>
                             <?php if(empty($predictor_logs)): ?>
