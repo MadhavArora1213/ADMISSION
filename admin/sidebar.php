@@ -49,6 +49,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="#"><i class="ph ph-chart-line-up"></i> Reports</a>
         <a href="community_dashboard.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['community_dashboard.php','questions_manager.php','answers_manager.php','experts.php','qa_moderation.php']) ? 'active' : ''; ?>"><i class="ph ph-users-three"></i> Community & Q&A</a>
         
+        <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Study Abroad</div>
+        <a href="foreign_universities.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['foreign_universities.php', 'foreign_university_form.php']) ? 'active' : ''; ?>"><i class="ph ph-globe-hemisphere-east"></i> Universities Abroad</a>
+        <a href="visa_guides.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['visa_guides.php', 'visa_guide_form.php']) ? 'active' : ''; ?>"><i class="ph ph-airplane-tilt"></i> Visa Guides</a>
+        <a href="consultants.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['consultants.php', 'consultant_form.php']) ? 'active' : ''; ?>"><i class="ph ph-users-four"></i> Consultants</a>
+
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">CMS</div>
         
         <a href="articles.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['articles.php','article_form.php','article_categories.php']) ? 'active' : ''; ?>"><i class="ph ph-newspaper"></i> Articles</a>
