@@ -92,6 +92,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="manage_widgets.php" class="<?php echo ($current_page == 'manage_widgets.php') ? 'active' : ''; ?>"><i class="ph ph-squares-four"></i> Widget Engine</a>
         <a href="manage_layouts.php" class="<?php echo ($current_page == 'manage_layouts.php') ? 'active' : ''; ?>"><i class="ph ph-layout"></i> Layouts</a>
         
+        <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Security & Moderation</div>
+        <a href="moderation_queue.php" class="<?php echo ($current_page == 'moderation_queue.php') ? 'active' : ''; ?>"><i class="ph ph-shield-check"></i> Moderation Queue</a>
+        <a href="spam_logs.php" class="<?php echo ($current_page == 'spam_logs.php') ? 'active' : ''; ?>"><i class="ph ph-warning-circle"></i> Spam & Bans</a>
+        
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">System</div>
         <a href="#" style="display:flex; justify-content:space-between; align-items:center;">
             <span style="display:flex; align-items:center; gap:12px;"><i class="ph ph-bell-ringing"></i> Alerts</span>
