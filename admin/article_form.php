@@ -257,7 +257,7 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="form-group"><label>Publish At</label><input type="datetime-local" name="publish_at" class="form-control" value="<?php echo $article['publish_at'] ? date('Y-m-d\TH:i', strtotime($article['publish_at'])) : ''; ?>"></div>
+                        <div class="form-group"><label>Publish At</label><input type="datetime-local" name="publish_at" class="form-control" value="<?php echo !empty($article['publish_at']) ? date('Y-m-d\TH:i', strtotime($article['publish_at'])) : ''; ?>"></div>
                         <div class="form-group"><label>Reading Time (mins)</label><input type="number" name="reading_time_mins" class="form-control" value="<?php echo v($article,'reading_time_mins'); ?>"></div>
                     </div>
                     <div class="form-group full">
@@ -358,13 +358,13 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="form-group"><label>Scheduled Publish At</label><input type="datetime-local" name="scheduled_at" class="form-control" value="<?php echo $article['scheduled_at'] ? date('Y-m-d\TH:i', strtotime($article['scheduled_at'])) : ''; ?>"></div>
-                        <div class="form-group"><label>Auto Unpublish At</label><input type="datetime-local" name="unpublish_at" class="form-control" value="<?php echo $article['unpublish_at'] ? date('Y-m-d\TH:i', strtotime($article['unpublish_at'])) : ''; ?>"></div>
+                        <div class="form-group"><label>Scheduled Publish At</label><input type="datetime-local" name="scheduled_at" class="form-control" value="<?php echo !empty($article['scheduled_at']) ? date('Y-m-d\TH:i', strtotime($article['scheduled_at'])) : ''; ?>"></div>
+                        <div class="form-group"><label>Auto Unpublish At</label><input type="datetime-local" name="unpublish_at" class="form-control" value="<?php echo !empty($article['unpublish_at']) ? date('Y-m-d\TH:i', strtotime($article['unpublish_at'])) : ''; ?>"></div>
                     </div>
                     <div style="background:#f1f5f9; border-radius:10px; padding:16px; margin-top:8px;">
                         <div style="display:flex; gap:24px; font-size:0.88rem;">
                             <div><span style="color:var(--text-muted);">Auto-save version:</span> <strong><?php echo v($article,'auto_save_version','1'); ?></strong></div>
-                            <div><span style="color:var(--text-muted);">Last draft saved:</span> <strong><?php echo $article['draft_saved_at'] ? date('d M Y H:i', strtotime($article['draft_saved_at'])) : 'Never'; ?></strong></div>
+                            <div><span style="color:var(--text-muted);">Last draft saved:</span> <strong><?php echo !empty($article['draft_saved_at']) ? date('d M Y H:i', strtotime($article['draft_saved_at'])) : 'Never'; ?></strong></div>
                         </div>
                     </div>
                 </div>
