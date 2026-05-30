@@ -78,6 +78,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Search & Discovery</div>
         <a href="search_analytics.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['search_analytics.php','search_config.php']) ? 'active' : ''; ?>"><i class="ph ph-magnifying-glass"></i> Search Analytics</a>
         <a href="compare_engine.php" class="<?php echo ($current_page == 'compare_engine.php') ? 'active' : ''; ?>"><i class="ph ph-scales"></i> Compare Engine</a>
+        <a href="predictor.php" class="<?php echo ($current_page == 'predictor.php') ? 'active' : ''; ?>"><i class="ph ph-magic-wand"></i> College Predictor</a>
         
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">SEO Management</div>
         <a href="seo_dashboard.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['seo_dashboard.php','redirects.php']) ? 'active' : ''; ?>"><i class="ph ph-globe"></i> SEO Dashboard</a>
@@ -96,11 +97,15 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="moderation_queue.php" class="<?php echo ($current_page == 'moderation_queue.php') ? 'active' : ''; ?>"><i class="ph ph-shield-check"></i> Moderation Queue</a>
         <a href="spam_logs.php" class="<?php echo ($current_page == 'spam_logs.php') ? 'active' : ''; ?>"><i class="ph ph-warning-circle"></i> Spam & Bans</a>
         
+        <a href="users.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['users.php']) ? 'active' : ''; ?>"><i class="ph ph-users"></i> User Management</a>
+        <a href="roles.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['roles.php']) ? 'active' : ''; ?>"><i class="ph ph-shield-star"></i> Roles & Permissions</a>
+        
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">System</div>
+        <a href="audit_logs.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['audit_logs.php']) ? 'active' : ''; ?>"><i class="ph ph-file-search"></i> Audit Logs</a>
         <a href="#" style="display:flex; justify-content:space-between; align-items:center;">
             <span style="display:flex; align-items:center; gap:12px;"><i class="ph ph-bell-ringing"></i> Alerts</span>
             <span style="background: #eab308; color: #422006; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: 700;">5</span>
         </a>
-        <a href="#"><i class="ph ph-gear"></i> Settings</a>
+        <a href="settings.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['settings.php']) ? 'active' : ''; ?>"><i class="ph ph-gear"></i> Settings</a>
     </nav>
 </aside>
