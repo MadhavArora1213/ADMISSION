@@ -45,8 +45,11 @@ $brokenLinks = $pdo->query("SELECT COUNT(*) FROM internal_links WHERE is_broken 
 
             <div class="sub-links">
                 <a href="seo_dashboard.php" class="sub-link active"><i class="ph ph-squares-four"></i> Overview</a>
-                <a href="redirects.php" class="sub-link"><i class="ph ph-arrows-left-right"></i> Redirects Manager</a>
-                <a href="#" class="sub-link"><i class="ph ph-link-break"></i> Internal Links</a>
+                <a href="seo_meta.php" class="sub-link"><i class="ph ph-tag"></i> Meta Tags & Schema</a>
+                <a href="redirects.php" class="sub-link"><i class="ph ph-arrows-left-right"></i> Redirects</a>
+                <a href="sitemaps.php" class="sub-link"><i class="ph ph-map-trifold"></i> Sitemaps</a>
+                <a href="internal_links.php" class="sub-link"><i class="ph ph-link-break"></i> Internal Links</a>
+                <a href="seo_templates.php" class="sub-link"><i class="ph ph-file-code"></i> SEO Templates</a>
             </div>
 
             <div class="stats-grid">

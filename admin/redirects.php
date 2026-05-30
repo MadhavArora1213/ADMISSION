@@ -9,6 +9,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         ->execute([$_POST['redirect_from'], $_POST['redirect_to'], $_POST['redirect_type'], $_POST['redirect_reason']]);
     header("Location: redirects.php?msg=added"); exit;
 }
+// Handle deleting redirect
+if (isset($_GET['delete_id'])) {
+    $pdo->prepare("DELETE FROM redirects WHERE id = ?")->execute([$_GET['delete_id']]);
+    header("Location: redirects.php?msg=deleted"); exit;
+}
+
+// Handle toggle
+if (isset($_GET['toggle_id'])) {
+    $pdo->prepare("UPDATE redirects SET is_active = NOT is_active WHERE id = ?")->execute([$_GET['toggle_id']]);
+    header("Location: redirects.php"); exit;
+}
 
 // Fetch all redirects
 $redirects = $pdo->query("SELECT * FROM redirects ORDER BY created_at DESC")->fetchAll();
@@ -44,8 +55,11 @@ $redirects = $pdo->query("SELECT * FROM redirects ORDER BY created_at DESC")->fe
 
             <div class="sub-links">
                 <a href="seo_dashboard.php" class="sub-link"><i class="ph ph-squares-four"></i> Overview</a>
-                <a href="redirects.php" class="sub-link active"><i class="ph ph-arrows-left-right"></i> Redirects Manager</a>
-                <a href="#" class="sub-link"><i class="ph ph-link-break"></i> Internal Links</a>
+                <a href="seo_meta.php" class="sub-link"><i class="ph ph-tag"></i> Meta Tags & Schema</a>
+                <a href="redirects.php" class="sub-link active"><i class="ph ph-arrows-left-right"></i> Redirects</a>
+                <a href="sitemaps.php" class="sub-link"><i class="ph ph-map-trifold"></i> Sitemaps</a>
+                <a href="internal_links.php" class="sub-link"><i class="ph ph-link-break"></i> Internal Links</a>
+                <a href="seo_templates.php" class="sub-link"><i class="ph ph-file-code"></i> SEO Templates</a>
             </div>
 
             <?php if(isset($_GET['msg'])): ?>
@@ -87,7 +101,7 @@ $redirects = $pdo->query("SELECT * FROM redirects ORDER BY created_at DESC")->fe
                     <h3>Active Redirects (<?php echo count($redirects); ?>)</h3>
                     <div style="overflow-x:auto;">
                         <table>
-                            <thead><tr><th>From</th><th>To</th><th>Type</th><th>Hits</th><th>Status</th></tr></thead>
+                            <thead><tr><th>From</th><th>To</th><th>Type</th><th>Hits</th><th>Status</th><th>Actions</th></tr></thead>
                             <tbody>
                                 <?php foreach($redirects as $r): ?>
                                 <tr>
@@ -96,8 +110,13 @@ $redirects = $pdo->query("SELECT * FROM redirects ORDER BY created_at DESC")->fe
                                     <td><span class="badge" style="background:#f1f5f9;color:#475569;"><?php echo $r['redirect_type']; ?></span></td>
                                     <td><?php echo number_format($r['hits']); ?></td>
                                     <td>
-                                        <?php if($r['is_active']): ?><i class="ph-fill ph-check-circle" style="color:#166534;"></i>
-                                        <?php else: ?><i class="ph-fill ph-minus-circle" style="color:#dc2626;"></i><?php endif; ?>
+                                        <a href="?toggle_id=<?php echo $r['id']; ?>" style="text-decoration:none;">
+                                        <?php if($r['is_active']): ?><i class="ph-fill ph-check-circle" style="color:#166534;font-size:1.2rem;"></i>
+                                        <?php else: ?><i class="ph-fill ph-minus-circle" style="color:#dc2626;font-size:1.2rem;"></i><?php endif; ?>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="?delete_id=<?php echo $r['id']; ?>" onclick="return confirm('Delete redirect?');" style="color:#dc2626;"><i class="ph ph-trash"></i></a>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
