@@ -12,7 +12,7 @@ $exam = $stmt->fetch();
 if (!$exam) { header('Location: exams.php'); exit; }
 
 $colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetchAll();
-$courses = $pdo->query("SELECT id, name FROM courses ORDER BY name ASC")->fetchAll();
+$courses = $pdo->query("SELECT id, course_name as name FROM courses ORDER BY course_name ASC")->fetchAll();
 
 // Handle Add
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'add') {

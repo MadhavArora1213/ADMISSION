@@ -12,7 +12,7 @@ $collegesStmt = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC");
 $colleges = $collegesStmt->fetchAll();
 $coursesStmt = $pdo->query("SELECT id, course_name FROM courses ORDER BY course_name ASC");
 $courses = $coursesStmt->fetchAll();
-$counsellorsStmt = $pdo->query("SELECT id, name FROM users ORDER BY name ASC");
+$counsellorsStmt = $pdo->query("SELECT id, full_name as name FROM users ORDER BY full_name ASC");
 $counsellors = $counsellorsStmt->fetchAll();
 
 // Handle Save

@@ -10,7 +10,7 @@ $error = '';
 
 // Dropdowns
 $categories = $pdo->query("SELECT id, category_name FROM article_categories ORDER BY category_name ASC")->fetchAll();
-$authors = $pdo->query("SELECT id, name FROM users ORDER BY name ASC")->fetchAll();
+$authors = $pdo->query("SELECT id, full_name as name FROM users ORDER BY full_name ASC")->fetchAll();
 $all_tags = $pdo->query("SELECT id, tag_name FROM tags ORDER BY tag_name ASC")->fetchAll();
 
 // Handle POST

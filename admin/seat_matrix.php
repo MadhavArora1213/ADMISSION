@@ -31,7 +31,7 @@ if (isset($_GET['delete'])) {
 }
 
 // Fetch Seat Matrix data
-$seats = $pdo->query("SELECT s.*, col.name as college_name, crs.name as course_name 
+$seats = $pdo->query("SELECT s.*, col.name as college_name, crs.course_name as course_name 
                       FROM seat_matrix s 
                       LEFT JOIN colleges col ON s.college_id = col.id 
                       LEFT JOIN courses crs ON s.course_id = crs.id 
@@ -41,7 +41,7 @@ $seats = $pdo->query("SELECT s.*, col.name as college_name, crs.name as course_n
 $colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetchAll();
 
 // Fetch Courses for dropdown
-$courses = $pdo->query("SELECT id, name FROM courses ORDER BY name ASC")->fetchAll();
+$courses = $pdo->query("SELECT id, course_name as name FROM courses ORDER BY course_name ASC")->fetchAll();
 
 ?>
 <!DOCTYPE html>

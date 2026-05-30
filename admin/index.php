@@ -9,9 +9,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = trim($_POST['password']);
     
     if (empty($username) || empty($password)) {
-        $error = 'Please enter both username and password.';
+        $error = 'Please enter both username/email and password.';
     } else {
-        $stmt = $pdo->prepare('SELECT id, username, password FROM admins WHERE username = :username');
+        // We now use the 'users' table which handles RBAC. Admin users must have a role_id or be super_admin.
+        $stmt = $pdo->prepare('SELECT id, full_name as username, password_hash as password FROM users WHERE (email = :username OR phone = :username) AND (role_id IS NOT NULL OR is_super_admin = TRUE) AND status = "active"');
         $stmt->execute(['username' => $username]);
         $user = $stmt->fetch();
         
@@ -21,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             header('Location: dashboard.php');
             exit;
         } else {
-            $error = 'Invalid username or password.';
+            $error = 'Invalid credentials or you do not have admin access.';
         }
     }
 }

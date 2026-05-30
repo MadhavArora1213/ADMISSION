@@ -21,7 +21,7 @@ if ($search !== '') {
 }
 
 $whereSQL = count($where) ? "WHERE " . implode(" AND ", $where) : "";
-$query = "SELECT l.*, c.name AS college_name, co.course_name, u.name AS assigned_name 
+$query = "SELECT l.*, c.name AS college_name, co.course_name, u.full_name AS assigned_name 
           FROM leads l 
           LEFT JOIN colleges c ON l.college_id = c.id 
           LEFT JOIN courses co ON l.course_id = co.id 
@@ -35,7 +35,7 @@ $stmt->execute($params);
 $leads = $stmt->fetchAll();
 
 // Counsellors dropdown
-$counselStmt = $pdo->query("SELECT id, name FROM users ORDER BY name ASC");
+$counselStmt = $pdo->query("SELECT id, full_name as name FROM users ORDER BY full_name ASC");
 $counsellors = $counselStmt->fetchAll();
 ?>
 <!DOCTYPE html>

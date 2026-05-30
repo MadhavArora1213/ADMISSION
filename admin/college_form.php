@@ -269,7 +269,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
 $states = $pdo->query("SELECT * FROM states ORDER BY name ASC")->fetchAll();
 $cities = $pdo->query("SELECT * FROM cities ORDER BY name ASC")->fetchAll();
 $universities = $pdo->query("SELECT * FROM universities ORDER BY name ASC")->fetchAll();
-$users = $pdo->query("SELECT id, name FROM users ORDER BY name ASC")->fetchAll();
+$users = $pdo->query("SELECT id, full_name as name FROM users ORDER BY full_name ASC")->fetchAll();
 $allColleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetchAll();
 
 $college = [];

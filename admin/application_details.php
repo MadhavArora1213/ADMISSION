@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_status'])) {
 
 // Fetch application data
 $stmt = $pdo->prepare("
-    SELECT a.*, u.name AS user_name, u.email AS user_email, u.phone AS user_phone, c.name AS college_name, cr.course_name 
+    SELECT a.*, u.full_name AS user_name, u.email AS user_email, u.phone AS user_phone, c.name AS college_name, cr.course_name 
     FROM applications a 
     LEFT JOIN users u ON a.user_id = u.id 
     LEFT JOIN colleges c ON a.college_id = c.id

@@ -12,14 +12,14 @@ $params = [];
 if ($status_filter !== 'all') { $where[] = "a.status = ?"; $params[] = $status_filter; }
 if ($payment_filter !== 'all') { $where[] = "a.payment_status = ?"; $params[] = $payment_filter; }
 if ($search !== '') { 
-    $where[] = "(a.application_number LIKE ? OR u.name LIKE ?)"; 
+    $where[] = "(a.application_number LIKE ? OR u.full_name LIKE ?)"; 
     $params[] = "%$search%"; 
     $params[] = "%$search%"; 
 }
 $whereSQL = count($where) ? "WHERE " . implode(" AND ", $where) : "";
 
 $stmt = $pdo->prepare("
-    SELECT a.*, u.name AS user_name, u.email AS user_email, c.name AS college_name, cr.course_name 
+    SELECT a.*, u.full_name AS user_name, u.email AS user_email, c.name AS college_name, cr.course_name 
     FROM applications a 
     LEFT JOIN users u ON a.user_id = u.id 
     LEFT JOIN colleges c ON a.college_id = c.id
