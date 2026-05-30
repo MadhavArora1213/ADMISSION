@@ -40,6 +40,18 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="users.php"><i class="ph ph-users"></i> Users</a>
         <a href="#"><i class="ph ph-chart-line-up"></i> Reports</a>
         
+        <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">CMS</div>
+        
+        <a href="articles.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['articles.php','article_form.php','article_categories.php']) ? 'active' : ''; ?>"><i class="ph ph-newspaper"></i> Articles</a>
+        <a href="media_library.php" class="<?php echo ($current_page == 'media_library.php') ? 'active' : ''; ?>"><i class="ph ph-images"></i> Media Library</a>
+        <a href="tags.php" class="<?php echo ($current_page == 'tags.php') ? 'active' : ''; ?>"><i class="ph ph-tag"></i> Tags</a>
+        
+        <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Search & Discovery</div>
+        <a href="search_analytics.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['search_analytics.php','search_config.php']) ? 'active' : ''; ?>"><i class="ph ph-magnifying-glass"></i> Search Analytics</a>
+        
+        <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">SEO Management</div>
+        <a href="seo_dashboard.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['seo_dashboard.php','redirects.php']) ? 'active' : ''; ?>"><i class="ph ph-globe"></i> SEO Dashboard</a>
+        
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Dashboard Engine</div>
         <a href="manage_widgets.php" class="<?php echo ($current_page == 'manage_widgets.php') ? 'active' : ''; ?>"><i class="ph ph-squares-four"></i> Widget Engine</a>
         <a href="manage_layouts.php" class="<?php echo ($current_page == 'manage_layouts.php') ? 'active' : ''; ?>"><i class="ph ph-layout"></i> Layouts</a>
