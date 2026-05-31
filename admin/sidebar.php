@@ -108,7 +108,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">System</div>
         <a href="audit_logs.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['audit_logs.php']) ? 'active' : ''; ?>"><i class="ph ph-file-search"></i> Audit Logs</a>
-        <a href="#" style="display:flex; justify-content:space-between; align-items:center;">
+        <a href="alerts.php" style="display:flex; justify-content:space-between; align-items:center;" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['alerts.php']) ? 'active' : ''; ?>">
             <span style="display:flex; align-items:center; gap:12px;"><i class="ph ph-bell-ringing"></i> Alerts</span>
             <span style="background: #eab308; color: #422006; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: 700;">5</span>
         </a>

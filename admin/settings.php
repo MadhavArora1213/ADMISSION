@@ -19,6 +19,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         'ai_provider', 'mfa_enabled', 'session_timeout_mins', 'max_login_attempts', 'api_rate_limit_per_min', 'backup_schedule', 'backup_retention_days'
     ];
     
+    // Handle file uploads
+    $upload_dir = '../uploads/';
+    if (!file_exists($upload_dir)) {
+        mkdir($upload_dir, 0777, true);
+    }
+    
+    $_POST['logo_url'] = $_POST['existing_logo_url'] ?? '';
+    if (isset($_FILES['logo_file']) && $_FILES['logo_file']['error'] == 0) {
+        $ext = pathinfo($_FILES['logo_file']['name'], PATHINFO_EXTENSION);
+        $filename = 'site_logo_' . time() . '_' . uniqid() . '.' . $ext;
+        if (move_uploaded_file($_FILES['logo_file']['tmp_name'], $upload_dir . $filename)) {
+            $_POST['logo_url'] = '/ADMISSION/uploads/' . $filename;
+        }
+    }
+    
+    $_POST['favicon_url'] = $_POST['existing_favicon_url'] ?? '';
+    if (isset($_FILES['favicon_file']) && $_FILES['favicon_file']['error'] == 0) {
+        $ext = pathinfo($_FILES['favicon_file']['name'], PATHINFO_EXTENSION);
+        $filename = 'site_favicon_' . time() . '_' . uniqid() . '.' . $ext;
+        if (move_uploaded_file($_FILES['favicon_file']['tmp_name'], $upload_dir . $filename)) {
+            $_POST['favicon_url'] = '/ADMISSION/uploads/' . $filename;
+        }
+    }
+
     foreach ($allowed_cols as $col) {
         if (isset($_POST[$col])) {
             $fields[] = "$col = ?";
@@ -177,7 +201,7 @@ $api_keys = $pdo->query("SELECT a.*, u.full_name as creator_name FROM api_keys a
             </div>
 
             <?php if($tab !== 'api_keys'): ?>
-            <form method="POST" class="panel">
+            <form method="POST" class="panel" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="update_settings">
                 
                 <?php if($tab === 'general'): ?>
@@ -194,11 +218,19 @@ $api_keys = $pdo->query("SELECT a.*, u.full_name as creator_name FROM api_keys a
                         </div>
                         <div class="form-group">
                             <label>Logo URL</label>
-                            <input type="text" name="logo_url" value="<?php echo htmlspecialchars($config['logo_url'] ?? ''); ?>">
+                            <?php if(!empty($config['logo_url'])): ?>
+                                <div style="margin-bottom: 8px;"><img src="<?php echo htmlspecialchars($config['logo_url']); ?>" style="height: 40px; border-radius: 4px; border: 1px solid #ccc;"></div>
+                            <?php endif; ?>
+                            <input type="hidden" name="existing_logo_url" value="<?php echo htmlspecialchars($config['logo_url'] ?? ''); ?>">
+                            <input type="file" name="logo_file" accept="image/*">
                         </div>
                         <div class="form-group">
                             <label>Favicon URL</label>
-                            <input type="text" name="favicon_url" value="<?php echo htmlspecialchars($config['favicon_url'] ?? ''); ?>">
+                            <?php if(!empty($config['favicon_url'])): ?>
+                                <div style="margin-bottom: 8px;"><img src="<?php echo htmlspecialchars($config['favicon_url']); ?>" style="height: 32px; border-radius: 4px; border: 1px solid #ccc;"></div>
+                            <?php endif; ?>
+                            <input type="hidden" name="existing_favicon_url" value="<?php echo htmlspecialchars($config['favicon_url'] ?? ''); ?>">
+                            <input type="file" name="favicon_file" accept="image/*">
                         </div>
                         <div class="form-group full">
                             <label style="display:flex; align-items:center; gap:8px;">

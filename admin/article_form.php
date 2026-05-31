@@ -36,7 +36,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     'article_type'        => $_POST['article_type'] ?: 'blog',
                     'excerpt'             => $_POST['excerpt'] ?: null,
                     'content_body'        => $_POST['content_body'] ?: null,
-                    'featured_image_url'  => $_POST['featured_image_url'] ?: null,
+                    // Handle featured image upload
+                    'featured_image_url'  => (function() {
+                        $upload_dir = '../uploads/';
+                        if (!file_exists($upload_dir)) mkdir($upload_dir, 0777, true);
+                        $url = $_POST['existing_featured_image_url'] ?? null;
+                        if (isset($_FILES['featured_image_file']) && $_FILES['featured_image_file']['error'] == 0) {
+                            $ext = pathinfo($_FILES['featured_image_file']['name'], PATHINFO_EXTENSION);
+                            $filename = 'article_featured_' . time() . '_' . uniqid() . '.' . $ext;
+                            if (move_uploaded_file($_FILES['featured_image_file']['tmp_name'], $upload_dir . $filename)) {
+                                $url = '/ADMISSION/uploads/' . $filename;
+                            }
+                        }
+                        return $url ?: null;
+                    })(),
                     'featured_image_alt'  => $_POST['featured_image_alt'] ?: null,
                     'author_id'           => $_POST['author_id'] ?: null,
                     'editor_id'           => $_POST['editor_id'] ?: null,
@@ -81,7 +94,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 'meta_description'  => $_POST['meta_description'] ?: null,
                 'og_title'          => $_POST['og_title'] ?: null,
                 'og_description'    => $_POST['og_description'] ?: null,
-                'og_image'          => $_POST['og_image'] ?: null,
+                // Handle OG image upload
+                'og_image'          => (function() {
+                    $upload_dir = '../uploads/';
+                    $url = $_POST['existing_og_image'] ?? null;
+                    if (isset($_FILES['og_image_file']) && $_FILES['og_image_file']['error'] == 0) {
+                        $ext = pathinfo($_FILES['og_image_file']['name'], PATHINFO_EXTENSION);
+                        $filename = 'article_og_' . time() . '_' . uniqid() . '.' . $ext;
+                        if (move_uploaded_file($_FILES['og_image_file']['tmp_name'], $upload_dir . $filename)) {
+                            $url = '/ADMISSION/uploads/' . $filename;
+                        }
+                    }
+                    return $url ?: null;
+                })(),
                 'canonical_url'     => $_POST['canonical_url'] ?: null,
                 'schema_type'       => $_POST['schema_type'] ?: null,
                 'primary_keyword'   => $_POST['primary_keyword'] ?: null,
@@ -212,7 +237,7 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
             <?php if(isset($_GET['msg']) && $_GET['msg']=='saved'): ?><div class="msg-alert"><i class="ph ph-check-circle"></i> Saved successfully!</div><?php endif; ?>
 
             <?php if ($current_tab == 'content'): ?>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="_tab" value="content">
                 <div class="form-section">
                     <h3><i class="ph ph-text-aa"></i> Article Details</h3>
@@ -278,7 +303,11 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                 <div class="form-section">
                     <h3><i class="ph ph-image"></i> Featured Image</h3>
                     <div class="form-grid">
-                        <div class="form-group"><label>Image URL</label><input type="url" name="featured_image_url" class="form-control" value="<?php echo v($article,'featured_image_url'); ?>" placeholder="https://..."></div>
+                        <div class="form-group"><label>Image URL</label><?php if(!empty($article['featured_image_url'])): ?>
+                            <div style="margin-bottom: 8px;"><img src="<?php echo htmlspecialchars($article['featured_image_url']); ?>" style="height: 50px; border-radius: 4px; border: 1px solid #ccc;"></div>
+                        <?php endif; ?>
+                        <input type="hidden" name="existing_featured_image_url" value="<?php echo v($article,'featured_image_url'); ?>">
+                        <input type="file" name="featured_image_file" class="form-control" accept="image/*"></div>
                         <div class="form-group"><label>Alt Text</label><input type="text" name="featured_image_alt" class="form-control" value="<?php echo v($article,'featured_image_alt'); ?>"></div>
                     </div>
                     <?php if(!empty($article['featured_image_url'])): ?>
@@ -308,7 +337,7 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
             </form>
 
             <?php elseif($current_tab == 'seo'): ?>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="_tab" value="seo">
                 <div class="form-section">
                     <h3><i class="ph ph-magnifying-glass"></i> Search Engine Optimization</h3>
@@ -335,7 +364,11 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                             </select>
                         </div>
                         <div class="form-group"><label>Canonical URL</label><input type="url" name="canonical_url" class="form-control" value="<?php echo v($seo,'canonical_url'); ?>"></div>
-                        <div class="form-group"><label>OG Image URL</label><input type="url" name="og_image" class="form-control" value="<?php echo v($seo,'og_image'); ?>"></div>
+                        <div class="form-group"><label>OG Image URL</label><?php if(!empty($seo['og_image'])): ?>
+                            <div style="margin-bottom: 8px;"><img src="<?php echo htmlspecialchars($seo['og_image']); ?>" style="height: 50px; border-radius: 4px; border: 1px solid #ccc;"></div>
+                        <?php endif; ?>
+                        <input type="hidden" name="existing_og_image" value="<?php echo v($seo,'og_image'); ?>">
+                        <input type="file" name="og_image_file" class="form-control" accept="image/*"></div>
                     </div>
                     <div class="form-group"><label>OG Title</label><input type="text" name="og_title" class="form-control" value="<?php echo v($seo,'og_title'); ?>"></div>
                     <div class="form-group"><label>OG Description</label><textarea name="og_description" class="form-control" rows="2"><?php echo v($seo,'og_description'); ?></textarea></div>
@@ -346,7 +379,7 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
             </form>
 
             <?php elseif($current_tab == 'schedule'): ?>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="_tab" value="schedule">
                 <div class="form-section">
                     <h3><i class="ph ph-calendar-clock"></i> Publishing Schedule</h3>

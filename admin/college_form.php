@@ -79,6 +79,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
                 $stmt->execute($collegeData);
             }
 
+            // Handle file uploads
+            $upload_dir = '../uploads/';
+            if (!file_exists($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+
+            $_POST['logo_url'] = $_POST['existing_logo_url'] ?? '';
+            if (isset($_FILES['logo_file']) && $_FILES['logo_file']['error'] == 0) {
+                $ext = pathinfo($_FILES['logo_file']['name'], PATHINFO_EXTENSION);
+                $filename = 'college_logo_' . time() . '_' . uniqid() . '.' . $ext;
+                if (move_uploaded_file($_FILES['logo_file']['tmp_name'], $upload_dir . $filename)) {
+                    $_POST['logo_url'] = '/ADMISSION/uploads/' . $filename;
+                }
+            }
+
+            $_POST['cover_image_url'] = $_POST['existing_cover_image_url'] ?? '';
+            if (isset($_FILES['cover_file']) && $_FILES['cover_file']['error'] == 0) {
+                $ext = pathinfo($_FILES['cover_file']['name'], PATHINFO_EXTENSION);
+                $filename = 'college_cover_' . time() . '_' . uniqid() . '.' . $ext;
+                if (move_uploaded_file($_FILES['cover_file']['tmp_name'], $upload_dir . $filename)) {
+                    $_POST['cover_image_url'] = '/ADMISSION/uploads/' . $filename;
+                }
+            }
+
             // 2. College Media (Logo & Cover)
             $mediaCheck = $pdo->prepare("SELECT id FROM college_media WHERE college_id = ? AND image_type IS NULL");
             $mediaCheck->execute([$id]);
@@ -233,6 +257,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
         
         $pdo->prepare("UPDATE colleges SET publish_status = ? WHERE id = ?")->execute([$_POST['publish_status'], $id]);
         
+        // Handle SEO image upload
+        $upload_dir = '../uploads/';
+        $_POST['og_image_url'] = $_POST['existing_og_image_url'] ?? '';
+        if (isset($_FILES['og_image_file']) && $_FILES['og_image_file']['error'] == 0) {
+            $ext = pathinfo($_FILES['og_image_file']['name'], PATHINFO_EXTENSION);
+            $filename = 'college_og_' . time() . '_' . uniqid() . '.' . $ext;
+            if (move_uploaded_file($_FILES['og_image_file']['tmp_name'], $upload_dir . $filename)) {
+                $_POST['og_image_url'] = '/ADMISSION/uploads/' . $filename;
+            }
+        }
+        
         $seoData = [
             'meta_title' => $_POST['meta_title'],
             'meta_description' => $_POST['meta_description'],
@@ -267,7 +302,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
 
 // Fetch Reference Data
 $states = $pdo->query("SELECT * FROM states ORDER BY name ASC")->fetchAll();
-$cities = $pdo->query("SELECT * FROM cities ORDER BY name ASC")->fetchAll();
+
 $universities = $pdo->query("SELECT * FROM universities ORDER BY name ASC")->fetchAll();
 $users = $pdo->query("SELECT id, full_name as name FROM users ORDER BY full_name ASC")->fetchAll();
 $allColleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetchAll();
@@ -303,6 +338,17 @@ if ($is_edit) {
         header('Location: colleges.php');
         exit;
     }
+}
+
+$cities = [];
+$currentStateId = getValue($college, 'state_id');
+if (!$currentStateId && !empty($_POST['state_id'])) {
+    $currentStateId = $_POST['state_id'];
+}
+if ($currentStateId) {
+    $stmt = $pdo->prepare("SELECT * FROM cities WHERE state_id = ? ORDER BY name ASC");
+    $stmt->execute([$currentStateId]);
+    $cities = $stmt->fetchAll();
 }
 
 function getValue($arr, $key, $default = '') {
@@ -412,7 +458,7 @@ function getValue($arr, $key, $default = '') {
                 <?php endif; ?>
 
                 <?php if($current_tab == 'identity'): ?>
-                <form action="" method="POST">
+                <form action="" method="POST" enctype="multipart/form-data">
                     <div class="form-section">
                         <h3><i class="ph ph-identification-card"></i> College Identity</h3>
                         <div class="form-grid">
@@ -472,11 +518,19 @@ function getValue($arr, $key, $default = '') {
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Logo URL</label>
-                                <input type="url" name="logo_url" class="form-control" placeholder="https://..." value="<?php echo getValue($college, 'logo_url'); ?>">
+                                <?php if(getValue($college, 'logo_url')): ?>
+                                    <div style="margin-bottom: 8px;"><img src="<?php echo getValue($college, 'logo_url'); ?>" style="height: 50px; border-radius: 4px; border: 1px solid #ccc;"></div>
+                                <?php endif; ?>
+                                <input type="hidden" name="existing_logo_url" value="<?php echo getValue($college, 'logo_url'); ?>">
+                                <input type="file" name="logo_file" class="form-control" accept="image/*">
                             </div>
                             <div class="form-group">
                                 <label>Cover Image URL</label>
-                                <input type="url" name="cover_image_url" class="form-control" placeholder="https://..." value="<?php echo getValue($college, 'cover_image_url'); ?>">
+                                <?php if(getValue($college, 'cover_image_url')): ?>
+                                    <div style="margin-bottom: 8px;"><img src="<?php echo getValue($college, 'cover_image_url'); ?>" style="height: 50px; border-radius: 4px; border: 1px solid #ccc;"></div>
+                                <?php endif; ?>
+                                <input type="hidden" name="existing_cover_image_url" value="<?php echo getValue($college, 'cover_image_url'); ?>">
+                                <input type="file" name="cover_file" class="form-control" accept="image/*">
                             </div>
                             
                             <div class="form-group">
@@ -537,7 +591,7 @@ function getValue($arr, $key, $default = '') {
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>State</label>
-                                <select name="state_id" class="form-control">
+                                <select name="state_id" id="state_id" class="form-control">
                                     <option value="">Select State</option>
                                     <?php foreach($states as $s): ?>
                                         <option value="<?php echo $s['id']; ?>" <?php echo getValue($college, 'state_id') == $s['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($s['name']); ?></option>
@@ -546,7 +600,7 @@ function getValue($arr, $key, $default = '') {
                             </div>
                             <div class="form-group">
                                 <label>City</label>
-                                <select name="city_id" class="form-control">
+                                <select name="city_id" id="city_id" class="form-control">
                                     <option value="">Select City</option>
                                     <?php foreach($cities as $c): ?>
                                         <option value="<?php echo $c['id']; ?>" <?php echo getValue($college, 'city_id') == $c['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($c['name']); ?></option>
@@ -649,7 +703,7 @@ function getValue($arr, $key, $default = '') {
                 </form>
 
                 <?php elseif($current_tab == 'about'): ?>
-                <form action="" method="POST">
+                <form action="" method="POST" enctype="multipart/form-data">
                     <div class="form-section">
                         <h3><i class="ph ph-info"></i> Basic Info & About</h3>
                         <div class="form-grid">
@@ -794,7 +848,7 @@ function getValue($arr, $key, $default = '') {
 
                 <?php elseif($current_tab == 'seo'): ?>
                 <!-- SEO & PUBLISH TAB -->
-                <form action="" method="POST">
+                <form action="" method="POST" enctype="multipart/form-data">
                     <div class="form-section">
                         <h3><i class="ph ph-globe"></i> SEO & Meta Data</h3>
                         <div class="form-grid">
@@ -820,7 +874,11 @@ function getValue($arr, $key, $default = '') {
                             </div>
                             <div class="form-group full">
                                 <label>OG Image URL</label>
-                                <input type="url" name="og_image_url" class="form-control" value="<?php echo getValue($college, 'og_image_url'); ?>">
+                                <?php if(getValue($college, 'og_image_url')): ?>
+                                    <div style="margin-bottom: 8px;"><img src="<?php echo getValue($college, 'og_image_url'); ?>" style="height: 50px; border-radius: 4px; border: 1px solid #ccc;"></div>
+                                <?php endif; ?>
+                                <input type="hidden" name="existing_og_image_url" value="<?php echo getValue($college, 'og_image_url'); ?>">
+                                <input type="file" name="og_image_file" class="form-control" accept="image/*">
                             </div>
                             <div class="form-group full">
                                 <label>Schema Markup (JSON)</label>
@@ -844,5 +902,33 @@ function getValue($arr, $key, $default = '') {
         </main>
     </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const stateSelect = document.getElementById('state_id');
+        const citySelect = document.getElementById('city_id');
+        
+        if (stateSelect && citySelect) {
+            stateSelect.addEventListener('change', function() {
+                const stateId = this.value;
+                citySelect.innerHTML = '<option value="">Select City</option>';
+                if (stateId) {
+                    fetch('api/get_cities.php?state_id=' + stateId)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.length > 0) {
+                                data.forEach(city => {
+                                    const option = document.createElement('option');
+                                    option.value = city.id;
+                                    option.textContent = city.name;
+                                    citySelect.appendChild(option);
+                                });
+                            }
+                        })
+                        .catch(error => console.error('Error fetching cities:', error));
+                }
+            });
+        }
+    });
+    </script>
 </body>
 </html>
