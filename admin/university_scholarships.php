@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 if (!isset($_SESSION['admin_id'])) {
     header('Location: index.php');
@@ -78,7 +78,8 @@ $scholarships = $stmt->fetchAll();
         .tab-link.active { background: var(--primary); color: white; }
         
         .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
         .form-group { margin-bottom: 16px; }
         .form-group.full { grid-column: 1 / -1; }
         .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; }
@@ -162,7 +163,7 @@ $scholarships = $stmt->fetchAll();
                                     <tr>
                                         <td style="font-weight:600;"><?php echo htmlspecialchars($s['scholarship_name']); ?></td>
                                         <td style="text-transform:capitalize;"><?php echo htmlspecialchars(str_replace('_', ' ', $s['scholarship_type'])); ?></td>
-                                        <td><?php echo $s['amount'] ? 'â‚¹'.number_format($s['amount'], 2) : 'Variable'; ?></td>
+                                        <td><?php echo $s['amount'] ? '₹'.number_format($s['amount'], 2) : 'Variable'; ?></td>
                                         <td><?php echo $s['renewable'] ? 'Yes' : 'No'; ?></td>
                                         <td>
                                             <form action="" method="POST" style="display:inline;" onsubmit="return confirm('Delete?');">

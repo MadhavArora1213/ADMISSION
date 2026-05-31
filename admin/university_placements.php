@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 if (!isset($_SESSION['admin_id'])) {
     header('Location: index.php');
@@ -23,6 +23,47 @@ function generateUUID() {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'add') {
         try {
+            $top_recruiters_json = null;
+            if (!empty(trim($_POST['top_recruiters']))) {
+                $recruiters = array_map('trim', explode(',', $_POST['top_recruiters']));
+                $recruiters = array_filter($recruiters, 'strlen');
+                if (!empty($recruiters)) {
+                    $formatted = array_map(function($r) { return ["name" => $r]; }, array_values($recruiters));
+                    $top_recruiters_json = json_encode($formatted);
+                }
+            }
+            
+            $sector_wise_json = null;
+            if (!empty(trim($_POST['sector_wise_json']))) {
+                $sectors = array_map('trim', explode(',', $_POST['sector_wise_json']));
+                $sectors = array_filter($sectors, 'strlen');
+                if (!empty($sectors)) {
+                    $formatted = [];
+                    foreach($sectors as $s) {
+                        $parts = explode(':', $s);
+                        $name = trim($parts[0] ?? '');
+                        $pct = trim($parts[1] ?? '0');
+                        if ($name) {
+                            $formatted[] = ["sector" => $name, "pct" => (int)$pct];
+                        }
+                    }
+                    $sector_wise_json = json_encode($formatted);
+                }
+            }
+
+            $placement_report_pdf = null;
+            if (isset($_FILES['placement_report_pdf']) && $_FILES['placement_report_pdf']['error'] == 0) {
+                $uploadDir = '../uploads/placements/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                $fileName = time() . '_' . preg_replace("/[^a-zA-Z0-9\.]/", "_", basename($_FILES['placement_report_pdf']['name']));
+                $targetFile = $uploadDir . $fileName;
+                if (move_uploaded_file($_FILES['placement_report_pdf']['tmp_name'], $targetFile)) {
+                    $placement_report_pdf = 'uploads/placements/' . $fileName;
+                }
+            }
+
             $stmt = $pdo->prepare("
                 INSERT INTO university_placements (id, university_id, placement_year, avg_package_lpa, highest_package_lpa, median_package_lpa, placement_percentage, students_placed, international_placements, top_recruiters, sector_wise_json, placement_report_pdf) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -37,9 +78,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_POST['placement_percentage'] ?: null,
                 $_POST['students_placed'] ?: null,
                 $_POST['international_placements'] ?: 0,
-                $_POST['top_recruiters'] ?: null,
-                $_POST['sector_wise_json'] ?: null,
-                $_POST['placement_report_pdf'] ?: null
+                $top_recruiters_json,
+                $sector_wise_json,
+                $placement_report_pdf
             ]);
             header("Location: university_placements.php?university_id=$university_id&msg=added");
             exit;
@@ -69,13 +110,13 @@ $placements = $stmt->fetchAll();
     <style>
         body { background-color: var(--bg-light); }
         .admin-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; }
+        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease; }
         .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-header .logo { font-size: 1.3rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
         .sidebar-nav { padding: 24px 0; flex: 1; }
         .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; text-decoration: none;}
         .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
-        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; }
+        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; min-width: 0; }
         .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
         .user-profile { display: flex; align-items: center; gap: 12px; font-weight: 500; }
         .content-area { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
@@ -86,21 +127,40 @@ $placements = $stmt->fetchAll();
         .tab-link:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
         .tab-link.active { background: var(--primary); color: white; }
         .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .form-group { margin-bottom: 16px; }
         .form-group.full { grid-column: 1 / -1; }
         .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; }
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
+        
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-dark); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+
+        @media (max-width: 768px) { 
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-left: 0; }
+            .topbar { justify-content: space-between; padding: 0 16px; }
+            .mobile-menu-btn { display: block; }
+            .content-area { padding: 16px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .page-header h2 { font-size: 1.5rem; }
+            .panel { padding: 16px; }
+        }
     </style>
 </head>
 <body>
-
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <div class="admin-layout">
         <?php include 'sidebar.php'; ?>
         <main class="main-content">
             <header class="topbar">
+                <button class="mobile-menu-btn" id="mobile-menu-btn">
+                    <i class="ph ph-list"></i>
+                </button>
                 <div class="user-profile">
                     <span>Admin</span>
                 </div>
@@ -133,7 +193,7 @@ $placements = $stmt->fetchAll();
 
                 <div class="panel">
                     <h3><i class="ph ph-plus-circle"></i> Add Placement Record</h3>
-                    <form action="" method="POST" style="margin-top:16px;">
+                    <form action="" method="POST" enctype="multipart/form-data" style="margin-top:16px;">
                         <input type="hidden" name="action" value="add">
                         <div class="form-grid">
                             <div class="form-group"><label>Placement Year *</label><input type="number" name="placement_year" class="form-control" required></div>
@@ -143,9 +203,9 @@ $placements = $stmt->fetchAll();
                             <div class="form-group"><label>Placement Percentage (%)</label><input type="number" step="0.01" name="placement_percentage" class="form-control"></div>
                             <div class="form-group"><label>Students Placed</label><input type="number" name="students_placed" class="form-control"></div>
                             <div class="form-group"><label>International Placements</label><input type="number" name="international_placements" class="form-control" value="0"></div>
-                            <div class="form-group"><label>Placement Report PDF (URL)</label><input type="url" name="placement_report_pdf" class="form-control"></div>
-                            <div class="form-group full"><label>Top Recruiters (JSON List)</label><input type="text" name="top_recruiters" class="form-control" placeholder='[{"name": "Amazon", "logo_url": "...", "count": 10}]'></div>
-                            <div class="form-group full"><label>Sector Wise Distribution (JSON List)</label><input type="text" name="sector_wise_json" class="form-control" placeholder='[{"sector": "IT", "pct": 45}, {"sector": "Finance", "pct": 20}]'></div>
+                            <div class="form-group"><label>Placement Report PDF</label><input type="file" accept="application/pdf" name="placement_report_pdf" class="form-control"></div>
+                            <div class="form-group full"><label>Top Recruiters (Comma-separated)</label><input type="text" name="top_recruiters" class="form-control" placeholder='e.g. Amazon, Google, Microsoft'></div>
+                            <div class="form-group full"><label>Sector Wise Distribution (Comma-separated, Sector:Percentage)</label><input type="text" name="sector_wise_json" class="form-control" placeholder='e.g. IT:45, Finance:20, Consulting:15'></div>
                         </div>
                         <div style="text-align: right; margin-top:16px;"><button type="submit" class="btn btn-primary">Add Placement</button></div>
                     </form>
@@ -163,8 +223,8 @@ $placements = $stmt->fetchAll();
                                     <?php foreach($placements as $p): ?>
                                     <tr>
                                         <td style="font-weight:600;"><?php echo htmlspecialchars($p['placement_year']); ?></td>
-                                        <td><?php echo $p['avg_package_lpa'] ? 'â‚¹'.$p['avg_package_lpa'].' L' : '-'; ?></td>
-                                        <td><?php echo $p['highest_package_lpa'] ? 'â‚¹'.$p['highest_package_lpa'].' L' : '-'; ?></td>
+                                        <td><?php echo $p['avg_package_lpa'] ? '₹'.$p['avg_package_lpa'].' L' : '-'; ?></td>
+                                        <td><?php echo $p['highest_package_lpa'] ? '₹'.$p['highest_package_lpa'].' L' : '-'; ?></td>
                                         <td><?php echo $p['placement_percentage'] ? $p['placement_percentage'].'%' : '-'; ?></td>
                                         <td><?php echo $p['students_placed'] ?: '-'; ?></td>
                                         <td>
@@ -184,6 +244,16 @@ $placements = $stmt->fetchAll();
             </div>
         </main>
     </div>
+    
+    <script>
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.add('open');
+            document.getElementById('sidebar-overlay').classList.add('show');
+        });
+        document.getElementById('sidebar-overlay').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.remove('open');
+            this.classList.remove('show');
+        });
+    </script>
 </body>
 </html>
-
