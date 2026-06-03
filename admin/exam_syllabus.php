@@ -14,8 +14,20 @@ if (!$exam) { header('Location: exams.php'); exit; }
 // Handle Add
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'add') {
     $id = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
+    
+    $chapter_pdf_url = null;
+    if (isset($_FILES['chapter_pdf_file']) && $_FILES['chapter_pdf_file']['error'] == 0) {
+        $target_dir = "../uploads/";
+        if (!is_dir($target_dir)) { mkdir($target_dir, 0777, true); }
+        $file_extension = strtolower(pathinfo($_FILES['chapter_pdf_file']['name'], PATHINFO_EXTENSION));
+        $new_filename = uniqid('syl_') . '.' . $file_extension;
+        if (move_uploaded_file($_FILES['chapter_pdf_file']['tmp_name'], $target_dir . $new_filename)) {
+            $chapter_pdf_url = "uploads/" . $new_filename;
+        }
+    }
+
     $stmt = $pdo->prepare("INSERT INTO exam_syllabus (id, exam_id, subject, topic, subtopics, weightage_pct, chapter_pdf_url) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$id, $exam_id, $_POST['subject'], $_POST['topic'], $_POST['subtopics'], $_POST['weightage_pct'] ?: null, $_POST['chapter_pdf_url'] ?: null]);
+    $stmt->execute([$id, $exam_id, $_POST['subject'], $_POST['topic'], $_POST['subtopics'], $_POST['weightage_pct'] ?: null, $chapter_pdf_url]);
     header("Location: exam_syllabus.php?exam_id=$exam_id&msg=added");
     exit;
 }
@@ -86,7 +98,7 @@ $list = $syl->fetchAll();
                     <a href="exam_cutoffs.php?exam_id=<?php echo $exam_id; ?>" class="tab-link">Cutoffs</a>
                 </div>
 
-                <form action="" method="POST" class="form-section">
+                <form action="" method="POST" enctype="multipart/form-data" class="form-section" id="syllabusForm">
                     <input type="hidden" name="action" value="add">
                     <h3>Add Syllabus Topic</h3>
                     <div class="form-grid">
@@ -99,16 +111,23 @@ $list = $syl->fetchAll();
                             <input type="text" name="topic" class="form-control" required placeholder="e.g. Mechanics">
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
-                            <label>Subtopics (JSON Array)</label>
-                            <input type="text" name="subtopics" class="form-control" placeholder='["Kinematics", "Newton Laws"]'>
+                            <label>Subtopics</label>
+                            <div id="subtopics_container" style="margin-bottom:10px;">
+                                <div style="display:flex; gap:10px; margin-bottom:8px;">
+                                    <input type="text" class="form-control subtopic-input" placeholder="Subtopic Name">
+                                    <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm" onclick="addSubtopic()" style="background:#e2e8f0; border:1px solid #cbd5e1; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add Subtopic</button>
+                            <input type="hidden" name="subtopics" id="subtopics_json">
                         </div>
                         <div class="form-group">
                             <label>Weightage (%)</label>
                             <input type="number" step="0.1" name="weightage_pct" class="form-control">
                         </div>
                         <div class="form-group">
-                            <label>Chapter PDF URL</label>
-                            <input type="url" name="chapter_pdf_url" class="form-control">
+                            <label>Chapter PDF File</label>
+                            <input type="file" name="chapter_pdf_file" class="form-control" accept=".pdf,.doc,.docx">
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary" style="margin-top:16px;">Add Topic</button>
@@ -129,7 +148,7 @@ $list = $syl->fetchAll();
                             <td><?php echo htmlspecialchars($d['subject']); ?></td>
                             <td><?php echo htmlspecialchars($d['topic']); ?></td>
                             <td><?php echo $d['weightage_pct'] ? $d['weightage_pct'].'%' : '-'; ?></td>
-                            <td><?php echo $d['chapter_pdf_url'] ? '<a href="'.htmlspecialchars($d['chapter_pdf_url']).'" target="_blank"><i class="ph ph-file-pdf"></i></a>' : '-'; ?></td>
+                            <td><?php echo $d['chapter_pdf_url'] ? '<a href="../'.htmlspecialchars($d['chapter_pdf_url']).'" target="_blank"><i class="ph ph-file-pdf"></i> View</a>' : '-'; ?></td>
                             <td><a href="?exam_id=<?php echo $exam_id; ?>&action=delete&id=<?php echo $d['id']; ?>" class="action-btn"><i class="ph ph-trash"></i></a></td>
                         </tr>
                         <?php endforeach; ?>
@@ -138,5 +157,30 @@ $list = $syl->fetchAll();
             </div>
         </main>
     </div>
+    <script>
+        function addSubtopic() {
+            const container = document.getElementById('subtopics_container');
+            const div = document.createElement('div');
+            div.style.cssText = 'display:flex; gap:10px; margin-bottom:8px;';
+            div.innerHTML = `
+                <input type="text" class="form-control subtopic-input" placeholder="Subtopic Name">
+                <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+            `;
+            container.appendChild(div);
+        }
+
+        const syllabusForm = document.getElementById('syllabusForm');
+        if (syllabusForm) {
+            syllabusForm.addEventListener('submit', function(e) {
+                let subs = [];
+                document.querySelectorAll('.subtopic-input').forEach(inp => {
+                    if(inp.value.trim() !== '') {
+                        subs.push(inp.value.trim());
+                    }
+                });
+                document.getElementById('subtopics_json').value = JSON.stringify(subs);
+            });
+        }
+    </script>
 </body>
 </html>

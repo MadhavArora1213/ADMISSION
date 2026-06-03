@@ -25,12 +25,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
         $error = "The slug '$slug' is already in use.";
     } else {
         try {
+            $logo_url = !empty($_POST['existing_conducting_body_logo']) ? $_POST['existing_conducting_body_logo'] : null;
+            if (isset($_FILES['conducting_body_logo_file']) && $_FILES['conducting_body_logo_file']['error'] == 0) {
+                $target_dir = "../uploads/";
+                if (!is_dir($target_dir)) {
+                    mkdir($target_dir, 0777, true);
+                }
+                $file_extension = strtolower(pathinfo($_FILES["conducting_body_logo_file"]["name"], PATHINFO_EXTENSION));
+                $new_filename = uniqid('exam_logo_') . '.' . $file_extension;
+                $target_file = $target_dir . $new_filename;
+                
+                if (move_uploaded_file($_FILES["conducting_body_logo_file"]["tmp_name"], $target_file)) {
+                    $logo_url = "uploads/" . $new_filename;
+                }
+            }
+
             $data = [
                 'exam_name' => $_POST['exam_name'],
                 'exam_slug' => $slug,
                 'exam_abbreviation' => $_POST['exam_abbreviation'] ?: null,
                 'conducting_body' => $_POST['conducting_body'] ?: null,
-                'conducting_body_logo' => $_POST['conducting_body_logo'] ?: null,
+                'conducting_body_logo' => $logo_url,
                 'exam_level' => $_POST['exam_level'] ?: null,
                 'exam_mode' => $_POST['exam_mode'] ?: null,
                 'exam_frequency' => $_POST['exam_frequency'] ?: null,
@@ -91,6 +106,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
     } catch (Exception $e) { $error = "Error: " . $e->getMessage(); }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'links') {
     try {
+        $handle_upload = function($file_input_name) {
+            $existing_val = !empty($_POST['existing_' . str_replace('_file', '_url', $file_input_name)]) ? $_POST['existing_' . str_replace('_file', '_url', $file_input_name)] : null;
+            if (isset($_FILES[$file_input_name]) && $_FILES[$file_input_name]['error'] == 0) {
+                $target_dir = "../uploads/";
+                if (!is_dir($target_dir)) { mkdir($target_dir, 0777, true); }
+                $file_extension = strtolower(pathinfo($_FILES[$file_input_name]["name"], PATHINFO_EXTENSION));
+                $new_filename = uniqid('exam_doc_') . '.' . $file_extension;
+                if (move_uploaded_file($_FILES[$file_input_name]["tmp_name"], $target_dir . $new_filename)) {
+                    return "uploads/" . $new_filename;
+                }
+            }
+            return $existing_val;
+        };
+
         $data = [
             'id' => $id,
             'application_fee_general' => $_POST['application_fee_general'] ?: null,
@@ -100,12 +129,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
             'application_fee_female' => $_POST['application_fee_female'] ?: null,
             'application_url' => $_POST['application_url'] ?: null,
             'official_website' => $_POST['official_website'] ?: null,
-            'syllabus_pdf_url' => $_POST['syllabus_pdf_url'] ?: null,
-            'result_url' => $_POST['result_url'] ?: null,
-            'scorecard_url' => $_POST['scorecard_url'] ?: null,
+            'syllabus_pdf_url' => $handle_upload('syllabus_pdf_file'),
+            'result_url' => $handle_upload('result_file'),
+            'scorecard_url' => $handle_upload('scorecard_file'),
             'counselling_authority' => $_POST['counselling_authority'] ?: null,
             'counselling_rounds' => $_POST['counselling_rounds'] ?: null,
-            'merit_list_url' => $_POST['merit_list_url'] ?: null,
+            'merit_list_url' => $handle_upload('merit_list_file'),
             'normalisation_method' => $_POST['normalisation_method'] ?: null
         ];
         $fields = [];
@@ -117,30 +146,104 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
     } catch (Exception $e) { $error = "Error: " . $e->getMessage(); }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'resources') {
     try {
+        $sample_papers = [];
+        // Handle existing ones that were not deleted
+        if (isset($_POST['existing_sp_years']) && is_array($_POST['existing_sp_years'])) {
+            foreach ($_POST['existing_sp_years'] as $index => $year) {
+                if (!empty($_POST['existing_sp_urls'][$index])) {
+                    $sample_papers[] = [
+                        'year' => $year,
+                        'subject' => $_POST['existing_sp_subjects'][$index] ?? '',
+                        'description' => $_POST['existing_sp_descriptions'][$index] ?? '',
+                        'url' => $_POST['existing_sp_urls'][$index]
+                    ];
+                }
+            }
+        }
+        
+        // Handle newly uploaded files
+        if (isset($_FILES['new_sp_files']) && is_array($_FILES['new_sp_files']['name'])) {
+            $target_dir = "../uploads/";
+            if (!is_dir($target_dir)) { mkdir($target_dir, 0777, true); }
+            
+            foreach ($_FILES['new_sp_files']['name'] as $index => $name) {
+                if ($_FILES['new_sp_files']['error'][$index] == 0 && !empty($_POST['new_sp_years'][$index])) {
+                    $file_extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                    $new_filename = uniqid('sp_') . '.' . $file_extension;
+                    if (move_uploaded_file($_FILES['new_sp_files']['tmp_name'][$index], $target_dir . $new_filename)) {
+                        $sample_papers[] = [
+                            'year' => $_POST['new_sp_years'][$index],
+                            'subject' => $_POST['new_sp_subjects'][$index] ?? '',
+                            'description' => $_POST['new_sp_descriptions'][$index] ?? '',
+                            'url' => "uploads/" . $new_filename
+                        ];
+                    }
+                }
+            }
+        }
+        
+        $sample_papers_json = !empty($sample_papers) ? json_encode($sample_papers) : null;
+
         $stmtCheck = $pdo->prepare("SELECT id FROM exam_resources WHERE exam_id = ?");
         $stmtCheck->execute([$id]);
         if ($stmtCheck->rowCount() > 0) {
             $stmt = $pdo->prepare("UPDATE exam_resources SET sample_papers_json = ? WHERE exam_id = ?");
-            $stmt->execute([$_POST['sample_papers_json'] ?: null, $id]);
+            $stmt->execute([$sample_papers_json, $id]);
         } else {
             $newId = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
             $stmt = $pdo->prepare("INSERT INTO exam_resources (id, exam_id, sample_papers_json) VALUES (?, ?, ?)");
-            $stmt->execute([$newId, $id, $_POST['sample_papers_json'] ?: null]);
+            $stmt->execute([$newId, $id, $sample_papers_json]);
         }
         header("Location: exam_form.php?id=$id&tab=resources&msg=saved");
         exit;
     } catch (Exception $e) { $error = "Error: " . $e->getMessage(); }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'results_data') {
     try {
+        $cutoff_pdfs = [];
+        if (isset($_POST['existing_co_years']) && is_array($_POST['existing_co_years'])) {
+            foreach ($_POST['existing_co_years'] as $index => $year) {
+                if (!empty($_POST['existing_co_urls'][$index])) {
+                    $cutoff_pdfs[] = [
+                        'year' => $year,
+                        'subject' => $_POST['existing_co_subjects'][$index] ?? '',
+                        'description' => $_POST['existing_co_descriptions'][$index] ?? '',
+                        'url' => $_POST['existing_co_urls'][$index]
+                    ];
+                }
+            }
+        }
+        
+        if (isset($_FILES['new_co_files']) && is_array($_FILES['new_co_files']['name'])) {
+            $target_dir = "../uploads/";
+            if (!is_dir($target_dir)) { mkdir($target_dir, 0777, true); }
+            
+            foreach ($_FILES['new_co_files']['name'] as $index => $name) {
+                if ($_FILES['new_co_files']['error'][$index] == 0 && !empty($_POST['new_co_years'][$index])) {
+                    $file_extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                    $new_filename = uniqid('co_') . '.' . $file_extension;
+                    if (move_uploaded_file($_FILES['new_co_files']['tmp_name'][$index], $target_dir . $new_filename)) {
+                        $cutoff_pdfs[] = [
+                            'year' => $_POST['new_co_years'][$index],
+                            'subject' => $_POST['new_co_subjects'][$index] ?? '',
+                            'description' => $_POST['new_co_descriptions'][$index] ?? '',
+                            'url' => "uploads/" . $new_filename
+                        ];
+                    }
+                }
+            }
+        }
+        
+        $cutoff_pdfs_json = !empty($cutoff_pdfs) ? json_encode($cutoff_pdfs) : null;
+
         $stmtCheck = $pdo->prepare("SELECT id FROM exam_results WHERE exam_id = ?");
         $stmtCheck->execute([$id]);
         if ($stmtCheck->rowCount() > 0) {
-            $stmt = $pdo->prepare("UPDATE exam_results SET percentile_vs_marks_json = ? WHERE exam_id = ?");
-            $stmt->execute([$_POST['percentile_vs_marks_json'] ?: null, $id]);
+            $stmt = $pdo->prepare("UPDATE exam_results SET percentile_vs_marks_json = ?, cutoff_pdfs_json = ? WHERE exam_id = ?");
+            $stmt->execute([$_POST['percentile_vs_marks_json'] ?: null, $cutoff_pdfs_json, $id]);
         } else {
             $newId = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
-            $stmt = $pdo->prepare("INSERT INTO exam_results (id, exam_id, percentile_vs_marks_json) VALUES (?, ?, ?)");
-            $stmt->execute([$newId, $id, $_POST['percentile_vs_marks_json'] ?: null]);
+            $stmt = $pdo->prepare("INSERT INTO exam_results (id, exam_id, percentile_vs_marks_json, cutoff_pdfs_json) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$newId, $id, $_POST['percentile_vs_marks_json'] ?: null, $cutoff_pdfs_json]);
         }
         header("Location: exam_form.php?id=$id&tab=results_data&msg=saved");
         exit;
@@ -165,7 +268,7 @@ if ($is_edit) {
         $exam_resources = $res;
     }
 
-    $stmtRst = $pdo->prepare("SELECT percentile_vs_marks_json FROM exam_results WHERE exam_id = ?");
+    $stmtRst = $pdo->prepare("SELECT percentile_vs_marks_json, cutoff_pdfs_json FROM exam_results WHERE exam_id = ?");
     $stmtRst->execute([$id]);
     if ($rst = $stmtRst->fetch(PDO::FETCH_ASSOC)) {
         $exam_results = $rst;
@@ -280,7 +383,7 @@ function getValue($arr, $key, $default = '') {
                 <?php endif; ?>
 
                 <?php if($current_tab == 'basic'): ?>
-                <form action="" method="POST">
+                <form action="" method="POST" enctype="multipart/form-data">
                     <div class="form-section">
                         <h3><i class="ph ph-exam"></i> Basic Details</h3>
                         <div class="form-grid">
@@ -302,8 +405,15 @@ function getValue($arr, $key, $default = '') {
                                 <input type="text" name="conducting_body" class="form-control" value="<?php echo getValue($exam, 'conducting_body'); ?>">
                             </div>
                             <div class="form-group">
-                                <label>Conducting Body Logo URL</label>
-                                <input type="url" name="conducting_body_logo" class="form-control" value="<?php echo getValue($exam, 'conducting_body_logo'); ?>">
+                                <label>Conducting Body Logo</label>
+                                <input type="hidden" name="existing_conducting_body_logo" value="<?php echo getValue($exam, 'conducting_body_logo'); ?>">
+                                <input type="file" name="conducting_body_logo_file" class="form-control" accept="image/*">
+                                <?php if(getValue($exam, 'conducting_body_logo')): ?>
+                                    <div style="margin-top: 8px;">
+                                        <img src="../<?php echo getValue($exam, 'conducting_body_logo'); ?>" alt="Logo" style="max-height: 50px; border-radius: 4px;">
+                                        <small class="text-muted" style="display:block; margin-top: 4px;">Current logo</small>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                             
                             <div class="form-group">
@@ -412,20 +522,30 @@ function getValue($arr, $key, $default = '') {
                             </div>
                             
                             <div class="form-group full">
-                                <label>Language Options (JSON Array)</label>
-                                <textarea name="language_options" class="form-control" rows="2" placeholder='["English", "Hindi"]'><?php echo getValue($exam, 'language_options'); ?></textarea>
+                                <label>Language Options (Comma separated)</label>
+                                <input type="text" id="ui_language_options" class="form-control" placeholder="e.g. English, Hindi" value="">
+                                <input type="hidden" name="language_options" id="language_options" value='<?php echo getValue($exam, 'language_options'); ?>'>
                             </div>
                             <div class="form-group full">
-                                <label>Subjects (JSON Array)</label>
-                                <textarea name="subjects_json" class="form-control" rows="3" placeholder='[{"subject": "Physics", "questions": 30, "marks": 120}]'><?php echo getValue($exam, 'subjects_json'); ?></textarea>
+                                <label>Subjects</label>
+                                <div id="subjects_container" style="margin-bottom: 10px;"></div>
+                                <button type="button" class="btn btn-sm" onclick="addSubject()" style="background:#e2e8f0; border:1px solid #cbd5e1; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add Subject</button>
+                                <input type="hidden" name="subjects_json" id="subjects_json" value='<?php echo getValue($exam, 'subjects_json'); ?>'>
                             </div>
                             <div class="form-group full">
-                                <label>Sections (JSON Array)</label>
-                                <textarea name="sections" class="form-control" rows="3" placeholder='[{"name": "Section A", "questions": 20, "time": 60}]'><?php echo getValue($exam, 'sections'); ?></textarea>
+                                <label>Sections</label>
+                                <div id="sections_container" style="margin-bottom: 10px;"></div>
+                                <button type="button" class="btn btn-sm" onclick="addSection()" style="background:#e2e8f0; border:1px solid #cbd5e1; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add Section</button>
+                                <input type="hidden" name="sections" id="sections" value='<?php echo getValue($exam, 'sections'); ?>'>
                             </div>
                             <div class="form-group full">
-                                <label>Marking Scheme (JSON Object)</label>
-                                <textarea name="marking_scheme" class="form-control" rows="3" placeholder='{"correct": 4, "wrong": -1, "unattempted": 0}'><?php echo getValue($exam, 'marking_scheme'); ?></textarea>
+                                <label>Marking Scheme</label>
+                                <div style="display:flex; gap: 15px; align-items: center;">
+                                    <div><small style="display:block; margin-bottom:4px; color:var(--text-muted);">Correct</small><input type="number" id="ms_correct" class="form-control" step="0.1"></div>
+                                    <div><small style="display:block; margin-bottom:4px; color:var(--text-muted);">Wrong</small><input type="number" id="ms_wrong" class="form-control" step="0.1"></div>
+                                    <div><small style="display:block; margin-bottom:4px; color:var(--text-muted);">Unattempted</small><input type="number" id="ms_unattempted" class="form-control" step="0.1"></div>
+                                </div>
+                                <input type="hidden" name="marking_scheme" id="marking_scheme" value='<?php echo getValue($exam, 'marking_scheme'); ?>'>
                             </div>
                         </div>
                     </div>
@@ -435,7 +555,7 @@ function getValue($arr, $key, $default = '') {
                 </form>
 
                 <?php elseif($current_tab == 'links'): ?>
-                <form action="" method="POST">
+                <form action="" method="POST" enctype="multipart/form-data">
                     <div class="form-section">
                         <h3><i class="ph ph-currency-inr"></i> Fees & Links</h3>
                         <div class="form-grid">
@@ -470,16 +590,28 @@ function getValue($arr, $key, $default = '') {
                                 <input type="url" name="application_url" class="form-control" value="<?php echo getValue($exam, 'application_url'); ?>">
                             </div>
                             <div class="form-group">
-                                <label>Syllabus PDF URL</label>
-                                <input type="url" name="syllabus_pdf_url" class="form-control" value="<?php echo getValue($exam, 'syllabus_pdf_url'); ?>">
+                                <label>Syllabus PDF File</label>
+                                <input type="hidden" name="existing_syllabus_pdf_url" value="<?php echo getValue($exam, 'syllabus_pdf_url'); ?>">
+                                <input type="file" name="syllabus_pdf_file" class="form-control" accept=".pdf,.doc,.docx">
+                                <?php if(getValue($exam, 'syllabus_pdf_url')): ?>
+                                    <small style="display:block; margin-top: 4px;"><a href="../<?php echo getValue($exam, 'syllabus_pdf_url'); ?>" target="_blank">View Current Syllabus File</a></small>
+                                <?php endif; ?>
                             </div>
                             <div class="form-group">
-                                <label>Result URL</label>
-                                <input type="url" name="result_url" class="form-control" value="<?php echo getValue($exam, 'result_url'); ?>">
+                                <label>Result File</label>
+                                <input type="hidden" name="existing_result_url" value="<?php echo getValue($exam, 'result_url'); ?>">
+                                <input type="file" name="result_file" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx">
+                                <?php if(getValue($exam, 'result_url')): ?>
+                                    <small style="display:block; margin-top: 4px;"><a href="../<?php echo getValue($exam, 'result_url'); ?>" target="_blank">View Current Result File</a></small>
+                                <?php endif; ?>
                             </div>
                             <div class="form-group">
-                                <label>Scorecard URL</label>
-                                <input type="url" name="scorecard_url" class="form-control" value="<?php echo getValue($exam, 'scorecard_url'); ?>">
+                                <label>Scorecard File</label>
+                                <input type="hidden" name="existing_scorecard_url" value="<?php echo getValue($exam, 'scorecard_url'); ?>">
+                                <input type="file" name="scorecard_file" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx">
+                                <?php if(getValue($exam, 'scorecard_url')): ?>
+                                    <small style="display:block; margin-top: 4px;"><a href="../<?php echo getValue($exam, 'scorecard_url'); ?>" target="_blank">View Current Scorecard File</a></small>
+                                <?php endif; ?>
                             </div>
                             
                             <div class="form-group full" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px;">
@@ -494,8 +626,12 @@ function getValue($arr, $key, $default = '') {
                                 <input type="number" name="counselling_rounds" class="form-control" value="<?php echo getValue($exam, 'counselling_rounds'); ?>">
                             </div>
                             <div class="form-group full">
-                                <label>Merit List URL</label>
-                                <input type="url" name="merit_list_url" class="form-control" value="<?php echo getValue($exam, 'merit_list_url'); ?>">
+                                <label>Merit List File</label>
+                                <input type="hidden" name="existing_merit_list_url" value="<?php echo getValue($exam, 'merit_list_url'); ?>">
+                                <input type="file" name="merit_list_file" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx">
+                                <?php if(getValue($exam, 'merit_list_url')): ?>
+                                    <small style="display:block; margin-top: 4px;"><a href="../<?php echo getValue($exam, 'merit_list_url'); ?>" target="_blank">View Current Merit List File</a></small>
+                                <?php endif; ?>
                             </div>
                             <div class="form-group full">
                                 <label>Normalisation Method</label>
@@ -509,13 +645,32 @@ function getValue($arr, $key, $default = '') {
                 </form>
                 
                 <?php elseif($current_tab == 'resources'): ?>
-                <form action="" method="POST">
+                <form action="" method="POST" enctype="multipart/form-data">
                     <div class="form-section">
                         <h3><i class="ph ph-files"></i> Resources</h3>
                         <div class="form-grid">
                             <div class="form-group full">
-                                <label>Sample Papers (JSON Array)</label>
-                                <textarea name="sample_papers_json" class="form-control" rows="6" placeholder='[{"year": "2023", "url": "https://example.com/2023.pdf"}]'><?php echo getValue($exam_resources, 'sample_papers_json'); ?></textarea>
+                                <label>Sample Papers</label>
+                                <div id="sp_container" style="margin-bottom: 10px;">
+                                    <?php 
+                                    $raw_json = isset($exam_resources['sample_papers_json']) ? $exam_resources['sample_papers_json'] : '[]';
+                                    $sps = json_decode($raw_json ?: '[]', true);
+                                    if (!is_array($sps)) $sps = [];
+                                    foreach($sps as $idx => $sp): 
+                                    ?>
+                                    <div class="sp-row" style="display:flex; gap:10px; margin-bottom:10px; align-items:center; background: #fff; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <input type="text" name="existing_sp_years[]" class="form-control" placeholder="Year (e.g. 2023)" value="<?php echo htmlspecialchars($sp['year']); ?>" style="width: 120px;">
+                                        <input type="text" name="existing_sp_subjects[]" class="form-control" placeholder="Subject" value="<?php echo htmlspecialchars($sp['subject'] ?? ''); ?>" style="width: 150px;">
+                                        <input type="text" name="existing_sp_descriptions[]" class="form-control" placeholder="Description" value="<?php echo htmlspecialchars($sp['description'] ?? ''); ?>" style="flex:1;">
+                                        <input type="hidden" name="existing_sp_urls[]" value="<?php echo htmlspecialchars($sp['url']); ?>">
+                                        <div>
+                                            <a href="../<?php echo htmlspecialchars($sp['url']); ?>" target="_blank" style="color:var(--primary); text-decoration:none; font-weight: 600;"><i class="ph ph-file-pdf"></i> View File</a>
+                                        </div>
+                                        <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <button type="button" class="btn btn-sm" onclick="addSamplePaper()" style="background:#e2e8f0; border:1px solid #cbd5e1; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add New Sample Paper</button>
                             </div>
                         </div>
                     </div>
@@ -525,13 +680,40 @@ function getValue($arr, $key, $default = '') {
                 </form>
                 
                 <?php elseif($current_tab == 'results_data'): ?>
-                <form action="" method="POST">
+                <form action="" method="POST" enctype="multipart/form-data">
                     <div class="form-section">
                         <h3><i class="ph ph-chart-bar"></i> Results Data</h3>
                         <div class="form-grid">
                             <div class="form-group full">
-                                <label>Percentile vs Marks (JSON Data)</label>
-                                <textarea name="percentile_vs_marks_json" class="form-control" rows="10" placeholder='{"2023": [{"marks": 250, "percentile": 99.5}, ...]}'><?php echo getValue($exam_results, 'percentile_vs_marks_json'); ?></textarea>
+                                <label>Percentile vs Marks</label>
+                                <div id="pvm_container" style="margin-bottom: 10px;"></div>
+                                <button type="button" class="btn btn-sm" onclick="addPvmYear()" style="background:#e2e8f0; border:1px solid #cbd5e1; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add Year Data</button>
+                                <input type="hidden" name="percentile_vs_marks_json" id="percentile_vs_marks_json" value='<?php echo getValue($exam_results, 'percentile_vs_marks_json'); ?>'>
+                            </div>
+                        </div>
+                        <div class="form-grid" style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                            <div class="form-group full">
+                                <label style="font-size: 1.1rem; color: var(--primary);">Previous Year Cutoffs & Statistics (PDFs)</label>
+                                <div id="co_container" style="margin-bottom: 10px; margin-top:10px;">
+                                    <?php 
+                                    $raw_co_json = isset($exam_results['cutoff_pdfs_json']) ? $exam_results['cutoff_pdfs_json'] : '[]';
+                                    $cos = json_decode($raw_co_json ?: '[]', true);
+                                    if (!is_array($cos)) $cos = [];
+                                    foreach($cos as $idx => $co): 
+                                    ?>
+                                    <div class="co-row" style="display:flex; gap:10px; margin-bottom:10px; align-items:center; background: #fff; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <input type="text" name="existing_co_years[]" class="form-control" placeholder="Year (e.g. 2023)" value="<?php echo htmlspecialchars($co['year']); ?>" style="width: 120px;">
+                                        <input type="text" name="existing_co_subjects[]" class="form-control" placeholder="Subject" value="<?php echo htmlspecialchars($co['subject'] ?? ''); ?>" style="width: 150px;">
+                                        <input type="text" name="existing_co_descriptions[]" class="form-control" placeholder="Description" value="<?php echo htmlspecialchars($co['description'] ?? ''); ?>" style="flex:1;">
+                                        <input type="hidden" name="existing_co_urls[]" value="<?php echo htmlspecialchars($co['url']); ?>">
+                                        <div>
+                                            <a href="../<?php echo htmlspecialchars($co['url']); ?>" target="_blank" style="color:var(--primary); text-decoration:none; font-weight: 600;"><i class="ph ph-file-pdf"></i> View File</a>
+                                        </div>
+                                        <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <button type="button" class="btn btn-sm" onclick="addCutoffFile()" style="background:#e2e8f0; border:1px solid #cbd5e1; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add New Document</button>
                             </div>
                         </div>
                     </div>
@@ -546,5 +728,269 @@ function getValue($arr, $key, $default = '') {
         </main>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const nameInput = document.querySelector('input[name="exam_name"]');
+            const slugInput = document.querySelector('input[name="exam_slug"]');
+            
+            if (nameInput && slugInput) {
+                let autoGenerate = slugInput.value === '';
+                
+                slugInput.addEventListener('input', function() {
+                    autoGenerate = false;
+                    if (this.value === '') {
+                        autoGenerate = true;
+                    }
+                });
+
+                nameInput.addEventListener('input', function() {
+                    if (autoGenerate) {
+                        let val = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                        slugInput.value = val;
+                    }
+                });
+            }
+
+            // --- Eligibility UI Logic ---
+            const langInput = document.getElementById('ui_language_options');
+            const langHidden = document.getElementById('language_options');
+            
+            const msCorrect = document.getElementById('ms_correct');
+            const msWrong = document.getElementById('ms_wrong');
+            const msUnattempted = document.getElementById('ms_unattempted');
+            const msHidden = document.getElementById('marking_scheme');
+            
+            if (langInput && langHidden) {
+                // Init languages
+                try {
+                    let langs = JSON.parse(langHidden.value || '[]');
+                    langInput.value = langs.join(', ');
+                } catch(e) {}
+                
+                // Init marking scheme
+                try {
+                    let ms = JSON.parse(msHidden.value || '{}');
+                    msCorrect.value = ms.correct !== undefined ? ms.correct : '';
+                    msWrong.value = ms.wrong !== undefined ? ms.wrong : '';
+                    msUnattempted.value = ms.unattempted !== undefined ? ms.unattempted : '';
+                } catch(e) {}
+
+                // Form submit hook
+                const eligibilityForm = langInput.closest('form');
+                if (eligibilityForm) {
+                    eligibilityForm.addEventListener('submit', function() {
+                        // Serialize languages
+                        let langs = langInput.value.split(',').map(s => s.trim()).filter(s => s);
+                        langHidden.value = JSON.stringify(langs);
+                        
+                        // Serialize marking scheme
+                        let ms = {
+                            correct: msCorrect.value !== '' ? Number(msCorrect.value) : 0,
+                            wrong: msWrong.value !== '' ? Number(msWrong.value) : 0,
+                            unattempted: msUnattempted.value !== '' ? Number(msUnattempted.value) : 0
+                        };
+                        msHidden.value = JSON.stringify(ms);
+                        
+                        // Serialize subjects
+                        let subjects = [];
+                        document.querySelectorAll('.subject-row').forEach(row => {
+                            let name = row.querySelector('.sub-name').value;
+                            let qs = row.querySelector('.sub-qs').value;
+                            let marks = row.querySelector('.sub-marks').value;
+                            if(name) {
+                                subjects.push({
+                                    subject: name,
+                                    questions: qs !== '' ? Number(qs) : 0,
+                                    marks: marks !== '' ? Number(marks) : 0
+                                });
+                            }
+                        });
+                        document.getElementById('subjects_json').value = JSON.stringify(subjects);
+                        
+                        // Serialize sections
+                        let sections = [];
+                        document.querySelectorAll('.section-row').forEach(row => {
+                            let name = row.querySelector('.sec-name').value;
+                            let qs = row.querySelector('.sec-qs').value;
+                            let time = row.querySelector('.sec-time').value;
+                            if(name) {
+                                sections.push({
+                                    name: name,
+                                    questions: qs !== '' ? Number(qs) : 0,
+                                    time: time !== '' ? Number(time) : 0
+                                });
+                            }
+                        });
+                        document.getElementById('sections').value = JSON.stringify(sections);
+                    });
+                }
+                
+                // Init subjects
+                try {
+                    let subjects = JSON.parse(document.getElementById('subjects_json').value || '[]');
+                    subjects.forEach(s => window.addSubject(s.subject, s.questions, s.marks));
+                } catch(e) {}
+                if(document.querySelectorAll('.subject-row').length === 0) window.addSubject();
+                
+                // Init sections
+                try {
+                    let sections = JSON.parse(document.getElementById('sections').value || '[]');
+                    sections.forEach(s => window.addSection(s.name, s.questions, s.time));
+                } catch(e) {}
+                if(document.querySelectorAll('.section-row').length === 0) window.addSection();
+            }
+
+            // --- Results Data UI Logic ---
+            const pvmHidden = document.getElementById('percentile_vs_marks_json');
+            if (pvmHidden) {
+                const resultsForm = pvmHidden.closest('form');
+                if (resultsForm) {
+                    resultsForm.addEventListener('submit', function() {
+                        let pvmData = {};
+                        document.querySelectorAll('.pvm-year-section').forEach(section => {
+                            let year = section.querySelector('.pvm-year-input').value.trim();
+                            if (year) {
+                                pvmData[year] = [];
+                                section.querySelectorAll('.pvm-row').forEach(row => {
+                                    let marks = row.querySelector('.pvm-marks').value;
+                                    let perc = row.querySelector('.pvm-perc').value;
+                                    if (marks !== '' || perc !== '') {
+                                        pvmData[year].push({
+                                            marks: marks !== '' ? Number(marks) : null,
+                                            percentile: perc !== '' ? Number(perc) : null
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                        pvmHidden.value = JSON.stringify(pvmData);
+                    });
+                }
+
+                // Init data
+                try {
+                    let raw_pvm = pvmHidden.value;
+                    // Fix htmlspecialchars escaping if necessary
+                    if(raw_pvm.includes('&quot;')) {
+                        raw_pvm = raw_pvm.replace(/&quot;/g, '"');
+                    }
+                    let data = JSON.parse(raw_pvm || '{}');
+                    if (Object.keys(data).length > 0) {
+                        for (let year in data) {
+                            let sec = window.addPvmYear(year);
+                            if (data[year] && data[year].length > 0) {
+                                data[year].forEach(row => {
+                                    window.addPvmRow(sec, row.marks, row.percentile);
+                                });
+                            } else {
+                                // Add an empty row if none existed
+                                window.addPvmRow(sec);
+                            }
+                        }
+                    } else {
+                        window.addPvmYear();
+                    }
+                } catch(e) {
+                    window.addPvmYear();
+                }
+            }
+        });
+
+        window.addSubject = function(name='', qs='', marks='') {
+            const container = document.getElementById('subjects_container');
+            if(!container) return;
+            const div = document.createElement('div');
+            div.className = 'subject-row';
+            div.style.cssText = 'display:flex; gap:10px; margin-bottom:10px; align-items:center;';
+            div.innerHTML = `
+                <input type="text" class="form-control sub-name" placeholder="Subject Name" value="${name}">
+                <input type="number" class="form-control sub-qs" placeholder="Questions" value="${qs}" style="width:100px;">
+                <input type="number" class="form-control sub-marks" placeholder="Marks" value="${marks}" style="width:100px;">
+                <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+            `;
+            container.appendChild(div);
+        };
+
+        window.addSection = function(name='', qs='', time='') {
+            const container = document.getElementById('sections_container');
+            if(!container) return;
+            const div = document.createElement('div');
+            div.className = 'section-row';
+            div.style.cssText = 'display:flex; gap:10px; margin-bottom:10px; align-items:center;';
+            div.innerHTML = `
+                <input type="text" class="form-control sec-name" placeholder="Section Name" value="${name}">
+                <input type="number" class="form-control sec-qs" placeholder="Questions" value="${qs}" style="width:100px;">
+                <input type="number" class="form-control sec-time" placeholder="Time (Mins)" value="${time}" style="width:120px;">
+                <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+            `;
+            container.appendChild(div);
+        };
+
+        window.addSamplePaper = function() {
+            const container = document.getElementById('sp_container');
+            if(!container) return;
+            const div = document.createElement('div');
+            div.className = 'sp-row';
+            div.style.cssText = 'display:flex; gap:10px; margin-bottom:10px; align-items:center; background: #fff; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;';
+            div.innerHTML = `
+                <input type="text" name="new_sp_years[]" class="form-control" placeholder="Year (e.g. 2024)" style="width: 120px;" required>
+                <input type="text" name="new_sp_subjects[]" class="form-control" placeholder="Subject" style="width: 150px;" required>
+                <input type="text" name="new_sp_descriptions[]" class="form-control" placeholder="Description" style="flex:1;">
+                <input type="file" name="new_sp_files[]" class="form-control" accept=".pdf,.doc,.docx" required style="width: 200px;">
+                <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+            `;
+            container.appendChild(div);
+        };
+
+        window.addCutoffFile = function() {
+            const container = document.getElementById('co_container');
+            if(!container) return;
+            const div = document.createElement('div');
+            div.className = 'co-row';
+            div.style.cssText = 'display:flex; gap:10px; margin-bottom:10px; align-items:center; background: #fff; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;';
+            div.innerHTML = `
+                <input type="text" name="new_co_years[]" class="form-control" placeholder="Year (e.g. 2024)" style="width: 120px;" required>
+                <input type="text" name="new_co_subjects[]" class="form-control" placeholder="Subject" style="width: 150px;" required>
+                <input type="text" name="new_co_descriptions[]" class="form-control" placeholder="Description" style="flex:1;">
+                <input type="file" name="new_co_files[]" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx" required style="width: 200px;">
+                <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+            `;
+            container.appendChild(div);
+        };
+
+        window.addPvmYear = function(year='') {
+            const container = document.getElementById('pvm_container');
+            if(!container) return null;
+            const sec = document.createElement('div');
+            sec.className = 'pvm-year-section';
+            sec.style.cssText = 'background: #fff; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px;';
+            sec.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+                    <input type="text" class="form-control pvm-year-input" placeholder="Year (e.g. 2023)" value="${year}" style="width: 150px; font-weight:bold;">
+                    <button type="button" onclick="this.closest('.pvm-year-section').remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:0.85rem;"><i class="ph ph-trash"></i> Remove Year</button>
+                </div>
+                <div class="pvm-rows-container"></div>
+                <button type="button" onclick="window.addPvmRow(this.closest('.pvm-year-section'))" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.85rem; margin-top:5px;">+ Add Row</button>
+            `;
+            container.appendChild(sec);
+            if(!year) window.addPvmRow(sec);
+            return sec;
+        };
+
+        window.addPvmRow = function(sectionElement, marks='', perc='') {
+            const container = sectionElement.querySelector('.pvm-rows-container');
+            const div = document.createElement('div');
+            div.className = 'pvm-row';
+            div.style.cssText = 'display:flex; gap:10px; margin-bottom:8px; align-items:center;';
+            const mVal = marks !== null && marks !== undefined ? marks : '';
+            const pVal = perc !== null && perc !== undefined ? perc : '';
+            div.innerHTML = `
+                <input type="number" class="form-control pvm-marks" placeholder="Marks" value="${mVal}" style="width:120px;" step="0.1">
+                <input type="number" class="form-control pvm-perc" placeholder="Percentile" value="${pVal}" style="width:120px;" step="0.01">
+                <button type="button" onclick="this.parentElement.remove()" style="background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; padding:8px; border-radius:4px; cursor:pointer;"><i class="ph ph-x"></i></button>
+            `;
+            container.appendChild(div);
+        };
+    </script>
 </body>
 </html>
