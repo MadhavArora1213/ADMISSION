@@ -20,14 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'add') {
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO university_cutoffs (id, university_id, exam_id, course_id, cutoff_year, category, round_number, opening_rank, closing_rank) 
+                INSERT INTO university_cutoffs (id, university_id, exam_id, course_id, year, category, round_number, opening_rank, closing_rank) 
                 VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $university_id,
                 $_POST['exam_id'],
                 $_POST['course_id'],
-                $_POST['cutoff_year'],
+                $_POST['year'],
                 $_POST['category'],
                 $_POST['round_number'] ?: null,
                 $_POST['opening_rank'] ?: null,
@@ -47,26 +47,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Fetch dropdown data
-$all_exams = $pdo->query("SELECT id, name FROM exams ORDER BY name ASC")->fetchAll();
+$all_exams = $pdo->query("SELECT id, exam_name as name FROM exams ORDER BY exam_name ASC")->fetchAll();
 // Fetch courses specifically linked to this university
 $university_courses_list = $pdo->prepare("
-    SELECT cc.course_id, c.name as course_name 
-    FROM university_courses cc 
-    JOIN courses c ON cc.course_id = c.id 
-    WHERE cc.university_id = ?
-    ORDER BY c.name ASC
+    SELECT id as course_id, course_name 
+    FROM university_courses 
+    WHERE university_id = ?
+    ORDER BY course_name ASC
 ");
 $university_courses_list->execute([$university_id]);
 $my_courses = $university_courses_list->fetchAll();
 
 // Fetch cutoffs
 $stmt = $pdo->prepare("
-    SELECT cu.*, e.name as exam_name, c.name as course_name 
+    SELECT cu.*, e.exam_name as exam_name, c.course_name 
     FROM university_cutoffs cu
     JOIN exams e ON cu.exam_id = e.id
-    JOIN courses c ON cu.course_id = c.id
+    JOIN university_courses c ON cu.course_id = c.id
     WHERE cu.university_id = ?
-    ORDER BY cu.cutoff_year DESC, e.name ASC
+    ORDER BY cu.year DESC, e.exam_name ASC
 ");
 $stmt->execute([$university_id]);
 $cutoffs = $stmt->fetchAll();
@@ -171,7 +170,7 @@ $cutoffs = $stmt->fetchAll();
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="form-group"><label>Year</label><input type="number" name="cutoff_year" class="form-control" required></div>
+                            <div class="form-group"><label>Year</label><input type="number" name="year" class="form-control" required></div>
                             <div class="form-group">
                                 <label>Category</label>
                                 <select name="category" class="form-control" required>
@@ -199,7 +198,7 @@ $cutoffs = $stmt->fetchAll();
                                 <tbody>
                                     <?php foreach($cutoffs as $c): ?>
                                     <tr>
-                                        <td style="font-weight:600;"><?php echo htmlspecialchars($c['cutoff_year']); ?></td>
+                                        <td style="font-weight:600;"><?php echo htmlspecialchars($c['year']); ?></td>
                                         <td><?php echo htmlspecialchars($c['exam_name']); ?></td>
                                         <td><?php echo htmlspecialchars($c['course_name']); ?></td>
                                         <td><?php echo htmlspecialchars($c['category']); ?></td>

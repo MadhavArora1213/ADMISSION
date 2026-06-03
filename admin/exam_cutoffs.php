@@ -6,7 +6,7 @@ require_once 'db.php';
 $exam_id = isset($_GET['exam_id']) ? $_GET['exam_id'] : null;
 if (!$exam_id) { header('Location: exams.php'); exit; }
 
-$stmt = $pdo->prepare("SELECT name FROM exams WHERE id = ?");
+$stmt = $pdo->prepare("SELECT exam_name as name FROM exams WHERE id = ?");
 $stmt->execute([$exam_id]);
 $exam = $stmt->fetch();
 if (!$exam) { header('Location: exams.php'); exit; }
