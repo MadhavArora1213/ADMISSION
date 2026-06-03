@@ -18,7 +18,9 @@ $courses = $pdo->query("SELECT id, course_name as name FROM courses ORDER BY cou
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'add') {
     $id = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
     $stmt = $pdo->prepare("INSERT INTO exam_cutoffs (id, exam_id, college_id, course_id, year, category, opening_rank, closing_rank, round) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$id, $exam_id, $_POST['college_id'], $_POST['course_id'], $_POST['year'], $_POST['category'], $_POST['opening_rank'] ?: null, $_POST['closing_rank'] ?: null, $_POST['round'] ?: null]);
+    $college_id = !empty($_POST['college_id']) ? $_POST['college_id'] : null;
+    $course_id = !empty($_POST['course_id']) ? $_POST['course_id'] : null;
+    $stmt->execute([$id, $exam_id, $college_id, $course_id, $_POST['year'], $_POST['category'], $_POST['opening_rank'] ?: null, $_POST['closing_rank'] ?: null, $_POST['round'] ?: null]);
     header("Location: exam_cutoffs.php?exam_id=$exam_id&msg=added");
     exit;
 }
@@ -32,10 +34,10 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
 }
 
 $cutoffsQ = $pdo->prepare("
-    SELECT ec.*, c.name as college_name, cr.name as course_name 
+    SELECT ec.*, c.name as college_name, cr.course_name as course_name 
     FROM exam_cutoffs ec
-    JOIN colleges c ON ec.college_id = c.id
-    JOIN courses cr ON ec.course_id = cr.id
+    LEFT JOIN colleges c ON ec.college_id = c.id
+    LEFT JOIN courses cr ON ec.course_id = cr.id
     WHERE ec.exam_id = ?
     ORDER BY ec.year DESC, c.name ASC
 ");
@@ -101,18 +103,18 @@ $list = $cutoffsQ->fetchAll();
                     <h3>Add Cutoff Data</h3>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label>College</label>
-                            <select name="college_id" class="form-control" required>
-                                <option value="">Select College</option>
+                            <label>College (Optional)</label>
+                            <select name="college_id" class="form-control">
+                                <option value="">-- No Specific College (General Exam Cutoff) --</option>
                                 <?php foreach($colleges as $c): ?>
                                     <option value="<?php echo $c['id']; ?>"><?php echo htmlspecialchars($c['name']); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Course</label>
-                            <select name="course_id" class="form-control" required>
-                                <option value="">Select Course</option>
+                            <label>Course (Optional)</label>
+                            <select name="course_id" class="form-control">
+                                <option value="">-- No Specific Course --</option>
                                 <?php foreach($courses as $c): ?>
                                     <option value="<?php echo $c['id']; ?>"><?php echo htmlspecialchars($c['name']); ?></option>
                                 <?php endforeach; ?>
@@ -164,8 +166,8 @@ $list = $cutoffsQ->fetchAll();
                             <?php foreach($list as $d): ?>
                             <tr>
                                 <td><?php echo $d['year']; ?></td>
-                                <td><?php echo htmlspecialchars($d['college_name']); ?></td>
-                                <td><?php echo htmlspecialchars($d['course_name']); ?></td>
+                                <td><?php echo $d['college_name'] ? htmlspecialchars($d['college_name']) : '<span style="color:#94a3b8; font-style:italic;">General Exam</span>'; ?></td>
+                                <td><?php echo $d['course_name'] ? htmlspecialchars($d['course_name']) : '<span style="color:#94a3b8; font-style:italic;">Any / All</span>'; ?></td>
                                 <td><?php echo $d['category']; ?> <?php if($d['round']) echo "(R{$d['round']})"; ?></td>
                                 <td><?php echo $d['opening_rank'].' - '.$d['closing_rank']; ?></td>
                                 <td><a href="?exam_id=<?php echo $exam_id; ?>&action=delete&id=<?php echo $d['id']; ?>" class="action-btn"><i class="ph ph-trash"></i></a></td>
