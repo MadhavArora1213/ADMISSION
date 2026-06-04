@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'add') {
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO university_faqs (id, university_id, question, answer, category, sort_order, is_active) 
+                INSERT INTO university_faqs (id, university_id, question_text, answer_text, category, sort_order, is_active) 
                 VALUES (UUID(), ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-$stmt = $pdo->prepare("SELECT * FROM university_faqs WHERE university_id = ? ORDER BY sort_order ASC, question ASC");
+$stmt = $pdo->prepare("SELECT * FROM university_faqs WHERE university_id = ? ORDER BY sort_order ASC, question_text ASC");
 $stmt->execute([$university_id]);
 $faqs = $stmt->fetchAll();
 ?>
@@ -65,7 +65,7 @@ $faqs = $stmt->fetchAll();
         .sidebar-nav { padding: 24px 0; flex: 1; }
         .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; text-decoration: none;}
         .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
-        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; }
+        .main-content { flex: 1; margin-left: 280px; max-width: calc(100% - 280px); display: flex; flex-direction: column; }
         .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
         .user-profile { display: flex; align-items: center; gap: 12px; font-weight: 500; }
         .content-area { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
@@ -78,8 +78,7 @@ $faqs = $stmt->fetchAll();
         .tab-link.active { background: var(--primary); color: white; }
         
         .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
         .form-group { margin-bottom: 16px; }
         .form-group.full { grid-column: 1 / -1; }
         .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; }
@@ -153,7 +152,7 @@ $faqs = $stmt->fetchAll();
                                 <tbody>
                                     <?php foreach($faqs as $f): ?>
                                     <tr>
-                                        <td style="font-weight:600; width:50%;"><?php echo htmlspecialchars($f['question']); ?></td>
+                                        <td style="font-weight:600; width:50%;"><?php echo htmlspecialchars($f['question_text']); ?></td>
                                         <td><?php echo htmlspecialchars($f['category']?:'-'); ?></td>
                                         <td><?php echo htmlspecialchars($f['sort_order']); ?></td>
                                         <td><?php echo $f['is_active'] ? '<span style="color:#166534;background:#dcfce7;padding:2px 8px;border-radius:12px;font-size:0.8rem;">Active</span>' : '<span style="color:#991b1b;background:#fee2e2;padding:2px 8px;border-radius:12px;font-size:0.8rem;">Inactive</span>'; ?></td>

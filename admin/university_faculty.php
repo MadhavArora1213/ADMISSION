@@ -19,6 +19,22 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'add') {
         try {
+            $photo_url = null;
+            if (isset($_FILES['photo_file']) && $_FILES['photo_file']['error'] == 0) {
+                $upload_dir = '../uploads/faculty/';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0777, true);
+                }
+                $file_name = time() . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '', basename($_FILES['photo_file']['name']));
+                $target_file = $upload_dir . $file_name;
+                if (move_uploaded_file($_FILES['photo_file']['tmp_name'], $target_file)) {
+                    $photo_url = 'uploads/faculty/' . $file_name;
+                }
+            }
+            if (!$photo_url && !empty($_POST['photo_url'])) {
+                $photo_url = $_POST['photo_url'];
+            }
+
             $stmt = $pdo->prepare("
                 INSERT INTO university_faculty (id, university_id, faculty_name, designation, department, qualification, experience_years, photo_url, research_papers) 
                 VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?)
@@ -30,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_POST['department'] ?: null,
                 $_POST['qualification'] ?: null,
                 $_POST['experience_years'] ?: null,
-                $_POST['photo_url'] ?: null,
+                $photo_url,
                 $_POST['research_papers'] ?: 0
             ]);
             header("Location: university_faculty.php?university_id=$university_id&msg=added");
@@ -67,7 +83,7 @@ $faculty = $stmt->fetchAll();
         .sidebar-nav { padding: 24px 0; flex: 1; }
         .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; text-decoration: none;}
         .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
-        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; }
+        .main-content { flex: 1; margin-left: 280px; max-width: calc(100% - 280px); display: flex; flex-direction: column; }
         .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
         .user-profile { display: flex; align-items: center; gap: 12px; font-weight: 500; }
         .content-area { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
@@ -80,8 +96,7 @@ $faculty = $stmt->fetchAll();
         .tab-link.active { background: var(--primary); color: white; }
         
         .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
         .form-group { margin-bottom: 16px; }
         .form-group.full { grid-column: 1 / -1; }
         .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; }
@@ -129,7 +144,7 @@ $faculty = $stmt->fetchAll();
 
                 <div class="panel">
                     <h3><i class="ph ph-plus-circle"></i> Add Faculty Member</h3>
-                    <form action="" method="POST" style="margin-top:16px;">
+                    <form action="" method="POST" enctype="multipart/form-data" style="margin-top:16px;">
                         <input type="hidden" name="action" value="add">
                         <div class="form-grid">
                             <div class="form-group"><label>Name</label><input type="text" name="faculty_name" class="form-control" required></div>
@@ -138,7 +153,8 @@ $faculty = $stmt->fetchAll();
                             <div class="form-group"><label>Qualification</label><input type="text" name="qualification" class="form-control" placeholder="e.g. Ph.D"></div>
                             <div class="form-group"><label>Experience (Years)</label><input type="number" name="experience_years" class="form-control"></div>
                             <div class="form-group"><label>Research Papers</label><input type="number" name="research_papers" class="form-control" value="0"></div>
-                            <div class="form-group full"><label>Photo URL</label><input type="url" name="photo_url" class="form-control"></div>
+                            <div class="form-group"><label>Upload Photo</label><input type="file" name="photo_file" class="form-control" accept="image/*"></div>
+                            <div class="form-group"><label>OR Photo URL</label><input type="url" name="photo_url" class="form-control"></div>
                         </div>
                         <div style="text-align: right; margin-top:16px;"><button type="submit" class="btn btn-primary">Add Faculty</button></div>
                     </form>
