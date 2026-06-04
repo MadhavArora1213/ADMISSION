@@ -12,6 +12,37 @@ $current_tab = isset($_GET['tab']) ? $_GET['tab'] : 'identity';
 $msg = '';
 $error = '';
 
+// Helpers for parsing text to JSON and back
+function linesToJsonList($text) {
+    if (empty(trim($text))) return null;
+    $lines = array_filter(array_map('trim', explode("\n", $text)), 'strlen');
+    return empty($lines) ? null : json_encode(array_values($lines));
+}
+function linesToJsonObject($text) {
+    if (empty(trim($text))) return null;
+    $lines = array_filter(array_map('trim', explode("\n", $text)), 'strlen');
+    $obj = [];
+    foreach($lines as $line) {
+        $parts = explode(':', $line, 2);
+        if (count($parts) == 2) {
+            $obj[trim($parts[0])] = trim($parts[1]);
+        }
+    }
+    return empty($obj) ? null : json_encode($obj);
+}
+function jsonToLines($jsonStr, $isObject = false) {
+    if (empty($jsonStr)) return '';
+    $data = json_decode($jsonStr, true);
+    if (!is_array($data)) return htmlspecialchars($jsonStr);
+    if ($isObject) {
+        $lines = [];
+        foreach($data as $k => $v) $lines[] = "$k: $v";
+        return htmlspecialchars(implode("\n", $lines));
+    }
+    return htmlspecialchars(implode("\n", $data));
+}
+
+
 function generateUUID() {
     return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
 }
@@ -90,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
                 $ext = pathinfo($_FILES['logo_file']['name'], PATHINFO_EXTENSION);
                 $filename = 'college_logo_' . time() . '_' . uniqid() . '.' . $ext;
                 if (move_uploaded_file($_FILES['logo_file']['tmp_name'], $upload_dir . $filename)) {
-                    $_POST['logo_url'] = '/ADMISSION/uploads/' . $filename;
+                    $_POST['logo_url'] = 'uploads/' . $filename;
                 }
             }
 
@@ -99,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
                 $ext = pathinfo($_FILES['cover_file']['name'], PATHINFO_EXTENSION);
                 $filename = 'college_cover_' . time() . '_' . uniqid() . '.' . $ext;
                 if (move_uploaded_file($_FILES['cover_file']['tmp_name'], $upload_dir . $filename)) {
-                    $_POST['cover_image_url'] = '/ADMISSION/uploads/' . $filename;
+                    $_POST['cover_image_url'] = 'uploads/' . $filename;
                 }
             }
 
@@ -158,10 +189,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
         // 1. college_content
         $contentData = [
             'about_text' => $_POST['about_text'],
-            'highlights_json' => $_POST['highlights_json'],
-            'accreditations_json' => $_POST['accreditations_json'],
-            'rankings_json' => $_POST['rankings_json'],
-            'awards_json' => $_POST['awards_json']
+            'highlights_json' => linesToJsonList($_POST['highlights_json']),
+            'accreditations_json' => linesToJsonList($_POST['accreditations']),
+            'rankings_json' => linesToJsonObject($_POST['rankings_json']),
+            'awards_json' => linesToJsonList($_POST['awards_json'])
         ];
         $chk = $pdo->prepare("SELECT id FROM college_content WHERE college_id = ?"); $chk->execute([$id]);
         if($chk->rowCount() > 0) {
@@ -177,7 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
         // 2. college_admissions
         $admData = [
             'admission_process' => $_POST['admission_process'],
-            'accepted_exams' => $_POST['accepted_exams'],
+            'accepted_exams' => linesToJsonList($_POST['accepted_exams']),
             'admission_start_date' => $_POST['admission_start_date'] ?: null,
             'admission_end_date' => $_POST['admission_end_date'] ?: null,
             'merit_based' => isset($_POST['merit_based']) ? 1 : 0,
@@ -208,8 +239,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
             'transport' => isset($_POST['transport']) ? 1 : 0,
             'ev_charging' => isset($_POST['ev_charging']) ? 1 : 0,
             'solar_power' => isset($_POST['solar_power']) ? 1 : 0,
-            'sports_facilities' => $_POST['sports_facilities'],
-            'labs' => $_POST['labs']
+            'sports_facilities' => linesToJsonList($_POST['sports_facilities']),
+            'labs' => linesToJsonList($_POST['labs'])
         ];
         $chk = $pdo->prepare("SELECT id FROM college_infrastructure WHERE college_id = ?"); $chk->execute([$id]);
         if($chk->rowCount() > 0) {
@@ -264,7 +295,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
             $ext = pathinfo($_FILES['og_image_file']['name'], PATHINFO_EXTENSION);
             $filename = 'college_og_' . time() . '_' . uniqid() . '.' . $ext;
             if (move_uploaded_file($_FILES['og_image_file']['tmp_name'], $upload_dir . $filename)) {
-                $_POST['og_image_url'] = '/ADMISSION/uploads/' . $filename;
+                $_POST['og_image_url'] = 'uploads/' . $filename;
+            }
+        }
+        
+        $schema_markup = $_POST['schema_markup'];
+        if (empty(trim($schema_markup))) {
+            $uStmt = $pdo->prepare("SELECT c.name, cm.logo_url, ct.about_text, cc.address, cc.website_url, cc.phone 
+                                    FROM colleges c 
+                                    LEFT JOIN college_media cm ON c.id = cm.college_id AND cm.image_type IS NULL
+                                    LEFT JOIN college_contacts cc ON c.id = cc.college_id 
+                                    LEFT JOIN college_content ct ON c.id = ct.college_id 
+                                    WHERE c.id = ?");
+            $uStmt->execute([$id]);
+            $uData = $uStmt->fetch(PDO::FETCH_ASSOC);
+            if ($uData) {
+                $schema = [
+                    "@context" => "https://schema.org",
+                    "@type" => "CollegeOrUniversity",
+                    "name" => $uData['name'],
+                    "description" => $uData['about_text'] ? substr(strip_tags($uData['about_text']), 0, 160) : '',
+                    "url" => $uData['website_url'] ?: '',
+                    "telephone" => $uData['phone'] ?: '',
+                    "address" => [
+                        "@type" => "PostalAddress",
+                        "streetAddress" => $uData['address'] ?: '',
+                    ]
+                ];
+                if ($uData['logo_url']) {
+                    $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+                    $schema["logo"] = "https://".$host."/".ltrim($uData['logo_url'], '/');
+                }
+                $schema_markup = json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
             }
         }
         
@@ -273,20 +335,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
             'meta_description' => $_POST['meta_description'],
             'og_image_url' => $_POST['og_image_url'],
             'canonical_url' => $_POST['canonical_url'],
-            'schema_markup' => $_POST['schema_markup'],
+            'schema_markup' => $schema_markup,
             'noindex' => isset($_POST['noindex']) ? 1 : 0
         ];
         
-        $chk = $pdo->prepare("SELECT id FROM seo_meta WHERE entity_type = 'college' AND entity_id = ?"); 
+        $chk = $pdo->prepare("SELECT id FROM seo_meta WHERE page_type = 'college' AND page_id = ?"); 
         $chk->execute([$id]);
         if($chk->rowCount() > 0) {
             $fields = []; foreach($seoData as $k=>$v) $fields[] = "$k = :$k";
-            $seoData['entity_id'] = $id;
-            $pdo->prepare("UPDATE seo_meta SET " . implode(", ", $fields) . " WHERE entity_type = 'college' AND entity_id = :entity_id")->execute($seoData);
+            $seoData['page_id'] = $id;
+            $pdo->prepare("UPDATE seo_meta SET " . implode(", ", $fields) . " WHERE page_type = 'college' AND page_id = :page_id")->execute($seoData);
         } else {
             $seoData['id'] = generateUUID(); 
-            $seoData['entity_type'] = 'college';
-            $seoData['entity_id'] = $id;
+            $seoData['page_type'] = 'college';
+            $seoData['page_id'] = $id;
             $keys = array_keys($seoData);
             $pdo->prepare("INSERT INTO seo_meta (" . implode(", ", $keys) . ") VALUES (:" . implode(", :", $keys) . ")")->execute($seoData);
         }
@@ -327,7 +389,7 @@ if ($is_edit) {
         LEFT JOIN college_admissions ca ON c.id = ca.college_id
         LEFT JOIN college_infrastructure ci ON c.id = ci.college_id
         LEFT JOIN college_hostels ch ON c.id = ch.college_id
-        LEFT JOIN seo_meta sm ON c.id = sm.entity_id AND sm.entity_type = 'college'
+        LEFT JOIN seo_meta sm ON c.id = sm.page_id AND sm.page_type = 'college'
         WHERE c.id = ?
     ";
     $stmt = $pdo->prepare($query);
@@ -517,17 +579,29 @@ function getValue($arr, $key, $default = '') {
                         <h3><i class="ph ph-image"></i> Media & Accreditations</h3>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label>Logo URL</label>
+                                <label>Logo Image</label>
                                 <?php if(getValue($college, 'logo_url')): ?>
-                                    <div style="margin-bottom: 8px;"><img src="<?php echo getValue($college, 'logo_url'); ?>" style="height: 50px; border-radius: 4px; border: 1px solid #ccc;"></div>
+                                    <div style="margin-bottom: 8px;">
+                                        <?php 
+                                            $logoSrc = getValue($college, 'logo_url');
+                                            if (strpos($logoSrc, 'http') !== 0) $logoSrc = '../' . $logoSrc;
+                                        ?>
+                                        <img src="<?php echo $logoSrc; ?>" style="height: 50px; border-radius: 4px; border: 1px solid #ccc;">
+                                    </div>
                                 <?php endif; ?>
                                 <input type="hidden" name="existing_logo_url" value="<?php echo getValue($college, 'logo_url'); ?>">
                                 <input type="file" name="logo_file" class="form-control" accept="image/*">
                             </div>
                             <div class="form-group">
-                                <label>Cover Image URL</label>
+                                <label>Cover Image</label>
                                 <?php if(getValue($college, 'cover_image_url')): ?>
-                                    <div style="margin-bottom: 8px;"><img src="<?php echo getValue($college, 'cover_image_url'); ?>" style="height: 50px; border-radius: 4px; border: 1px solid #ccc;"></div>
+                                    <div style="margin-bottom: 8px;">
+                                        <?php 
+                                            $coverSrc = getValue($college, 'cover_image_url');
+                                            if (strpos($coverSrc, 'http') !== 0) $coverSrc = '../' . $coverSrc;
+                                        ?>
+                                        <img src="<?php echo $coverSrc; ?>" style="height: 50px; border-radius: 4px; border: 1px solid #ccc;">
+                                    </div>
                                 <?php endif; ?>
                                 <input type="hidden" name="existing_cover_image_url" value="<?php echo getValue($college, 'cover_image_url'); ?>">
                                 <input type="file" name="cover_file" class="form-control" accept="image/*">
@@ -711,21 +785,21 @@ function getValue($arr, $key, $default = '') {
                                 <label>About Text</label>
                                 <textarea name="about_text" class="form-control" rows="5"><?php echo getValue($college, 'about_text'); ?></textarea>
                             </div>
-                            <div class="form-group">
-                                <label>Highlights (JSON List)</label>
-                                <textarea name="highlights_json" class="form-control" rows="3"><?php echo getValue($college, 'highlights_json'); ?></textarea>
+                                                        <div class="form-group">
+                                <label>Highlights (One per line)</label>
+                                <textarea name="highlights_json" class="form-control" rows="3" placeholder="Excellent Campus&#10;Top Recruiters"><?php echo jsonToLines($college['highlights_json'] ?? ''); ?></textarea>
                             </div>
                             <div class="form-group">
-                                <label>Accreditations (JSON List)</label>
-                                <textarea name="accreditations_json" class="form-control" rows="3"><?php echo getValue($college, 'accreditations_json'); ?></textarea>
+                                <label>Accreditations (One per line)</label>
+                                <textarea name="accreditations" class="form-control" rows="3" placeholder="UGC&#10;AICTE"><?php echo jsonToLines($college['accreditations_json'] ?? ''); ?></textarea>
                             </div>
                             <div class="form-group">
-                                <label>Rankings (JSON Object)</label>
-                                <textarea name="rankings_json" class="form-control" rows="3"><?php echo getValue($college, 'rankings_json'); ?></textarea>
+                                <label>Rankings (Format: Name: Rank)</label>
+                                <textarea name="rankings_json" class="form-control" rows="3" placeholder="NIRF: 12&#10;India Today: 5"><?php echo jsonToLines($college['rankings_json'] ?? '', true); ?></textarea>
                             </div>
                             <div class="form-group">
-                                <label>Awards (JSON List)</label>
-                                <textarea name="awards_json" class="form-control" rows="3"><?php echo getValue($college, 'awards_json'); ?></textarea>
+                                <label>Awards (One per line)</label>
+                                <textarea name="awards_json" class="form-control" rows="3" placeholder="Best Engineering College 2023"><?php echo jsonToLines($college['awards_json'] ?? ''); ?></textarea>
                             </div>
                         </div>
                     </div>
@@ -737,9 +811,9 @@ function getValue($arr, $key, $default = '') {
                                 <label>Admission Process Description</label>
                                 <textarea name="admission_process" class="form-control" rows="4"><?php echo getValue($college, 'admission_process'); ?></textarea>
                             </div>
-                            <div class="form-group full">
-                                <label>Accepted Exams (JSON List)</label>
-                                <input type="text" name="accepted_exams" class="form-control" value="<?php echo getValue($college, 'accepted_exams'); ?>" placeholder='["JEE Main", "SAT"]'>
+                                                        <div class="form-group full">
+                                <label>Accepted Exams (One per line)</label>
+                                <textarea name="accepted_exams" class="form-control" rows="2" placeholder="JEE Main&#10;SAT"><?php echo jsonToLines($college['accepted_exams'] ?? ''); ?></textarea>
                             </div>
                             <div class="form-group">
                                 <label>Admission Start Date</label>
@@ -787,13 +861,13 @@ function getValue($arr, $key, $default = '') {
                                 <div><input type="checkbox" name="ev_charging" <?php echo !empty($college['ev_charging'])?'checked':''; ?>> <label>EV Charging</label></div>
                                 <div><input type="checkbox" name="solar_power" <?php echo !empty($college['solar_power'])?'checked':''; ?>> <label>Solar Power</label></div>
                             </div>
-                            <div class="form-group">
-                                <label>Sports Facilities (JSON)</label>
-                                <textarea name="sports_facilities" class="form-control" rows="3"><?php echo getValue($college, 'sports_facilities'); ?></textarea>
+                                                        <div class="form-group">
+                                <label>Sports Facilities (One per line)</label>
+                                <textarea name="sports_facilities" class="form-control" rows="3" placeholder="Cricket&#10;Football"><?php echo jsonToLines($college['sports_facilities'] ?? ''); ?></textarea>
                             </div>
                             <div class="form-group">
-                                <label>Labs (JSON)</label>
-                                <textarea name="labs" class="form-control" rows="3"><?php echo getValue($college, 'labs'); ?></textarea>
+                                <label>Labs (One per line)</label>
+                                <textarea name="labs" class="form-control" rows="3" placeholder="Computer Lab&#10;Physics Lab"><?php echo jsonToLines($college['labs'] ?? ''); ?></textarea>
                             </div>
                         </div>
                     </div>
@@ -873,15 +947,21 @@ function getValue($arr, $key, $default = '') {
                                 <input type="url" name="canonical_url" class="form-control" value="<?php echo getValue($college, 'canonical_url'); ?>">
                             </div>
                             <div class="form-group full">
-                                <label>OG Image URL</label>
+                                <label>OG Image</label>
                                 <?php if(getValue($college, 'og_image_url')): ?>
-                                    <div style="margin-bottom: 8px;"><img src="<?php echo getValue($college, 'og_image_url'); ?>" style="height: 50px; border-radius: 4px; border: 1px solid #ccc;"></div>
+                                    <div style="margin-bottom: 8px;">
+                                        <?php 
+                                            $ogSrc = getValue($college, 'og_image_url');
+                                            if (strpos($ogSrc, 'http') !== 0) $ogSrc = '../' . $ogSrc;
+                                        ?>
+                                        <img src="<?php echo $ogSrc; ?>" style="height: 50px; border-radius: 4px; border: 1px solid #ccc;">
+                                    </div>
                                 <?php endif; ?>
                                 <input type="hidden" name="existing_og_image_url" value="<?php echo getValue($college, 'og_image_url'); ?>">
                                 <input type="file" name="og_image_file" class="form-control" accept="image/*">
                             </div>
                             <div class="form-group full">
-                                <label>Schema Markup (JSON)</label>
+                                <label>Schema Markup (Leave blank to auto-generate)</label>
                                 <textarea name="schema_markup" class="form-control" rows="6"><?php echo getValue($college, 'schema_markup'); ?></textarea>
                             </div>
                             <div class="form-group checkbox-group">

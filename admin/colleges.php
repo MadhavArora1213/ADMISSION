@@ -49,7 +49,7 @@ $colleges = $stmt->fetchAll();
         .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
         .sidebar-nav a i { font-size: 1.25rem; }
         
-        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; }
+        .main-content { flex: 1; margin-left: 280px; max-width: calc(100% - 280px); display: flex; flex-direction: column; }
         .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
         .user-profile { display: flex; align-items: center; gap: 12px; font-weight: 500; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; }
