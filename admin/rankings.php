@@ -13,8 +13,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $rank_position = $_POST['rank_position'] ?: null;
         $rank_band = $_POST['rank_band'];
         $score = $_POST['score'] ?: null;
-        $sub_scores = $_POST['sub_scores'] ?: null;
-        $source_url = $_POST['source_url'];
+        $sub_scores_json = null;
+        if (!empty(trim($_POST['sub_scores']))) {
+            $scores = array_map('trim', explode(',', $_POST['sub_scores']));
+            $scores = array_filter($scores, 'strlen');
+            if (!empty($scores)) {
+                $formatted = [];
+                foreach($scores as $s) {
+                    $parts = explode(':', $s);
+                    $name = trim($parts[0] ?? '');
+                    $val = trim($parts[1] ?? '0');
+                    if ($name) {
+                        $formatted[$name] = (float)$val;
+                    }
+                }
+                $sub_scores_json = json_encode($formatted);
+            }
+        }
+        $sub_scores = $sub_scores_json;
+
+        $source_url = !empty($_POST['source_url']) ? $_POST['source_url'] : null;
+        if (isset($_FILES['source_file']) && $_FILES['source_file']['error'] == 0) {
+            $upload_dir = '../uploads/rankings/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+            $file_name = time() . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '', basename($_FILES['source_file']['name']));
+            $target_file = $upload_dir . $file_name;
+            if (move_uploaded_file($_FILES['source_file']['tmp_name'], $target_file)) {
+                $source_url = 'uploads/rankings/' . $file_name;
+            }
+        }
         $published_date = $_POST['published_date'] ?: null;
         $previous_year_rank = $_POST['previous_year_rank'] ?: null;
         
@@ -93,7 +122,7 @@ $colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetc
 
             <div class="panel">
                 <h3><i class="ph ph-plus-circle"></i> Add New Ranking</h3>
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="save_ranking">
                     <div class="form-grid">
                         <div class="form-group" style="grid-column: 1 / span 2;">
@@ -107,15 +136,16 @@ $colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetc
                         </div>
                         <div class="form-group">
                             <label>Ranking Body</label>
-                            <select name="ranking_body" class="form-control" required>
-                                <option value="NIRF">NIRF</option>
-                                <option value="QS">QS</option>
-                                <option value="Times">Times</option>
-                                <option value="Outlook">Outlook</option>
-                                <option value="IndiaToday">IndiaToday</option>
-                                <option value="NAAC">NAAC</option>
-                                <option value="Careers360">Careers360</option>
-                            </select>
+                            <input type="text" name="ranking_body" class="form-control" list="ranking_body_list" placeholder="e.g. NIRF, QS" required>
+                            <datalist id="ranking_body_list">
+                                <option value="NIRF">
+                                <option value="QS">
+                                <option value="Times">
+                                <option value="Outlook">
+                                <option value="IndiaToday">
+                                <option value="NAAC">
+                                <option value="Careers360">
+                            </datalist>
                         </div>
                         <div class="form-group">
                             <label>Year</label>
@@ -123,14 +153,24 @@ $colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetc
                         </div>
                         <div class="form-group">
                             <label>Category</label>
-                            <select name="category" class="form-control" required>
-                                <option value="Overall">Overall</option>
-                                <option value="Engineering">Engineering</option>
-                                <option value="Management">Management</option>
-                                <option value="Medical">Medical</option>
-                                <option value="Law">Law</option>
-                                <option value="Arts">Arts</option>
-                            </select>
+                            <input type="text" name="category" class="form-control" list="category_list" placeholder="e.g. Overall, Engineering, Pharmacy" required>
+                            <datalist id="category_list">
+                                <option value="Overall">
+                                <option value="Engineering">
+                                <option value="Management">
+                                <option value="Medical">
+                                <option value="Law">
+                                <option value="Arts">
+                                <option value="Pharmacy">
+                                <option value="Dental">
+                                <option value="Architecture">
+                                <option value="Agriculture">
+                                <option value="Design">
+                                <option value="Science">
+                                <option value="Commerce">
+                                <option value="Mass Communication">
+                                <option value="Hotel Management">
+                            </datalist>
                         </div>
                         <div class="form-group">
                             <label>Rank Position</label>
@@ -149,11 +189,15 @@ $colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetc
                             <input type="number" name="previous_year_rank" class="form-control" placeholder="e.g. 20">
                         </div>
                         <div class="form-group" style="grid-column: 1 / span 3;">
-                            <label>Sub-scores (JSON format)</label>
-                            <input type="text" name="sub_scores" class="form-control" placeholder='{"teaching": 88.5, "research": 76.2}'>
+                            <label>Sub-scores (Comma-separated Name:Score)</label>
+                            <input type="text" name="sub_scores" class="form-control" placeholder='e.g. Teaching: 88.5, Research: 76.2'>
                         </div>
-                        <div class="form-group" style="grid-column: 1 / span 3;">
-                            <label>Source URL</label>
+                        <div class="form-group" style="grid-column: 1 / span 2;">
+                            <label>Upload Ranking Document/PDF</label>
+                            <input type="file" name="source_file" class="form-control" accept=".pdf,.doc,.docx,image/*">
+                        </div>
+                        <div class="form-group">
+                            <label>OR Source URL</label>
                             <input type="url" name="source_url" class="form-control" placeholder="https://...">
                         </div>
                     </div>
@@ -196,6 +240,13 @@ $colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetc
                                     ?>
                                 </td>
                                 <td>
+                                    <?php 
+                                    $link = $row['source_url'] ?? '';
+                                    if ($link) {
+                                        $display_link = preg_match('/^https?:\/\//', $link) ? $link : '../' . $link;
+                                        echo "<a href='" . htmlspecialchars($display_link) . "' target='_blank' style='margin-right:8px; color:var(--primary);'><i class='ph ph-eye'></i></a>";
+                                    }
+                                    ?>
                                     <a href="?delete=<?php echo $row['id']; ?>" class="btn-danger" onclick="return confirm('Delete this ranking?');"><i class="ph ph-trash"></i></a>
                                 </td>
                             </tr>

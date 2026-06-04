@@ -34,14 +34,13 @@ if (isset($_GET['delete'])) {
 $seats = $pdo->query("SELECT s.*, col.name as college_name, crs.course_name as course_name 
                       FROM seat_matrix s 
                       LEFT JOIN colleges col ON s.college_id = col.id 
-                      LEFT JOIN courses crs ON s.course_id = crs.id 
+                      LEFT JOIN college_courses crs ON s.course_id = crs.id 
                       ORDER BY s.year DESC, col.name ASC")->fetchAll();
 
 // Fetch Colleges for dropdown
 $colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetchAll();
 
-// Fetch Courses for dropdown
-$courses = $pdo->query("SELECT id, course_name as name FROM courses ORDER BY course_name ASC")->fetchAll();
+// Courses will be fetched dynamically via AJAX based on selected college
 
 ?>
 <!DOCTYPE html>
@@ -95,7 +94,7 @@ $courses = $pdo->query("SELECT id, course_name as name FROM courses ORDER BY cou
                     <div class="form-grid">
                         <div class="form-group" style="grid-column: 1 / span 2;">
                             <label>College</label>
-                            <select name="college_id" class="form-control" required>
+                            <select name="college_id" id="college_select" class="form-control" required>
                                 <option value="">-- Select College --</option>
                                 <?php foreach($colleges as $c): ?>
                                     <option value="<?php echo $c['id']; ?>"><?php echo htmlspecialchars($c['name']); ?></option>
@@ -104,11 +103,8 @@ $courses = $pdo->query("SELECT id, course_name as name FROM courses ORDER BY cou
                         </div>
                         <div class="form-group" style="grid-column: 1 / span 2;">
                             <label>Course</label>
-                            <select name="course_id" class="form-control" required>
-                                <option value="">-- Select Course --</option>
-                                <?php foreach($courses as $c): ?>
-                                    <option value="<?php echo $c['id']; ?>"><?php echo htmlspecialchars($c['name']); ?></option>
-                                <?php endforeach; ?>
+                            <select name="course_id" id="course_select" class="form-control" required>
+                                <option value="">-- Select College First --</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -197,5 +193,39 @@ $courses = $pdo->query("SELECT id, course_name as name FROM courses ORDER BY cou
         </div>
     </main>
 </div>
+<script>
+    document.getElementById('college_select').addEventListener('change', function() {
+        const collegeId = this.value;
+        const courseSelect = document.getElementById('course_select');
+        
+        // Reset course dropdown
+        courseSelect.innerHTML = '<option value="">-- Loading Courses... --</option>';
+        
+        if (!collegeId) {
+            courseSelect.innerHTML = '<option value="">-- Select College First --</option>';
+            return;
+        }
+
+        fetch('api/get_college_courses.php?college_id=' + encodeURIComponent(collegeId))
+            .then(response => response.json())
+            .then(data => {
+                courseSelect.innerHTML = '<option value="">-- Select Course --</option>';
+                if (data.length === 0) {
+                    courseSelect.innerHTML = '<option value="">-- No courses found for this college --</option>';
+                } else {
+                    data.forEach(course => {
+                        const option = document.createElement('option');
+                        option.value = course.id;
+                        option.textContent = course.name;
+                        courseSelect.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching courses:', error);
+                courseSelect.innerHTML = '<option value="">-- Error loading courses --</option>';
+            });
+    });
+</script>
 </body>
 </html>

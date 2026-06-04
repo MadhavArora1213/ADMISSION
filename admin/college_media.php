@@ -33,17 +33,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $document_type = null;
             $tour_360_url = null;
 
+            $final_url = !empty($_POST['url']) ? $_POST['url'] : null;
+
+            if (isset($_FILES['media_file']) && $_FILES['media_file']['error'] == 0) {
+                $upload_dir = '../uploads/media/';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0777, true);
+                }
+                $file_name = time() . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '', basename($_FILES['media_file']['name']));
+                $target_file = $upload_dir . $file_name;
+                if (move_uploaded_file($_FILES['media_file']['tmp_name'], $target_file)) {
+                    $final_url = 'uploads/media/' . $file_name;
+                }
+            }
+
             if($media_type == 'image') {
-                $image_url = $_POST['url'];
+                $image_url = $final_url;
                 $image_type = $_POST['sub_type'] ?: null;
             } elseif ($media_type == 'video') {
-                $video_url = $_POST['url'];
+                $video_url = $final_url;
                 $video_type = $_POST['sub_type'] ?: null;
             } elseif ($media_type == 'document') {
-                $document_url = $_POST['url'];
+                $document_url = $final_url;
                 $document_type = $_POST['sub_type'] ?: null;
             } elseif ($media_type == '360') {
-                $tour_360_url = $_POST['url'];
+                $tour_360_url = $final_url;
             }
             
             $stmt = $pdo->prepare("
@@ -74,8 +88,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         header("Location: college_media.php?college_id=$college_id&msg=deleted");
         exit;
     } elseif (isset($_POST['action']) && $_POST['action'] == 'update_tour') {
-        $stmt = $pdo->prepare("UPDATE college_media SET virtual_tour_enabled = ? WHERE college_id = ? AND image_type IS NULL"); // Apply to identity row
-        $stmt->execute([isset($_POST['virtual_tour_enabled']) ? 1 : 0, $college_id]);
+        $enabled = isset($_POST['virtual_tour_enabled']) ? 1 : 0;
+        $url = !empty($_POST['tour_url']) ? $_POST['tour_url'] : null;
+        
+        $chk = $pdo->prepare("SELECT id FROM college_media WHERE college_id = ? AND image_url IS NULL AND video_url IS NULL AND document_url IS NULL LIMIT 1");
+        $chk->execute([$college_id]);
+        $row = $chk->fetch();
+        
+        if ($row) {
+            $stmt = $pdo->prepare("UPDATE college_media SET virtual_tour_enabled = ?, `360_tour_url` = ? WHERE id = ?");
+            $stmt->execute([$enabled, $url, $row['id']]);
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO college_media (id, college_id, virtual_tour_enabled, `360_tour_url`) VALUES (?, ?, ?, ?)");
+            $stmt->execute([generateUUID(), $college_id, $enabled, $url]);
+        }
+        
         header("Location: college_media.php?college_id=$college_id&msg=updated");
         exit;
     }
@@ -87,7 +114,7 @@ $stmt->execute([$college_id]);
 $media = $stmt->fetchAll();
 
 // Fetch virtual tour setting
-$stmtTour = $pdo->prepare("SELECT virtual_tour_enabled FROM college_media WHERE college_id = ? AND image_type IS NULL LIMIT 1");
+$stmtTour = $pdo->prepare("SELECT virtual_tour_enabled, `360_tour_url` FROM college_media WHERE college_id = ? AND image_url IS NULL AND video_url IS NULL AND document_url IS NULL LIMIT 1");
 $stmtTour->execute([$college_id]);
 $tourSetting = $stmtTour->fetch();
 ?>
@@ -102,37 +129,57 @@ $tourSetting = $stmtTour->fetch();
     <style>
         body { background-color: var(--bg-light); }
         .admin-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; }
+        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease; }
         .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-header .logo { font-size: 1.3rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
         .sidebar-nav { padding: 24px 0; flex: 1; }
         .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; text-decoration: none;}
         .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
-        .main-content { flex: 1; margin-left: 280px; max-width: calc(100% - 280px); display: flex; flex-direction: column; }
+        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; min-width: 0; }
         .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
         .user-profile { display: flex; align-items: center; gap: 12px; font-weight: 500; }
         .content-area { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
         .page-header { margin-bottom: 24px; }
-        .page-header h2 { font-size: 1.8rem; font-weight: 700; display:flex; align-items:center; gap: 12px; }
+        .page-header h2 { font-size: 1.8rem; font-weight: 700; display:flex; align-items:center; gap: 12px; flex-wrap: wrap; }
         .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding-bottom: 12px; }
         .tab-link { padding: 8px 16px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
         .tab-link:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
         .tab-link.active { background: var(--primary); color: white; }
-        .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
+        .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); overflow-x: auto; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
         .form-group { margin-bottom: 16px; }
         .form-group.full { grid-column: 1 / -1; }
-        .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; min-width: 600px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
+        
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-dark); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+
+        @media (max-width: 768px) { 
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-left: 0; }
+            .topbar { justify-content: space-between; padding: 0 16px; }
+            .mobile-menu-btn { display: block; }
+            .content-area { padding: 16px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .page-header h2 { font-size: 1.5rem; }
+            .panel { padding: 16px; }
+        }
     </style>
 </head>
 <body>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <div class="admin-layout">
         <?php include 'sidebar.php'; ?>
         <main class="main-content">
             <header class="topbar">
+                <button class="mobile-menu-btn" id="mobile-menu-btn">
+                    <i class="ph ph-list"></i>
+                </button>
                 <div class="user-profile">
                     <span>Admin</span>
                 </div>
@@ -164,17 +211,22 @@ $tourSetting = $stmtTour->fetch();
                 <?php endif; ?>
 
                 <div class="panel">
-                    <form action="" method="POST" style="display:flex; gap:16px; align-items:center;">
+                    <form action="" method="POST" style="display:flex; flex-wrap:wrap; gap:16px; align-items:center;">
                         <input type="hidden" name="action" value="update_tour">
-                        <input type="checkbox" name="virtual_tour_enabled" id="vt" <?php echo !empty($tourSetting['virtual_tour_enabled']) ? 'checked' : ''; ?>>
-                        <label for="vt" style="font-weight:600; cursor:pointer;">Virtual Tour Enabled</label>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <input type="checkbox" name="virtual_tour_enabled" id="vt" <?php echo !empty($tourSetting['virtual_tour_enabled']) ? 'checked' : ''; ?> onchange="document.getElementById('tourUrlInput').style.display = this.checked ? 'block' : 'none';">
+                            <label for="vt" style="font-weight:600; cursor:pointer;">Virtual Tour Enabled</label>
+                        </div>
+                        <div id="tourUrlInput" style="display: <?php echo !empty($tourSetting['virtual_tour_enabled']) ? 'block' : 'none'; ?>; flex: 1; min-width: 250px;">
+                            <input type="url" name="tour_url" placeholder="Virtual Tour URL (https://...)" class="form-control" value="<?php echo htmlspecialchars($tourSetting['360_tour_url'] ?? ''); ?>">
+                        </div>
                         <button type="submit" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.9rem;">Save Setting</button>
                     </form>
                 </div>
 
                 <div class="panel">
                     <h3><i class="ph ph-plus-circle"></i> Add Media/Document</h3>
-                    <form action="" method="POST" style="margin-top:16px;">
+                    <form action="" method="POST" enctype="multipart/form-data" style="margin-top:16px;">
                         <input type="hidden" name="action" value="add">
                         <div class="form-grid">
                             <div class="form-group">
@@ -205,7 +257,14 @@ $tourSetting = $stmtTour->fetch();
                                     </optgroup>
                                 </select>
                             </div>
-                            <div class="form-group full"><label>URL (Direct Link or Embed)</label><input type="url" name="url" class="form-control" required></div>
+                            <div class="form-group full" id="file_group">
+                                <label>Upload File</label>
+                                <input type="file" name="media_file" id="media_file_input" class="form-control" accept="image/*">
+                            </div>
+                            <div class="form-group full" id="url_group">
+                                <label>OR Direct Link / Embed URL (e.g., YouTube, Matterport)</label>
+                                <input type="url" name="url" id="media_url_input" class="form-control">
+                            </div>
                             <div class="form-group full"><label>Caption / Title</label><input type="text" name="caption" class="form-control"></div>
                             <div class="form-group"><label>Sort Order</label><input type="number" name="sort_order" class="form-control" value="0"></div>
                         </div>
@@ -232,9 +291,12 @@ $tourSetting = $stmtTour->fetch();
                                         elseif ($m['360_tour_url']) { $typeStr = '360 Tour'; $link = $m['360_tour_url']; }
                                     ?>
                                     <tr>
+                                        <?php 
+                                        $display_link = preg_match('/^https?:\/\//', $link) ? $link : '../' . $link;
+                                        ?>
                                         <td>
                                             <?php if($typeStr == 'Image'): ?>
-                                                <img src="<?php echo htmlspecialchars($link); ?>" alt="" style="width:60px; height:60px; object-fit:cover; border-radius:4px;">
+                                                <img src="<?php echo htmlspecialchars($display_link); ?>" alt="" style="width:60px; height:60px; object-fit:cover; border-radius:4px;">
                                             <?php elseif($typeStr == 'Document'): ?>
                                                 <i class="ph ph-file-pdf" style="font-size:2rem; color:var(--text-muted);"></i>
                                             <?php else: ?>
@@ -246,7 +308,7 @@ $tourSetting = $stmtTour->fetch();
                                         <td><?php echo htmlspecialchars($m['caption']); ?></td>
                                         <td><?php echo htmlspecialchars($m['sort_order']); ?></td>
                                         <td>
-                                            <a href="<?php echo htmlspecialchars($link); ?>" target="_blank" style="margin-right:8px; color:var(--primary);"><i class="ph ph-eye" style="font-size:1.2rem;"></i></a>
+                                            <a href="<?php echo htmlspecialchars($display_link); ?>" target="_blank" style="margin-right:8px; color:var(--primary);"><i class="ph ph-eye" style="font-size:1.2rem;"></i></a>
                                             <form action="" method="POST" style="display:inline;" onsubmit="return confirm('Delete?');">
                                                 <input type="hidden" name="action" value="delete"><input type="hidden" name="m_id" value="<?php echo $m['id']; ?>">
                                                 <button type="submit" style="background:none; border:none; color:#dc2626; cursor:pointer;"><i class="ph ph-trash" style="font-size:1.2rem;"></i></button>
@@ -262,5 +324,39 @@ $tourSetting = $stmtTour->fetch();
             </div>
         </main>
     </div>
+    <script>
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.add('open');
+            document.getElementById('sidebar-overlay').classList.add('show');
+        });
+        document.getElementById('sidebar-overlay').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.remove('open');
+            this.classList.remove('show');
+        });
+        
+        document.getElementById('media_type_select').addEventListener('change', function() {
+            var type = this.value;
+            var fileGroup = document.getElementById('file_group');
+            var urlGroup = document.getElementById('url_group');
+            var fileInput = document.getElementById('media_file_input');
+            
+            if (type === '360') {
+                fileGroup.style.display = 'none';
+                fileInput.removeAttribute('accept');
+                urlGroup.style.display = 'block';
+            } else {
+                fileGroup.style.display = 'block';
+                urlGroup.style.display = 'block';
+                if (type === 'image') {
+                    fileInput.setAttribute('accept', 'image/*');
+                } else if (type === 'video') {
+                    fileInput.setAttribute('accept', 'video/*');
+                } else if (type === 'document') {
+                    fileInput.setAttribute('accept', '.pdf,.doc,.docx');
+                }
+            }
+        });
+        document.getElementById('media_type_select').dispatchEvent(new Event('change'));
+    </script>
 </body>
 </html>
