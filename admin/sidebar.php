@@ -78,7 +78,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Search & Discovery</div>
         <a href="search_analytics.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['search_analytics.php','search_config.php']) ? 'active' : ''; ?>"><i class="ph ph-magnifying-glass"></i> Search Analytics</a>
         <a href="compare_engine.php" class="<?php echo ($current_page == 'compare_engine.php') ? 'active' : ''; ?>"><i class="ph ph-scales"></i> Compare Engine</a>
-        <a href="predictor.php" class="<?php echo ($current_page == 'predictor.php') ? 'active' : ''; ?>"><i class="ph ph-magic-wand"></i> College Predictor</a>
         <a href="emi_calculator.php" class="<?php echo ($current_page == 'emi_calculator.php') ? 'active' : ''; ?>"><i class="ph ph-calculator"></i> Fee / EMI Calculator</a>
         
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">SEO Management</div>

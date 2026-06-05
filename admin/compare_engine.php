@@ -7,24 +7,27 @@ require_once 'db.php';
 $msg = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_config'])) {
     $max_entities = (int)$_POST['max_entities'];
-    $compare_fields_config = $_POST['compare_fields_config'];
     
-    // Validate JSON
-    json_decode($compare_fields_config);
-    if (json_last_error() === JSON_ERROR_NONE) {
-        // Check if config exists
-        $stmt = $pdo->query("SELECT id FROM compare_config LIMIT 1");
-        if ($stmt->rowCount() > 0) {
-            $update = $pdo->prepare("UPDATE compare_config SET max_entities = ?, compare_fields_config = ?");
-            $update->execute([$max_entities, $compare_fields_config]);
-        } else {
-            $insert = $pdo->prepare("INSERT INTO compare_config (max_entities, compare_fields_config) VALUES (?, ?)");
-            $insert->execute([$max_entities, $compare_fields_config]);
-        }
-        $msg = "Configuration updated successfully.";
+    // Construct JSON safely from the dynamic UI fields
+    $fields = $_POST['fields'] ?? [];
+    $config_array = [
+        'college' => array_values(array_filter(array_map('trim', $fields['college'] ?? []))),
+        'course'  => array_values(array_filter(array_map('trim', $fields['course'] ?? []))),
+        'exam'    => array_values(array_filter(array_map('trim', $fields['exam'] ?? [])))
+    ];
+    
+    $compare_fields_config = json_encode($config_array, JSON_UNESCAPED_UNICODE);
+
+    // Check if config exists
+    $stmt = $pdo->query("SELECT id FROM compare_config LIMIT 1");
+    if ($stmt->rowCount() > 0) {
+        $update = $pdo->prepare("UPDATE compare_config SET max_entities = ?, compare_fields_config = ?");
+        $update->execute([$max_entities, $compare_fields_config]);
     } else {
-        $msg = "Invalid JSON format for fields configuration.";
+        $insert = $pdo->prepare("INSERT INTO compare_config (max_entities, compare_fields_config) VALUES (?, ?)");
+        $insert->execute([$max_entities, $compare_fields_config]);
     }
+    $msg = "Configuration updated successfully.";
 }
 
 // Fetch current config
@@ -39,6 +42,12 @@ if (!$config) {
         ], JSON_PRETTY_PRINT)
     ];
 }
+
+// Parse the JSON for the UI
+$fields_json = json_decode($config['compare_fields_config'], true);
+$college_fields = $fields_json['college'] ?? [];
+$course_fields = $fields_json['course'] ?? [];
+$exam_fields = $fields_json['exam'] ?? [];
 
 // Fetch compare sessions
 $stmt = $pdo->prepare("
@@ -59,6 +68,7 @@ $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Compare Engine | AdmissionSeason Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <style>
         body { background-color: var(--bg-light); }
         .admin-layout { display: flex; min-height: 100vh; }
@@ -81,12 +91,15 @@ $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .form-label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; }
         .form-control { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; font-family: inherit; }
         .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-        textarea.form-control { resize: vertical; font-family: monospace; }
         
         .btn-primary { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .btn-primary:hover { background: #1d4ed8; }
+        .btn-secondary { background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size:0.85rem;}
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight:bold;}
+        .btn-danger:hover { background: #fecaca; }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dbeafe; color: #1e40af; margin-bottom: 20px; border: 1px solid #bfdbfe; font-weight:500; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; font-weight:500; }
         
         table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
@@ -97,7 +110,8 @@ $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .badge-course { background: #dcfce7; color: #166534; }
         .badge-exam { background: #fef9c3; color: #854d0e; }
         
-        .code-block { background: #f1f5f9; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 0.8rem; overflow-x: auto; border: 1px solid var(--border-color); }
+        .category-box { border: 1px solid var(--border-color); padding: 16px; border-radius: 12px; background: #f8fafc;}
+        .category-box h4 { margin-top:0; color:var(--primary); margin-bottom:12px; display:flex; align-items:center; gap:6px; font-size:1rem;}
     </style>
 </head>
 <body>
@@ -117,7 +131,7 @@ $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
             
             <?php if($msg): ?>
-            <div class="msg-alert"><i class="ph ph-info"></i> <?php echo htmlspecialchars($msg); ?></div>
+            <div class="msg-alert"><i class="ph ph-check-circle"></i> <?php echo htmlspecialchars($msg); ?></div>
             <?php endif; ?>
 
             <div class="panel">
@@ -130,16 +144,57 @@ $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Compare Fields Configuration (JSON)</label>
-                        <textarea name="compare_fields_config" class="form-control" rows="10" required><?php 
-                            // Format JSON nicely if it's valid
-                            $json = json_decode($config['compare_fields_config']);
-                            echo $json ? json_encode($json, JSON_PRETTY_PRINT) : htmlspecialchars($config['compare_fields_config']); 
-                        ?></textarea>
-                        <small style="color:var(--text-muted); display:block; margin-top:4px;">Define the field groups and ordered lists for each comparison type (college, course, exam).</small>
+                        <label class="form-label">Compare Fields Configuration</label>
+                        <small style="color:var(--text-muted); display:block; margin-bottom:16px;">Define the specific metrics users can use to compare each entity type side-by-side.</small>
+                        
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                            
+                            <!-- College Fields -->
+                            <div class="category-box">
+                                <h4><i class="ph ph-buildings"></i> College Fields</h4>
+                                <div id="container-college" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+                                    <?php foreach($college_fields as $field): ?>
+                                    <div class="field-row" style="display:flex; gap:8px;">
+                                        <input type="text" name="fields[college][]" class="form-control" value="<?php echo htmlspecialchars($field); ?>" required>
+                                        <button type="button" class="btn-danger remove-btn">&times;</button>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <button type="button" class="btn-secondary add-btn" data-type="college">+ Add Field</button>
+                            </div>
+
+                            <!-- Course Fields -->
+                            <div class="category-box">
+                                <h4><i class="ph ph-books"></i> Course Fields</h4>
+                                <div id="container-course" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+                                    <?php foreach($course_fields as $field): ?>
+                                    <div class="field-row" style="display:flex; gap:8px;">
+                                        <input type="text" name="fields[course][]" class="form-control" value="<?php echo htmlspecialchars($field); ?>" required>
+                                        <button type="button" class="btn-danger remove-btn">&times;</button>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <button type="button" class="btn-secondary add-btn" data-type="course">+ Add Field</button>
+                            </div>
+
+                            <!-- Exam Fields -->
+                            <div class="category-box">
+                                <h4><i class="ph ph-exam"></i> Exam Fields</h4>
+                                <div id="container-exam" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+                                    <?php foreach($exam_fields as $field): ?>
+                                    <div class="field-row" style="display:flex; gap:8px;">
+                                        <input type="text" name="fields[exam][]" class="form-control" value="<?php echo htmlspecialchars($field); ?>" required>
+                                        <button type="button" class="btn-danger remove-btn">&times;</button>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <button type="button" class="btn-secondary add-btn" data-type="exam">+ Add Field</button>
+                            </div>
+
+                        </div>
                     </div>
                     
-                    <button type="submit" name="update_config" class="btn-primary"><i class="ph ph-floppy-disk"></i> Save Configuration</button>
+                    <button type="submit" name="update_config" class="btn-primary" style="margin-top:16px;"><i class="ph ph-floppy-disk"></i> Save Configuration</button>
                 </form>
             </div>
             
@@ -200,5 +255,29 @@ $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </main>
 </div>
+
+<script>
+$(document).ready(function() {
+    $('.add-btn').on('click', function() {
+        let type = $(this).data('type');
+        let container = $('#container-' + type);
+        let html = `
+            <div class="field-row" style="display:flex; gap:8px;">
+                <input type="text" name="fields[` + type + `][]" class="form-control" placeholder="New Field" required>
+                <button type="button" class="btn-danger remove-btn">&times;</button>
+            </div>
+        `;
+        container.append(html);
+    });
+
+    $(document).on('click', '.remove-btn', function() {
+        if($(this).parent().parent().find('.field-row').length > 1) {
+            $(this).parent().remove();
+        } else {
+            $(this).siblings('input').val(''); // Don't let them delete the last one completely, just clear it
+        }
+    });
+});
+</script>
 </body>
 </html>

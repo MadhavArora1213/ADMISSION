@@ -18,12 +18,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $tax_rate = (float)$_POST['tax_rate'];
     $is_active = isset($_POST['is_active']) ? 1 : 0;
     
-    // JSON arrays
-    $loan_providers = $_POST['loan_providers'];
-    if (empty(json_decode($loan_providers))) $loan_providers = '[]';
+    // Process Loan Providers
+    $lp_names = $_POST['lp_name'] ?? [];
+    $lp_rates = $_POST['lp_rate'] ?? [];
+    $lp_tenures = $_POST['lp_tenure'] ?? [];
     
-    $affiliate_links = $_POST['affiliate_links'];
-    if (empty(json_decode($affiliate_links))) $affiliate_links = '[]';
+    $loan_providers_arr = [];
+    foreach($lp_names as $i => $name) {
+        if(trim($name) !== '') {
+            $loan_providers_arr[] = [
+                'name' => trim($name),
+                'interest_rate_range' => trim($lp_rates[$i] ?? ''),
+                'max_tenure' => (int)($lp_tenures[$i] ?? 0)
+            ];
+        }
+    }
+    $loan_providers = json_encode($loan_providers_arr, JSON_UNESCAPED_UNICODE);
+
+    // Process Affiliate Links
+    $aff_providers = $_POST['aff_provider'] ?? [];
+    $aff_urls = $_POST['aff_url'] ?? [];
+    $aff_ctas = $_POST['aff_cta'] ?? [];
+
+    $affiliate_links_arr = [];
+    foreach($aff_providers as $i => $provider) {
+        if(trim($provider) !== '') {
+            $affiliate_links_arr[] = [
+                'provider' => trim($provider),
+                'url' => trim($aff_urls[$i] ?? ''),
+                'cta_label' => trim($aff_ctas[$i] ?? 'Apply Now')
+            ];
+        }
+    }
+    $affiliate_links = json_encode($affiliate_links_arr, JSON_UNESCAPED_UNICODE);
 
     $stmt = $pdo->prepare("
         UPDATE calculator_config 
@@ -42,6 +69,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 if ($tab === 'config') {
     $config = $pdo->query("SELECT * FROM calculator_config WHERE id=1")->fetch();
+    $lp_data = json_decode($config['loan_providers'] ?: '[]', true);
+    if(empty($lp_data)) $lp_data = [['name'=>'', 'interest_rate_range'=>'', 'max_tenure'=>'']];
+    
+    $aff_data = json_decode($config['affiliate_links'] ?: '[]', true);
+    if(empty($aff_data)) $aff_data = [['provider'=>'', 'url'=>'', 'cta_label'=>'']];
+    
 } else {
     // Sessions
     $search = isset($_GET['q']) ? trim($_GET['q']) : '';
@@ -79,6 +112,7 @@ if ($tab === 'config') {
     <title>EMI Calculator | Admin Panel</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <style>
         body { background-color: var(--bg-light); }
         .admin-layout { display: flex; min-height: 100vh; }
@@ -123,8 +157,21 @@ if ($tab === 'config') {
         .form-group { display: flex; flex-direction: column; gap: 8px; }
         .form-group.full { grid-column: 1 / -1; }
         .form-group label { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;}
-        .form-group input, .form-group textarea { padding: 12px; font-size: 0.95rem; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; font-family: inherit;}
-        .form-group textarea { font-family: monospace; font-size: 0.85rem; resize: vertical; min-height: 100px;}
+        .form-group input { padding: 12px; font-size: 0.95rem; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; font-family: inherit;}
+        
+        /* Dynamic Lists */
+        .dynamic-list-container { border: 1px solid var(--border-color); padding: 16px; border-radius: 12px; background: #f8fafc; margin-top: 8px;}
+        .dynamic-row { display: flex; gap: 12px; align-items: flex-end; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--border-color);}
+        .dynamic-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .dynamic-row .form-group { flex: 1; margin: 0; }
+        .dynamic-row .form-group label { font-size: 0.75rem; }
+        .dynamic-row .form-group input { padding: 8px 12px; font-size: 0.9rem;}
+        
+        .btn-danger-sm { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight:bold; height: 36px;}
+        .btn-danger-sm:hover { background: #fecaca; }
+        
+        .btn-secondary-sm { background: #fff; color: var(--text-dark); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; margin-top: 10px;}
+        .btn-secondary-sm:hover { background: #f1f5f9; }
     </style>
 </head>
 <body>
@@ -189,16 +236,54 @@ if ($tab === 'config') {
                             <input type="number" step="0.01" name="tax_rate" value="<?php echo htmlspecialchars($config['tax_rate']); ?>" required>
                         </div>
 
+                        <!-- Loan Providers UI -->
                         <div class="form-group full" style="margin-top:20px;">
-                            <label>Loan Providers (JSON Format)</label>
-                            <textarea name="loan_providers"><?php echo htmlspecialchars($config['loan_providers'] ?: '[]'); ?></textarea>
-                            <span style="font-size:0.75rem; color:var(--text-muted);">Example: <code>[{"name":"HDFC", "interest_rate_range":"9.5% - 11%", "max_tenure":84}]</code></span>
+                            <label><i class="ph ph-bank"></i> Loan Providers</label>
+                            <div class="dynamic-list-container" id="lp-container">
+                                <?php foreach($lp_data as $lp): ?>
+                                <div class="dynamic-row">
+                                    <div class="form-group">
+                                        <label>Bank / Provider Name</label>
+                                        <input type="text" name="lp_name[]" value="<?php echo htmlspecialchars($lp['name']); ?>" placeholder="e.g. HDFC Bank">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Interest Rate Range</label>
+                                        <input type="text" name="lp_rate[]" value="<?php echo htmlspecialchars($lp['interest_rate_range'] ?? ''); ?>" placeholder="e.g. 9.5% - 11%">
+                                    </div>
+                                    <div class="form-group" style="flex: 0.5;">
+                                        <label>Max Tenure</label>
+                                        <input type="number" name="lp_tenure[]" value="<?php echo htmlspecialchars($lp['max_tenure'] ?? ''); ?>" placeholder="Months">
+                                    </div>
+                                    <button type="button" class="btn-danger-sm remove-lp">&times;</button>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <button type="button" class="btn-secondary-sm" id="add-lp">+ Add Provider</button>
                         </div>
 
+                        <!-- Affiliate Monetization UI -->
                         <div class="form-group full">
-                            <label>Affiliate Monitization Links (JSON Format)</label>
-                            <textarea name="affiliate_links"><?php echo htmlspecialchars($config['affiliate_links'] ?: '[]'); ?></textarea>
-                            <span style="font-size:0.75rem; color:var(--text-muted);">Example: <code>[{"provider":"Credenc", "url":"https://...", "cta_label":"Apply Now"}]</code></span>
+                            <label><i class="ph ph-link"></i> Affiliate Monetization Links</label>
+                            <div class="dynamic-list-container" id="aff-container">
+                                <?php foreach($aff_data as $aff): ?>
+                                <div class="dynamic-row">
+                                    <div class="form-group">
+                                        <label>Platform Name</label>
+                                        <input type="text" name="aff_provider[]" value="<?php echo htmlspecialchars($aff['provider']); ?>" placeholder="e.g. Credenc">
+                                    </div>
+                                    <div class="form-group" style="flex: 2;">
+                                        <label>Affiliate URL</label>
+                                        <input type="url" name="aff_url[]" value="<?php echo htmlspecialchars($aff['url'] ?? ''); ?>" placeholder="https://...">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Button Label</label>
+                                        <input type="text" name="aff_cta[]" value="<?php echo htmlspecialchars($aff['cta_label'] ?? 'Apply Now'); ?>">
+                                    </div>
+                                    <button type="button" class="btn-danger-sm remove-aff">&times;</button>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <button type="button" class="btn-secondary-sm" id="add-aff">+ Add Affiliate Link</button>
                         </div>
                     </div>
                     
@@ -206,6 +291,67 @@ if ($tab === 'config') {
                         <button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> Save Configuration</button>
                     </div>
                 </form>
+                
+                <script>
+                $(document).ready(function() {
+                    $('#add-lp').click(function() {
+                        let html = `
+                        <div class="dynamic-row">
+                            <div class="form-group">
+                                <label>Bank / Provider Name</label>
+                                <input type="text" name="lp_name[]" placeholder="e.g. HDFC Bank">
+                            </div>
+                            <div class="form-group">
+                                <label>Interest Rate Range</label>
+                                <input type="text" name="lp_rate[]" placeholder="e.g. 9.5% - 11%">
+                            </div>
+                            <div class="form-group" style="flex: 0.5;">
+                                <label>Max Tenure</label>
+                                <input type="number" name="lp_tenure[]" placeholder="Months">
+                            </div>
+                            <button type="button" class="btn-danger-sm remove-lp">&times;</button>
+                        </div>`;
+                        $('#lp-container').append(html);
+                    });
+                    
+                    $(document).on('click', '.remove-lp', function() {
+                        if($('.remove-lp').length > 1) {
+                            $(this).closest('.dynamic-row').remove();
+                        } else {
+                            $(this).closest('.dynamic-row').find('input').val('');
+                        }
+                    });
+
+                    $('#add-aff').click(function() {
+                        let html = `
+                        <div class="dynamic-row">
+                            <div class="form-group">
+                                <label>Platform Name</label>
+                                <input type="text" name="aff_provider[]" placeholder="e.g. Credenc">
+                            </div>
+                            <div class="form-group" style="flex: 2;">
+                                <label>Affiliate URL</label>
+                                <input type="url" name="aff_url[]" placeholder="https://...">
+                            </div>
+                            <div class="form-group">
+                                <label>Button Label</label>
+                                <input type="text" name="aff_cta[]" value="Apply Now">
+                            </div>
+                            <button type="button" class="btn-danger-sm remove-aff">&times;</button>
+                        </div>`;
+                        $('#aff-container').append(html);
+                    });
+
+                    $(document).on('click', '.remove-aff', function() {
+                        if($('.remove-aff').length > 1) {
+                            $(this).closest('.dynamic-row').remove();
+                        } else {
+                            $(this).closest('.dynamic-row').find('input').val('');
+                        }
+                    });
+                });
+                </script>
+
             <?php else: ?>
                 <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center;">
                     <div style="display:flex; gap:15px;">
