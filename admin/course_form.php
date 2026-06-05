@@ -71,12 +71,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
     } catch (Exception $e) { $error = "Error: " . $e->getMessage(); }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'salary') {
     try {
+        $top_recruiters_json = null;
+        if (isset($_POST['recruiter_name']) && is_array($_POST['recruiter_name'])) {
+            $recruiters = [];
+            $upload_dir = '../uploads/recruiters/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+
+            foreach ($_POST['recruiter_name'] as $index => $name) {
+                $name = trim($name);
+                $logo = trim($_POST['recruiter_logo'][$index] ?? '');
+                
+                if (isset($_FILES['recruiter_logo_file']['name'][$index]) && $_FILES['recruiter_logo_file']['error'][$index] == 0) {
+                    $tmp_name = $_FILES['recruiter_logo_file']['tmp_name'][$index];
+                    $file_name = time() . '_' . mt_rand(100, 999) . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '', $_FILES['recruiter_logo_file']['name'][$index]);
+                    $target_path = $upload_dir . $file_name;
+                    
+                    if (move_uploaded_file($tmp_name, $target_path)) {
+                        $logo = 'uploads/recruiters/' . $file_name;
+                    }
+                }
+
+                if ($name !== '') {
+                    $recruiters[] = ['name' => $name, 'logo' => $logo];
+                }
+            }
+            if (!empty($recruiters)) {
+                $top_recruiters_json = json_encode($recruiters);
+            }
+        } elseif (isset($_POST['top_recruiters'])) {
+            $top_recruiters_json = $_POST['top_recruiters'] ?: null;
+        }
+
         $data = [
             'id' => $id,
             'avg_salary_lpa' => $_POST['avg_salary_lpa'] ?: null,
             'salary_range_min' => $_POST['salary_range_min'] ?: null,
             'salary_range_max' => $_POST['salary_range_max'] ?: null,
-            'top_recruiters' => $_POST['top_recruiters'] ?: null
+            'top_recruiters' => $top_recruiters_json
         ];
         $fields = [];
         foreach($data as $key => $val) { if($key=='id') continue; $fields[] = "$key = :$key"; }
@@ -264,7 +297,7 @@ function getValue($arr, $key, $default = '') {
                 </form>
 
                 <?php elseif($current_tab == 'salary'): ?>
-                <form action="" method="POST">
+                <form action="" method="POST" enctype="multipart/form-data">
                     <div class="form-section">
                         <h3><i class="ph ph-money"></i> Salary & Recruiters</h3>
                         <div class="form-grid">
@@ -282,8 +315,26 @@ function getValue($arr, $key, $default = '') {
                                 <input type="number" step="0.01" name="salary_range_max" class="form-control" value="<?php echo getValue($course, 'salary_range_max'); ?>">
                             </div>
                             <div class="form-group full">
-                                <label>Top Recruiters (JSON Array [{name, logo}])</label>
-                                <textarea name="top_recruiters" class="form-control" rows="4" placeholder='[{"name": "Google", "logo": "url"}, ...]'><?php echo getValue($course, 'top_recruiters'); ?></textarea>
+                                <label>Top Recruiters</label>
+                                <div id="recruiters-container">
+                                    <?php 
+                                    $recruiters = json_decode($course['top_recruiters'] ?? '[]', true);
+                                    if (!$recruiters || !is_array($recruiters)) $recruiters = [];
+                                    if (empty($recruiters)) $recruiters[] = ['name' => '', 'logo' => ''];
+                                    foreach ($recruiters as $recruiter): 
+                                    ?>
+                                    <div class="recruiter-row" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                                        <input type="text" name="recruiter_name[]" class="form-control" placeholder="Company Name" value="<?php echo htmlspecialchars($recruiter['name'] ?? ''); ?>" style="flex: 1;">
+                                        <input type="hidden" name="recruiter_logo[]" value="<?php echo htmlspecialchars($recruiter['logo'] ?? ''); ?>">
+                                        <input type="file" name="recruiter_logo_file[]" class="form-control" style="flex: 1;" accept="image/*">
+                                        <?php if(!empty($recruiter['logo'])): ?>
+                                        <img src="../<?php echo htmlspecialchars($recruiter['logo']); ?>" alt="logo" style="height: 30px; object-fit: contain;">
+                                        <?php endif; ?>
+                                        <button type="button" class="btn btn-danger remove-recruiter" style="padding: 0 15px; height: 100%; border-radius: 8px; border: 1px solid #fecaca; background: #fee2e2; color: #991b1b; cursor: pointer;">&times;</button>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <button type="button" class="btn btn-secondary" id="add-recruiter" style="margin-top: 10px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #fff; cursor: pointer;">+ Add Recruiter</button>
                             </div>
                         </div>
                     </div>
@@ -296,5 +347,41 @@ function getValue($arr, $key, $default = '') {
             </div>
         </main>
     </div>
+    
+    <!-- jQuery and Trumbowyg -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/ui/trumbowyg.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/trumbowyg.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            if ($('textarea[name="description"]').length) {
+                $('textarea[name="description"]').trumbowyg({
+                    semantic: true,
+                    removeformatPasted: true,
+                    resetCss: true
+                });
+            }
+            
+            // Top Recruiters dynamic list
+            $('#add-recruiter').click(function() {
+                var row = `
+                <div class="recruiter-row" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                    <input type="text" name="recruiter_name[]" class="form-control" placeholder="Company Name" style="flex: 1;">
+                    <input type="hidden" name="recruiter_logo[]" value="">
+                    <input type="file" name="recruiter_logo_file[]" class="form-control" style="flex: 1;" accept="image/*">
+                    <button type="button" class="btn btn-danger remove-recruiter" style="padding: 0 15px; height: 100%; border-radius: 8px; border: 1px solid #fecaca; background: #fee2e2; color: #991b1b; cursor: pointer;">&times;</button>
+                </div>`;
+                $('#recruiters-container').append(row);
+            });
+
+            $(document).on('click', '.remove-recruiter', function() {
+                if ($('.recruiter-row').length > 1) {
+                    $(this).closest('.recruiter-row').remove();
+                } else {
+                    $(this).closest('.recruiter-row').find('input').val('');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

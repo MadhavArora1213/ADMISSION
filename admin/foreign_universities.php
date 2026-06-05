@@ -21,9 +21,8 @@ if ($search !== '') {
 $whereSQL = count($where) ? "WHERE " . implode(" AND ", $where) : "";
 
 $stmt = $pdo->prepare("
-    SELECT f.*, c.name as country_name 
+    SELECT f.* 
     FROM foreign_universities f
-    LEFT JOIN countries c ON f.country_id = c.id
     $whereSQL 
     ORDER BY f.created_at DESC 
     LIMIT 100
@@ -142,7 +141,7 @@ $total_uni = $pdo->query("SELECT count(*) FROM foreign_universities")->fetchColu
                                     </div>
                                     <div style="font-size:0.75rem; color:var(--text-muted);">/<?php echo htmlspecialchars($uni['university_slug']); ?></div>
                                 </td>
-                                <td><?php echo htmlspecialchars($uni['country_name'] ?: 'Country ID: ' . $uni['country_id']); ?></td>
+                                <td><?php echo htmlspecialchars($uni['country'] ?? '-'); ?></td>
                                 <td><?php echo $uni['qs_rank'] ? '#' . htmlspecialchars($uni['qs_rank']) : '-'; ?></td>
                                 <td><?php echo $uni['tuition_usd_annual'] ? '$' . number_format($uni['tuition_usd_annual'], 2) : '-'; ?></td>
                                 <td>

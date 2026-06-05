@@ -8,11 +8,28 @@ $is_edit = $id !== '';
 
 $msg = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $provider_logo = $_POST['provider_logo'] ?? '';
+    
+    // Handle file upload
+    if (isset($_FILES['provider_logo_file']) && $_FILES['provider_logo_file']['error'] == 0) {
+        $upload_dir = '../uploads/scholarships/';
+        if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+        
+        $tmp_name = $_FILES['provider_logo_file']['tmp_name'];
+        $file_name = time() . '_' . mt_rand(100, 999) . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '', $_FILES['provider_logo_file']['name']);
+        
+        if (move_uploaded_file($tmp_name, $upload_dir . $file_name)) {
+            $provider_logo = 'uploads/scholarships/' . $file_name;
+        }
+    }
+
+    $slug = !empty($_POST['scholarship_slug']) ? $_POST['scholarship_slug'] : strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $_POST['scholarship_name'])));
+
     $data = [
         'scholarship_name' => $_POST['scholarship_name'],
-        'scholarship_slug' => $_POST['scholarship_slug'],
+        'scholarship_slug' => $slug,
         'provider_name' => $_POST['provider_name'],
-        'provider_logo' => $_POST['provider_logo'],
+        'provider_logo' => $provider_logo,
         'scholarship_type' => $_POST['scholarship_type'],
         'amount' => !empty($_POST['amount']) ? $_POST['amount'] : null,
         'amount_type' => $_POST['amount_type'],
@@ -139,7 +156,7 @@ $selected_levels = isset($sch['course_levels']) && $sch['course_levels'] ? json_
             <div class="msg-alert <?php echo strpos($msg, 'Error') !== false ? 'msg-error' : ''; ?>"><i class="ph ph-info"></i> <?php echo htmlspecialchars($msg); ?></div>
             <?php endif; ?>
 
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="panel">
                     <h3><i class="ph ph-info"></i> Basic Information</h3>
                     <div class="grid-2">
@@ -148,16 +165,22 @@ $selected_levels = isset($sch['course_levels']) && $sch['course_levels'] ? json_
                             <input type="text" name="scholarship_name" class="form-control" value="<?php echo htmlspecialchars($sch['scholarship_name']??''); ?>" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Scholarship Slug *</label>
-                            <input type="text" name="scholarship_slug" class="form-control" value="<?php echo htmlspecialchars($sch['scholarship_slug']??''); ?>" required>
+                            <label class="form-label">Scholarship Slug (Leave blank to auto-generate)</label>
+                            <input type="text" name="scholarship_slug" class="form-control" value="<?php echo htmlspecialchars($sch['scholarship_slug']??''); ?>">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Provider Name</label>
                             <input type="text" name="provider_name" class="form-control" value="<?php echo htmlspecialchars($sch['provider_name']??''); ?>">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Provider Logo URL</label>
-                            <input type="url" name="provider_logo" class="form-control" value="<?php echo htmlspecialchars($sch['provider_logo']??''); ?>">
+                            <label class="form-label">Provider Logo</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="hidden" name="provider_logo" value="<?php echo htmlspecialchars($sch['provider_logo']??''); ?>">
+                                <input type="file" name="provider_logo_file" class="form-control" accept="image/*" style="flex: 1;">
+                                <?php if(!empty($sch['provider_logo'])): ?>
+                                <img src="../<?php echo htmlspecialchars($sch['provider_logo']); ?>" alt="logo" style="height: 40px; object-fit: contain; border-radius: 4px;">
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 </div>

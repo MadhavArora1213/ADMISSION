@@ -13,34 +13,59 @@ if ($id) {
     if (!$inv) { die("Invoice not found."); }
 }
 
+// Fetch colleges for dropdown
+$colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+
 $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $invoice_number = trim($_POST['invoice_number']);
-    $college_id = (int)$_POST['college_id'];
+    $college_id = trim($_POST['college_id']);
+    $invoice_description = trim($_POST['invoice_description'] ?? '');
+    
     $subtotal_amount = $_POST['subtotal_amount'] !== '' ? (float)$_POST['subtotal_amount'] : 0.00;
+    $discount_amount = $_POST['discount_amount'] !== '' ? (float)$_POST['discount_amount'] : 0.00;
     $gst_amount = $_POST['gst_amount'] !== '' ? (float)$_POST['gst_amount'] : 0.00;
-    $total_amount = $subtotal_amount + $gst_amount;
+    $total_amount = ($subtotal_amount - $discount_amount) + $gst_amount;
+    
     $invoice_date = $_POST['invoice_date'];
     $due_date = $_POST['due_date'];
     $payment_status = $_POST['payment_status'];
     $payment_method = $_POST['payment_method'];
     
+    // File Upload
+    $invoice_file = $inv['invoice_file'] ?? null;
+    if (isset($_FILES['invoice_file']) && $_FILES['invoice_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+        if ($_FILES['invoice_file']['error'] == UPLOAD_ERR_OK) {
+            $upload_dir = '../uploads/invoices/';
+            if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+            $file_ext = strtolower(pathinfo($_FILES['invoice_file']['name'], PATHINFO_EXTENSION));
+            $new_name = uniqid('INV_') . '.' . $file_ext;
+            if (move_uploaded_file($_FILES['invoice_file']['tmp_name'], $upload_dir . $new_name)) {
+                $invoice_file = 'uploads/invoices/' . $new_name;
+            } else {
+                $error = "Failed to save the uploaded invoice file.";
+            }
+        } else {
+            $error = "File upload failed with error code: " . $_FILES['invoice_file']['error'];
+        }
+    }
+    
     if (empty($invoice_number) || empty($college_id)) {
-        $error = "Invoice Number and College ID are required.";
+        $error = "Invoice Number and College are required.";
     } else {
         if ($id) {
-            $stmt = $pdo->prepare("UPDATE invoices SET invoice_number=?, college_id=?, subtotal_amount=?, gst_amount=?, total_amount=?, invoice_date=?, due_date=?, payment_status=?, payment_method=? WHERE id=?");
-            $stmt->execute([$invoice_number, $college_id, $subtotal_amount, $gst_amount, $total_amount, $invoice_date, $due_date, $payment_status, $payment_method, $id]);
+            $stmt = $pdo->prepare("UPDATE invoices SET invoice_number=?, college_id=?, invoice_description=?, subtotal_amount=?, discount_amount=?, gst_amount=?, total_amount=?, invoice_date=?, due_date=?, payment_status=?, payment_method=?, invoice_file=? WHERE id=?");
+            $stmt->execute([$invoice_number, $college_id, $invoice_description, $subtotal_amount, $discount_amount, $gst_amount, $total_amount, $invoice_date, $due_date, $payment_status, $payment_method, $invoice_file, $id]);
             $success = "Invoice updated successfully.";
             $stmt = $pdo->prepare("SELECT * FROM invoices WHERE id = ?");
             $stmt->execute([$id]);
             $inv = $stmt->fetch(PDO::FETCH_ASSOC);
         } else {
             try {
-                $stmt = $pdo->prepare("INSERT INTO invoices (invoice_number, college_id, subtotal_amount, gst_amount, total_amount, invoice_date, due_date, payment_status, payment_method) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                $stmt->execute([$invoice_number, $college_id, $subtotal_amount, $gst_amount, $total_amount, $invoice_date, $due_date, $payment_status, $payment_method]);
+                $stmt = $pdo->prepare("INSERT INTO invoices (invoice_number, college_id, invoice_description, subtotal_amount, discount_amount, gst_amount, total_amount, invoice_date, due_date, payment_status, payment_method, invoice_file) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$invoice_number, $college_id, $invoice_description, $subtotal_amount, $discount_amount, $gst_amount, $total_amount, $invoice_date, $due_date, $payment_status, $payment_method, $invoice_file]);
                 $id = $pdo->lastInsertId();
                 header("Location: invoice_form.php?id=$id&msg=created");
                 exit;
@@ -108,27 +133,52 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php if ($error): ?><div class="msg-alert alert-error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
 
             <div class="form-panel">
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     <div class="grid-2">
                         <div class="form-group">
                             <label>Invoice Number *</label>
                             <input type="text" name="invoice_number" class="form-control" required value="<?php echo htmlspecialchars($inv['invoice_number'] ?? 'INV-'.time()); ?>">
                         </div>
                         <div class="form-group">
-                            <label>College ID *</label>
-                            <input type="number" name="college_id" class="form-control" required value="<?php echo htmlspecialchars($inv['college_id'] ?? ''); ?>">
+                            <label>Billed To (College) *</label>
+                            <select name="college_id" class="form-control" required>
+                                <option value="">-- Select College --</option>
+                                <?php foreach($colleges as $c): ?>
+                                    <option value="<?php echo $c['id']; ?>" <?php echo (isset($inv['college_id']) && $inv['college_id']==$c['id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($c['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                     </div>
+                    
+                    <div class="form-group">
+                        <label>Description / Line Items</label>
+                        <textarea name="invoice_description" class="form-control" rows="3" placeholder="e.g. Premium Listing for 2026"><?php echo htmlspecialchars($inv['invoice_description'] ?? ''); ?></textarea>
+                    </div>
+
                     <div class="grid-2">
                         <div class="form-group">
                             <label>Subtotal Amount</label>
                             <input type="number" step="0.01" name="subtotal_amount" class="form-control" required value="<?php echo htmlspecialchars($inv['subtotal_amount'] ?? '0.00'); ?>">
                         </div>
                         <div class="form-group">
+                            <label>Discount Amount</label>
+                            <input type="number" step="0.01" name="discount_amount" class="form-control" value="<?php echo htmlspecialchars($inv['discount_amount'] ?? '0.00'); ?>">
+                        </div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="form-group">
                             <label>GST Amount</label>
                             <input type="number" step="0.01" name="gst_amount" class="form-control" value="<?php echo htmlspecialchars($inv['gst_amount'] ?? '0.00'); ?>">
                         </div>
+                        <div class="form-group">
+                            <label>Total Amount (Auto-Calculated)</label>
+                            <input type="text" class="form-control" readonly style="background:#f8fafc;" value="<?php echo htmlspecialchars($inv['total_amount'] ?? '0.00'); ?>">
+                        </div>
                     </div>
+
                     <div class="grid-2">
                         <div class="form-group">
                             <label>Invoice Date</label>
@@ -157,6 +207,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </select>
                         </div>
                     </div>
+                    
+                    <div class="form-group">
+                        <label>Upload Invoice PDF (Optional)</label>
+                        <input type="file" name="invoice_file" class="form-control" accept="application/pdf">
+                        <?php if(!empty($inv['invoice_file'])): ?>
+                            <div style="margin-top: 10px;">
+                                <a href="../<?php echo htmlspecialchars($inv['invoice_file']); ?>" target="_blank" style="color:var(--primary); font-weight:600; text-decoration:none;"><i class="ph ph-file-pdf"></i> View Current PDF</a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    
                     <button type="submit" class="btn-primary" style="margin-top:10px;">Save Invoice</button>
                 </form>
             </div>

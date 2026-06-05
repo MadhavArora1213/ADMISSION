@@ -13,12 +13,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     $slug = !empty($_POST['category_slug']) ? $_POST['category_slug'] : strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name)));
     $parent = !empty($_POST['parent_category_id']) ? $_POST['parent_category_id'] : null;
     
+    $icon_url = !empty($_POST['icon_url']) ? $_POST['icon_url'] : null;
+    
+    if (isset($_FILES['icon_file']) && $_FILES['icon_file']['error'] == 0) {
+        $upload_dir = '../uploads/categories/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+        $file_name = time() . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '', basename($_FILES['icon_file']['name']));
+        $target_file = $upload_dir . $file_name;
+        if (move_uploaded_file($_FILES['icon_file']['tmp_name'], $target_file)) {
+            $icon_url = 'uploads/categories/' . $file_name;
+        }
+    }
+
     if (!empty($_POST['id'])) {
-        $stmt = $pdo->prepare("UPDATE course_categories SET category_name = ?, category_slug = ?, icon_url = ?, parent_category_id = ?, sort_order = ?, is_featured = ? WHERE id = ?");
-        $stmt->execute([$name, $slug, $_POST['icon_url'], $parent, $_POST['sort_order'], isset($_POST['is_featured']) ? 1 : 0, $id]);
+        $stmt = $pdo->prepare("UPDATE course_categories SET category_name = ?, category_slug = ?, icon_url = COALESCE(?, icon_url), parent_category_id = ?, sort_order = ?, is_featured = ? WHERE id = ?");
+        $stmt->execute([$name, $slug, $icon_url, $parent, $_POST['sort_order'], isset($_POST['is_featured']) ? 1 : 0, $id]);
     } else {
         $stmt = $pdo->prepare("INSERT INTO course_categories (id, category_name, category_slug, icon_url, parent_category_id, sort_order, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$id, $name, $slug, $_POST['icon_url'], $parent, $_POST['sort_order'], isset($_POST['is_featured']) ? 1 : 0]);
+        $stmt->execute([$id, $name, $slug, $icon_url, $parent, $_POST['sort_order'], isset($_POST['is_featured']) ? 1 : 0]);
     }
     header('Location: course_categories.php?msg=saved');
     exit;
@@ -58,23 +72,23 @@ if (isset($_GET['edit_id'])) {
     <style>
         body { background-color: var(--bg-light); }
         .admin-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; }
+        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease; }
         .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-header .logo { font-size: 1.3rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
         .sidebar-nav { padding: 24px 0; flex: 1; }
         .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; }
         .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
         .sidebar-nav a i { font-size: 1.25rem; }
-        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; padding-bottom: 60px; }
+        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; padding-bottom: 60px; min-width: 0; }
         .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
         .content-area { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; display: grid; grid-template-columns: 350px 1fr; gap: 32px; }
         .page-header { grid-column: 1 / -1; margin-bottom: 8px; }
         .page-header h2 { font-size: 2rem; font-weight: 800; }
-        .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); padding: 24px; box-shadow: var(--shadow-sm); align-self: start; }
+        .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); padding: 24px; box-shadow: var(--shadow-sm); align-self: start; overflow-x: auto; }
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
-        .form-control { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; }
-        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        .form-control { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; min-width: 600px; }
         th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
         .action-links { display: flex; gap: 8px; }
@@ -83,13 +97,35 @@ if (isset($_GET['edit_id'])) {
         .action-btn.delete:hover { background: #dc2626; color: white; border-color: #dc2626; }
         .msg-alert { grid-column: 1 / -1; padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 16px; border: 1px solid #bbf7d0; }
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-dark); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+
+        @media (max-width: 1024px) {
+            .content-area { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) { 
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-left: 0; }
+            .topbar { justify-content: space-between; padding: 0 16px; }
+            .mobile-menu-btn { display: block; }
+            .content-area { padding: 16px; gap: 16px; }
+            .page-header h2 { font-size: 1.5rem; }
+            .panel { padding: 16px; }
+        }
     </style>
 </head>
 <body>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <div class="admin-layout">
         <?php include 'sidebar.php'; ?>
         <main class="main-content">
             <header class="topbar">
+                <button class="mobile-menu-btn" id="mobile-menu-btn">
+                    <i class="ph ph-list"></i>
+                </button>
                 <div class="user-profile">
                     <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
                     <a href="logout.php" style="margin-left: 16px; color: #19376d;"><i class="ph ph-sign-out" style="font-size: 1.5rem;"></i></a>
@@ -110,7 +146,7 @@ if (isset($_GET['edit_id'])) {
 
                 <div class="panel">
                     <h3><?php echo $edit_cat ? 'Edit Category' : 'Add New Category'; ?></h3>
-                    <form action="course_categories.php" method="POST" style="margin-top: 24px;">
+                    <form action="course_categories.php" method="POST" enctype="multipart/form-data" style="margin-top: 24px;">
                         <input type="hidden" name="action" value="save">
                         <?php if($edit_cat): ?><input type="hidden" name="id" value="<?php echo $edit_cat['id']; ?>"><?php endif; ?>
                         
@@ -136,7 +172,11 @@ if (isset($_GET['edit_id'])) {
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Icon URL</label>
+                            <label>Upload Icon Image</label>
+                            <input type="file" name="icon_file" class="form-control" accept="image/*">
+                        </div>
+                        <div class="form-group">
+                            <label>OR Icon URL</label>
                             <input type="url" name="icon_url" class="form-control" value="<?php echo $edit_cat ? htmlspecialchars($edit_cat['icon_url']) : ''; ?>">
                         </div>
                         <div class="form-group">
@@ -176,9 +216,16 @@ if (isset($_GET['edit_id'])) {
                             <tbody>
                                 <?php foreach($categories as $cat): ?>
                                 <tr>
-                                    <td style="font-weight: 600; color: var(--primary);">
-                                        <?php echo htmlspecialchars($cat['category_name']); ?>
-                                        <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;"><?php echo htmlspecialchars($cat['category_slug']); ?></div>
+                                    <td style="font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 12px;">
+                                        <?php if($cat['icon_url']): ?>
+                                            <img src="<?php echo preg_match('/^https?:\/\//', $cat['icon_url']) ? htmlspecialchars($cat['icon_url']) : '../' . htmlspecialchars($cat['icon_url']); ?>" alt="icon" style="width: 32px; height: 32px; object-fit: cover; border-radius: 6px; background: #fff; padding: 2px; border: 1px solid var(--border-color);">
+                                        <?php else: ?>
+                                            <div style="width: 32px; height: 32px; border-radius: 6px; background: #e2e8f0; display:flex; align-items:center; justify-content:center; color: #64748b;"><i class="ph ph-image"></i></div>
+                                        <?php endif; ?>
+                                        <div>
+                                            <?php echo htmlspecialchars($cat['category_name']); ?>
+                                            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;"><?php echo htmlspecialchars($cat['category_slug']); ?></div>
+                                        </div>
                                     </td>
                                     <td><?php echo $cat['parent_name'] ? htmlspecialchars($cat['parent_name']) : '-'; ?></td>
                                     <td><?php echo $cat['sort_order']; ?></td>
@@ -200,5 +247,15 @@ if (isset($_GET['edit_id'])) {
             </div>
         </main>
     </div>
+    <script>
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.add('open');
+            document.getElementById('sidebar-overlay').classList.add('show');
+        });
+        document.getElementById('sidebar-overlay').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.remove('open');
+            this.classList.remove('show');
+        });
+    </script>
 </body>
 </html>

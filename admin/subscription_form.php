@@ -16,8 +16,11 @@ if ($id) {
 $error = '';
 $success = '';
 
+$colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+$plans = $pdo->query("SELECT id, plan_name FROM subscription_plans ORDER BY plan_name ASC")->fetchAll(PDO::FETCH_ASSOC);
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $college_id = (int)$_POST['college_id'];
+    $college_id = $_POST['college_id'];
     $plan_id = (int)$_POST['plan_id'];
     $amount = $_POST['amount'] !== '' ? (float)$_POST['amount'] : 0.00;
     $billing_cycle = $_POST['billing_cycle'];
@@ -25,20 +28,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $end_date = $_POST['end_date'];
     $auto_renew = isset($_POST['auto_renew']) ? 1 : 0;
     $status = $_POST['status'];
+    $payment_gateway_id = $_POST['payment_gateway_id'] ?? '';
+    $next_billing_date = !empty($_POST['next_billing_date']) ? $_POST['next_billing_date'] : null;
+    $trial_end_date = !empty($_POST['trial_end_date']) ? $_POST['trial_end_date'] : null;
     
     if (empty($college_id) || empty($plan_id)) {
         $error = "College ID and Plan ID are required.";
     } else {
         if ($id) {
-            $stmt = $pdo->prepare("UPDATE subscriptions SET college_id=?, plan_id=?, amount=?, billing_cycle=?, start_date=?, end_date=?, auto_renew=?, status=? WHERE id=?");
-            $stmt->execute([$college_id, $plan_id, $amount, $billing_cycle, $start_date, $end_date, $auto_renew, $status, $id]);
+            $stmt = $pdo->prepare("UPDATE subscriptions SET college_id=?, plan_id=?, amount=?, billing_cycle=?, start_date=?, end_date=?, auto_renew=?, status=?, payment_gateway_id=?, next_billing_date=?, trial_end_date=? WHERE id=?");
+            $stmt->execute([$college_id, $plan_id, $amount, $billing_cycle, $start_date, $end_date, $auto_renew, $status, $payment_gateway_id, $next_billing_date, $trial_end_date, $id]);
             $success = "Subscription updated successfully.";
             $stmt = $pdo->prepare("SELECT * FROM subscriptions WHERE id = ?");
             $stmt->execute([$id]);
             $sub = $stmt->fetch(PDO::FETCH_ASSOC);
         } else {
-            $stmt = $pdo->prepare("INSERT INTO subscriptions (college_id, plan_id, amount, billing_cycle, start_date, end_date, auto_renew, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$college_id, $plan_id, $amount, $billing_cycle, $start_date, $end_date, $auto_renew, $status]);
+            $stmt = $pdo->prepare("INSERT INTO subscriptions (college_id, plan_id, amount, billing_cycle, start_date, end_date, auto_renew, status, payment_gateway_id, next_billing_date, trial_end_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$college_id, $plan_id, $amount, $billing_cycle, $start_date, $end_date, $auto_renew, $status, $payment_gateway_id, $next_billing_date, $trial_end_date]);
             $id = $pdo->lastInsertId();
             header("Location: subscription_form.php?id=$id&msg=created");
             exit;
@@ -102,17 +108,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <form method="POST">
                     <div class="grid-2">
                         <div class="form-group">
-                            <label>College ID *</label>
-                            <input type="number" name="college_id" class="form-control" required value="<?php echo htmlspecialchars($sub['college_id'] ?? ''); ?>">
+                            <label>College *</label>
+                            <select name="college_id" class="form-control" required>
+                                <option value="">Select College</option>
+                                <?php foreach($colleges as $c): ?>
+                                    <option value="<?php echo htmlspecialchars($c['id']); ?>" <?php echo (isset($sub['college_id']) && $sub['college_id'] == $c['id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($c['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="form-group">
-                            <label>Plan ID *</label>
-                            <input type="number" name="plan_id" class="form-control" required value="<?php echo htmlspecialchars($sub['plan_id'] ?? ''); ?>">
+                            <label>Plan *</label>
+                            <select name="plan_id" class="form-control" required>
+                                <option value="">Select Plan</option>
+                                <?php foreach($plans as $p): ?>
+                                    <option value="<?php echo htmlspecialchars($p['id']); ?>" <?php echo (isset($sub['plan_id']) && $sub['plan_id'] == $p['id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($p['plan_name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                     </div>
                     <div class="grid-2">
                         <div class="form-group">
-                            <label>Amount (USD)</label>
+                            <label>Amount (INR)</label>
                             <input type="number" step="0.01" name="amount" class="form-control" required value="<?php echo htmlspecialchars($sub['amount'] ?? '0.00'); ?>">
                         </div>
                         <div class="form-group">
@@ -141,6 +161,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <option value="<?php echo $t; ?>" <?php echo (isset($sub['status']) && $sub['status']==$t) ? 'selected' : ''; ?>><?php echo ucfirst($t); ?></option>
                             <?php endforeach; ?>
                         </select>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Next Billing Date</label>
+                            <input type="date" name="next_billing_date" class="form-control" value="<?php echo htmlspecialchars($sub['next_billing_date'] ?? ''); ?>">
+                        </div>
+                        <div class="form-group">
+                            <label>Trial End Date</label>
+                            <input type="date" name="trial_end_date" class="form-control" value="<?php echo htmlspecialchars($sub['trial_end_date'] ?? ''); ?>">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Gateway / Stripe ID</label>
+                        <input type="text" name="payment_gateway_id" class="form-control" placeholder="e.g. sub_1M..." value="<?php echo htmlspecialchars($sub['payment_gateway_id'] ?? ''); ?>">
                     </div>
                     <div class="form-group" style="margin-top: 15px;">
                         <label style="display:flex; align-items:center; gap:8px;">

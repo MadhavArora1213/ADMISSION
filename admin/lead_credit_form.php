@@ -16,8 +16,10 @@ if ($id) {
 $error = '';
 $success = '';
 
+$colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $college_id = (int)$_POST['college_id'];
+    $college_id = $_POST['college_id'];
     $leads_purchased = (int)$_POST['leads_purchased'];
     $leads_delivered = (int)$_POST['leads_delivered'];
     $lead_cost = $_POST['lead_cost'] !== '' ? (float)$_POST['lead_cost'] : 0.00;
@@ -99,8 +101,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="form-panel">
                 <form method="POST">
                     <div class="form-group">
-                        <label>College ID *</label>
-                        <input type="number" name="college_id" class="form-control" required value="<?php echo htmlspecialchars($credit['college_id'] ?? ''); ?>">
+                        <label>College *</label>
+                        <select name="college_id" class="form-control" required>
+                            <option value="">Select College</option>
+                            <?php foreach($colleges as $c): ?>
+                                <option value="<?php echo htmlspecialchars($c['id']); ?>" <?php echo (isset($credit['college_id']) && $credit['college_id'] == $c['id']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($c['name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="grid-2">
                         <div class="form-group">
@@ -114,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
                     <div class="grid-2">
                         <div class="form-group">
-                            <label>Cost per Lead (USD)</label>
+                            <label>Cost per Lead (INR)</label>
                             <input type="number" step="0.01" name="lead_cost" class="form-control" required value="<?php echo htmlspecialchars($credit['lead_cost'] ?? '0.00'); ?>">
                         </div>
                         <div class="form-group">

@@ -147,10 +147,10 @@ $verified_c = $pdo->query("SELECT count(*) FROM consultants WHERE verified_consu
                     <table>
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Contact Email</th>
+                                <th>Consultant</th>
+                                <th>Contact</th>
+                                <th>Specializations</th>
                                 <th>Experience</th>
-                                <th>Success Rate</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -159,14 +159,31 @@ $verified_c = $pdo->query("SELECT count(*) FROM consultants WHERE verified_consu
                             <?php foreach($consultants as $c): ?>
                             <tr>
                                 <td>
-                                    <div style="font-weight:600; color:var(--text-dark);">
-                                        <?php echo htmlspecialchars($c['consultant_name']); ?>
+                                    <div style="display:flex; gap:12px; align-items:center;">
+                                        <?php if(!empty($c['profile_picture'])): ?>
+                                            <img src="../<?php echo htmlspecialchars($c['profile_picture']); ?>" alt="" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+                                        <?php else: ?>
+                                            <div style="width:40px; height:40px; border-radius:50%; background:#e2e8f0; display:flex; align-items:center; justify-content:center; color:#64748b; font-weight:700;">
+                                                <?php echo substr($c['consultant_name'], 0, 1); ?>
+                                            </div>
+                                        <?php endif; ?>
+                                        <div>
+                                            <div style="font-weight:600; color:var(--text-dark);">
+                                                <?php echo htmlspecialchars($c['consultant_name']); ?>
+                                            </div>
+                                            <div style="font-size:0.75rem; color:var(--text-muted);"><i class="ph ph-star-fill" style="color:#eab308"></i> <?php echo $c['consultant_rating'] ?: 'N/A'; ?></div>
+                                        </div>
                                     </div>
-                                    <div style="font-size:0.75rem; color:var(--text-muted);"><i class="ph ph-star-fill" style="color:#eab308"></i> <?php echo $c['consultant_rating'] ?: 'N/A'; ?></div>
                                 </td>
-                                <td><?php echo htmlspecialchars($c['contact_email'] ?: '-'); ?></td>
-                                <td><?php echo $c['experience_years'] ? htmlspecialchars($c['experience_years']) . ' Yrs' : '-'; ?></td>
-                                <td><?php echo $c['success_rate_percent'] ? htmlspecialchars($c['success_rate_percent']) . '%' : '-'; ?></td>
+                                <td>
+                                    <div><?php echo htmlspecialchars($c['contact_email'] ?: '-'); ?></div>
+                                    <div style="font-size:0.75rem; color:var(--text-muted);"><i class="ph ph-map-pin"></i> <?php echo htmlspecialchars($c['office_location'] ?: 'Remote'); ?></div>
+                                </td>
+                                <td><?php echo $c['specializations'] ? htmlspecialchars(substr($c['specializations'], 0, 30)) . (strlen($c['specializations']) > 30 ? '...' : '') : '-'; ?></td>
+                                <td>
+                                    <div><?php echo $c['experience_years'] ? htmlspecialchars($c['experience_years']) . ' Yrs' : '-'; ?></div>
+                                    <div style="font-size:0.75rem; color:var(--text-muted);"><?php echo $c['success_rate_percent'] ? htmlspecialchars($c['success_rate_percent']) . '% Success' : ''; ?></div>
+                                </td>
                                 <td>
                                     <?php if($c['verified_consultant']): ?>
                                         <span class="badge s-verified"><i class="ph ph-seal-check"></i> Verified</span>

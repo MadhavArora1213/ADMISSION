@@ -19,25 +19,28 @@ $success = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $university_name = trim($_POST['university_name']);
     $university_slug = trim($_POST['university_slug']);
-    $country_id = (int)$_POST['country_id'];
+    if (empty($university_slug) && !empty($university_name)) {
+        $university_slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $university_name)));
+    }
+    $country = trim($_POST['country']);
     $qs_rank = $_POST['qs_rank'] !== '' ? (int)$_POST['qs_rank'] : null;
     $tuition_usd_annual = $_POST['tuition_usd_annual'] !== '' ? (float)$_POST['tuition_usd_annual'] : null;
     $description = $_POST['description'];
     
-    if (empty($university_name) || empty($university_slug) || empty($country_id)) {
-        $error = "Name, slug, and country ID are required.";
+    if (empty($university_name) || empty($university_slug) || empty($country)) {
+        $error = "Name, slug, and country are required.";
     } else {
         if ($id) {
-            $stmt = $pdo->prepare("UPDATE foreign_universities SET university_name=?, university_slug=?, country_id=?, qs_rank=?, tuition_usd_annual=?, description=? WHERE id=?");
-            $stmt->execute([$university_name, $university_slug, $country_id, $qs_rank, $tuition_usd_annual, $description, $id]);
+            $stmt = $pdo->prepare("UPDATE foreign_universities SET university_name=?, university_slug=?, country=?, qs_rank=?, tuition_usd_annual=?, description=? WHERE id=?");
+            $stmt->execute([$university_name, $university_slug, $country, $qs_rank, $tuition_usd_annual, $description, $id]);
             $success = "University updated successfully.";
             // Refresh data
             $stmt = $pdo->prepare("SELECT * FROM foreign_universities WHERE id = ?");
             $stmt->execute([$id]);
             $uni = $stmt->fetch(PDO::FETCH_ASSOC);
         } else {
-            $stmt = $pdo->prepare("INSERT INTO foreign_universities (university_name, university_slug, country_id, qs_rank, tuition_usd_annual, description) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$university_name, $university_slug, $country_id, $qs_rank, $tuition_usd_annual, $description]);
+            $stmt = $pdo->prepare("INSERT INTO foreign_universities (university_name, university_slug, country, qs_rank, tuition_usd_annual, description) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$university_name, $university_slug, $country, $qs_rank, $tuition_usd_annual, $description]);
             $id = $pdo->lastInsertId();
             header("Location: foreign_university_form.php?id=$id&msg=created");
             exit;
@@ -117,15 +120,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <input type="text" name="university_name" class="form-control" required value="<?php echo htmlspecialchars($uni['university_name'] ?? ''); ?>">
                         </div>
                         <div class="form-group">
-                            <label>Slug (URL) *</label>
-                            <input type="text" name="university_slug" class="form-control" required value="<?php echo htmlspecialchars($uni['university_slug'] ?? ''); ?>">
+                            <label>Slug (URL) (Leave blank to auto-generate)</label>
+                            <input type="text" name="university_slug" class="form-control" value="<?php echo htmlspecialchars($uni['university_slug'] ?? ''); ?>">
                         </div>
                     </div>
 
                     <div class="grid-2">
                         <div class="form-group">
-                            <label>Country ID * (Ensure ID exists in countries table)</label>
-                            <input type="number" name="country_id" class="form-control" required value="<?php echo htmlspecialchars($uni['country_id'] ?? ''); ?>">
+                            <label>Country *</label>
+                            <input type="text" name="country" class="form-control" required value="<?php echo htmlspecialchars($uni['country'] ?? ''); ?>" placeholder="e.g. USA, UK, Canada">
                         </div>
                         <div class="form-group">
                             <label>QS Rank</label>
@@ -149,5 +152,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </main>
 </div>
+
+<!-- jQuery and Trumbowyg -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/ui/trumbowyg.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/trumbowyg.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('textarea[name="description"]').trumbowyg();
+    });
+</script>
 </body>
 </html>

@@ -109,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Price (USD) *</label>
+                        <label>Price (INR) *</label>
                         <input type="number" step="0.01" name="price" class="form-control" required value="<?php echo htmlspecialchars($plan['price'] ?? '0.00'); ?>">
                     </div>
                     <button type="submit" class="btn-primary">Save Plan</button>

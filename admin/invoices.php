@@ -10,8 +10,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
 }
 
 $stmt = $pdo->prepare("
-    SELECT i.* 
+    SELECT i.*, c.name as college_name 
     FROM invoices i
+    LEFT JOIN colleges c ON i.college_id = c.id
     ORDER BY i.created_at DESC
 ");
 $stmt->execute();
@@ -80,7 +81,8 @@ $invoices = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <thead>
                             <tr>
                                 <th>Invoice #</th>
-                                <th>College ID</th>
+                                <th>College</th>
+                                <th>Description</th>
                                 <th>Total</th>
                                 <th>Date</th>
                                 <th>Status</th>
@@ -91,14 +93,27 @@ $invoices = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <?php foreach($invoices as $inv): ?>
                             <tr>
                                 <td><div style="font-weight:600;"><?php echo htmlspecialchars($inv['invoice_number']); ?></div></td>
-                                <td><?php echo htmlspecialchars($inv['college_id']); ?></td>
-                                <td>$<?php echo number_format($inv['total_amount'], 2); ?></td>
+                                <td>
+                                    <div style="font-weight:600; color:var(--text-dark);">
+                                        <?php echo htmlspecialchars($inv['college_name'] ?? 'College ID: ' . $inv['college_id']); ?>
+                                    </div>
+                                </td>
+                                <td><?php echo htmlspecialchars(substr($inv['invoice_description'], 0, 30)) . (strlen($inv['invoice_description']) > 30 ? '...' : ''); ?></td>
+                                <td>
+                                    $<?php echo number_format($inv['total_amount'], 2); ?>
+                                    <?php if($inv['discount_amount'] > 0): ?>
+                                        <div style="font-size:0.75rem; color:var(--text-muted);">incl. $<?php echo number_format($inv['discount_amount'], 2); ?> discount</div>
+                                    <?php endif; ?>
+                                </td>
                                 <td><?php echo date('Y-m-d', strtotime($inv['invoice_date'])); ?></td>
                                 <td><span class="badge b-<?php echo $inv['payment_status']; ?>"><?php echo htmlspecialchars($inv['payment_status']); ?></span></td>
                                 <td>
                                     <div style="display:flex; gap:6px;">
-                                        <a href="invoice_form.php?id=<?php echo $inv['id']; ?>" class="action-btn"><i class="ph ph-pencil-simple"></i></a>
-                                        <a href="?action=delete&id=<?php echo $inv['id']; ?>" class="action-btn" onclick="return confirm('Delete?');"><i class="ph ph-trash"></i></a>
+                                        <?php if(!empty($inv['invoice_file'])): ?>
+                                            <a href="../<?php echo htmlspecialchars($inv['invoice_file']); ?>" target="_blank" class="action-btn" title="View PDF"><i class="ph ph-file-pdf"></i></a>
+                                        <?php endif; ?>
+                                        <a href="invoice_form.php?id=<?php echo $inv['id']; ?>" class="action-btn" title="Edit"><i class="ph ph-pencil-simple"></i></a>
+                                        <a href="?action=delete&id=<?php echo $inv['id']; ?>" class="action-btn" title="Delete" onclick="return confirm('Delete?');"><i class="ph ph-trash"></i></a>
                                     </div>
                                 </td>
                             </tr>

@@ -18,26 +18,51 @@ $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $consultant_name = trim($_POST['consultant_name']);
+    
+    // New Fields
+    $slug = trim($_POST['slug'] ?? '');
+    if (empty($slug) && !empty($consultant_name)) {
+        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $consultant_name)));
+    }
+    
+    $specializations = trim($_POST['specializations'] ?? '');
+    $office_location = trim($_POST['office_location'] ?? '');
+    $languages_spoken = trim($_POST['languages_spoken'] ?? '');
+    $website_url = trim($_POST['website_url'] ?? '');
+    $bio = $_POST['bio'] ?? '';
+    
     $consultant_rating = $_POST['consultant_rating'] !== '' ? (float)$_POST['consultant_rating'] : null;
     $verified_consultant = isset($_POST['verified_consultant']) ? 1 : 0;
-    $contact_email = trim($_POST['contact_email']);
-    $contact_phone = trim($_POST['contact_phone']);
+    $contact_email = trim($_POST['contact_email'] ?? '');
+    $contact_phone = trim($_POST['contact_phone'] ?? '');
     $experience_years = $_POST['experience_years'] !== '' ? (int)$_POST['experience_years'] : null;
     $success_rate_percent = $_POST['success_rate_percent'] !== '' ? (float)$_POST['success_rate_percent'] : null;
+    
+    // Profile Picture Upload
+    $profile_picture = $consultant['profile_picture'] ?? null;
+    if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] == 0) {
+        $upload_dir = '../uploads/consultants/';
+        if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+        $file_ext = strtolower(pathinfo($_FILES['profile_picture']['name'], PATHINFO_EXTENSION));
+        $new_name = uniqid() . '.' . $file_ext;
+        if (move_uploaded_file($_FILES['profile_picture']['tmp_name'], $upload_dir . $new_name)) {
+            $profile_picture = 'uploads/consultants/' . $new_name;
+        }
+    }
     
     if (empty($consultant_name)) {
         $error = "Consultant Name is required.";
     } else {
         if ($id) {
-            $stmt = $pdo->prepare("UPDATE consultants SET consultant_name=?, consultant_rating=?, verified_consultant=?, contact_email=?, contact_phone=?, experience_years=?, success_rate_percent=? WHERE id=?");
-            $stmt->execute([$consultant_name, $consultant_rating, $verified_consultant, $contact_email, $contact_phone, $experience_years, $success_rate_percent, $id]);
+            $stmt = $pdo->prepare("UPDATE consultants SET consultant_name=?, slug=?, profile_picture=?, specializations=?, office_location=?, languages_spoken=?, website_url=?, bio=?, consultant_rating=?, verified_consultant=?, contact_email=?, contact_phone=?, experience_years=?, success_rate_percent=? WHERE id=?");
+            $stmt->execute([$consultant_name, $slug, $profile_picture, $specializations, $office_location, $languages_spoken, $website_url, $bio, $consultant_rating, $verified_consultant, $contact_email, $contact_phone, $experience_years, $success_rate_percent, $id]);
             $success = "Consultant updated successfully.";
             $stmt = $pdo->prepare("SELECT * FROM consultants WHERE id = ?");
             $stmt->execute([$id]);
             $consultant = $stmt->fetch(PDO::FETCH_ASSOC);
         } else {
-            $stmt = $pdo->prepare("INSERT INTO consultants (consultant_name, consultant_rating, verified_consultant, contact_email, contact_phone, experience_years, success_rate_percent) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$consultant_name, $consultant_rating, $verified_consultant, $contact_email, $contact_phone, $experience_years, $success_rate_percent]);
+            $stmt = $pdo->prepare("INSERT INTO consultants (consultant_name, slug, profile_picture, specializations, office_location, languages_spoken, website_url, bio, consultant_rating, verified_consultant, contact_email, contact_phone, experience_years, success_rate_percent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$consultant_name, $slug, $profile_picture, $specializations, $office_location, $languages_spoken, $website_url, $bio, $consultant_rating, $verified_consultant, $contact_email, $contact_phone, $experience_years, $success_rate_percent]);
             $id = $pdo->lastInsertId();
             header("Location: consultant_form.php?id=$id&msg=created");
             exit;
@@ -113,10 +138,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php endif; ?>
 
             <div class="form-panel">
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Consultant Name / Agency Name *</label>
+                            <input type="text" name="consultant_name" class="form-control" required value="<?php echo htmlspecialchars($consultant['consultant_name'] ?? ''); ?>">
+                        </div>
+                        <div class="form-group">
+                            <label>Slug (URL) (Leave blank to auto-generate)</label>
+                            <input type="text" name="slug" class="form-control" value="<?php echo htmlspecialchars($consultant['slug'] ?? ''); ?>">
+                        </div>
+                    </div>
+                    
                     <div class="form-group">
-                        <label>Consultant Name / Agency Name *</label>
-                        <input type="text" name="consultant_name" class="form-control" required value="<?php echo htmlspecialchars($consultant['consultant_name'] ?? ''); ?>">
+                        <label>Profile Picture / Agency Logo</label>
+                        <input type="file" name="profile_picture" class="form-control" accept="image/*">
+                        <?php if(!empty($consultant['profile_picture'])): ?>
+                            <div style="margin-top: 10px;">
+                                <img src="../<?php echo htmlspecialchars($consultant['profile_picture']); ?>" alt="Profile" style="height: 60px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="grid-2">
@@ -128,6 +169,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <label>Contact Phone</label>
                             <input type="text" name="contact_phone" class="form-control" value="<?php echo htmlspecialchars($consultant['contact_phone'] ?? ''); ?>">
                         </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Office Location (City, Country)</label>
+                            <input type="text" name="office_location" class="form-control" value="<?php echo htmlspecialchars($consultant['office_location'] ?? ''); ?>" placeholder="e.g. New York, USA">
+                        </div>
+                        <div class="form-group">
+                            <label>Languages Spoken</label>
+                            <input type="text" name="languages_spoken" class="form-control" value="<?php echo htmlspecialchars($consultant['languages_spoken'] ?? ''); ?>" placeholder="e.g. English, Hindi, Spanish">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Specializations</label>
+                        <input type="text" name="specializations" class="form-control" value="<?php echo htmlspecialchars($consultant['specializations'] ?? ''); ?>" placeholder="e.g. Study Abroad, Visa Processing, MBA">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Website URL</label>
+                        <input type="url" name="website_url" class="form-control" value="<?php echo htmlspecialchars($consultant['website_url'] ?? ''); ?>" placeholder="https://...">
                     </div>
 
                     <div class="grid-2">
@@ -145,6 +207,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <label>Rating (out of 5.0)</label>
                         <input type="number" step="0.1" max="5" min="0" name="consultant_rating" class="form-control" value="<?php echo htmlspecialchars($consultant['consultant_rating'] ?? ''); ?>">
                     </div>
+                    
+                    <div class="form-group">
+                        <label>Bio / About Consultant</label>
+                        <textarea name="bio" class="form-control" rows="5"><?php echo htmlspecialchars($consultant['bio'] ?? ''); ?></textarea>
+                    </div>
 
                     <div class="form-group" style="margin-top: 30px;">
                         <label class="checkbox-label">
@@ -159,5 +226,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </main>
 </div>
+
+<!-- jQuery and Trumbowyg -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/ui/trumbowyg.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/trumbowyg.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('textarea[name="bio"]').trumbowyg();
+    });
+</script>
 </body>
 </html>

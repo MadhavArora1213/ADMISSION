@@ -10,9 +10,10 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
 }
 
 $stmt = $pdo->prepare("
-    SELECT * 
-    FROM lead_credits
-    ORDER BY created_at DESC
+    SELECT c.*, col.name as college_name 
+    FROM lead_credits c
+    LEFT JOIN colleges col ON c.college_id = col.id
+    ORDER BY c.created_at DESC
 ");
 $stmt->execute();
 $credits = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -77,7 +78,7 @@ $credits = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <table>
                         <thead>
                             <tr>
-                                <th>College ID</th>
+                                <th>College</th>
                                 <th>Purchased</th>
                                 <th>Delivered</th>
                                 <th>Remaining</th>
@@ -89,7 +90,7 @@ $credits = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <tbody>
                             <?php foreach($credits as $credit): ?>
                             <tr>
-                                <td><div style="font-weight:600;"><?php echo htmlspecialchars($credit['college_id']); ?></div></td>
+                                <td><div style="font-weight:600;"><?php echo htmlspecialchars($credit['college_name'] ?? 'Unknown College'); ?></div></td>
                                 <td><?php echo htmlspecialchars($credit['leads_purchased']); ?></td>
                                 <td><?php echo htmlspecialchars($credit['leads_delivered']); ?></td>
                                 <td style="font-weight:700; color:var(--primary);"><?php echo htmlspecialchars($credit['credits_remaining']); ?></td>

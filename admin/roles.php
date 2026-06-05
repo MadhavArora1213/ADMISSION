@@ -5,14 +5,34 @@ require_once 'db.php';
 
 // Hardcoded modules for demonstration
 $modules = [
-    'colleges' => 'Colleges & Universities',
-    'courses' => 'Courses & Exams',
-    'articles' => 'CMS & Articles',
-    'users' => 'User Management',
-    'moderation' => 'Security & Moderation',
+    'dashboard' => 'Dashboard',
+    'leads' => 'Leads',
+    'colleges' => 'Colleges',
+    'universities' => 'Universities',
+    'rankings' => 'Rankings',
+    'seat_matrix' => 'Seat Matrix',
+    'exams' => 'Exams',
+    'courses' => 'Courses',
+    'course_categories' => 'Course Categories',
+    'applications' => 'Applications',
+    'scholarships' => 'Scholarships',
+    'reviews' => 'Reviews',
+    'users' => 'Users',
     'community' => 'Community & Q&A',
+    'foreign_universities' => 'Universities Abroad',
+    'visa_guides' => 'Visa Guides',
+    'consultants' => 'Consultants',
     'billing' => 'Billing & Revenue',
-    'analytics' => 'Analytics & Reports'
+    'analytics' => 'Analytics & Reports',
+    'cms' => 'CMS (Articles, Media, Tags)',
+    'search' => 'Search & Discovery',
+    'seo' => 'SEO Management',
+    'communications' => 'Communications',
+    'ai_systems' => 'AI Engine',
+    'widgets' => 'Dashboard Engine',
+    'moderation' => 'Security & Moderation',
+    'partners' => 'Partner Management',
+    'system' => 'System (Logs, Settings)'
 ];
 
 $actions = ['read', 'write', 'delete'];

@@ -85,7 +85,7 @@ $plans = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <tr>
                                 <td><div style="font-weight:600;"><?php echo htmlspecialchars($plan['plan_name']); ?></div></td>
                                 <td><span class="badge"><?php echo htmlspecialchars($plan['plan_type']); ?></span></td>
-                                <td>$<?php echo number_format($plan['price'], 2); ?></td>
+                                <td>₹<?php echo number_format($plan['price'], 2); ?></td>
                                 <td><?php echo date('Y-m-d', strtotime($plan['created_at'])); ?></td>
                                 <td>
                                     <div style="display:flex; gap:6px;">

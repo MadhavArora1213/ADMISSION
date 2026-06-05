@@ -17,26 +17,26 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $country_id = (int)$_POST['country_id'];
+    $country = trim($_POST['country']);
     $visa_type = trim($_POST['visa_type']);
     $processing_time_days = $_POST['processing_time_days'] !== '' ? (int)$_POST['processing_time_days'] : null;
     $visa_fee_usd = $_POST['visa_fee_usd'] !== '' ? (float)$_POST['visa_fee_usd'] : null;
     $pswv_duration_months = $_POST['pswv_duration_months'] !== '' ? (int)$_POST['pswv_duration_months'] : null;
     $success_tips = $_POST['success_tips'];
     
-    if (empty($country_id) || empty($visa_type)) {
-        $error = "Country ID and Visa Type are required.";
+    if (empty($country) || empty($visa_type)) {
+        $error = "Country and Visa Type are required.";
     } else {
         if ($id) {
-            $stmt = $pdo->prepare("UPDATE visa_guides SET country_id=?, visa_type=?, processing_time_days=?, visa_fee_usd=?, pswv_duration_months=?, success_tips=? WHERE id=?");
-            $stmt->execute([$country_id, $visa_type, $processing_time_days, $visa_fee_usd, $pswv_duration_months, $success_tips, $id]);
+            $stmt = $pdo->prepare("UPDATE visa_guides SET country=?, visa_type=?, processing_time_days=?, visa_fee_usd=?, pswv_duration_months=?, success_tips=? WHERE id=?");
+            $stmt->execute([$country, $visa_type, $processing_time_days, $visa_fee_usd, $pswv_duration_months, $success_tips, $id]);
             $success = "Visa guide updated successfully.";
             $stmt = $pdo->prepare("SELECT * FROM visa_guides WHERE id = ?");
             $stmt->execute([$id]);
             $guide = $stmt->fetch(PDO::FETCH_ASSOC);
         } else {
-            $stmt = $pdo->prepare("INSERT INTO visa_guides (country_id, visa_type, processing_time_days, visa_fee_usd, pswv_duration_months, success_tips) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$country_id, $visa_type, $processing_time_days, $visa_fee_usd, $pswv_duration_months, $success_tips]);
+            $stmt = $pdo->prepare("INSERT INTO visa_guides (country, visa_type, processing_time_days, visa_fee_usd, pswv_duration_months, success_tips) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$country, $visa_type, $processing_time_days, $visa_fee_usd, $pswv_duration_months, $success_tips]);
             $id = $pdo->lastInsertId();
             header("Location: visa_guide_form.php?id=$id&msg=created");
             exit;
@@ -112,8 +112,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <form method="POST">
                     <div class="grid-2">
                         <div class="form-group">
-                            <label>Country ID * (Ensure ID exists in countries table)</label>
-                            <input type="number" name="country_id" class="form-control" required value="<?php echo htmlspecialchars($guide['country_id'] ?? ''); ?>">
+                            <label>Country *</label>
+                            <input type="text" name="country" class="form-control" required value="<?php echo htmlspecialchars($guide['country'] ?? ''); ?>" placeholder="e.g. USA, UK, Canada">
                         </div>
                         <div class="form-group">
                             <label>Visa Type * (e.g. Student Visa F1, Tier 4)</label>
@@ -148,5 +148,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </main>
 </div>
+
+<!-- jQuery and Trumbowyg -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/ui/trumbowyg.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/trumbowyg.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('textarea[name="success_tips"]').trumbowyg();
+    });
+</script>
 </body>
 </html>

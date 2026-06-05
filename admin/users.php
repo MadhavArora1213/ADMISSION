@@ -13,8 +13,36 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     } elseif ($action === 'activate') {
         $pdo->prepare("UPDATE users SET status = 'active' WHERE id = ?")->execute([$id]);
         $msg = "User activated.";
+    } elseif ($action === 'delete') {
+        $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$id]);
+        $msg = "User deleted.";
     }
     header("Location: users.php?msg=" . urlencode($msg));
+    exit;
+}
+
+// Handle Create User
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create_user') {
+    $full_name = trim($_POST['full_name']);
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+    $role_id = $_POST['role_id'] ?: null;
+    $is_super_admin = isset($_POST['is_super_admin']) ? 1 : 0;
+    
+    // Check if email exists
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    if ($stmt->fetch()) {
+        header("Location: users.php?msg=" . urlencode("Error: Email already exists"));
+        exit;
+    }
+    
+    $password_hash = password_hash($password, PASSWORD_DEFAULT);
+    
+    $stmt = $pdo->prepare("INSERT INTO users (id, full_name, email, password_hash, role_id, is_super_admin, status, auth_provider) VALUES (UUID(), ?, ?, ?, ?, ?, 'active', 'email')");
+    $stmt->execute([$full_name, $email, $password_hash, $role_id, $is_super_admin]);
+    
+    header("Location: users.php?msg=" . urlencode("Admin user created successfully"));
     exit;
 }
 
@@ -124,12 +152,15 @@ $users = $stmt->fetchAll();
                     <h2><i class="ph ph-users" style="color:var(--primary);"></i> User Management</h2>
                     <p style="color:var(--text-muted);">Manage all users and assign administrative roles.</p>
                 </div>
-                <form method="GET">
-                    <div class="search-box">
-                        <i class="ph ph-magnifying-glass" style="color:var(--text-muted);"></i>
-                        <input type="text" name="q" placeholder="Search name or email..." value="<?php echo htmlspecialchars($search); ?>">
-                    </div>
-                </form>
+                <div style="display:flex; align-items:center; gap: 16px;">
+                    <button class="btn-primary" onclick="openCreateUserModal()"><i class="ph ph-plus"></i> Create Admin User</button>
+                    <form method="GET">
+                        <div class="search-box">
+                            <i class="ph ph-magnifying-glass" style="color:var(--text-muted);"></i>
+                            <input type="text" name="q" placeholder="Search name or email..." value="<?php echo htmlspecialchars($search); ?>">
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <?php if(isset($_GET['msg'])): ?>
@@ -188,6 +219,7 @@ $users = $stmt->fetchAll();
                                     <?php else: ?>
                                         <a href="?action=activate&id=<?php echo $u['id']; ?>" class="btn-action" style="color:#166534; border-color:#86efac;"><i class="ph ph-check-circle"></i> Activate</a>
                                     <?php endif; ?>
+                                    <a href="?action=delete&id=<?php echo $u['id']; ?>" class="btn-action" onclick="return confirm('Are you sure you want to permanently delete this user?')" style="color:#991b1b; border-color:#fca5a5;"><i class="ph ph-trash"></i> Delete</a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -239,6 +271,53 @@ $users = $stmt->fetchAll();
     </div>
 </div>
 
+<!-- Create User Modal -->
+<div id="createUserModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span>Create Admin User</span>
+            <button onclick="closeCreateUserModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-muted);">&times;</button>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="action" value="create_user">
+            
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="full_name" required style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-color); font-size:0.9rem;">
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" required style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-color); font-size:0.9rem;">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-color); font-size:0.9rem;">
+            </div>
+            <div class="form-group">
+                <label>Assign Role</label>
+                <select name="role_id" required>
+                    <option value="">-- Select an Admin Role --</option>
+                    <?php foreach($roles as $r): ?>
+                        <option value="<?php echo $r['id']; ?>"><?php echo htmlspecialchars($r['role_name']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group" style="margin-top:20px;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" name="is_super_admin" value="1">
+                    <span style="color:#166534; font-weight:800; text-transform:none;">Grant Super Admin Access</span>
+                </label>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; text-transform:none;">Super Admins bypass role restrictions and have full system access.</p>
+            </div>
+            
+            <div style="margin-top:24px; text-align:right;">
+                <button type="button" class="btn-action" style="padding:10px 20px;" onclick="closeCreateUserModal()">Cancel</button>
+                <button type="submit" class="btn-primary" style="margin-left:10px;">Create User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 function openRoleModal(userId, userName, roleId, isSuperAdmin) {
     document.getElementById('roleModal').classList.add('active');
@@ -250,6 +329,14 @@ function openRoleModal(userId, userName, roleId, isSuperAdmin) {
 
 function closeModal() {
     document.getElementById('roleModal').classList.remove('active');
+}
+
+function openCreateUserModal() {
+    document.getElementById('createUserModal').classList.add('active');
+}
+
+function closeCreateUserModal() {
+    document.getElementById('createUserModal').classList.remove('active');
 }
 </script>
 </body>

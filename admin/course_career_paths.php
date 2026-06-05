@@ -14,12 +14,50 @@ if (!$course) { header('Location: courses.php'); exit; }
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'save') {
     $id = !empty($_POST['id']) ? $_POST['id'] : sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
     
+    // Skills
+    $skills_json = null;
+    if (isset($_POST['skill']) && is_array($_POST['skill'])) {
+        $skills = array_filter(array_map('trim', $_POST['skill']));
+        if (!empty($skills)) {
+            $skills_json = json_encode(array_values($skills));
+        }
+    } elseif (isset($_POST['skills_required'])) {
+        $skills_json = $_POST['skills_required'] ?: null;
+    }
+
+    // Top Companies
+    $companies_json = null;
+    if (isset($_POST['company_name']) && is_array($_POST['company_name'])) {
+        $companies = [];
+        $upload_dir = '../uploads/companies/';
+        if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+        
+        foreach ($_POST['company_name'] as $index => $name) {
+            $name = trim($name);
+            $logo = trim($_POST['company_logo'][$index] ?? '');
+            
+            if (isset($_FILES['company_logo_file']['name'][$index]) && $_FILES['company_logo_file']['error'][$index] == 0) {
+                $tmp_name = $_FILES['company_logo_file']['tmp_name'][$index];
+                $file_name = time() . '_' . mt_rand(100, 999) . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '', $_FILES['company_logo_file']['name'][$index]);
+                if (move_uploaded_file($tmp_name, $upload_dir . $file_name)) {
+                    $logo = 'uploads/companies/' . $file_name;
+                }
+            }
+            if ($name !== '') {
+                $companies[] = ['name' => $name, 'logo' => $logo];
+            }
+        }
+        if (!empty($companies)) $companies_json = json_encode($companies);
+    } elseif (isset($_POST['top_companies'])) {
+        $companies_json = $_POST['top_companies'] ?: null;
+    }
+
     if (!empty($_POST['id'])) {
         $stmt = $pdo->prepare("UPDATE course_career_paths SET job_role = ?, avg_salary_lpa = ?, top_companies = ?, growth_outlook = ?, skills_required = ?, fresher_salary_lpa = ?, experienced_salary_lpa = ? WHERE id = ?");
-        $stmt->execute([$_POST['job_role'], $_POST['avg_salary_lpa']?:null, $_POST['top_companies']?:null, $_POST['growth_outlook']?:null, $_POST['skills_required']?:null, $_POST['fresher_salary_lpa']?:null, $_POST['experienced_salary_lpa']?:null, $id]);
+        $stmt->execute([$_POST['job_role'], $_POST['avg_salary_lpa']?:null, $companies_json, $_POST['growth_outlook']?:null, $skills_json, $_POST['fresher_salary_lpa']?:null, $_POST['experienced_salary_lpa']?:null, $id]);
     } else {
         $stmt = $pdo->prepare("INSERT INTO course_career_paths (id, course_id, job_role, avg_salary_lpa, top_companies, growth_outlook, skills_required, fresher_salary_lpa, experienced_salary_lpa) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$id, $course_id, $_POST['job_role'], $_POST['avg_salary_lpa']?:null, $_POST['top_companies']?:null, $_POST['growth_outlook']?:null, $_POST['skills_required']?:null, $_POST['fresher_salary_lpa']?:null, $_POST['experienced_salary_lpa']?:null]);
+        $stmt->execute([$id, $course_id, $_POST['job_role'], $_POST['avg_salary_lpa']?:null, $companies_json, $_POST['growth_outlook']?:null, $skills_json, $_POST['fresher_salary_lpa']?:null, $_POST['experienced_salary_lpa']?:null]);
     }
     header("Location: course_career_paths.php?course_id=$course_id&msg=saved");
     exit;
@@ -116,7 +154,7 @@ if (isset($_GET['edit_id'])) {
                 <div class="msg-alert"><i class="ph ph-check-circle"></i> Career path deleted.</div>
                 <?php endif; ?>
 
-                <form action="" method="POST" class="form-section">
+                <form action="" method="POST" enctype="multipart/form-data" class="form-section">
                     <h3><?php echo $edit ? 'Edit Career Path' : 'Add Career Path'; ?></h3>
                     <input type="hidden" name="action" value="save">
                     <?php if($edit): ?><input type="hidden" name="id" value="<?php echo $edit['id']; ?>"><?php endif; ?>
@@ -148,12 +186,49 @@ if (isset($_GET['edit_id'])) {
                             <input type="number" step="0.01" name="experienced_salary_lpa" class="form-control" value="<?php echo $edit ? $edit['experienced_salary_lpa'] : ''; ?>">
                         </div>
                         <div class="form-group full">
-                            <label>Skills Required (JSON Array)</label>
-                            <textarea name="skills_required" class="form-control" rows="2" placeholder='["Java", "Python"]'><?php echo $edit ? htmlspecialchars($edit['skills_required']) : ''; ?></textarea>
+                            <label>Skills Required</label>
+                            <div id="skills-container">
+                                <?php 
+                                $skills = [];
+                                if ($edit && !empty($edit['skills_required'])) {
+                                    $skills = json_decode($edit['skills_required'] ?? '[]', true);
+                                }
+                                if (!$skills || !is_array($skills)) $skills = [];
+                                if (empty($skills)) $skills[] = '';
+                                foreach ($skills as $skill): 
+                                ?>
+                                <div class="skill-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                    <input type="text" name="skill[]" class="form-control" placeholder="Skill (e.g. Java)" value="<?php echo htmlspecialchars($skill); ?>" style="flex: 1;">
+                                    <button type="button" class="btn btn-danger remove-skill" style="padding: 0 15px; border-radius: 8px; border: 1px solid #fecaca; background: #fee2e2; color: #991b1b; cursor: pointer;">&times;</button>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <button type="button" class="btn btn-secondary" id="add-skill" style="margin-top: 10px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #fff; cursor: pointer;">+ Add Skill</button>
                         </div>
                         <div class="form-group full">
-                            <label>Top Companies (JSON Array [{name, logo}])</label>
-                            <textarea name="top_companies" class="form-control" rows="2" placeholder='[{"name":"TCS"}]'><?php echo $edit ? htmlspecialchars($edit['top_companies']) : ''; ?></textarea>
+                            <label>Top Companies</label>
+                            <div id="companies-container">
+                                <?php 
+                                $companies = [];
+                                if ($edit && !empty($edit['top_companies'])) {
+                                    $companies = json_decode($edit['top_companies'] ?? '[]', true);
+                                }
+                                if (!$companies || !is_array($companies)) $companies = [];
+                                if (empty($companies)) $companies[] = ['name' => '', 'logo' => ''];
+                                foreach ($companies as $company): 
+                                ?>
+                                <div class="company-row" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                                    <input type="text" name="company_name[]" class="form-control" placeholder="Company Name" value="<?php echo htmlspecialchars($company['name'] ?? ''); ?>" style="flex: 1;">
+                                    <input type="hidden" name="company_logo[]" value="<?php echo htmlspecialchars($company['logo'] ?? ''); ?>">
+                                    <input type="file" name="company_logo_file[]" class="form-control" style="flex: 1;" accept="image/*">
+                                    <?php if(!empty($company['logo'])): ?>
+                                    <img src="../<?php echo htmlspecialchars($company['logo']); ?>" alt="logo" style="height: 30px; object-fit: contain;">
+                                    <?php endif; ?>
+                                    <button type="button" class="btn btn-danger remove-company" style="padding: 0 15px; height: 100%; border-radius: 8px; border: 1px solid #fecaca; background: #fee2e2; color: #991b1b; cursor: pointer;">&times;</button>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <button type="button" class="btn btn-secondary" id="add-company" style="margin-top: 10px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #fff; cursor: pointer;">+ Add Company</button>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary" style="margin-top: 16px;"><?php echo $edit ? 'Update' : 'Add'; ?> Career Path</button>
@@ -197,5 +272,48 @@ if (isset($_GET['edit_id'])) {
             </div>
         </main>
     </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Skills dynamic list
+            $('#add-skill').click(function() {
+                var row = `
+                <div class="skill-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" name="skill[]" class="form-control" placeholder="Skill (e.g. Java)" style="flex: 1;">
+                    <button type="button" class="btn btn-danger remove-skill" style="padding: 0 15px; border-radius: 8px; border: 1px solid #fecaca; background: #fee2e2; color: #991b1b; cursor: pointer;">&times;</button>
+                </div>`;
+                $('#skills-container').append(row);
+            });
+
+            $(document).on('click', '.remove-skill', function() {
+                if ($('.skill-row').length > 1) {
+                    $(this).closest('.skill-row').remove();
+                } else {
+                    $(this).closest('.skill-row').find('input').val('');
+                }
+            });
+
+            // Top Companies dynamic list
+            $('#add-company').click(function() {
+                var row = `
+                <div class="company-row" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                    <input type="text" name="company_name[]" class="form-control" placeholder="Company Name" style="flex: 1;">
+                    <input type="hidden" name="company_logo[]" value="">
+                    <input type="file" name="company_logo_file[]" class="form-control" style="flex: 1;" accept="image/*">
+                    <button type="button" class="btn btn-danger remove-company" style="padding: 0 15px; height: 100%; border-radius: 8px; border: 1px solid #fecaca; background: #fee2e2; color: #991b1b; cursor: pointer;">&times;</button>
+                </div>`;
+                $('#companies-container').append(row);
+            });
+
+            $(document).on('click', '.remove-company', function() {
+                if ($('.company-row').length > 1) {
+                    $(this).closest('.company-row').remove();
+                } else {
+                    $(this).closest('.company-row').find('input').val('');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

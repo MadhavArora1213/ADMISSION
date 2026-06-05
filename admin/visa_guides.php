@@ -15,16 +15,15 @@ $search = isset($_GET['q']) ? trim($_GET['q']) : '';
 $where = [];
 $params = [];
 if ($search !== '') { 
-    $where[] = "(v.visa_type LIKE ? OR c.name LIKE ?)"; 
+    $where[] = "(v.visa_type LIKE ? OR v.country LIKE ?)"; 
     $params[] = "%$search%"; 
     $params[] = "%$search%"; 
 }
 $whereSQL = count($where) ? "WHERE " . implode(" AND ", $where) : "";
 
 $stmt = $pdo->prepare("
-    SELECT v.*, c.name as country_name 
+    SELECT v.* 
     FROM visa_guides v
-    LEFT JOIN countries c ON v.country_id = c.id
     $whereSQL 
     ORDER BY v.created_at DESC 
     LIMIT 100
@@ -139,7 +138,7 @@ $total_guides = $pdo->query("SELECT count(*) FROM visa_guides")->fetchColumn();
                             <tr>
                                 <td>
                                     <div style="font-weight:600; color:var(--text-dark);">
-                                        <?php echo htmlspecialchars($guide['country_name'] ?: 'Country ID: ' . $guide['country_id']); ?>
+                                        <?php echo htmlspecialchars($guide['country'] ?? '-'); ?>
                                     </div>
                                 </td>
                                 <td><?php echo htmlspecialchars($guide['visa_type']); ?></td>
