@@ -10,9 +10,10 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
 }
 
 $stmt = $pdo->prepare("
-    SELECT * 
-    FROM commissions
-    ORDER BY created_at DESC
+    SELECT c.*, col.name as college_name 
+    FROM commissions c
+    LEFT JOIN colleges col ON c.college_id = col.id
+    ORDER BY c.created_at DESC
 ");
 $stmt->execute();
 $commissions = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -92,14 +93,14 @@ $commissions = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <?php foreach($commissions as $comm): ?>
                             <tr>
                                 <td>
-                                    <div style="font-weight:600;">C: <?php echo htmlspecialchars($comm['college_id']); ?></div>
+                                    <div style="font-weight:600;">C: <?php echo htmlspecialchars($comm['college_name'] ?? 'Unknown College'); ?></div>
                                     <?php if($comm['consultant_id']): ?>
                                     <div style="font-size:0.75rem; color:var(--text-muted);">Consultant: <?php echo htmlspecialchars($comm['consultant_id']); ?></div>
                                     <?php endif; ?>
                                 </td>
                                 <td><?php echo htmlspecialchars($comm['application_id']); ?></td>
                                 <td><?php echo htmlspecialchars($comm['commission_pct']); ?>%</td>
-                                <td style="font-weight:700; color:var(--primary);">$<?php echo number_format($comm['commission_earned'], 2); ?></td>
+                                <td style="font-weight:700; color:var(--primary);">₹<?php echo number_format($comm['commission_earned'], 2); ?></td>
                                 <td><?php echo $comm['payout_date'] ? date('Y-m-d', strtotime($comm['payout_date'])) : '-'; ?></td>
                                 <td><span class="badge s-<?php echo $comm['commission_status']; ?>"><?php echo htmlspecialchars($comm['commission_status']); ?></span></td>
                                 <td>

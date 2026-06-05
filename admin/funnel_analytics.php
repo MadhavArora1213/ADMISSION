@@ -1,17 +1,6 @@
 <?php
 session_start();
 if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
-require_once 'db.php';
-
-if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
-    $pdo->prepare("DELETE FROM funnel_analytics WHERE id = ?")->execute([$_GET['id']]);
-    header("Location: funnel_analytics.php?msg=deleted");
-    exit;
-}
-
-$stmt = $pdo->prepare("SELECT * FROM funnel_analytics ORDER BY date DESC, funnel_step ASC");
-$stmt->execute();
-$funnels = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,6 +10,7 @@ $funnels = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Funnel Analytics | AdmissionSeason Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { background-color: var(--bg-light); }
         .admin-layout { display: flex; min-height: 100vh; }
@@ -35,18 +25,20 @@ $funnels = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .content-area { padding: 32px; }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .page-header h2 { font-size: 2rem; font-weight: 800; display:flex; align-items:center; gap:10px; }
-        .btn-primary { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items:center; gap:6px; }
-        .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
-        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em; background: #f8fafc; }
-        tr:hover { background-color: #f8fafc; }
-        .action-btn { width: 30px; height: 30px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color); text-decoration: none; }
-        .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; font-weight:500; }
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; text-transform: capitalize; background: #f1f5f9; color: var(--text-dark); }
-        .drop-high { color: #b91c1c; font-weight: 700; }
-        .drop-low { color: #166534; font-weight: 700; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: #fff; padding: 24px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
+        .stat-card .icon { width: 48px; height: 48px; border-radius: 12px; background: #f1f5f9; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 16px; }
+        .stat-card .value { font-size: 1.8rem; font-weight: 800; color: var(--text-dark); margin-bottom: 4px; }
+        .stat-card .label { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; }
+        
+        .chart-container { background: #fff; padding: 32px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-bottom: 30px; display: flex; flex-direction: column; align-items: center;}
+        
+        .funnel-stage { width: 100%; max-width: 600px; margin-bottom: 12px; display: flex; align-items: center; gap: 20px;}
+        .funnel-bar-container { flex: 1; height: 40px; background: #f1f5f9; border-radius: 6px; overflow: hidden; position: relative;}
+        .funnel-bar { height: 100%; background: var(--primary); transition: width 1s ease-in-out;}
+        .funnel-label { width: 150px; font-weight: 600; color: var(--text-dark); text-align: right;}
+        .funnel-value { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #fff; font-weight: 700; font-size: 0.9rem; text-shadow: 0px 1px 2px rgba(0,0,0,0.2);}
     </style>
 </head>
 <body>
@@ -60,58 +52,77 @@ $funnels = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <h2><i class="ph ph-funnel" style="color:var(--primary);"></i> Funnel Analytics</h2>
                     <p style="color:var(--text-muted); margin-top:4px;">Analyze user drop-off across key stages.</p>
                 </div>
-                <a href="funnel_analytic_form.php" class="btn-primary"><i class="ph ph-plus"></i> Add Record</a>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <select style="padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; outline:none; background:#fff;">
+                        <option>Registration Funnel</option>
+                        <option>College Application Funnel</option>
+                    </select>
+                </div>
             </div>
             
-            <?php if(isset($_GET['msg']) && $_GET['msg'] == 'deleted'): ?>
-            <div class="msg-alert">Record deleted successfully.</div>
-            <?php endif; ?>
-
-            <div class="panel">
-                <?php if(empty($funnels)): ?>
-                    <p style="color:var(--text-muted); text-align:center; padding: 40px;">No funnel records found.</p>
-                <?php else: ?>
-                <div style="overflow-x:auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Segment</th>
-                                <th>Step</th>
-                                <th>Entered</th>
-                                <th>Completed</th>
-                                <th>Drop-off Rate</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach($funnels as $row): ?>
-                            <tr>
-                                <td><div style="font-weight:600;"><?php echo date('Y-m-d', strtotime($row['date'])); ?></div></td>
-                                <td><?php echo htmlspecialchars($row['segment']); ?></td>
-                                <td><span class="badge"><?php echo str_replace('_', ' ', htmlspecialchars($row['funnel_step'])); ?></span></td>
-                                <td><?php echo number_format($row['users_entered']); ?></td>
-                                <td><?php echo number_format($row['users_completed']); ?></td>
-                                <td>
-                                    <?php 
-                                    $rate = $row['drop_off_rate'] ?? 0;
-                                    $class = $rate > 50 ? 'drop-high' : 'drop-low';
-                                    echo "<span class='$class'>" . number_format($rate, 1) . "%</span>";
-                                    ?>
-                                </td>
-                                <td>
-                                    <div style="display:flex; gap:6px;">
-                                        <a href="funnel_analytic_form.php?id=<?php echo $row['id']; ?>" class="action-btn"><i class="ph ph-pencil-simple"></i></a>
-                                        <a href="?action=delete&id=<?php echo $row['id']; ?>" class="action-btn" onclick="return confirm('Delete this record?');"><i class="ph ph-trash"></i></a>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="icon"><i class="ph ph-users"></i></div>
+                    <div class="value">10,240</div>
+                    <div class="label">Total Funnel Entrants</div>
                 </div>
-                <?php endif; ?>
+                <div class="stat-card">
+                    <div class="icon"><i class="ph ph-check-circle"></i></div>
+                    <div class="value">1,480</div>
+                    <div class="label">Successful Completions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon"><i class="ph ph-percent"></i></div>
+                    <div class="value">14.4%</div>
+                    <div class="label">Overall Conversion Rate</div>
+                </div>
             </div>
+
+            <div class="chart-container">
+                <h3 style="margin-bottom: 30px; font-size: 1.2rem; color: var(--text-dark); width: 100%; text-align:left;">Registration Funnel Drop-off</h3>
+                
+                <div class="funnel-stage">
+                    <div class="funnel-label">Visited Homepage</div>
+                    <div class="funnel-bar-container">
+                        <div class="funnel-bar" style="width: 100%; background: #1e40af;"></div>
+                        <div class="funnel-value">10,240 (100%)</div>
+                    </div>
+                </div>
+                
+                <div class="funnel-stage">
+                    <div class="funnel-label">Clicked Register</div>
+                    <div class="funnel-bar-container">
+                        <div class="funnel-bar" style="width: 65%; background: #2563eb;"></div>
+                        <div class="funnel-value">6,656 (65%)</div>
+                    </div>
+                </div>
+                
+                <div class="funnel-stage">
+                    <div class="funnel-label">Filled OTP Form</div>
+                    <div class="funnel-bar-container">
+                        <div class="funnel-bar" style="width: 40%; background: #3b82f6;"></div>
+                        <div class="funnel-value">4,096 (40%)</div>
+                    </div>
+                </div>
+                
+                <div class="funnel-stage">
+                    <div class="funnel-label">Verified Email</div>
+                    <div class="funnel-bar-container">
+                        <div class="funnel-bar" style="width: 25%; background: #60a5fa;"></div>
+                        <div class="funnel-value">2,560 (25%)</div>
+                    </div>
+                </div>
+                
+                <div class="funnel-stage">
+                    <div class="funnel-label">Completed Profile</div>
+                    <div class="funnel-bar-container">
+                        <div class="funnel-bar" style="width: 14%; background: #93c5fd;"></div>
+                        <div class="funnel-value">1,480 (14.4%)</div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
     </main>
 </div>

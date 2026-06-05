@@ -11,19 +11,51 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
 
 // Handle upload metadata save
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'save') {
-    $mid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0x0fff)|0x4000,mt_rand(0,0x3fff)|0x8000,mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff));
-    $pdo->prepare("INSERT INTO media_files (id, file_name, file_url, cdn_url, file_type, file_size_kb, alt_text, folder_path, uploaded_by) VALUES (?,?,?,?,?,?,?,?,?)")->execute([
-        $mid,
-        $_POST['file_name'],
-        $_POST['file_url'],
-        $_POST['cdn_url'] ?: null,
-        $_POST['file_type'] ?: 'image',
-        $_POST['file_size_kb'] ?: null,
-        $_POST['alt_text'] ?: null,
-        $_POST['folder_path'] ?: null,
-        $_SESSION['admin_id']
-    ]);
-    header("Location: media_library.php?msg=added"); exit;
+    $alt_text = $_POST['alt_text'] ?? '';
+    
+    if (isset($_FILES['media_file']) && $_FILES['media_file']['error'] == UPLOAD_ERR_OK) {
+        $upload_dir = '../uploads/media/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+        
+        $original_name = $_FILES['media_file']['name'];
+        $tmp_name = $_FILES['media_file']['tmp_name'];
+        $file_size = round($_FILES['media_file']['size'] / 1024, 2);
+        
+        $ext = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
+        
+        $file_type = 'doc';
+        if (in_array($ext, ['jpg','jpeg','png','gif','webp'])) $file_type = 'image';
+        elseif (in_array($ext, ['mp4','webm','mov'])) $file_type = 'video';
+        elseif ($ext === 'pdf') $file_type = 'pdf';
+        elseif ($ext === 'svg') $file_type = 'svg';
+        
+        $new_name = uniqid() . '_' . preg_replace('/[^a-zA-Z0-9.-]/', '_', $original_name);
+        $destination = $upload_dir . $new_name;
+        
+        if (move_uploaded_file($tmp_name, $destination)) {
+            $file_url = '../uploads/media/' . $new_name;
+            $mid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0x0fff)|0x4000,mt_rand(0,0x3fff)|0x8000,mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff));
+            
+            $pdo->prepare("INSERT INTO media_files (id, file_name, file_url, cdn_url, file_type, file_size_kb, alt_text, folder_path, uploaded_by) VALUES (?,?,?,?,?,?,?,?,?)")->execute([
+                $mid,
+                $original_name,
+                $file_url,
+                null,
+                $file_type,
+                $file_size,
+                $alt_text,
+                '/uploads/media/',
+                $_SESSION['admin_id']
+            ]);
+            header("Location: media_library.php?msg=added"); exit;
+        } else {
+            header("Location: media_library.php?msg=error"); exit;
+        }
+    } else {
+        header("Location: media_library.php?msg=error"); exit;
+    }
 }
 
 $type_filter = isset($_GET['type']) ? $_GET['type'] : 'all';
@@ -117,26 +149,21 @@ $files = $pdo->query("SELECT mf.*, u.full_name as uploader FROM media_files mf L
             <h3 style="font-size:1.2rem; font-weight:700;">Add File to Library</h3>
             <button onclick="document.getElementById('addModal').style.display='none'" style="background:none; border:none; cursor:pointer; font-size:1.5rem; color:var(--text-muted);">&times;</button>
         </div>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="action" value="save">
             <div class="form-grid">
-                <div class="form-group" style="grid-column:1/-1;"><label>File Name *</label><input type="text" name="file_name" class="form-control" required placeholder="image.jpg"></div>
-                <div class="form-group" style="grid-column:1/-1;"><label>File URL *</label><input type="url" name="file_url" class="form-control" required placeholder="https://..."></div>
-                <div class="form-group"><label>CDN URL</label><input type="url" name="cdn_url" class="form-control" placeholder="https://cdn..."></div>
-                <div class="form-group"><label>File Type</label>
-                    <select name="file_type" class="form-control">
-                        <?php foreach(['image','video','pdf','doc','svg'] as $ft): ?>
-                        <option value="<?php echo $ft; ?>"><?php echo ucfirst($ft); ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label>Select File *</label>
+                    <input type="file" name="media_file" class="form-control" required style="padding: 12px; background: #f8fafc; border: 2px dashed var(--border-color); cursor: pointer;">
                 </div>
-                <div class="form-group"><label>File Size (KB)</label><input type="number" name="file_size_kb" class="form-control" placeholder="512"></div>
-                <div class="form-group"><label>Folder Path</label><input type="text" name="folder_path" class="form-control" placeholder="/uploads/2025/"></div>
-                <div class="form-group" style="grid-column:1/-1;"><label>Alt Text</label><input type="text" name="alt_text" class="form-control" placeholder="Descriptive alt text..."></div>
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label>Alt Text (Optional)</label>
+                    <input type="text" name="alt_text" class="form-control" placeholder="Descriptive alt text for SEO / Accessibility...">
+                </div>
             </div>
             <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:16px;">
                 <button type="button" onclick="document.getElementById('addModal').style.display='none'" class="btn" style="background:#f1f5f9;color:#475569;">Cancel</button>
-                <button type="submit" class="btn btn-primary"><i class="ph ph-plus"></i> Add to Library</button>
+                <button type="submit" class="btn btn-primary"><i class="ph ph-upload-simple"></i> Upload to Library</button>
             </div>
         </form>
     </div>

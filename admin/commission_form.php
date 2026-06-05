@@ -16,9 +16,11 @@ if ($id) {
 $error = '';
 $success = '';
 
+$colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $application_id = (int)$_POST['application_id'];
-    $college_id = (int)$_POST['college_id'];
+    $college_id = $_POST['college_id'];
     $consultant_id = $_POST['consultant_id'] !== '' ? (int)$_POST['consultant_id'] : null;
     $invoice_id = $_POST['invoice_id'] !== '' ? (int)$_POST['invoice_id'] : null;
     $commission_pct = (float)$_POST['commission_pct'];
@@ -107,8 +109,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <input type="number" name="application_id" class="form-control" required value="<?php echo htmlspecialchars($comm['application_id'] ?? ''); ?>">
                         </div>
                         <div class="form-group">
-                            <label>College ID *</label>
-                            <input type="number" name="college_id" class="form-control" required value="<?php echo htmlspecialchars($comm['college_id'] ?? ''); ?>">
+                            <label>College *</label>
+                            <select name="college_id" class="form-control" required>
+                                <option value="">Select College</option>
+                                <?php foreach($colleges as $c): ?>
+                                    <option value="<?php echo htmlspecialchars($c['id']); ?>" <?php echo (isset($comm['college_id']) && $comm['college_id'] == $c['id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($c['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                     </div>
                     
@@ -129,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <input type="number" step="0.1" name="commission_pct" class="form-control" required value="<?php echo htmlspecialchars($comm['commission_pct'] ?? '0.0'); ?>">
                         </div>
                         <div class="form-group">
-                            <label>Earned Amount (USD) *</label>
+                            <label>Earned Amount (INR) *</label>
                             <input type="number" step="0.01" name="commission_earned" class="form-control" required value="<?php echo htmlspecialchars($comm['commission_earned'] ?? '0.00'); ?>">
                         </div>
                     </div>
