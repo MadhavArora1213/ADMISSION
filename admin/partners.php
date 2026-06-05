@@ -3,6 +3,14 @@ session_start();
 if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
 require_once 'db.php';
 
+// Handle Delete Partner
+if (isset($_GET['action']) && $_GET['action'] === 'delete_partner' && isset($_GET['id'])) {
+    $stmt = $pdo->prepare("DELETE FROM partners WHERE id = ?");
+    $stmt->execute([$_GET['id']]);
+    header("Location: partners.php?msg=" . urlencode("Partner deleted successfully."));
+    exit;
+}
+
 // Handle Add/Edit Partner
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_partner') {
     $partner_id = !empty($_POST['partner_id']) ? $_POST['partner_id'] : null;
@@ -219,8 +227,9 @@ $stat_trial = $pdo->query("SELECT COUNT(*) FROM partners WHERE status = 'trial'"
                                     <div style="font-size:0.85rem;"><strong>Start:</strong> <?php echo $p['contract_start'] ? date('M d, Y', strtotime($p['contract_start'])) : '—'; ?></div>
                                     <div style="font-size:0.85rem; margin-top:4px;"><strong>End:</strong> <?php echo $p['contract_end'] ? date('M d, Y', strtotime($p['contract_end'])) : '—'; ?></div>
                                 </td>
-                                <td>
-                                    <button class="btn-action" onclick='editPartner(<?php echo json_encode($p); ?>)'><i class="ph ph-pencil-simple"></i> Edit</button>
+                                <td style="display: flex; gap: 8px;">
+                                    <button class="btn-action" onclick='editPartner(<?php echo htmlspecialchars(json_encode($p), ENT_QUOTES, "UTF-8"); ?>)'><i class="ph ph-pencil-simple"></i> Edit</button>
+                                    <a href="?action=delete_partner&id=<?php echo urlencode($p['id']); ?>" class="btn-action" style="color:#dc2626; border-color:#fca5a5;" onclick="return confirm('Are you sure you want to delete this partner account? This action cannot be undone.');"><i class="ph ph-trash"></i> Delete</a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

@@ -197,10 +197,8 @@ $api_keys = $pdo->query("SELECT a.*, u.full_name as creator_name FROM api_keys a
                 <a href="?tab=general" class="tab-link <?php echo $tab=='general'?'active':''; ?>">General & SMTP</a>
                 <a href="?tab=storage" class="tab-link <?php echo $tab=='storage'?'active':''; ?>">Storage & Payment</a>
                 <a href="?tab=security" class="tab-link <?php echo $tab=='security'?'active':''; ?>">AI & Security</a>
-                <a href="?tab=api_keys" class="tab-link <?php echo $tab=='api_keys'?'active':''; ?>">API Keys</a>
             </div>
 
-            <?php if($tab !== 'api_keys'): ?>
             <form method="POST" class="panel" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="update_settings">
                 
@@ -217,7 +215,7 @@ $api_keys = $pdo->query("SELECT a.*, u.full_name as creator_name FROM api_keys a
                             <input type="text" name="site_url" value="<?php echo htmlspecialchars($config['site_url'] ?? ''); ?>">
                         </div>
                         <div class="form-group">
-                            <label>Logo URL</label>
+                            <label>Logo</label>
                             <?php if(!empty($config['logo_url'])): ?>
                                 <div style="margin-bottom: 8px;"><img src="<?php echo htmlspecialchars($config['logo_url']); ?>" style="height: 40px; border-radius: 4px; border: 1px solid #ccc;"></div>
                             <?php endif; ?>
@@ -225,7 +223,7 @@ $api_keys = $pdo->query("SELECT a.*, u.full_name as creator_name FROM api_keys a
                             <input type="file" name="logo_file" accept="image/*">
                         </div>
                         <div class="form-group">
-                            <label>Favicon URL</label>
+                            <label>Favicon</label>
                             <?php if(!empty($config['favicon_url'])): ?>
                                 <div style="margin-bottom: 8px;"><img src="<?php echo htmlspecialchars($config['favicon_url']); ?>" style="height: 32px; border-radius: 4px; border: 1px solid #ccc;"></div>
                             <?php endif; ?>
@@ -407,75 +405,6 @@ $api_keys = $pdo->query("SELECT a.*, u.full_name as creator_name FROM api_keys a
                     <button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> Save Settings</button>
                 </div>
             </form>
-            <?php endif; ?>
-
-            <?php if($tab === 'api_keys'): ?>
-                <?php if(isset($_SESSION['new_api_key'])): ?>
-                <div class="msg-warning" style="background:#fefce8; border-color:#ca8a04; color:#854d0e;">
-                    <strong><i class="ph ph-warning"></i> IMPORTANT!</strong> Please copy your new API Key now. You will not be able to see it again!
-                    <div style="font-family:monospace; background:#fff; padding:10px; margin-top:10px; font-size:1.1rem; border:1px solid #fde047; word-break:break-all;">
-                        <?php echo $_SESSION['new_api_key']; ?>
-                    </div>
-                </div>
-                <?php unset($_SESSION['new_api_key']); endif; ?>
-
-                <div class="panel" style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <h3 style="margin-bottom:4px;">Manage API Keys</h3>
-                        <p style="font-size:0.85rem; color:var(--text-muted);">Create keys for external integrations (Zapier, mobile apps, etc.)</p>
-                    </div>
-                    <form method="POST" style="display:flex; gap:10px;">
-                        <input type="hidden" name="action" value="generate_api_key">
-                        <input type="text" name="api_key_name" placeholder="Key Name (e.g. Zapier)" required style="padding:10px; border:1px solid var(--border-color); border-radius:8px;">
-                        <button type="submit" class="btn-primary"><i class="ph ph-key"></i> Generate Key</button>
-                    </form>
-                </div>
-
-                <div class="panel">
-                    <?php if(empty($api_keys)): ?>
-                        <p style="color:var(--text-muted); text-align:center; padding:40px;">No API keys generated.</p>
-                    <?php else: ?>
-                    <div style="overflow-x:auto;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Key Name</th>
-                                    <th>Prefix</th>
-                                    <th>Status</th>
-                                    <th>Created By</th>
-                                    <th>Created At</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach($api_keys as $k): ?>
-                                <tr>
-                                    <td style="font-weight:700;"><?php echo htmlspecialchars($k['api_key_name']); ?></td>
-                                    <td style="font-family:monospace; color:var(--text-muted);">******</td>
-                                    <td>
-                                        <?php if($k['is_active']): ?>
-                                            <span class="badge s-active">Active</span>
-                                        <?php else: ?>
-                                            <span class="badge s-revoked">Revoked</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td><?php echo htmlspecialchars($k['creator_name']); ?></td>
-                                    <td><?php echo date('M d, Y', strtotime($k['created_at'])); ?></td>
-                                    <td>
-                                        <?php if($k['is_active']): ?>
-                                            <a href="?tab=api_keys&action=revoke_key&id=<?php echo $k['id']; ?>" class="btn-action" onclick="return confirm('Revoke this API Key? It will immediately stop working.')" style="color:#dc2626; border-color:#fca5a5;">Revoke</a>
-                                        <?php else: ?>
-                                            —
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
         </div>
     </main>
 </div>
