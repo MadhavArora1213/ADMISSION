@@ -10,9 +10,10 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
 }
 
 $stmt = $pdo->prepare("
-    SELECT * 
-    FROM ad_products
-    ORDER BY created_at DESC
+    SELECT a.*, c.name as college_name 
+    FROM ad_products a
+    LEFT JOIN colleges c ON a.college_id = c.id
+    ORDER BY a.created_at DESC
 ");
 $stmt->execute();
 $ads = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -77,7 +78,7 @@ $ads = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <table>
                         <thead>
                             <tr>
-                                <th>College ID</th>
+                                <th>College</th>
                                 <th>Type</th>
                                 <th>Placement</th>
                                 <th>Impressions</th>
@@ -90,7 +91,7 @@ $ads = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <tbody>
                             <?php foreach($ads as $ad): ?>
                             <tr>
-                                <td><div style="font-weight:600;"><?php echo htmlspecialchars($ad['college_id']); ?></div></td>
+                                <td><div style="font-weight:600;"><?php echo htmlspecialchars($ad['college_name'] ?? 'Unknown College'); ?></div></td>
                                 <td><span class="badge"><?php echo str_replace('_', ' ', htmlspecialchars($ad['ad_type'])); ?></span></td>
                                 <td><?php echo htmlspecialchars($ad['ad_placement']); ?></td>
                                 <td><?php echo htmlspecialchars($ad['impressions']); ?></td>

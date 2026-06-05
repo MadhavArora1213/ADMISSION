@@ -16,15 +16,35 @@ if ($id) {
 $error = '';
 $success = '';
 
+$colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $college_id = (int)$_POST['college_id'];
+    $college_id = $_POST['college_id'];
     $ad_type = $_POST['ad_type'];
     $ad_placement = trim($_POST['ad_placement']);
     $ad_start = $_POST['ad_start'] ? $_POST['ad_start'] : null;
     $ad_end = $_POST['ad_end'] ? $_POST['ad_end'] : null;
-    $media_url = trim($_POST['media_url']);
+    
+    $media_url = $id ? $ad['media_url'] : '';
+    
+    if (isset($_FILES['media_file']) && $_FILES['media_file']['error'] == UPLOAD_ERR_OK) {
+        $upload_dir = '../uploads/ads/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+        $file_ext = strtolower(pathinfo($_FILES['media_file']['name'], PATHINFO_EXTENSION));
+        $new_filename = uniqid('ad_') . '.' . $file_ext;
+        $target_file = $upload_dir . $new_filename;
+        
+        if (move_uploaded_file($_FILES['media_file']['tmp_name'], $target_file)) {
+            $media_url = 'uploads/ads/' . $new_filename;
+        }
+    } elseif (isset($_POST['media_url']) && !empty(trim($_POST['media_url']))) {
+        $media_url = trim($_POST['media_url']);
+    }
+    
     $target_url = trim($_POST['target_url']);
-    $cost_usd = $_POST['cost_usd'] !== '' ? (float)$_POST['cost_usd'] : 0.00;
+    $cost_inr = $_POST['cost_inr'] !== '' ? (float)$_POST['cost_inr'] : 0.00;
     $status = $_POST['status'];
     
     // For editing stats directly (usually done via separate analytics script, but allowed here for admin)
@@ -35,15 +55,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $error = "College ID is required.";
     } else {
         if ($id) {
-            $stmt = $pdo->prepare("UPDATE ad_products SET college_id=?, ad_type=?, ad_placement=?, ad_start=?, ad_end=?, media_url=?, target_url=?, cost_usd=?, impressions=?, clicks=?, status=? WHERE id=?");
-            $stmt->execute([$college_id, $ad_type, $ad_placement, $ad_start, $ad_end, $media_url, $target_url, $cost_usd, $impressions, $clicks, $status, $id]);
+            $stmt = $pdo->prepare("UPDATE ad_products SET college_id=?, ad_type=?, ad_placement=?, ad_start=?, ad_end=?, media_url=?, target_url=?, cost_inr=?, impressions=?, clicks=?, status=? WHERE id=?");
+            $stmt->execute([$college_id, $ad_type, $ad_placement, $ad_start, $ad_end, $media_url, $target_url, $cost_inr, $impressions, $clicks, $status, $id]);
             $success = "Ad updated successfully.";
             $stmt = $pdo->prepare("SELECT * FROM ad_products WHERE id = ?");
             $stmt->execute([$id]);
             $ad = $stmt->fetch(PDO::FETCH_ASSOC);
         } else {
-            $stmt = $pdo->prepare("INSERT INTO ad_products (college_id, ad_type, ad_placement, ad_start, ad_end, media_url, target_url, cost_usd, impressions, clicks, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$college_id, $ad_type, $ad_placement, $ad_start, $ad_end, $media_url, $target_url, $cost_usd, $impressions, $clicks, $status]);
+            $stmt = $pdo->prepare("INSERT INTO ad_products (college_id, ad_type, ad_placement, ad_start, ad_end, media_url, target_url, cost_inr, impressions, clicks, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$college_id, $ad_type, $ad_placement, $ad_start, $ad_end, $media_url, $target_url, $cost_inr, $impressions, $clicks, $status]);
             $id = $pdo->lastInsertId();
             header("Location: ad_product_form.php?id=$id&msg=created");
             exit;
@@ -104,11 +124,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php if ($error): ?><div class="msg-alert alert-error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
 
             <div class="form-panel">
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     <div class="grid-2">
                         <div class="form-group">
-                            <label>College ID *</label>
-                            <input type="number" name="college_id" class="form-control" required value="<?php echo htmlspecialchars($ad['college_id'] ?? ''); ?>">
+                            <label>College *</label>
+                            <select name="college_id" class="form-control" required>
+                                <option value="">Select College</option>
+                                <?php foreach($colleges as $c): ?>
+                                    <option value="<?php echo htmlspecialchars($c['id']); ?>" <?php echo (isset($ad['college_id']) && $ad['college_id'] == $c['id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($c['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label>Ad Type</label>
@@ -137,8 +164,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
 
                     <div class="form-group">
-                        <label>Media URL (Image Link)</label>
-                        <input type="url" name="media_url" class="form-control" placeholder="https://..." value="<?php echo htmlspecialchars($ad['media_url'] ?? ''); ?>">
+                        <label>Media Upload (Image)</label>
+                        <?php if(!empty($ad['media_url'])): ?>
+                            <div style="margin-bottom:10px;">
+                                <img src="<?php echo strpos($ad['media_url'], 'http') === 0 ? htmlspecialchars($ad['media_url']) : '../'.htmlspecialchars($ad['media_url']); ?>" style="max-height:100px; border-radius:6px; border:1px solid #ddd;" alt="Current Ad Image">
+                            </div>
+                        <?php endif; ?>
+                        <input type="file" name="media_file" class="form-control" accept="image/*">
+                        <small style="color:var(--text-muted); margin-top:4px; display:block;">Or paste an external URL below:</small>
+                        <input type="url" name="media_url" class="form-control" placeholder="https://..." value="<?php echo htmlspecialchars($ad['media_url'] ?? ''); ?>" style="margin-top:8px;">
                     </div>
                     <div class="form-group">
                         <label>Target URL (Click Destination)</label>
@@ -147,8 +181,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                     <div class="grid-2">
                         <div class="form-group">
-                            <label>Cost (USD)</label>
-                            <input type="number" step="0.01" name="cost_usd" class="form-control" value="<?php echo htmlspecialchars($ad['cost_usd'] ?? '0.00'); ?>">
+                            <label>Cost (INR)</label>
+                            <input type="number" step="0.01" name="cost_inr" class="form-control" value="<?php echo htmlspecialchars($ad['cost_inr'] ?? '0.00'); ?>">
                         </div>
                         <div class="form-group">
                             <label>Status</label>
