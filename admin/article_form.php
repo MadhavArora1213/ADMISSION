@@ -52,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     })(),
                     'featured_image_alt'  => $_POST['featured_image_alt'] ?: null,
                     'author_id'           => $_POST['author_id'] ?: null,
+                    'custom_author_name'  => $_POST['custom_author_name'] ?: null,
                     'editor_id'           => $_POST['editor_id'] ?: null,
                     'category_id'         => $_POST['category_id'] ?: null,
                     'reading_time_mins'   => $_POST['reading_time_mins'] ?: null,
@@ -63,6 +64,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $sets = array_map(fn($k) => "$k = :$k", array_keys($data));
                     $data['id'] = $id;
                     $pdo->prepare("UPDATE articles SET " . implode(', ', $sets) . " WHERE id = :id")->execute($data);
+                    
+                    // Save to Revision History
+                    if (!empty($_POST['content_body'])) {
+                        $rev_id = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0x0fff)|0x4000,mt_rand(0,0x3fff)|0x8000,mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff));
+                        $current_version = $pdo->query("SELECT MAX(version) FROM article_revisions WHERE article_id='$id'")->fetchColumn() ?: 0;
+                        $pdo->prepare("INSERT INTO article_revisions (id, article_id, version, user_id, content_snapshot) VALUES (?, ?, ?, ?, ?)")->execute([$rev_id, $id, $current_version + 1, $_SESSION['admin_id'] ?? null, $_POST['content_body']]);
+                    }
                 } else {
                     $id = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
                         mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff),
@@ -84,12 +92,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         } elseif ($tab == 'seo') {
             // Upsert SEO meta
-            $seoId = $pdo->query("SELECT id FROM seo_meta WHERE entity_type='article' AND entity_id='$id'")->fetchColumn();
+            $seoId = $pdo->query("SELECT id FROM seo_meta WHERE page_type='article' AND page_id='$id'")->fetchColumn();
             if (!$seoId) $seoId = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0x0fff)|0x4000,mt_rand(0,0x3fff)|0x8000,mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff));
             $seoData = [
                 'id'                => $seoId,
-                'entity_type'       => 'article',
-                'entity_id'         => $id,
+                'page_type'         => 'article',
+                'page_id'           => $id,
                 'meta_title'        => $_POST['meta_title'] ?: null,
                 'meta_description'  => $_POST['meta_description'] ?: null,
                 'og_title'          => $_POST['og_title'] ?: null,
@@ -111,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 'schema_type'       => $_POST['schema_type'] ?: null,
                 'primary_keyword'   => $_POST['primary_keyword'] ?: null,
             ];
-            $pdo->prepare("INSERT INTO seo_meta (id,entity_type,entity_id,meta_title,meta_description,og_title,og_description,og_image,canonical_url,schema_type,primary_keyword) VALUES (:id,:entity_type,:entity_id,:meta_title,:meta_description,:og_title,:og_description,:og_image,:canonical_url,:schema_type,:primary_keyword) ON DUPLICATE KEY UPDATE meta_title=VALUES(meta_title),meta_description=VALUES(meta_description),og_title=VALUES(og_title),og_description=VALUES(og_description),og_image=VALUES(og_image),canonical_url=VALUES(canonical_url),schema_type=VALUES(schema_type),primary_keyword=VALUES(primary_keyword)")->execute($seoData);
+            $pdo->prepare("INSERT INTO seo_meta (id,page_type,page_id,meta_title,meta_description,og_title,og_description,og_image,canonical_url,schema_type,primary_keyword) VALUES (:id,:page_type,:page_id,:meta_title,:meta_description,:og_title,:og_description,:og_image,:canonical_url,:schema_type,:primary_keyword) ON DUPLICATE KEY UPDATE meta_title=VALUES(meta_title),meta_description=VALUES(meta_description),og_title=VALUES(og_title),og_description=VALUES(og_description),og_image=VALUES(og_image),canonical_url=VALUES(canonical_url),schema_type=VALUES(schema_type),primary_keyword=VALUES(primary_keyword)")->execute($seoData);
             header("Location: article_form.php?id=$id&tab=seo&msg=saved"); exit;
         } elseif ($tab == 'schedule') {
             $pdo->prepare("UPDATE articles SET scheduled_at=:scheduled_at, unpublish_at=:unpublish_at, status=:status WHERE id=:id")->execute([
@@ -136,7 +144,7 @@ if ($is_edit) {
     $article = $article->fetch(PDO::FETCH_ASSOC);
     if (!$article) { header('Location: articles.php'); exit; }
 
-    $seo = $pdo->prepare("SELECT * FROM seo_meta WHERE entity_type='article' AND entity_id=?");
+    $seo = $pdo->prepare("SELECT * FROM seo_meta WHERE page_type='article' AND page_id=?");
     $seo->execute([$id]);
     $seo = $seo->fetch(PDO::FETCH_ASSOC) ?: [];
 
@@ -266,13 +274,16 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="form-group"><label>Author</label>
+                        <div class="form-group"><label>Author (System User)</label>
                             <select name="author_id" class="form-control">
                                 <option value="">-- Select --</option>
                                 <?php foreach($authors as $u): ?>
                                 <option value="<?php echo $u['id']; ?>" <?php echo v($article,'author_id')==$u['id']?'selected':''; ?>><?php echo htmlspecialchars($u['name']); ?></option>
                                 <?php endforeach; ?>
                             </select>
+                        </div>
+                        <div class="form-group"><label>OR Custom Author Name</label>
+                            <input type="text" name="custom_author_name" class="form-control" placeholder="E.g. Guest Contributor" value="<?php echo v($article,'custom_author_name'); ?>">
                         </div>
                         <div class="form-group"><label>Editor</label>
                             <select name="editor_id" class="form-control">
@@ -295,24 +306,21 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                 <div class="form-section">
                     <h3><i class="ph ph-text-align-left"></i> Content Body</h3>
                     <div class="form-group">
-                        <label>Content (HTML / Block Editor JSON)</label>
-                        <textarea name="content_body" class="form-control" rows="16" style="font-family: 'Courier New', monospace; font-size:0.88rem;"><?php echo v($article,'content_body'); ?></textarea>
+                        <label>Content</label>
+                        <textarea name="content_body" id="content_body" class="form-control" rows="16" style="font-family: 'Courier New', monospace; font-size:0.88rem;"><?php echo v($article,'content_body'); ?></textarea>
                     </div>
                 </div>
 
                 <div class="form-section">
                     <h3><i class="ph ph-image"></i> Featured Image</h3>
                     <div class="form-grid">
-                        <div class="form-group"><label>Image URL</label><?php if(!empty($article['featured_image_url'])): ?>
+                        <div class="form-group"><label>Image</label><?php if(!empty($article['featured_image_url'])): ?>
                             <div style="margin-bottom: 8px;"><img src="<?php echo htmlspecialchars($article['featured_image_url']); ?>" style="height: 50px; border-radius: 4px; border: 1px solid #ccc;"></div>
                         <?php endif; ?>
                         <input type="hidden" name="existing_featured_image_url" value="<?php echo v($article,'featured_image_url'); ?>">
                         <input type="file" name="featured_image_file" class="form-control" accept="image/*"></div>
                         <div class="form-group"><label>Alt Text</label><input type="text" name="featured_image_alt" class="form-control" value="<?php echo v($article,'featured_image_alt'); ?>"></div>
                     </div>
-                    <?php if(!empty($article['featured_image_url'])): ?>
-                    <img src="<?php echo htmlspecialchars($article['featured_image_url']); ?>" style="max-height:160px; border-radius:8px; border:1px solid var(--border-color); margin-top:8px;" alt="preview">
-                    <?php endif; ?>
                 </div>
 
                 <div class="form-section">
@@ -364,7 +372,7 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                             </select>
                         </div>
                         <div class="form-group"><label>Canonical URL</label><input type="url" name="canonical_url" class="form-control" value="<?php echo v($seo,'canonical_url'); ?>"></div>
-                        <div class="form-group"><label>OG Image URL</label><?php if(!empty($seo['og_image'])): ?>
+                        <div class="form-group"><label>OG Image</label><?php if(!empty($seo['og_image'])): ?>
                             <div style="margin-bottom: 8px;"><img src="<?php echo htmlspecialchars($seo['og_image']); ?>" style="height: 50px; border-radius: 4px; border: 1px solid #ccc;"></div>
                         <?php endif; ?>
                         <input type="hidden" name="existing_og_image" value="<?php echo v($seo,'og_image'); ?>">
@@ -426,6 +434,10 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
         </div>
     </main>
 </div>
+<!-- jQuery and Trumbowyg -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/ui/trumbowyg.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/trumbowyg.min.js"></script>
 <script>
 // Char counters
 function setupCounter(inputId, countId, max, fillId) {
@@ -448,6 +460,34 @@ function setupCounter(inputId, countId, max, fillId) {
 setupCounter('excerpt','ec',300,null);
 setupCounter('meta_title','mtc',70,'mt_fill');
 setupCounter('meta_desc','mdc',160,'md_fill');
+
+$(document).ready(function() {
+    if ($('#content_body').length) {
+        $('#content_body').trumbowyg({
+            semantic: true,
+            removeformatPasted: true,
+            resetCss: true
+        });
+    }
+
+    // Auto-generate slug from title
+    let titleInput = $('input[name="article_title"]');
+    let slugInput = $('input[name="article_slug"]');
+    let isEdit = <?php echo $is_edit ? 'true' : 'false'; ?>;
+    let isManualSlug = isEdit && slugInput.val().length > 0;
+
+    slugInput.on('input', function() {
+        isManualSlug = $(this).val().length > 0;
+    });
+
+    titleInput.on('input', function() {
+        if (!isManualSlug) {
+            let title = $(this).val();
+            let slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            slugInput.val(slug);
+        }
+    });
+});
 </script>
 </body>
 </html>
