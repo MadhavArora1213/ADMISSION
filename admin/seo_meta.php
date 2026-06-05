@@ -6,8 +6,9 @@ require_once 'db.php';
 // Handle adding/editing SEO Meta
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'save') {
     $id = $_POST['id'] ?? null;
+    $page_id = !empty($_POST['page_id']) ? trim($_POST['page_id']) : sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
     $data = [
-        $_POST['page_type'], $_POST['page_id'], $_POST['meta_title'], $_POST['meta_description'],
+        $_POST['page_type'], $page_id, $_POST['meta_title'], $_POST['meta_description'],
         $_POST['og_image'], $_POST['canonical_url'], $_POST['robots_directive'], $_POST['schema_type'],
         $_POST['schema_json'], $_POST['hreflang'], $_POST['google_index_status']
     ];
@@ -95,8 +96,8 @@ if (isset($_GET['edit_id'])) {
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Page ID (UUID)</label>
-                                <input type="text" name="page_id" class="form-control" value="<?php echo $edit_meta['page_id']??''; ?>" required>
+                                <label>Page ID (Leave blank to auto-generate)</label>
+                                <input type="text" name="page_id" class="form-control" value="<?php echo $edit_meta['page_id']??''; ?>" placeholder="Will be auto-generated">
                             </div>
                         </div>
 
