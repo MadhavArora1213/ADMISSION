@@ -6,9 +6,12 @@ require_once 'db.php';
 // Handle adding/editing
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'save') {
     $id = $_POST['id'] ?? null;
+    $raw_json = trim($_POST['variables_json'] ?? '');
+    json_decode($raw_json);
+    $variables_json = (json_last_error() === JSON_ERROR_NONE && !empty($raw_json)) ? $raw_json : '[]';
     $data = [
         $_POST['template_name'], $_POST['channel'], $_POST['subject'],
-        $_POST['body_html'], $_POST['body_text'], $_POST['variables_json'],
+        $_POST['body_html'], $_POST['body_text'], $variables_json,
         $_POST['language'], isset($_POST['is_active']) ? 1 : 0, $_POST['category']
     ];
     if ($id) {
@@ -51,6 +54,7 @@ if (isset($_GET['edit_id'])) {
     <style>
         body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h2{font-size:2rem;font-weight:800}.panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}.panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}tr:hover{background:rgba(0,0,0,.015)}.badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700}.sub-links{display:flex;gap:8px;margin-bottom:20px}.sub-link{font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .2s}.sub-link:hover,.sub-link.active{background:rgba(0,0,0,.05);color:var(--primary)}.form-control{width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:8px;font-family:inherit;font-size:.95rem;box-sizing:border-box}.form-group{margin-bottom:16px}.form-group label{display:block;font-weight:600;margin-bottom:7px;font-size:.9rem;color:var(--text-muted)}.msg-alert{padding:14px 20px;border-radius:8px;background:#dcfce7;color:#166534;border:1px solid #bbf7d0;margin-bottom:20px}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/ui/trumbowyg.min.css">
 </head>
 <body>
 <div class="admin-layout">
@@ -129,7 +133,7 @@ if (isset($_GET['edit_id'])) {
 
                         <div class="form-group">
                             <label>Body (HTML / Handlebars)</label>
-                            <textarea name="body_html" class="form-control" rows="4" placeholder="<h1>Hi {{name}}</h1>..."><?php echo htmlspecialchars($edit_tpl['body_html']??''); ?></textarea>
+                            <textarea name="body_html" id="body_html" class="form-control" rows="4" placeholder="<h1>Hi {{name}}</h1>..."><?php echo htmlspecialchars($edit_tpl['body_html']??''); ?></textarea>
                         </div>
                         
                         <div class="form-group">
@@ -193,5 +197,12 @@ if (isset($_GET['edit_id'])) {
         </div>
     </main>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/trumbowyg.min.js"></script>
+<script>
+    $('#body_html').trumbowyg({
+        semantic: false
+    });
+</script>
 </body>
 </html>

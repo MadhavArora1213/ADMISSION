@@ -6,8 +6,12 @@ require_once 'db.php';
 // Handle adding/editing
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'save') {
     $id = $_POST['id'] ?? null;
+    $raw_json = trim($_POST['filters_json'] ?? '');
+    json_decode($raw_json);
+    $filters_json = (json_last_error() === JSON_ERROR_NONE && !empty($raw_json)) ? $raw_json : '{}';
+
     $data = [
-        $_POST['segment_name'], $_POST['filters_json'], $_POST['refresh_schedule']
+        $_POST['segment_name'], $filters_json, $_POST['refresh_schedule']
     ];
     if ($id) {
         $data[] = $id;
@@ -88,15 +92,27 @@ if (isset($_GET['edit_id'])) {
                         </div>
                         
                         <div class="form-group">
-                            <label>Filters JSON *</label>
-                            <textarea name="filters_json" class="form-control" rows="4" required placeholder='{"stream":"engineering", "state":"maharashtra"}'><?php echo htmlspecialchars($edit_seg['filters_json']??''); ?></textarea>
-                            <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Define query conditions to filter users.</div>
+                            <label>Targeting Filters</label>
+                            <input type="hidden" name="filters_json" id="filters_json" value="<?php echo htmlspecialchars($edit_seg['filters_json'] ?? '{}'); ?>">
+                            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                                <input type="text" id="f_key" class="form-control" placeholder="Property (e.g. stream)" style="flex:1;">
+                                <input type="text" id="f_val" class="form-control" placeholder="Value (e.g. engineering)" style="flex:1;">
+                                <button type="button" class="btn-primary" onclick="addFilter()" style="padding: 10px 15px;">Add</button>
+                            </div>
+                            <div id="filters_list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+                            <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Define properties to filter users (e.g., state, stream).</div>
                         </div>
 
                         <div class="form-group">
-                            <label>Refresh Schedule (Cron)</label>
-                            <input type="text" name="refresh_schedule" class="form-control" value="<?php echo htmlspecialchars($edit_seg['refresh_schedule']??'0 0 * * *'); ?>" placeholder="0 0 * * *">
-                            <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">How often to re-evaluate this segment.</div>
+                            <label>Automatic Refresh Schedule</label>
+                            <select name="refresh_schedule" class="form-control">
+                                <?php $cron = $edit_seg['refresh_schedule'] ?? '0 0 * * *'; ?>
+                                <option value="0 * * * *" <?php echo $cron=='0 * * * *'?'selected':''; ?>>Every Hour</option>
+                                <option value="0 0 * * *" <?php echo $cron=='0 0 * * *'?'selected':''; ?>>Daily at Midnight</option>
+                                <option value="0 0 * * 0" <?php echo $cron=='0 0 * * 0'?'selected':''; ?>>Weekly on Sunday</option>
+                                <option value="0 0 1 * *" <?php echo $cron=='0 0 1 * *'?'selected':''; ?>>Monthly on the 1st</option>
+                            </select>
+                            <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">How often the system should recalculate who is in this segment.</div>
                         </div>
 
                         <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="ph ph-floppy-disk"></i> Save Segment</button>
@@ -136,5 +152,50 @@ if (isset($_GET['edit_id'])) {
         </div>
     </main>
 </div>
+<script>
+// Filters JSON Manager
+let filtersObj = {};
+try {
+    let rawF = document.getElementById('filters_json')?.value;
+    if(rawF) filtersObj = JSON.parse(rawF);
+    if(typeof filtersObj !== 'object' || filtersObj === null) filtersObj = {};
+} catch(e) { filtersObj = {}; }
+
+function renderFilters() {
+    const list = document.getElementById('filters_list');
+    if(!list) return;
+    list.innerHTML = '';
+    for(const [key, val] of Object.entries(filtersObj)) {
+        const badge = document.createElement('div');
+        badge.style.cssText = 'background:#4f46e5; color:#fff; padding:6px 12px; border-radius:20px; font-size:0.85rem; display:flex; align-items:center; gap:8px;';
+        badge.innerHTML = `<span>${key}: <strong>${val}</strong></span> <button type="button" onclick="removeFilter('${key}')" style="background:none; border:none; color:#fff; cursor:pointer; font-weight:bold;">&times;</button>`;
+        list.appendChild(badge);
+    }
+    document.getElementById('filters_json').value = JSON.stringify(filtersObj);
+}
+
+function addFilter() {
+    const keyInput = document.getElementById('f_key');
+    const valInput = document.getElementById('f_val');
+    const key = keyInput.value.trim();
+    const val = valInput.value.trim();
+    
+    if(key && val) {
+        filtersObj[key] = val;
+        keyInput.value = '';
+        valInput.value = '';
+        renderFilters();
+    }
+}
+
+function removeFilter(key) {
+    delete filtersObj[key];
+    renderFilters();
+}
+
+if(document.getElementById('filters_json')) {
+    renderFilters();
+}
+</script>
 </body>
 </html>

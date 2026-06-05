@@ -134,8 +134,13 @@ $chat_logs = $pdo->query("SELECT * FROM ai_chat_sessions ORDER BY created_at DES
                             <textarea name="fallback_response" class="form-control" rows="2"><?php echo htmlspecialchars($config['fallback_response'] ?? ''); ?></textarea>
                         </div>
                         <div class="form-group">
-                            <label>Escalation Keywords (JSON Array)</label>
-                            <input type="text" name="escalation_keywords" class="form-control" value="<?php echo htmlspecialchars($config['escalation_keywords'] ?? ''); ?>">
+                            <label>Escalation Keywords</label>
+                            <input type="hidden" name="escalation_keywords" id="escalation_keywords" value="<?php echo htmlspecialchars($config['escalation_keywords'] ?? '[]'); ?>">
+                            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                                <input type="text" id="new_keyword" class="form-control" placeholder="Add a keyword (e.g., help, agent)">
+                                <button type="button" class="btn-primary" onclick="addKeyword()" style="padding: 10px 15px;">Add</button>
+                            </div>
+                            <div id="keywords_list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
                         </div>
                         <div class="form-group">
                             <label>Spam Threshold (0 to 1)</label>
@@ -187,20 +192,37 @@ $chat_logs = $pdo->query("SELECT * FROM ai_chat_sessions ORDER BY created_at DES
                             <input type="number" name="recommendation_limit" class="form-control" value="<?php echo htmlspecialchars($recs['recommendation_limit'] ?? ''); ?>">
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
-                            <label>Feature Weights (JSON)</label>
-                            <textarea name="feature_weights" class="form-control" rows="2" placeholder='{"nirf_rank":0.3, "fee":0.2}'><?php echo htmlspecialchars($recs['feature_weights'] ?? ''); ?></textarea>
+                            <label>Algorithm Prioritization (Weights)</label>
+                            <input type="hidden" name="feature_weights" id="feature_weights" value="<?php echo htmlspecialchars($recs['feature_weights'] ?? '{}'); ?>">
+                            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                                <input type="text" id="fw_name" class="form-control" placeholder="Feature (e.g., nirf_rank, fee)" style="flex:2;">
+                                <input type="number" id="fw_weight" class="form-control" placeholder="Weight (0.1 to 1.0)" step="0.1" style="flex:1;">
+                                <button type="button" class="btn-primary" onclick="addFeatureWeight()" style="padding: 10px 15px;">Add</button>
+                            </div>
+                            <div id="fw_list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
-                            <label>User Profile Fields (JSON Array)</label>
-                            <textarea name="user_profile_fields" class="form-control" rows="2" placeholder='["location", "budget", "exam_score"]'><?php echo htmlspecialchars($recs['user_profile_fields'] ?? ''); ?></textarea>
+                            <label>User Profile Data Fields to Analyze</label>
+                            <input type="hidden" name="user_profile_fields" id="user_profile_fields" value="<?php echo htmlspecialchars($recs['user_profile_fields'] ?? '[]'); ?>">
+                            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                                <input type="text" id="new_upf" class="form-control" placeholder="Add field (e.g., location, budget)">
+                                <button type="button" class="btn-primary" onclick="addUPF()" style="padding: 10px 15px;">Add</button>
+                            </div>
+                            <div id="upf_list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
                         </div>
                         <div class="form-group">
                             <label>Model Version</label>
                             <input type="text" name="model_version" class="form-control" value="<?php echo htmlspecialchars($recs['model_version'] ?? ''); ?>">
                         </div>
                         <div class="form-group">
-                            <label>Retrain Schedule (Cron)</label>
-                            <input type="text" name="retrain_schedule" class="form-control" value="<?php echo htmlspecialchars($recs['retrain_schedule'] ?? ''); ?>">
+                            <label>Automatic Retrain Schedule</label>
+                            <select name="retrain_schedule" class="form-control">
+                                <?php $cron = $recs['retrain_schedule'] ?? ''; ?>
+                                <option value="0 * * * *" <?php echo $cron=='0 * * * *'?'selected':''; ?>>Every Hour</option>
+                                <option value="0 0 * * *" <?php echo $cron=='0 0 * * *'?'selected':''; ?>>Daily at Midnight</option>
+                                <option value="0 0 * * 0" <?php echo $cron=='0 0 * * 0'?'selected':''; ?>>Weekly on Sunday</option>
+                                <option value="0 0 1 * *" <?php echo $cron=='0 0 1 * *'?'selected':''; ?>>Monthly on the 1st</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label>A/B Test Variant</label>
@@ -299,5 +321,141 @@ $chat_logs = $pdo->query("SELECT * FROM ai_chat_sessions ORDER BY created_at DES
         </div>
     </main>
 </div>
+<script>
+// Escalation Keywords Manager
+let keywords = [];
+try {
+    let rawKeys = document.getElementById('escalation_keywords').value;
+    if(rawKeys) keywords = JSON.parse(rawKeys);
+    if(!Array.isArray(keywords)) keywords = [];
+} catch(e) {
+    keywords = [];
+}
+
+function renderKeywords() {
+    const list = document.getElementById('keywords_list');
+    list.innerHTML = '';
+    keywords.forEach((kw, idx) => {
+        const badge = document.createElement('div');
+        badge.style.cssText = 'background:var(--primary); color:#fff; padding:6px 12px; border-radius:20px; font-size:0.85rem; display:flex; align-items:center; gap:8px;';
+        badge.innerHTML = `<span>${kw}</span> <button type="button" onclick="removeKeyword(${idx})" style="background:none; border:none; color:#fff; cursor:pointer; font-weight:bold;">&times;</button>`;
+        list.appendChild(badge);
+    });
+    document.getElementById('escalation_keywords').value = JSON.stringify(keywords);
+}
+
+function addKeyword() {
+    const input = document.getElementById('new_keyword');
+    const val = input.value.trim();
+    if(val && !keywords.includes(val)) {
+        keywords.push(val);
+        input.value = '';
+        renderKeywords();
+    }
+}
+
+function removeKeyword(idx) {
+    keywords.splice(idx, 1);
+    renderKeywords();
+}
+
+// Initial Render
+if(document.getElementById('escalation_keywords')) {
+    renderKeywords();
+    document.getElementById('new_keyword').addEventListener('keypress', function(e) {
+        if(e.key === 'Enter') {
+            e.preventDefault();
+            addKeyword();
+        }
+    });
+}
+
+// User Profile Fields Manager
+let upf = [];
+try {
+    let rawUPF = document.getElementById('user_profile_fields')?.value;
+    if(rawUPF) upf = JSON.parse(rawUPF);
+    if(!Array.isArray(upf)) upf = [];
+} catch(e) { upf = []; }
+
+function renderUPF() {
+    const list = document.getElementById('upf_list');
+    if(!list) return;
+    list.innerHTML = '';
+    upf.forEach((f, idx) => {
+        const badge = document.createElement('div');
+        badge.style.cssText = 'background:#14b8a6; color:#fff; padding:6px 12px; border-radius:20px; font-size:0.85rem; display:flex; align-items:center; gap:8px;';
+        badge.innerHTML = `<span>${f}</span> <button type="button" onclick="removeUPF(${idx})" style="background:none; border:none; color:#fff; cursor:pointer; font-weight:bold;">&times;</button>`;
+        list.appendChild(badge);
+    });
+    document.getElementById('user_profile_fields').value = JSON.stringify(upf);
+}
+
+function addUPF() {
+    const input = document.getElementById('new_upf');
+    const val = input.value.trim();
+    if(val && !upf.includes(val)) {
+        upf.push(val);
+        input.value = '';
+        renderUPF();
+    }
+}
+
+function removeUPF(idx) {
+    upf.splice(idx, 1);
+    renderUPF();
+}
+
+if(document.getElementById('user_profile_fields')) {
+    renderUPF();
+    document.getElementById('new_upf').addEventListener('keypress', function(e) {
+        if(e.key === 'Enter') { e.preventDefault(); addUPF(); }
+    });
+}
+
+// Feature Weights Manager
+let featureWeights = {};
+try {
+    let rawFW = document.getElementById('feature_weights')?.value;
+    if(rawFW) featureWeights = JSON.parse(rawFW);
+    if(typeof featureWeights !== 'object' || featureWeights === null) featureWeights = {};
+} catch(e) { featureWeights = {}; }
+
+function renderFW() {
+    const list = document.getElementById('fw_list');
+    if(!list) return;
+    list.innerHTML = '';
+    for(const [key, val] of Object.entries(featureWeights)) {
+        const badge = document.createElement('div');
+        badge.style.cssText = 'background:#f59e0b; color:#fff; padding:6px 12px; border-radius:20px; font-size:0.85rem; display:flex; align-items:center; gap:8px;';
+        badge.innerHTML = `<span>${key}: <strong>${val}</strong></span> <button type="button" onclick="removeFW('${key}')" style="background:none; border:none; color:#fff; cursor:pointer; font-weight:bold;">&times;</button>`;
+        list.appendChild(badge);
+    }
+    document.getElementById('feature_weights').value = JSON.stringify(featureWeights);
+}
+
+function addFeatureWeight() {
+    const nameInput = document.getElementById('fw_name');
+    const weightInput = document.getElementById('fw_weight');
+    const name = nameInput.value.trim();
+    const weight = parseFloat(weightInput.value);
+    
+    if(name && !isNaN(weight)) {
+        featureWeights[name] = weight;
+        nameInput.value = '';
+        weightInput.value = '';
+        renderFW();
+    }
+}
+
+function removeFW(key) {
+    delete featureWeights[key];
+    renderFW();
+}
+
+if(document.getElementById('feature_weights')) {
+    renderFW();
+}
+</script>
 </body>
 </html>
