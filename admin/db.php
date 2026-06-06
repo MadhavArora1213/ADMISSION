@@ -1,14 +1,18 @@
 <?php
-$host = 'localhost';
-$user = 'root';
-$pass = ''; // Default XAMPP password is empty
-$dbname = 'admission';
+// =============================================
+// DO NOT CHANGE THESE — Production DB credentials
+// For local dev: use a separate local config
+// =============================================
+$host   = 'localhost';
+$user   = 'u642624414_db_user';
+$pass   = '6NY@D$f#';
+$dbname = 'u642624414_edusearch';
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $user, $pass);
-    // Set the PDO error mode to exception
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("ERROR: Could not connect. " . $e->getMessage());
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Database connection failed. Please try again later.");
 }
 ?>
