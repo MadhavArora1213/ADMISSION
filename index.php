@@ -42,11 +42,19 @@ $sqlCourses = "SELECT id,course_name,course_slug,course_level,duration_years,avg
 $popularCourses = cAll($pdo, str_replace("WHERE status='active'","WHERE status='active' AND is_popular=1",$sqlCourses));
 if (empty($popularCourses)) $popularCourses = cAll($pdo, $sqlCourses);
 
-$upcomingExams = cAll($pdo, "SELECT e.id,e.name,e.slug,e.level,ed.exam_date,ed.application_start,ed.application_end,ed.result_date,ed.event_name FROM exams e LEFT JOIN exam_dates ed ON ed.exam_id=e.id AND (ed.exam_date>=CURDATE() OR ed.application_end>=CURDATE()) GROUP BY e.id ORDER BY ed.exam_date ASC LIMIT 6");
+$upcomingExams = cAll($pdo, "SELECT e.id,e.exam_name AS name,e.exam_slug AS slug,e.exam_level AS level,ed.exam_date,ed.application_start,ed.application_end,ed.result_date,ed.event_name FROM exams e LEFT JOIN exam_dates ed ON ed.exam_id=e.id AND (ed.exam_date>=CURDATE() OR ed.application_end>=CURDATE()) GROUP BY e.id ORDER BY ed.exam_date ASC LIMIT 6");
 
 $reviews = cAll($pdo, "SELECT r.overall_rating,r.review_title,r.review_body,r.batch_year,r.created_at,c.name AS college_name,c.slug AS college_slug FROM reviews r JOIN colleges c ON c.id=r.college_id WHERE r.moderation_status='approved' ORDER BY r.helpful_votes DESC,r.created_at DESC LIMIT 6");
 
 $states = cAll($pdo, "SELECT id,name FROM states ORDER BY name ASC");
+
+// --- NAVBAR DATA ---
+$navCategories = cAll($pdo, "SELECT category_name,category_slug FROM course_categories WHERE status='active' ORDER BY sort_order ASC LIMIT 12");
+$navExamsUg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams LIMIT 6");
+$navExamsPg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams LIMIT 6");
+$navCoursesUg = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE course_level='UG' ORDER BY total_colleges_offering DESC LIMIT 6");
+$navCoursesPg = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE course_level='PG' ORDER BY total_colleges_offering DESC LIMIT 6");
+$navCountries = cAll($pdo, "SELECT name FROM countries LIMIT 6");
 
 function cImg(?string $url=''): string { return $url ?: 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&q=80'; }
 
@@ -96,8 +104,7 @@ $newsItems = [
 <meta name="description" content="India's leading college discovery platform. Find top colleges, exams, courses, fees, rankings, and admission updates.">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=7">
-
+<link rel="stylesheet" href="assets/css/style.css?v=8">
 </head>
 <body>
 
@@ -110,40 +117,25 @@ $newsItems = [
   <div class="floating-shape"></div>
 </div>
 
-
 <?php include 'includes/navbar.php'; ?>
-
 <?php include 'includes/hero.php'; ?>
-
 <?php include 'includes/marquee.php'; ?>
-
 <?php include 'includes/streams.php'; ?>
-
 <?php include 'includes/top_ranked.php'; ?>
-
 <?php include 'includes/featured_colleges.php'; ?>
-
 <?php include 'includes/tools.php'; ?>
-
 <?php include 'includes/exams.php'; ?>
-
 <?php include 'includes/featured_exams.php'; ?>
-
 <?php include 'includes/courses.php'; ?>
-
 <?php include 'includes/reviews.php'; ?>
-
 <?php include 'includes/news.php'; ?>
-
 <?php include 'includes/stats.php'; ?>
-
 <?php include 'includes/newsletter.php'; ?>
+
 <!-- ═══ FOOTER ═══ -->
 <?php include 'includes/footer.php'; ?>
 
 <button class="scroll-top" id="scrollTop"><i class="ph ph-arrow-up"></i></button>
-
 <script src="assets/js/main.js?v=6"></script>
 </body>
 </html>
-

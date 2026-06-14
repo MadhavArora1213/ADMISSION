@@ -5,7 +5,7 @@
     <h1>Find Over <?=number_format($totalExams?:250)?>+ Exams in India</h1>
     <p>Explore curated data on top institutions, programs, and premium reviews to secure your future.</p>
     
-    <div class="pro-hero-search-card">
+    <div class="pro-hero-search-card glassmorphic-card">
       <div class="pro-search-tabs">
         <button class="active">Colleges</button>
         <button>Exams</button>
@@ -18,14 +18,11 @@
       </div>
     </div>
     
-    <div class="pro-hero-bottom">
-      <div class="pro-recent-visits">
-        <strong>Your Recent Visits</strong>
-        <a href="#">IIM Ahmedabad, Ahmedabad</a>
-        <a href="#">JEE Main</a>
-        <a href="#">CBSE X</a>
-      </div>
-      <button class="pro-counselling-btn">Need Counselling</button>
+    <div class="hero-feature-pills">
+      <a href="#" class="hero-pill glass-pill"><i class="ph-fill ph-scales"></i> Compare Colleges</a>
+      <a href="#" class="hero-pill glass-pill"><i class="ph-fill ph-headset"></i> Talk to Experts</a>
+      <a href="#" class="hero-pill glass-pill"><i class="ph-fill ph-airplane-tilt"></i> Study Abroad</a>
+      <a href="#" class="hero-pill glass-pill"><i class="ph-fill ph-money"></i> Scholarships</a>
     </div>
   </div>
 </section>
