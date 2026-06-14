@@ -25,7 +25,7 @@ function initApp() {
     };
     mobileToggle.addEventListener('click', () => toggle());
     navWrapper.querySelectorAll('.nav-dd > .nav-link').forEach(l => {
-      l.addEventListener('click', function(e) {
+      l.addEventListener('click', function (e) {
         if (window.innerWidth <= 900) { e.preventDefault(); this.closest('.nav-dd').classList.toggle('open'); }
       });
     });
@@ -45,7 +45,7 @@ function initApp() {
   });
 
   /* ─── Search ─── */
-  window.handleSearch = function(e) {
+  window.handleSearch = function (e) {
     if (e) e.preventDefault();
     const q = document.getElementById('heroSearch')?.value?.trim();
     const state = document.getElementById('heroState')?.value;
@@ -85,7 +85,7 @@ function initApp() {
 
   /* ─── Smooth Scroll ─── */
   document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', function(e) {
+    a.addEventListener('click', function (e) {
       const h = this.getAttribute('href');
       if (!h || h === '#') return;
       e.preventDefault();
@@ -95,7 +95,7 @@ function initApp() {
   });
 
   /* ─── Newsletter ─── */
-  window.handleNewsletter = function(e) {
+  window.handleNewsletter = function (e) {
     e.preventDefault();
     const input = e.target.querySelector('input');
     if (input?.value?.trim()) { toast('Thank you! You are now subscribed.'); input.value = ''; }
@@ -117,14 +117,14 @@ function initApp() {
 
   /* ─── College Card Actions ─── */
   document.querySelectorAll('.uni-card .btn-outline').forEach(b => {
-    b.addEventListener('click', function(e) {
+    b.addEventListener('click', function (e) {
       e.stopPropagation();
       const name = this.closest('.uni-card-body')?.querySelector('h3')?.textContent || 'College';
       toast('Brochure download coming soon for: ' + name);
     });
   });
   document.querySelectorAll('.uni-card .btn-primary').forEach(b => {
-    b.addEventListener('click', function(e) {
+    b.addEventListener('click', function (e) {
       e.stopPropagation();
       const name = this.closest('.uni-card-body')?.querySelector('h3')?.textContent || 'College';
       toast('Application form coming soon for: ' + name);
@@ -133,7 +133,7 @@ function initApp() {
 
   /* ─── Table row click ─── */
   document.querySelectorAll('.rank-table tbody tr').forEach(row => {
-    row.addEventListener('click', function() { this.querySelector('.action-cell a')?.click(); });
+    row.addEventListener('click', function () { this.querySelector('.action-cell a')?.click(); });
   });
 
 }
