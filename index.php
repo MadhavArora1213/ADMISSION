@@ -48,14 +48,7 @@ $reviews = cAll($pdo, "SELECT r.overall_rating,r.review_title,r.review_body,r.ba
 
 $states = cAll($pdo, "SELECT id,name FROM states ORDER BY name ASC");
 
-// --- NAVBAR DATA ---
-$navColleges = cAll($pdo, "SELECT name,slug FROM colleges WHERE status='active' ORDER BY id DESC LIMIT 50");
-$navCategories = cAll($pdo, "SELECT category_name,category_slug FROM course_categories WHERE status='active' ORDER BY sort_order ASC LIMIT 50");
-$navExamsUg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams LIMIT 50");
-$navExamsPg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams LIMIT 50");
-$navCoursesUg = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE course_level='UG' ORDER BY total_colleges_offering DESC LIMIT 50");
-$navCoursesPg = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE course_level='PG' ORDER BY total_colleges_offering DESC LIMIT 50");
-$navCountries = cAll($pdo, "SELECT name FROM countries LIMIT 50");
+
 
 function cImg(?string $url=''): string { return $url ?: 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&q=80'; }
 
@@ -89,12 +82,7 @@ $examsFeatured = [
     ['name'=>'CUET','level'=>'National','date'=>'11 May 2026','type'=>'Offline','img'=>'https://images.unsplash.com/photo-1452860606245-08a5d1cb3b9e?w=400&q=80'],
     ['name'=>'CAT','level'=>'National','date'=>'30 Nov 2025','type'=>'Online','img'=>'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&q=80'],
 ];
-$newsItems = [
-    ['title'=>'JoSAA 2026 Round 1 Seat Allotment Result Out Now','cat'=>'Admission','date'=>'13 Jun 2026','img'=>'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&q=80'],
-    ['title'=>'NEET 2026: Expected Cutoff & College Predictions Released','cat'=>'Exam','date'=>'12 Jun 2026','img'=>'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&q=80'],
-    ['title'=>'CBSE Class 12 Hindi Core Question Paper 2026 with Solution','cat'=>'Board','date'=>'12 Jun 2026','img'=>'https://images.unsplash.com/photo-1452860606245-08a5d1cb3b9e?w=600&q=80'],
-    ['title'=>'Top 10 Engineering Colleges in India 2026 – Fees & Ranking','cat'=>'College','date'=>'11 Jun 2026','img'=>'https://images.unsplash.com/photo-1562774053-701939374585?w=600&q=80'],
-];
+$newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.featured_image_url as img, a.publish_at as date, c.category_name as cat FROM articles a LEFT JOIN article_categories c ON a.category_id=c.id WHERE a.status='published' ORDER BY a.publish_at DESC LIMIT 4");
 ?>
 <!DOCTYPE html>
 <html lang="en">

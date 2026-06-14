@@ -1,3 +1,16 @@
+<?php
+// --- NAVBAR DATA ---
+if (!isset($navColleges)) {
+    $navColleges = cAll($pdo, "SELECT name,slug FROM colleges WHERE status='active' ORDER BY is_featured DESC, overall_rating_avg DESC, ranking_nirf ASC LIMIT 50");
+    $navStates = cAll($pdo, "SELECT s.id, s.name, COUNT(c.id) as college_count FROM states s LEFT JOIN colleges c ON c.state_id = s.id AND c.status = 'active' GROUP BY s.id, s.name ORDER BY college_count DESC, s.name ASC LIMIT 50");
+    $navPopularCourses = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE status='active' ORDER BY is_popular DESC, total_colleges_offering DESC LIMIT 50");
+    $navExamsUg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams LIMIT 50");
+    $navExamsPg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams LIMIT 50");
+    $navCoursesUg = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE course_level='UG' ORDER BY total_colleges_offering DESC LIMIT 50");
+    $navCoursesPg = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE course_level='PG' ORDER BY total_colleges_offering DESC LIMIT 50");
+    $navCountries = cAll($pdo, "SELECT name FROM countries LIMIT 50");
+}
+?>
 <!-- ═══ PRO STYLE NAVBAR ═══ -->
 <header class="pro-header" id="header">
   <div class="pro-nav-main">
@@ -33,7 +46,7 @@
             <div class="mega-col">
               <h4>Top Courses</h4>
               <ul>
-                <?php foreach($popularCourses ?? [] as $course): ?>
+                <?php foreach($navPopularCourses ?? [] as $course): ?>
                 <li><a href="#"><?=htmlspecialchars($course['course_name'])?></a></li>
                 <?php endforeach; ?>
               </ul>
@@ -41,7 +54,7 @@
             <div class="mega-col">
               <h4>Top Locations</h4>
               <ul>
-                <?php foreach($states ?? [] as $st): ?>
+                <?php foreach($navStates ?? [] as $st): ?>
                 <li><a href="#"><?=htmlspecialchars($st['name'])?></a></li>
                 <?php endforeach; ?>
               </ul>
@@ -145,7 +158,7 @@
 
         <li><a href="#">Admissions 2026</a></li>
         <li><a href="#">Reviews</a></li>
-        <li><a href="#">News</a></li>
+        <li><a href="news.php">News</a></li>
       </ul>
       <ul class="pro-sub-links-right">
         <li><a href="#" class="counselling-btn"><i class="ph-fill ph-headset"></i> Free Counselling</a></li>
