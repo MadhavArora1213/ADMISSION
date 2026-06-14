@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             min-height: 100vh;
         }
         .login-card {
-            background: var(--bg-#f8fafc);
+            background: var(--bg-white);
             padding: 48px;
             border-radius: 24px;
             box-shadow: var(--shadow-xl);

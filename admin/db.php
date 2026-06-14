@@ -1,12 +1,8 @@
 <?php
-// =============================================
-// DO NOT CHANGE THESE — Production DB credentials
-// For local dev: use a separate local config
-// =============================================
 $host   = 'localhost';
-$user   = 'u642624414_db_user';
-$pass   = '6NY@D$f#';
-$dbname = 'u642624414_edusearch';
+$user   = 'root';
+$pass   = '';
+$dbname = 'admission';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);

@@ -96,7 +96,7 @@ $newsItems = [
 <meta name="description" content="India's leading college discovery platform. Find top colleges, exams, courses, fees, rankings, and admission updates.">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=5">
+<link rel="stylesheet" href="assets/css/style.css?v=6">
 
 </head>
 <body>
@@ -606,6 +606,6 @@ $newsItems = [
 
 <button class="scroll-top" id="scrollTop"><i class="ph ph-arrow-up"></i></button>
 
-<script src="assets/js/main.js?v=5"></script>
+<script src="assets/js/main.js?v=6"></script>
 </body>
 </html>
