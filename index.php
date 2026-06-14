@@ -49,12 +49,13 @@ $reviews = cAll($pdo, "SELECT r.overall_rating,r.review_title,r.review_body,r.ba
 $states = cAll($pdo, "SELECT id,name FROM states ORDER BY name ASC");
 
 // --- NAVBAR DATA ---
-$navCategories = cAll($pdo, "SELECT category_name,category_slug FROM course_categories WHERE status='active' ORDER BY sort_order ASC LIMIT 12");
-$navExamsUg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams LIMIT 6");
-$navExamsPg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams LIMIT 6");
-$navCoursesUg = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE course_level='UG' ORDER BY total_colleges_offering DESC LIMIT 6");
-$navCoursesPg = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE course_level='PG' ORDER BY total_colleges_offering DESC LIMIT 6");
-$navCountries = cAll($pdo, "SELECT name FROM countries LIMIT 6");
+$navColleges = cAll($pdo, "SELECT name,slug FROM colleges WHERE status='active' ORDER BY id DESC LIMIT 50");
+$navCategories = cAll($pdo, "SELECT category_name,category_slug FROM course_categories WHERE status='active' ORDER BY sort_order ASC LIMIT 50");
+$navExamsUg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams LIMIT 50");
+$navExamsPg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams LIMIT 50");
+$navCoursesUg = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE course_level='UG' ORDER BY total_colleges_offering DESC LIMIT 50");
+$navCoursesPg = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE course_level='PG' ORDER BY total_colleges_offering DESC LIMIT 50");
+$navCountries = cAll($pdo, "SELECT name FROM countries LIMIT 50");
 
 function cImg(?string $url=''): string { return $url ?: 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&q=80'; }
 

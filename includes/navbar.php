@@ -31,28 +31,27 @@
           <a href="#">Colleges <i class="ph ph-caret-down"></i></a>
           <div class="pro-mega-menu">
             <div class="mega-col">
-              <h4>Top Streams</h4>
+              <h4>Top Courses</h4>
               <ul>
-                <?php foreach(array_slice($navCategories ?? [], 0, 8) as $cat): ?>
-                <li><a href="#"><?=htmlspecialchars($cat['category_name'])?></a></li>
+                <?php foreach($popularCourses ?? [] as $course): ?>
+                <li><a href="#"><?=htmlspecialchars($course['course_name'])?></a></li>
                 <?php endforeach; ?>
               </ul>
             </div>
             <div class="mega-col">
               <h4>Top Locations</h4>
               <ul>
-                <?php foreach(array_slice($states ?? [], 0, 8) as $st): ?>
+                <?php foreach($states ?? [] as $st): ?>
                 <li><a href="#"><?=htmlspecialchars($st['name'])?></a></li>
                 <?php endforeach; ?>
               </ul>
             </div>
             <div class="mega-col">
-              <h4>Top Rated</h4>
+              <h4>Top Colleges</h4>
               <ul>
-                <li><a href="#">NIRF Ranked Colleges</a></li>
-                <li><a href="#">Top Private Colleges</a></li>
-                <li><a href="#">Top Government Colleges</a></li>
-                <li><a href="#">Highest Placements</a></li>
+                <?php foreach($navColleges ?? [] as $college): ?>
+                <li><a href="#"><?=htmlspecialchars($college['name'])?></a></li>
+                <?php endforeach; ?>
               </ul>
             </div>
           </div>
