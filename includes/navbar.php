@@ -156,12 +156,12 @@ if (!isset($navColleges)) {
           </div>
         </li>
 
-        <li><a href="#">Admissions 2026</a></li>
+        <li><a href="#">Admissions 2026 <span class="nav-badge-hot">LIVE</span></a></li>
         <li><a href="#">Reviews</a></li>
         <li><a href="news.php">News</a></li>
       </ul>
       <ul class="pro-sub-links-right">
-        <li><a href="#" class="counselling-btn"><i class="ph-fill ph-headset"></i> Free Counselling</a></li>
+        <li><a href="#" class="counselling-btn"><i class="ph-fill ph-headset"></i> Free Counselling <span class="pulse-dot"></span></a></li>
       </ul>
     </div>
   </div>

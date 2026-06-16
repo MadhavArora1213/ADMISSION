@@ -4,6 +4,10 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 require_once __DIR__ . '/admin/db.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 if (!function_exists('cAll')) {
     function cAll(PDO $pdo, string $sql): array {
         try { return $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC); }
@@ -21,6 +25,22 @@ $slug = trim($_GET['slug'] ?? '');
 
 if (empty($slug)) {
     header('Location: news.php');
+    exit;
+}
+
+// Handle Mock Login
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'mock_login') {
+    $_SESSION['user_id'] = 'user-1234-uuid';
+    $_SESSION['user_name'] = 'Rahul Sharma';
+    header("Location: news_details.php?slug=" . urlencode($slug) . "#comments-section");
+    exit;
+}
+
+// Handle Mock Logout
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'mock_logout') {
+    unset($_SESSION['user_id']);
+    unset($_SESSION['user_name']);
+    header("Location: news_details.php?slug=" . urlencode($slug) . "#comments-section");
     exit;
 }
 
@@ -75,8 +95,56 @@ $sidebarCats = $pdo->query("
 
 $typeLabel    = ucwords(str_replace('_', ' ', $article['article_type']));
 $publishDate  = !empty($article['publish_at']) ? date('F d, Y', strtotime($article['publish_at'])) : '';
-$readingTime  = $article['reading_time_mins'] ?? ceil(str_word_count(strip_tags($article['content_body'] ?? '')) / 200);
-$tags         = !empty($article['tags']) ? json_decode($article['tags'], true) : [];
+$readingTime  = $article['reading_time_mins'] ?? max(1, (int)ceil(str_word_count(strip_tags($article['content_body'] ?? '')) / 200));
+
+// Fetch real tag names from the tags table using IDs stored in articles.tags
+$tags = [];
+if (!empty($article['tags'])) {
+    $tagIds = json_decode($article['tags'], true);
+    if (is_array($tagIds) && count($tagIds) > 0) {
+        $placeholders = implode(',', array_fill(0, count($tagIds), '?'));
+        $tagStmt = $pdo->prepare("SELECT tag_name FROM tags WHERE id IN ($placeholders)");
+        $tagStmt->execute(array_map('intval', $tagIds));
+        $tags = $tagStmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+}
+
+// Handle Comment Submission
+$comment_error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_comment') {
+    if (!isset($_SESSION['user_id'])) {
+        $comment_error = 'You must be logged in to comment.';
+    } else {
+        $comment_text = trim($_POST['comment_text'] ?? '');
+        if (empty($comment_text)) {
+            $comment_error = 'Comment cannot be empty.';
+        } else {
+            // Ensure mock user exists in the DB
+            $stmtUserCheck = $pdo->prepare("SELECT id FROM users WHERE id = ?");
+            $stmtUserCheck->execute(['user-1234-uuid']);
+            if (!$stmtUserCheck->fetch()) {
+                $stmtInsertUser = $pdo->prepare("INSERT INTO users (id, full_name, email, password_hash, status) VALUES (?, ?, ?, ?, ?)");
+                $stmtInsertUser->execute(['user-1234-uuid', 'Rahul Sharma', 'rahul.sharma@example.com', password_hash('password123', PASSWORD_DEFAULT), 'active']);
+            }
+
+            $stmtComment = $pdo->prepare("INSERT INTO article_comments (article_id, user_id, comment_text) VALUES (?, ?, ?)");
+            $stmtComment->execute([$article['id'], $_SESSION['user_id'], $comment_text]);
+            header("Location: news_details.php?slug=" . urlencode($slug) . "#comments-section");
+            exit;
+        }
+    }
+}
+
+// Fetch all comments for this article
+$stmtComments = $pdo->prepare("
+    SELECT c.*, u.full_name 
+    FROM article_comments c 
+    JOIN users u ON c.user_id = u.id 
+    WHERE c.article_id = ? 
+    ORDER BY c.created_at DESC
+");
+$stmtComments->execute([$article['id']]);
+$comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -198,6 +266,78 @@ $tags         = !empty($article['tags']) ? json_decode($article['tags'], true) :
         <div class="nps-thanks" id="npsThanks" style="display:none;">
           <i class="ph ph-smiley"></i>
           <p>Thank you for your feedback!</p>
+        </div>
+      </div>
+
+      <!-- ═══ COMMENTS SECTION ═══ -->
+      <div class="comments-section" id="comments-section">
+        <h3 class="comments-title"><i class="ph ph-chat-circle-dots"></i> Discussion (<?= count($comments) ?>)</h3>
+        
+        <?php if (!empty($comment_error)): ?>
+          <div class="comment-alert alert-error">
+            <i class="ph ph-warning-circle"></i> <?= htmlspecialchars($comment_error) ?>
+          </div>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['user_id'])): ?>
+          <!-- Comment Form for Logged In Users -->
+          <div class="comment-form-wrap">
+            <div class="user-info-row">
+              <span class="user-avatar-small"><?= strtoupper(substr($_SESSION['user_name'], 0, 1)) ?></span>
+              <span class="user-logged-in">Logged in as <strong><?= htmlspecialchars($_SESSION['user_name']) ?></strong></span>
+              <form method="POST" action="" style="margin-left: auto;">
+                <input type="hidden" name="action" value="mock_logout">
+                <button type="submit" class="logout-btn-link"><i class="ph ph-sign-out"></i> Logout</button>
+              </form>
+            </div>
+            <form method="POST" action="" class="comment-form">
+              <input type="hidden" name="action" value="add_comment">
+              <textarea name="comment_text" rows="4" placeholder="Share your thoughts or ask a question about this article..." required></textarea>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary comment-submit-btn"><i class="ph ph-paper-plane-tilt"></i> Post Comment</button>
+              </div>
+            </form>
+          </div>
+        <?php else: ?>
+          <!-- Login Prompt for Guest Users -->
+          <div class="comment-login-prompt">
+            <div class="prompt-icon"><i class="ph ph-lock-key"></i></div>
+            <div class="prompt-text">
+              <h4>Join the Discussion</h4>
+              <p>You must be logged in to post comments and interact with other readers.</p>
+            </div>
+            <form method="POST" action="">
+              <input type="hidden" name="action" value="mock_login">
+              <button type="submit" class="btn btn-primary login-btn-quick"><i class="ph ph-sign-in"></i> Quick Login as Student</button>
+            </form>
+          </div>
+        <?php endif; ?>
+
+        <!-- Comments List -->
+        <div class="comments-list">
+          <?php if (empty($comments)): ?>
+            <div class="no-comments">
+              <i class="ph ph-chat-circle-slash"></i>
+              <p>No comments yet. Be the first to share your thoughts!</p>
+            </div>
+          <?php else: ?>
+            <?php foreach ($comments as $comment): 
+              $commentDate = date('M d, Y \a\t h:i A', strtotime($comment['created_at']));
+            ?>
+              <div class="comment-item">
+                <div class="comment-avatar"><?= strtoupper(substr($comment['full_name'], 0, 1)) ?></div>
+                <div class="comment-content">
+                  <div class="comment-header">
+                    <span class="comment-author"><?= htmlspecialchars($comment['full_name']) ?></span>
+                    <span class="comment-date"><?= $commentDate ?></span>
+                  </div>
+                  <div class="comment-body">
+                    <?= nl2br(htmlspecialchars($comment['comment_text'])) ?>
+                  </div>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
         </div>
       </div>
 
