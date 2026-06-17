@@ -26,18 +26,9 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-require_once __DIR__ . '/includes/sms_config.php';
 require_once __DIR__ . '/includes/phone_email_config.php';
 
-// Supported Country Codes with Phone Lengths
-$country_data = [
-    '91'  => ['min' => 10, 'max' => 10, 'name' => 'India (+91)'],
-    '1'   => ['min' => 10, 'max' => 10, 'name' => 'USA/Canada (+1)'],
-    '44'  => ['min' => 10, 'max' => 10, 'name' => 'UK (+44)'],
-    '61'  => ['min' => 9,  'max' => 9,  'name' => 'Australia (+61)'],
-    '971' => ['min' => 9,  'max' => 9,  'name' => 'UAE (+971)'],
-    '977' => ['min' => 10, 'max' => 10, 'name' => 'Nepal (+977)'],
-];
+
 
 // Handle AJAX Actions
 if (isset($_GET['ajax'])) {
@@ -51,215 +42,7 @@ if (isset($_GET['ajax'])) {
         exit;
     }
     
-    if ($action === 'check_exist') {
-        $form_mode = $_POST['form_mode'] ?? 'signup';
-        if ($form_mode === 'signup') {
-            $name = trim($_POST['name'] ?? '');
-            $email = trim($_POST['email'] ?? '');
-            $country_code = trim($_POST['country_code'] ?? '91');
-            $phone = trim($_POST['phone'] ?? '');
-            $city = trim($_POST['city'] ?? '');
-            $course_id = trim($_POST['course'] ?? '');
-            if ($course_id === 'Other') {
-                $course_id = trim($_POST['other_course_name'] ?? '');
-            }
-
-            $name_regex = "/^[a-zA-Z\s]{2,100}$/";
-            $city_regex = "/^[a-zA-Z\s\.\-']{2,100}$/";
-
-            $isValidPhone = false;
-            if (array_key_exists($country_code, $country_data)) {
-                $limits = $country_data[$country_code];
-                $phone_len = strlen($phone);
-                if ($phone_len >= $limits['min'] && $phone_len <= $limits['max'] && ctype_digit($phone)) {
-                    $isValidPhone = true;
-                }
-            }
-
-            if (!preg_match($name_regex, $name)) {
-                echo json_encode(['success' => false, 'error' => 'Name must be letters and spaces only (2-100 chars).']);
-                exit;
-            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                echo json_encode(['success' => false, 'error' => 'Please enter a valid email address.']);
-                exit;
-            } elseif (!$isValidPhone) {
-                $limits = $country_data[$country_code] ?? ['min' => 10, 'max' => 10];
-                echo json_encode(['success' => false, 'error' => 'Please enter a valid phone number containing exactly ' . $limits['min'] . ' digits.']);
-                exit;
-            } elseif (!preg_match($city_regex, $city)) {
-                echo json_encode(['success' => false, 'error' => 'Please enter a valid city name.']);
-                exit;
-            } elseif (empty($course_id)) {
-                echo json_encode(['success' => false, 'error' => 'Please select your preferred course.']);
-                exit;
-            } else {
-                $full_phone = '+' . $country_code . $phone;
-                $stmtCheck = $pdo->prepare("SELECT id FROM users WHERE email = ? OR phone = ? LIMIT 1");
-                $stmtCheck->execute([$email, $full_phone]);
-                if ($stmtCheck->fetch()) {
-                    echo json_encode(['success' => false, 'error' => 'An account with this email or phone number already exists.']);
-                    exit;
-                } else {
-                    // Send ShoutOUT OTP
-                    $otp_id = sendShoutoutOtp($full_phone);
-                    if (!$otp_id) {
-                        echo json_encode(['success' => false, 'error' => 'Failed to send verification SMS via ShoutOUT. Please check your number or try again.']);
-                        exit;
-                    }
-                    
-                    $_SESSION['temp_auth'] = [
-                        'mode' => 'signup',
-                        'name' => $name,
-                        'email' => $email,
-                        'phone' => $full_phone,
-                        'city' => $city,
-                        'course_id' => $course_id,
-                        'otp_id' => $otp_id
-                    ];
-                    echo json_encode(['success' => true, 'phone' => $full_phone]);
-                    exit;
-                }
-            }
-        } else {
-            // Login Mode
-            $country_code = trim($_POST['country_code_login'] ?? '91');
-            $phone = trim($_POST['phone_login'] ?? '');
-
-            $isValidPhone = false;
-            if (array_key_exists($country_code, $country_data)) {
-                $limits = $country_data[$country_code];
-                $phone_len = strlen($phone);
-                if ($phone_len >= $limits['min'] && $phone_len <= $limits['max'] && ctype_digit($phone)) {
-                    $isValidPhone = true;
-                }
-            }
-
-            if (!$isValidPhone) {
-                $limits = $country_data[$country_code] ?? ['min' => 10, 'max' => 10];
-                echo json_encode(['success' => false, 'error' => 'Please enter a valid phone number containing exactly ' . $limits['min'] . ' digits.']);
-                exit;
-            } else {
-                $full_phone = '+' . $country_code . $phone;
-                $stmtUser = $pdo->prepare("SELECT id, full_name, phone FROM users WHERE phone = ? AND status = 'active' LIMIT 1");
-                $stmtUser->execute([$full_phone]);
-                $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
-
-                if (!$user) {
-                    echo json_encode(['success' => false, 'error' => 'No registered user found with this mobile number. Please sign up first.']);
-                    exit;
-                } else {
-                    // Send ShoutOUT OTP
-                    $otp_id = sendShoutoutOtp($full_phone);
-                    if (!$otp_id) {
-                        echo json_encode(['success' => false, 'error' => 'Failed to send verification SMS via ShoutOUT. Please try again.']);
-                        exit;
-                    }
-                    
-                    $_SESSION['temp_auth'] = [
-                        'mode' => 'login',
-                        'id' => $user['id'],
-                        'name' => $user['full_name'],
-                        'phone' => $user['phone'],
-                        'otp_id' => $otp_id
-                    ];
-                    echo json_encode(['success' => true, 'phone' => $full_phone]);
-                    exit;
-                }
-            }
-        }
-    } elseif ($action === 'verify_shoutout_otp') {
-        $otpCode = trim($_POST['otp'] ?? '');
-        if (empty($otpCode)) {
-            echo json_encode(['success' => false, 'error' => 'Please enter the verification code.']);
-            exit;
-        }
-
-        if (empty($_SESSION['temp_auth'])) {
-            echo json_encode(['success' => false, 'error' => 'Session expired. Please request a new OTP.']);
-            exit;
-        }
-
-        $temp = $_SESSION['temp_auth'];
-        $otpId = $temp['otp_id'] ?? '';
-
-        // Verify with ShoutOUT
-        $isVerified = verifyShoutoutOtp($otpId, $otpCode);
-        if (!$isVerified) {
-            echo json_encode(['success' => false, 'error' => 'Invalid OTP code. Please try again.']);
-            exit;
-        }
-
-        if ($temp['mode'] === 'signup') {
-            try {
-                $pdo->beginTransaction();
-                
-                $user_id = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-                    mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff),
-                    mt_rand(0,0x0fff)|0x4000, mt_rand(0,0x3fff)|0x8000,
-                    mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff));
-                    
-                $profile_id = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-                    mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff),
-                    mt_rand(0,0x0fff)|0x4000, mt_rand(0,0x3fff)|0x8000,
-                    mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff));
-                    
-                $stmtInsertUser = $pdo->prepare("
-                    INSERT INTO users (id, full_name, email, phone, password_hash, auth_provider, status, phone_verified, email_verified)
-                    VALUES (?, ?, ?, ?, ?, 'phone_otp', 'active', TRUE, TRUE)
-                ");
-                $dummy_pass = password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT);
-                $stmtInsertUser->execute([
-                    $user_id,
-                    $temp['name'],
-                    $temp['email'],
-                    $temp['phone'],
-                    $dummy_pass
-                ]);
-                
-                $stmtInsertProfile = $pdo->prepare("
-                    INSERT INTO student_profiles (id, user_id, city, preferred_courses)
-                    VALUES (?, ?, ?, ?)
-                ");
-                $preferred_courses_json = json_encode([$temp['course_id']]);
-                $stmtInsertProfile->execute([
-                    $profile_id,
-                    $user_id,
-                    $temp['city'],
-                    $preferred_courses_json
-                ]);
-                
-                $pdo->commit();
-                
-                unset($_SESSION['temp_auth']);
-                
-                session_regenerate_id(true);
-                $_SESSION['user_id'] = $user_id;
-                $_SESSION['user_name'] = $temp['name'];
-                
-                echo json_encode(['success' => true, 'redirect' => 'index.php']);
-                exit;
-            } catch (Exception $e) {
-                if ($pdo->inTransaction()) {
-                    $pdo->rollBack();
-                }
-                echo json_encode(['success' => false, 'error' => 'An error occurred during registration. Details: ' . $e->getMessage()]);
-                exit;
-            }
-        } else {
-            // Login Mode
-            unset($_SESSION['temp_auth']);
-            
-            session_regenerate_id(true);
-            $_SESSION['user_id'] = $temp['id'];
-            $_SESSION['user_name'] = $temp['name'];
-            
-            $stmtUpdate = $pdo->prepare("UPDATE users SET last_login_at = NOW(), last_login_ip = ?, login_count = login_count + 1 WHERE id = ?");
-            $stmtUpdate->execute([$_SERVER['REMOTE_ADDR'] ?? '127.0.0.1', $temp['id']]);
-            
-            echo json_encode(['success' => true, 'redirect' => 'index.php']);
-            exit;
-        }
-    } elseif ($action === 'verify_phone_email') {
+    if ($action === 'verify_phone_email') {
         $user_json_url = trim($_POST['user_json_url'] ?? '');
         if (empty($user_json_url)) {
             echo json_encode(['success' => false, 'error' => 'Invalid verification data.']);
@@ -377,10 +160,6 @@ if (isset($_GET['ajax'])) {
     }
 }
 
-$error = '';
-$success_message = '';
-$show_otp_verify = false;
-$otp_sent_to = '';
 $action_type = 'signup';
 
 // Fetch active states and cities
@@ -452,211 +231,7 @@ $other_courses = [
     ['id' => 'Other', 'course_name' => 'Other']
 ];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $_SESSION['rate_limit']['attempts']++;
-    if ($_SESSION['rate_limit']['attempts'] > 15) {
-        $error = 'Too many requests. Please wait a minute.';
-    } else {
-        $post_token = $_POST['csrf_token'] ?? '';
-        if (!hash_equals($_SESSION['csrf_token'], $post_token)) {
-            $error = 'Invalid security token. Please refresh.';
-        } else {
-            $action = $_POST['action'] ?? '';
 
-            if ($action === 'request_otp') {
-                $form_mode = $_POST['form_mode'] ?? 'signup';
-                
-                if ($form_mode === 'signup') {
-                    $action_type = 'signup';
-                    $name = trim($_POST['name'] ?? '');
-                    $email = trim($_POST['email'] ?? '');
-                    $country_code = trim($_POST['country_code'] ?? '91');
-                    $phone = trim($_POST['phone'] ?? '');
-                    $city = trim($_POST['city'] ?? '');
-                    $course_id = trim($_POST['course'] ?? '');
-                    if ($course_id === 'Other') {
-                        $course_id = trim($_POST['other_course_name'] ?? '');
-                    }
-
-                    $name_regex = "/^[a-zA-Z\s]{2,100}$/";
-                    $city_regex = "/^[a-zA-Z\s\.\-']{2,100}$/";
-
-                    $isValidPhone = false;
-                    if (array_key_exists($country_code, $country_data)) {
-                        $limits = $country_data[$country_code];
-                        $phone_len = strlen($phone);
-                        if ($phone_len >= $limits['min'] && $phone_len <= $limits['max'] && ctype_digit($phone)) {
-                            $isValidPhone = true;
-                        }
-                    }
-
-                    if (!preg_match($name_regex, $name)) {
-                        $error = 'Name must be letters and spaces only (2-100 chars).';
-                    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                        $error = 'Please enter a valid email address.';
-                    } elseif (!$isValidPhone) {
-                        $limits = $country_data[$country_code] ?? ['min' => 10, 'max' => 10];
-                        $error = 'Please enter a valid phone number containing exactly ' . $limits['min'] . ' digits.';
-                    } elseif (!preg_match($city_regex, $city)) {
-                        $error = 'Please enter a valid city name.';
-                    } elseif (empty($course_id)) {
-                        $error = 'Please select your preferred course.';
-                    } else {
-                        $full_phone = '+' . $country_code . $phone;
-                        $stmtCheck = $pdo->prepare("SELECT id FROM users WHERE email = ? OR phone = ? LIMIT 1");
-                        $stmtCheck->execute([$email, $full_phone]);
-                        if ($stmtCheck->fetch()) {
-                            $error = 'An account with this email or phone number already exists.';
-                        } else {
-                            $_SESSION['temp_auth'] = [
-                                'mode' => 'signup',
-                                'name' => $name,
-                                'email' => $email,
-                                'phone' => $full_phone,
-                                'city' => $city,
-                                'course_id' => $course_id
-                            ];
-                            
-                            $_SESSION['temp_otp'] = '123456';
-                            $_SESSION['otp_expiry'] = time() + 300;
-                            
-                            $show_otp_verify = true;
-                            $otp_sent_to = htmlspecialchars($full_phone);
-                            $success_message = 'Mock OTP Sent: 123456';
-                        }
-                    }
-                } else {
-                    $action_type = 'login';
-                    $country_code = trim($_POST['country_code_login'] ?? '91');
-                    $phone = trim($_POST['phone_login'] ?? '');
-
-                    $isValidPhone = false;
-                    if (array_key_exists($country_code, $country_data)) {
-                        $limits = $country_data[$country_code];
-                        $phone_len = strlen($phone);
-                        if ($phone_len >= $limits['min'] && $phone_len <= $limits['max'] && ctype_digit($phone)) {
-                            $isValidPhone = true;
-                        }
-                    }
-
-                    if (!$isValidPhone) {
-                        $limits = $country_data[$country_code] ?? ['min' => 10, 'max' => 10];
-                        $error = 'Please enter a valid phone number containing exactly ' . $limits['min'] . ' digits.';
-                    } else {
-                        $full_phone = '+' . $country_code . $phone;
-                        $stmtUser = $pdo->prepare("SELECT id, full_name, phone FROM users WHERE phone = ? AND status = 'active' LIMIT 1");
-                        $stmtUser->execute([$full_phone]);
-                        $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
-
-                        if (!$user) {
-                            $error = 'No registered user found with this mobile number. Please sign up first.';
-                        } else {
-                            $_SESSION['temp_auth'] = [
-                                'mode' => 'login',
-                                'id' => $user['id'],
-                                'name' => $user['full_name'],
-                                'phone' => $user['phone']
-                            ];
-                            
-                            $_SESSION['temp_otp'] = '123456';
-                            $_SESSION['otp_expiry'] = time() + 300;
-                            
-                            $show_otp_verify = true;
-                            $otp_sent_to = htmlspecialchars($full_phone);
-                            $success_message = 'Mock OTP Sent: 123456';
-                        }
-                    }
-                }
-            } elseif ($action === 'verify_otp') {
-                $entered_otp = trim($_POST['otp'] ?? '');
-                
-                if (empty($_SESSION['temp_auth'])) {
-                    $error = 'Session expired. Please request a new OTP.';
-                } elseif (time() > ($_SESSION['otp_expiry'] ?? 0)) {
-                    $error = 'OTP has expired. Please request a new one.';
-                    $show_otp_verify = false;
-                } elseif ($entered_otp !== ($_SESSION['temp_otp'] ?? '')) {
-                    $error = 'Incorrect OTP entered.';
-                    $show_otp_verify = true;
-                    $otp_sent_to = htmlspecialchars($_SESSION['temp_auth']['phone'] ?? '');
-                } else {
-                    $temp = $_SESSION['temp_auth'];
-                    
-                    if ($temp['mode'] === 'signup') {
-                        try {
-                            $pdo->beginTransaction();
-                            
-                            $user_id = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-                                mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff),
-                                mt_rand(0,0x0fff)|0x4000, mt_rand(0,0x3fff)|0x8000,
-                                mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff));
-                                
-                            $profile_id = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-                                mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff),
-                                mt_rand(0,0x0fff)|0x4000, mt_rand(0,0x3fff)|0x8000,
-                                mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff));
-                                
-                            $stmtInsertUser = $pdo->prepare("
-                                INSERT INTO users (id, full_name, email, phone, password_hash, auth_provider, status, phone_verified, email_verified)
-                                VALUES (?, ?, ?, ?, ?, 'phone_otp', 'active', TRUE, TRUE)
-                            ");
-                            $dummy_pass = password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT);
-                            $stmtInsertUser->execute([
-                                $user_id,
-                                $temp['name'],
-                                $temp['email'],
-                                $temp['phone'],
-                                $dummy_pass
-                            ]);
-                            
-                            $stmtInsertProfile = $pdo->prepare("
-                                INSERT INTO student_profiles (id, user_id, city, preferred_courses)
-                                VALUES (?, ?, ?, ?)
-                            ");
-                            $preferred_courses_json = json_encode([$temp['course_id']]);
-                            $stmtInsertProfile->execute([
-                                $profile_id,
-                                $user_id,
-                                $temp['city'],
-                                $preferred_courses_json
-                            ]);
-                            
-                            $pdo->commit();
-                            
-                            unset($_SESSION['temp_auth']);
-                            unset($_SESSION['temp_otp']);
-                            unset($_SESSION['otp_expiry']);
-                            
-                            session_regenerate_id(true);
-                            $_SESSION['user_id'] = $user_id;
-                            $_SESSION['user_name'] = $temp['name'];
-                            
-                            header('Location: index.php');
-                            exit;
-                        } catch (Exception $e) {
-                            $pdo->rollBack();
-                            $error = 'An error occurred. Code: ' . $e->getMessage();
-                        }
-                    } else {
-                        unset($_SESSION['temp_auth']);
-                        unset($_SESSION['temp_otp']);
-                        unset($_SESSION['otp_expiry']);
-                        
-                        session_regenerate_id(true);
-                        $_SESSION['user_id'] = $temp['id'];
-                        $_SESSION['user_name'] = $temp['name'];
-                        
-                        $stmtUpdate = $pdo->prepare("UPDATE users SET last_login_at = NOW(), last_login_ip = ?, login_count = login_count + 1 WHERE id = ?");
-                        $stmtUpdate->execute([$_SERVER['REMOTE_ADDR'] ?? '127.0.0.1', $temp['id']]);
-                        
-                        header('Location: index.php');
-                        exit;
-                    }
-                }
-            }
-        }
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -1237,64 +812,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       text-decoration: underline;
     }
     
-    .btn-get-otp {
-      width: 100%;
-      max-width: 280px;
-      margin: 8px auto 0 auto;
-      background: var(--oxford-navy);
-      color: #FFFFFF;
-      height: 50px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 0.95rem;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 15px rgba(11, 36, 71, 0.15);
-    }
-    
-    .btn-get-otp:hover {
-      background: var(--yale-blue);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(11, 36, 71, 0.25);
-    }
-    
-    .btn-get-otp:active {
-      transform: translateY(0) scale(0.98);
-    }
-    
-    .btn-submit {
-      width: 100%;
-      background: var(--oxford-navy);
-      color: #FFFFFF;
-      height: 50px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 0.95rem;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 15px rgba(11, 36, 71, 0.15);
-    }
-    
-    .btn-submit:hover {
-      background: var(--yale-blue);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(11, 36, 71, 0.25);
-    }
-    
-    .btn-submit:active {
-      transform: translateY(0) scale(0.98);
-    }
-    
+
     .switch-footer-text {
       text-align: center;
       margin-top: 28px;
@@ -1498,7 +1016,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <!-- Unified POST Form -->
       <form method="POST" action="" id="auth_form">
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
-        <input type="hidden" name="action" value="request_otp">
+
         <!-- Hidden input to track form active mode -->
         <input type="hidden" name="form_mode" id="form_mode" value="<?= htmlspecialchars($action_type) ?>">
         
@@ -1584,8 +1102,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <p style="text-align:center; font-size:0.92rem; color:#64748b; margin-bottom:8px;">Click the button below to sign in with your phone number via Phone.Email.</p>
         </div>
         
-        <!-- Recaptcha Container required for Firebase -->
-        <div id="recaptcha-container" style="margin-bottom: 20px; display: flex; justify-content: center;"></div>
         
         <div style="display: flex; justify-content: center; margin: 8px auto 0 auto;">
           <div class="pe_signin_button" data-client-id="<?= PE_APP_ID ?>"></div>
@@ -1602,23 +1118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </form>
     </div>
 
-    <!-- OTP VERIFICATION VIEW (Handled dynamically) -->
-    <div id="otp_verification_wrapper" style="display: none;">
-      <h1 style="font-family: 'Space Grotesk', sans-serif; margin-bottom: 8px;">Verify Mobile Number</h1>
-      <p class="subtitle">A 5-digit OTP code has been sent to your phone (<strong id="otp_sent_to_label"></strong>).</p>
-      
-      <form method="POST" action="" id="otp_form">
-        <div class="form-group-custom" style="max-width: 320px; margin: 0 auto 24px auto;">
-          <input type="text" name="otp" id="otp_input" class="input-card" placeholder="Enter 5-digit OTP" required pattern="^[0-9]{5}$" maxlength="5" autofocus style="letter-spacing: 6px; font-weight: 800; text-align: center; font-size: 1.1rem; background: rgba(255,255,255,0.5); border: 1px solid var(--border-glass);">
-        </div>
-        
-        <button type="submit" class="btn-submit" style="max-width: 260px; margin: 0 auto;">Verify OTP <i class="ph ph-arrow-right"></i></button>
-      </form>
-      
-      <p class="switch-footer-text" style="margin-top: 24px;">
-        Entered wrong number? <span onclick="cancelOtpVerification()" style="cursor: pointer; color: var(--oxford-navy); font-weight: 700; text-decoration: underline;">Change Number</span>
-      </p>
-    </div>
+
   </div>
 </div>
 
@@ -1638,113 +1138,7 @@ function showAlert(message, type = 'danger') {
   }
 }
 
-// Reset view back to signup/login fields
-function cancelOtpVerification() {
-  document.getElementById('auth_forms_wrapper').style.display = 'block';
-  document.getElementById('otp_verification_wrapper').style.display = 'none';
-  showAlert('');
-}
 
-// Client logic for form submit interceptions
-document.addEventListener('DOMContentLoaded', () => {
-  const authForm = document.getElementById('auth_form');
-  if (authForm) {
-    authForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      showAlert('');
-      
-      const formMode = document.getElementById('form_mode').value;
-      const formData = new FormData(authForm);
-      
-      const submitBtn = authForm.querySelector('.btn-get-otp');
-      const originalBtnText = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = 'Sending SMS OTP... <i class="ph ph-spinner-gap animate-spin"></i>';
-      
-      try {
-        // 1. Trigger pre-validation check and OTP generation via server ShoutOUT SMS API
-        const response = await fetch('?ajax=check_exist', {
-          method: 'POST',
-          body: formData
-        });
-        const result = await response.json();
-        
-        if (!result.success) {
-          showAlert(result.error);
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
-          return;
-        }
-        
-        // 2. Pre-validation and OTP generation succeeded. Transition UI views
-        const phoneNumber = result.phone;
-        document.getElementById('auth_forms_wrapper').style.display = 'none';
-        document.getElementById('otp_verification_wrapper').style.display = 'block';
-        document.getElementById('otp_sent_to_label').innerText = phoneNumber;
-        
-        // Focus on OTP input
-        setTimeout(() => {
-          const otpInput = document.getElementById('otp_input');
-          if (otpInput) otpInput.focus();
-        }, 100);
-        
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalBtnText;
-        
-      } catch (err) {
-        console.error("OTP send failed:", err);
-        showAlert("Failed to send OTP verification code. Please check your network.");
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalBtnText;
-      }
-    });
-  }
-
-  // OTP Verification Submission
-  const otpForm = document.getElementById('otp_form');
-  if (otpForm) {
-    otpForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      showAlert('');
-      
-      const otp = document.getElementById('otp_input').value;
-      const submitBtn = otpForm.querySelector('.btn-submit');
-      const originalBtnText = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = 'Verifying OTP code... <i class="ph ph-spinner-gap animate-spin"></i>';
-      
-      try {
-        // Send verified OTP code back to server for verification
-        const csrfToken = document.querySelector('input[name="csrf_token"]').value;
-        const formData = new FormData();
-        formData.append('csrf_token', csrfToken);
-        formData.append('otp', otp);
-        
-        const response = await fetch('?ajax=verify_shoutout_otp', {
-          method: 'POST',
-          body: formData
-        });
-        const result = await response.json();
-        
-        if (result.success) {
-          showAlert('Verified successfully! Redirecting you...', 'success');
-          setTimeout(() => {
-            window.location.href = result.redirect;
-          }, 1000);
-        } else {
-          showAlert(result.error);
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
-        }
-      } catch (err) {
-        console.error("OTP verification error:", err);
-        showAlert("An error occurred during verification. Please try again.");
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalBtnText;
-      }
-    });
-  }
-});
 
 // Phone.Email verification callback
 function phoneEmailListener(userObj) {
