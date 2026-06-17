@@ -4,6 +4,10 @@ error_reporting(E_ALL);
 ini_set('display_errors', '0');
 require_once __DIR__ . '/admin/db.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 function cCol(PDO $pdo, string $sql, int $d = 0): int {
     try { $s = $pdo->query($sql); $v = $s->fetchColumn(); return $v !== false && $v !== null ? (int)$v : $d; }
     catch (Exception $e) { return $d; }

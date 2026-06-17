@@ -28,16 +28,8 @@ if (empty($slug)) {
     exit;
 }
 
-// Handle Mock Login
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'mock_login') {
-    $_SESSION['user_id'] = 'user-1234-uuid';
-    $_SESSION['user_name'] = 'Rahul Sharma';
-    header("Location: news_details.php?slug=" . urlencode($slug) . "#comments-section");
-    exit;
-}
-
-// Handle Mock Logout
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'mock_logout') {
+// Handle Logout from comments section
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'logout') {
     unset($_SESSION['user_id']);
     unset($_SESSION['user_name']);
     header("Location: news_details.php?slug=" . urlencode($slug) . "#comments-section");
@@ -119,14 +111,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         if (empty($comment_text)) {
             $comment_error = 'Comment cannot be empty.';
         } else {
-            // Ensure mock user exists in the DB
-            $stmtUserCheck = $pdo->prepare("SELECT id FROM users WHERE id = ?");
-            $stmtUserCheck->execute(['user-1234-uuid']);
-            if (!$stmtUserCheck->fetch()) {
-                $stmtInsertUser = $pdo->prepare("INSERT INTO users (id, full_name, email, password_hash, status) VALUES (?, ?, ?, ?, ?)");
-                $stmtInsertUser->execute(['user-1234-uuid', 'Rahul Sharma', 'rahul.sharma@example.com', password_hash('password123', PASSWORD_DEFAULT), 'active']);
-            }
-
             $stmtComment = $pdo->prepare("INSERT INTO article_comments (article_id, user_id, comment_text) VALUES (?, ?, ?)");
             $stmtComment->execute([$article['id'], $_SESSION['user_id'], $comment_text]);
             header("Location: news_details.php?slug=" . urlencode($slug) . "#comments-section");
@@ -286,7 +270,7 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
               <span class="user-avatar-small"><?= strtoupper(substr($_SESSION['user_name'], 0, 1)) ?></span>
               <span class="user-logged-in">Logged in as <strong><?= htmlspecialchars($_SESSION['user_name']) ?></strong></span>
               <form method="POST" action="" style="margin-left: auto;">
-                <input type="hidden" name="action" value="mock_logout">
+                <input type="hidden" name="action" value="logout">
                 <button type="submit" class="logout-btn-link"><i class="ph ph-sign-out"></i> Logout</button>
               </form>
             </div>
@@ -306,10 +290,7 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
               <h4>Join the Discussion</h4>
               <p>You must be logged in to post comments and interact with other readers.</p>
             </div>
-            <form method="POST" action="">
-              <input type="hidden" name="action" value="mock_login">
-              <button type="submit" class="btn btn-primary login-btn-quick"><i class="ph ph-sign-in"></i> Quick Login as Student</button>
-            </form>
+            <a href="login.php" class="btn btn-primary login-btn-quick"><i class="ph ph-sign-in"></i> Login to Comment</a>
           </div>
         <?php endif; ?>
 

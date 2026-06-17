@@ -4,6 +4,10 @@ error_reporting(E_ALL);
 ini_set('display_errors', '0');
 require_once __DIR__ . '/admin/db.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Helper functions (if not already defined in db.php)
 if (!function_exists('cAll')) {
     function cAll(PDO $pdo, string $sql): array {

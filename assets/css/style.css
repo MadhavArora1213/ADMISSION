@@ -2961,6 +2961,108 @@ select {
   box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
 }
 
+/* User dropdown */
+.pro-user-dropdown {
+  position: relative;
+}
+
+.pro-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #0b2447, #3b82f6);
+  color: #fff;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 800;
+  font-family: 'Space Grotesk', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
+}
+
+.pro-user-avatar:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+}
+
+.pro-user-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 200px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.04);
+  padding: 8px;
+  display: none;
+  z-index: 1001;
+  animation: userMenuFade 0.2s ease;
+}
+
+@keyframes userMenuFade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pro-user-menu.open {
+  display: block;
+}
+
+.pro-user-menu-header {
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #64748b;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pro-user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #334155;
+  font-weight: 600;
+  font-size: 0.88rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.pro-user-menu-item i {
+  font-size: 1.05rem;
+  color: #64748b;
+}
+
+.pro-user-menu-item:hover {
+  background: #f1f5f9;
+  color: #0b2447;
+}
+
+.pro-user-menu-item.logout:hover {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.pro-user-menu-item.logout:hover i {
+  color: #ef4444;
+}
+
+.pro-user-menu-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 4px 0;
+}
+
 /* Sub Nav */
 .pro-nav-sub {
   background: #ffffff;

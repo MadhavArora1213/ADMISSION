@@ -1,4 +1,7 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // --- NAVBAR DATA ---
 if (!isset($navColleges)) {
     $navColleges = cAll($pdo, "SELECT name,slug FROM colleges WHERE status='active' ORDER BY is_featured DESC, overall_rating_avg DESC, ranking_nirf ASC LIMIT 50");
@@ -32,11 +35,17 @@ if (!isset($navColleges)) {
         <a href="#" class="pro-icon-btn" title="Saved"><i class="ph ph-heart"></i></a>
         <a href="#" class="pro-icon-btn" title="Notifications"><i class="ph ph-bell"></i></a>
         <?php if (isset($_SESSION['user_id'])): ?>
-          <span class="pro-nav-link" style="font-weight:700; color:var(--primary);"><i class="ph ph-user"></i> <?= htmlspecialchars($_SESSION['user_name']) ?></span>
-          <form method="POST" action="news_details.php?slug=top-10-engineering-colleges-2026-v2" style="display:inline;">
-            <input type="hidden" name="action" value="mock_logout">
-            <button type="submit" class="pro-icon-btn" title="Logout" style="border:none; cursor:pointer; background:none;"><i class="ph ph-sign-out" style="color:#ef4444;"></i></button>
-          </form>
+          <div class="pro-user-dropdown">
+            <button class="pro-user-avatar" id="userMenuBtn" onclick="toggleUserMenu()">
+              <?= strtoupper(substr($_SESSION['user_name'], 0, 1)) ?>
+            </button>
+            <div class="pro-user-menu" id="userMenu">
+              <div class="pro-user-menu-header"><?= htmlspecialchars($_SESSION['user_name']) ?></div>
+              <a href="profile.php" class="pro-user-menu-item"><i class="ph ph-user"></i> My Profile</a>
+              <div class="pro-user-menu-divider"></div>
+              <a href="logout.php" class="pro-user-menu-item logout"><i class="ph ph-sign-out"></i> Logout</a>
+            </div>
+          </div>
         <?php else: ?>
           <a href="login.php" class="pro-user-btn" title="Login"><i class="ph-fill ph-user-plus"></i></a>
         <?php endif; ?>
@@ -173,4 +182,26 @@ if (!isset($navColleges)) {
       </ul>
     </div>
   </div>
+<script>
+function toggleUserMenu() {
+  const menu = document.getElementById('userMenu');
+  if (menu) {
+    menu.classList.toggle('open');
+  }
+}
+
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('userMenu');
+  const btn = document.getElementById('userMenuBtn');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.getElementById('userMenu')?.classList.remove('open');
+  }
+});
+</script>
 </header>
