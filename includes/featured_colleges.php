@@ -3,13 +3,13 @@
   <div class="container">
     <div class="section-hdr-flex reveal">
       <div><h2>Curated Institutions</h2><p>Immersive profiles of top-tier colleges</p></div>
-      <a href="#" class="section-link" style="border-color:var(--border);color:var(--text)">Explore All <i class="ph ph-arrow-right"></i></a>
+      <a href="colleges.php" class="section-link" style="border-color:var(--border);color:var(--text)">Explore All <i class="ph ph-arrow-right"></i></a>
     </div>
     
     <div class="uni-grid">
     <?php if (!empty($featuredColleges)): $ci=0; ?>
       <?php foreach ($featuredColleges as $cl): ?>
-      <a href="#" class="uni-card-premium reveal reveal-delay-<?=$ci++?>">
+      <a href="<?= !empty($cl['slug']) ? 'college.php?slug=' . urlencode($cl['slug']) : 'colleges.php' ?>" class="uni-card-premium reveal reveal-delay-<?=$ci++?>">
         <img src="<?=cImg($cl['cover_image_url'])?>" class="ucp-bg" alt="<?=htmlspecialchars($cl['name'])?>" loading="lazy">
         <div class="ucp-overlay">
           <div class="ucp-tags">
@@ -28,7 +28,7 @@
       </a>
       <?php endforeach; ?>
     <?php else: $ci=0; foreach ($fColleges as $cl): ?>
-      <a href="#" class="uni-card-premium reveal reveal-delay-<?=$ci++?>">
+      <a href="<?= !empty($cl['slug']) ? 'college.php?slug=' . urlencode($cl['slug']) : 'colleges.php' ?>" class="uni-card-premium reveal reveal-delay-<?=$ci++?>">
         <img src="<?=$cl['img']?>" class="ucp-bg" alt="<?=$cl['name']?>" loading="lazy">
         <div class="ucp-overlay">
           <div class="ucp-tags"><span class="ucp-tag"><?=$cl['type']?></span></div>

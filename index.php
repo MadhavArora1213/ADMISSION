@@ -8,13 +8,24 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-function cCol(PDO $pdo, string $sql, int $d = 0): int {
-    try { $s = $pdo->query($sql); $v = $s->fetchColumn(); return $v !== false && $v !== null ? (int)$v : $d; }
-    catch (Exception $e) { return $d; }
+require_once __DIR__ . '/includes/college_helpers.php';
+
+// ─── SIMPLE ROUTER ───
+$route = trim($_GET['url'] ?? '/', '/');
+$routeParts = explode('/', $route);
+$routeBase = $routeParts[0] ?? '';
+
+if ($routeBase === 'colleges') {
+    $_GET['type']  = $_GET['type'] ?? 'all';
+    $_GET['state'] = $_GET['state'] ?? 0;
+    require __DIR__ . '/colleges.php';
+    exit;
 }
-function cAll(PDO $pdo, string $sql): array {
-    try { return $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC); }
-    catch (Exception $e) { return []; }
+
+if ($routeBase === 'college' && !empty($routeParts[1])) {
+    $_GET['slug'] = $routeParts[1];
+    require __DIR__ . '/college.php';
+    exit;
 }
 
 $totalColleges = cCol($pdo, "SELECT COUNT(*) FROM colleges WHERE status='active'", 25);
@@ -53,8 +64,6 @@ $reviews = cAll($pdo, "SELECT r.overall_rating,r.review_title,r.review_body,r.ba
 $states = cAll($pdo, "SELECT id,name FROM states ORDER BY name ASC");
 
 
-
-function cImg(?string $url=''): string { return $url ?: 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&q=80'; }
 
 $fColleges = [
     ['name'=>'IIT Delhi','loc'=>'New Delhi, Delhi NCR','type'=>'Public','rating'=>'4.8','fee'=>'₹2.5L','pkg'=>'₹21.5L','img'=>'https://images.unsplash.com/photo-1562774053-701939374585?w=800&q=80'],
@@ -97,7 +106,7 @@ $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.feat
 <meta name="description" content="India's leading college discovery platform. Find top colleges, exams, courses, fees, rankings, and admission updates.">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=8">
+  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=8">
 </head>
 <body>
 

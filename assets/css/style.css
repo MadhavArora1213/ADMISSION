@@ -48,6 +48,7 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased
 }
+.bg-light { background: var(--background); }
 
 a {
   text-decoration: none;

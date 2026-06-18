@@ -115,6 +115,8 @@ $scholarships = $stmt->fetchAll();
                     <a href="college_faqs.php?college_id=<?php echo $college_id; ?>" class="tab-link">FAQs</a>
                     <a href="college_faculty.php?college_id=<?php echo $college_id; ?>" class="tab-link">Faculty</a>
                     <a href="college_scholarships.php?college_id=<?php echo $college_id; ?>" class="tab-link active">Scholarships</a>
+                    <a href="college_updates.php?college_id=<?php echo $college_id; ?>" class="tab-link">News & Updates</a>
+                    <a href="college_qna.php?college_id=<?php echo $college_id; ?>" class="tab-link">Student Q&A</a>
                 </div>
 
                 <?php if(isset($_GET['msg'])): ?>

@@ -499,6 +499,8 @@ function getValue($arr, $key, $default = '') {
                     <a href="college_faqs.php?college_id=<?php echo $id; ?>" class="tab-link">FAQs</a>
                     <a href="college_faculty.php?college_id=<?php echo $id; ?>" class="tab-link">Faculty</a>
                     <a href="college_scholarships.php?college_id=<?php echo $id; ?>" class="tab-link">Scholarships</a>
+                    <a href="college_updates.php?college_id=<?php echo $id; ?>" class="tab-link">News & Updates</a>
+                    <a href="college_qna.php?college_id=<?php echo $id; ?>" class="tab-link">Student Q&A</a>
                 </div>
                 <?php else: ?>
                 <div class="tabs-nav">
