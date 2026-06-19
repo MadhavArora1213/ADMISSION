@@ -2,6 +2,10 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+require_once __DIR__ . '/college_helpers.php';
+require_once __DIR__ . '/exam_helpers.php';
+require_once __DIR__ . '/course_helpers.php';
+
 // --- NAVBAR DATA ---
 if (!isset($navColleges)) {
     $navColleges = cAll($pdo, "SELECT name,slug FROM colleges WHERE status='active' ORDER BY is_featured DESC, overall_rating_avg DESC, ranking_nirf ASC LIMIT 50");
@@ -58,13 +62,13 @@ if (!isset($navColleges)) {
       <ul class="pro-sub-links">
         
         <li class="pro-has-mega">
-          <a href="#">Colleges <i class="ph ph-caret-down"></i></a>
+          <a href="colleges.php">Colleges <i class="ph ph-caret-down"></i></a>
           <div class="pro-mega-menu">
             <div class="mega-col">
               <h4>Top Courses</h4>
               <ul>
-                <?php foreach($navPopularCourses ?? [] as $course): ?>
-                <li><a href="#"><?=htmlspecialchars($course['course_name'])?></a></li>
+                <?php foreach($navPopularCourses ?? [] as $navCrs): ?>
+                <li><a href="#"><?=htmlspecialchars((string)($navCrs['course_name'] ?? ''))?></a></li>
                 <?php endforeach; ?>
               </ul>
             </div>
@@ -72,15 +76,15 @@ if (!isset($navColleges)) {
               <h4>Top Locations</h4>
               <ul>
                 <?php foreach($navStates ?? [] as $st): ?>
-                <li><a href="#"><?=htmlspecialchars($st['name'])?></a></li>
+                <li><a href="colleges.php?state=<?= (int)$st['id'] ?>"><?=htmlspecialchars($st['name'])?></a></li>
                 <?php endforeach; ?>
               </ul>
             </div>
             <div class="mega-col">
               <h4>Top Colleges</h4>
               <ul>
-                <?php foreach($navColleges ?? [] as $college): ?>
-                <li><a href="#"><?=htmlspecialchars($college['name'])?></a></li>
+                <?php foreach($navColleges ?? [] as $navClg): ?>
+                <li><a href="<?= collegeUrl($navClg['slug'] ?? '') ?>"><?=htmlspecialchars((string)($navClg['name'] ?? ''))?></a></li>
                 <?php endforeach; ?>
               </ul>
             </div>
@@ -88,13 +92,13 @@ if (!isset($navColleges)) {
         </li>
 
         <li class="pro-has-mega">
-          <a href="#">Exams <i class="ph ph-caret-down"></i></a>
+          <a href="<?= examsUrl() ?>">Exams <i class="ph ph-caret-down"></i></a>
           <div class="pro-mega-menu">
             <div class="mega-col">
               <h4>Top UG Exams</h4>
               <ul>
                 <?php foreach($navExamsUg ?? [] as $ex): ?>
-                <li><a href="#"><?=htmlspecialchars($ex['exam_name'])?></a></li>
+                <li><a href="<?= examUrl($ex['exam_slug']) ?>"><?=htmlspecialchars($ex['exam_name'])?></a></li>
                 <?php endforeach; ?>
               </ul>
             </div>
@@ -102,7 +106,7 @@ if (!isset($navColleges)) {
               <h4>Top PG Exams</h4>
               <ul>
                 <?php foreach($navExamsPg ?? [] as $ex): ?>
-                <li><a href="#"><?=htmlspecialchars($ex['exam_name'])?></a></li>
+                <li><a href="<?= examUrl($ex['exam_slug']) ?>"><?=htmlspecialchars($ex['exam_name'])?></a></li>
                 <?php endforeach; ?>
               </ul>
             </div>
@@ -119,13 +123,13 @@ if (!isset($navColleges)) {
         </li>
 
         <li class="pro-has-mega">
-          <a href="#">Courses <i class="ph ph-caret-down"></i></a>
+          <a href="<?= coursesUrl() ?>">Courses <i class="ph ph-caret-down"></i></a>
           <div class="pro-mega-menu">
             <div class="mega-col">
               <h4>Top UG Courses</h4>
               <ul>
                 <?php foreach($navCoursesUg ?? [] as $co): ?>
-                <li><a href="#"><?=htmlspecialchars($co['course_name'])?></a></li>
+                <li><a href="<?= courseUrl($co['course_slug']) ?>"><?=htmlspecialchars($co['course_name'])?></a></li>
                 <?php endforeach; ?>
               </ul>
             </div>
@@ -133,7 +137,7 @@ if (!isset($navColleges)) {
               <h4>Top PG Courses</h4>
               <ul>
                 <?php foreach($navCoursesPg ?? [] as $co): ?>
-                <li><a href="#"><?=htmlspecialchars($co['course_name'])?></a></li>
+                <li><a href="<?= courseUrl($co['course_slug']) ?>"><?=htmlspecialchars($co['course_name'])?></a></li>
                 <?php endforeach; ?>
               </ul>
             </div>
