@@ -1,14 +1,13 @@
-﻿-- phpMyAdmin SQL Dump
+-- phpMyAdmin SQL Dump
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jun 06, 2026 at 08:07 AM
+-- Generation Time: Jun 17, 2026 at 02:28 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET FOREIGN_KEY_CHECKS = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
@@ -18,7 +17,9 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
--- Database selected in phpMyAdmin
+--
+-- Database: `admission`
+--
 
 -- --------------------------------------------------------
 
@@ -29,8 +30,8 @@ SET time_zone = "+00:00";
 CREATE TABLE `ab_tests` (
   `id` int(11) NOT NULL,
   `test_name` varchar(255) NOT NULL,
-  `variant_a` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `variant_b` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `variant_a` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`variant_a`)),
+  `variant_b` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`variant_b`)),
   `metric` enum('ctr','conversion','lead_rate','time_on_page') NOT NULL,
   `winner` enum('a','b','inconclusive') DEFAULT NULL,
   `confidence_pct` float DEFAULT NULL,
@@ -57,7 +58,7 @@ CREATE TABLE `activity_log` (
   `actor_id` char(36) DEFAULT NULL,
   `entity_type` enum('college','exam','article','review','lead') NOT NULL,
   `entity_id` char(36) NOT NULL,
-  `meta_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `meta_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`meta_json`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -81,11 +82,11 @@ CREATE TABLE `activity_logs` (
   `entity_id` char(36) DEFAULT NULL,
   `module_name` varchar(255) DEFAULT NULL,
   `description` text DEFAULT NULL,
-  `before_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `after_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `before_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`before_json`)),
+  `after_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`after_json`)),
   `ip_address` varchar(45) DEFAULT NULL,
   `user_agent` text DEFAULT NULL,
-  `metadata_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `metadata_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata_json`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -107,7 +108,7 @@ CREATE TABLE `admin_alerts` (
   `status` enum('open','acknowledged','resolved','ignored') DEFAULT 'open',
   `assigned_to` char(36) DEFAULT NULL,
   `resolution_notes` text DEFAULT NULL,
-  `metadata_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `metadata_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata_json`)),
   `resolved_by` char(36) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `resolved_at` timestamp NULL DEFAULT NULL
@@ -122,8 +123,8 @@ CREATE TABLE `admin_alerts` (
 CREATE TABLE `admin_widgets` (
   `id` int(11) NOT NULL,
   `widget_type` enum('chart','table','kpi','map') NOT NULL,
-  `widget_config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-  `visible_to_roles` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `widget_config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`widget_config`)),
+  `visible_to_roles` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`visible_to_roles`)),
   `sort_order` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -160,9 +161,9 @@ CREATE TABLE `ad_products` (
 CREATE TABLE `ai_chat_sessions` (
   `id` int(11) NOT NULL,
   `session_token` varchar(255) NOT NULL,
-  `messages_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `messages_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`messages_json`)),
   `lead_captured` tinyint(1) DEFAULT 0,
-  `entity_context` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `entity_context` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`entity_context`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -181,7 +182,7 @@ CREATE TABLE `ai_config` (
   `max_tokens` int(11) DEFAULT 800,
   `fallback_response` text DEFAULT NULL,
   `session_memory` tinyint(1) DEFAULT 1,
-  `escalation_keywords` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `escalation_keywords` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`escalation_keywords`)),
   `lead_capture_enabled` tinyint(1) DEFAULT 0,
   `whatsapp_bot_enabled` tinyint(1) DEFAULT 0,
   `response_language` enum('en','hi','en_hi_mix') DEFAULT 'en',
@@ -224,8 +225,8 @@ CREATE TABLE `ai_dashboard_insights` (
 CREATE TABLE `ai_recommendations` (
   `id` int(11) NOT NULL,
   `algo_type` enum('collaborative','content','hybrid','llm_ranked') DEFAULT 'hybrid',
-  `feature_weights` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `user_profile_fields` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `feature_weights` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`feature_weights`)),
+  `user_profile_fields` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`user_profile_fields`)),
   `recommendation_limit` tinyint(4) DEFAULT 10,
   `personalization_enabled` tinyint(1) DEFAULT 1,
   `model_version` varchar(50) DEFAULT NULL,
@@ -251,9 +252,9 @@ CREATE TABLE `alert_rules` (
   `id` char(36) NOT NULL,
   `rule_name` varchar(255) DEFAULT NULL,
   `module_name` varchar(255) DEFAULT NULL,
-  `condition_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `condition_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`condition_json`)),
   `severity` enum('low','medium','high','critical') DEFAULT NULL,
-  `notification_channels` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `notification_channels` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`notification_channels`)),
   `is_active` tinyint(1) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -305,7 +306,7 @@ CREATE TABLE `api_keys` (
   `id` varchar(36) NOT NULL,
   `api_key_name` varchar(150) NOT NULL,
   `api_key_hash` varchar(255) NOT NULL,
-  `api_scope` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `api_scope` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`api_scope`)),
   `api_expires_at` timestamp NULL DEFAULT NULL,
   `last_used_at` timestamp NULL DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT 1,
@@ -361,7 +362,7 @@ CREATE TABLE `application_documents` (
   `verified_by` char(36) DEFAULT NULL,
   `rejection_reason` text DEFAULT NULL,
   `verified_at` timestamp NULL DEFAULT NULL,
-  `ocr_extracted_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `ocr_extracted_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`ocr_extracted_data`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -385,7 +386,7 @@ CREATE TABLE `articles` (
   `custom_author_name` varchar(255) DEFAULT NULL,
   `editor_id` char(36) DEFAULT NULL,
   `category_id` int(11) DEFAULT NULL,
-  `tags` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `tags` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`tags`)),
   `status` enum('draft','pending_review','published','archived') DEFAULT 'draft',
   `publish_at` timestamp NULL DEFAULT NULL,
   `reading_time_mins` tinyint(4) DEFAULT NULL,
@@ -404,7 +405,14 @@ CREATE TABLE `articles` (
 --
 
 INSERT INTO `articles` (`id`, `article_title`, `article_slug`, `article_type`, `content_body`, `excerpt`, `featured_image_url`, `featured_image_alt`, `author_id`, `custom_author_name`, `editor_id`, `category_id`, `tags`, `status`, `publish_at`, `reading_time_mins`, `view_count`, `share_count`, `draft_saved_at`, `auto_save_version`, `scheduled_at`, `unpublish_at`, `created_at`, `updated_at`) VALUES
-('ca435e52-4315-46eb-b0e5-ab09c1e0fb72', 'ghrghghrbv bcgchgvb', 'ghrghghr', 'blog', '<p>gbgb b fv&nbsp; &nbsp; fv r rgbet g rg r&nbsp;</p>', 'v vf vd dv vd v vxdf huwdvhfwbucvhdb ciuwb fhbrjic j', '/ADMISSION/uploads/article_featured_1780658855_6a22b2a7162a4.jpg', 'bgb', '8b0478e7-602f-11f1-9ea0-a0510b1a7448', NULL, '8b0478e7-602f-11f1-9ea0-a0510b1a7448', 2, '[2]', 'published', '2026-06-05 11:25:00', 42, 0, 0, NULL, 1, '2026-06-12 11:36:00', '2026-06-12 11:36:00', '2026-06-05 11:27:35', '2026-06-05 11:39:16');
+('', 'Top 10 Engineering Colleges in India for 2026', 'top-10-engineering-colleges-2026', 'ranking', '<p>Engineering remains one of the most sought-after career paths in India. In 2026, the rankings have seen a significant shift, with several new IITs and private institutions moving up the ladder...</p>', 'Discover the top-ranked engineering institutions in India based on placement records, faculty, and research output for the year 2026.', 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80', NULL, NULL, 'Madhav Arora', NULL, 2, NULL, 'published', '2026-06-14 15:53:09', NULL, 0, 0, NULL, 1, NULL, NULL, '2026-06-14 15:53:09', '2026-06-14 15:53:09'),
+('5ba7e718-4bb4-4946-834e-ee0b36c1d8d5', 'Top 10 Engineering Colleges in India for 2026', 'top-10-engineering-colleges-2026-v2', 'ranking', '<p>Engineering remains one of the most sought-after career paths in India. In 2026, the rankings have seen a significant shift, with several new IITs and private institutions moving up the ladder...</p>', 'Discover the top-ranked engineering institutions in India based on placement records, faculty, and research output for the year 2026.', 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80', NULL, NULL, 'Madhav Arora', NULL, 2, NULL, 'published', '2026-06-14 15:55:04', NULL, 17, 0, NULL, 1, NULL, NULL, '2026-06-14 15:55:04', '2026-06-17 11:44:46'),
+('6443a93e-56d5-488c-b02b-a75bfa1a0758', 'How to Choose the Right College: A Comprehensive Guide', 'how-to-choose-the-right-college-v2', 'guide', '<p>Choosing the right college is a life-changing decision. It is not just about the brand name; it is about finding a place that aligns with your personal and professional aspirations. Let us dive into the key factors you must consider...</p>', 'Feeling overwhelmed by college options? Here is a step-by-step guide to evaluating colleges based on your career goals, budget, and location preferences.', 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80', NULL, NULL, 'Career Counselor', NULL, 2, NULL, 'published', '2026-06-14 15:55:04', NULL, 3, 0, NULL, 1, NULL, NULL, '2026-06-14 15:55:04', '2026-06-15 04:24:39'),
+('8c302e7f-f5b8-436d-b037-3e54d6a086cb', 'Why Liberal Arts Education is Gaining Popularity in India', 'liberal-arts-education-popularity-v2', 'blog', '<p>The traditional mindset of \"Engineering or Medical\" is slowly changing in India. A liberal arts education offers critical thinking, adaptability, and a broad worldview, which modern employers highly value...</p>', 'More students are moving away from traditional STEM fields to explore Liberal Arts. What is driving this shift, and what are the career prospects?', 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80', NULL, NULL, 'Guest Blogger', NULL, 2, NULL, 'published', '2026-06-14 15:55:04', NULL, 0, 0, NULL, 1, NULL, NULL, '2026-06-14 15:55:04', '2026-06-14 15:55:04'),
+('9a915909-6c0d-4dc1-8799-3811226adb9e', 'My Opinion: Are Entrance Exams Putting Too Much Pressure on Students?', 'opinion-entrance-exams-pressure-v2', 'opinion', '<p>Every year, millions of students appear for competitive exams like JEE, NEET, and CUET. While these exams are designed to be a fair metric for selection, the sheer pressure and the booming coaching industry are creating an unhealthy environment...</p>', 'With rising competition and coaching culture, entrance exams are taking a toll on student mental health. It is time we rethink our evaluation methods.', 'https://images.unsplash.com/photo-1513258496099-48168024aec0?w=800&q=80', NULL, NULL, 'Student Voice', NULL, 2, NULL, 'published', '2026-06-14 15:55:04', NULL, 0, 0, NULL, 1, NULL, NULL, '2026-06-14 15:55:04', '2026-06-14 15:55:04'),
+('bcbf97c5-f71a-47db-b507-1fd618d370ef', 'Delhi University Introduces New B.Tech Programs', 'du-introduces-new-btech-programs-v2', 'news', '<p>Delhi University (DU) is expanding its technical education footprint by introducing B.Tech programs in Computer Science, Electronics, and Electrical Engineering. Admissions will be based on JEE Main scores...</p>', 'In a major academic expansion, Delhi University has announced the launch of three new B.Tech programs starting this academic session. Here is what you need to know.', 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&q=80', NULL, NULL, 'Campus Reporter', NULL, 2, NULL, 'published', '2026-06-14 15:55:04', NULL, 0, 0, NULL, 1, NULL, NULL, '2026-06-14 15:55:04', '2026-06-14 15:55:04'),
+('c83156f5-2dea-4676-b04e-020d84e24ee8', 'JEE Main 2026 Dates Announced: Check Registration Details', 'jee-main-2026-dates-announced-v2', 'exam_update', '<p>Attention engineering aspirants! The NTA has officially announced the exam dates for JEE Main 2026. The exam will be conducted in two sessions, as usual. Students are advised to keep their documents ready for the registration process...</p>', 'The National Testing Agency (NTA) has finally released the schedule for JEE Main 2026. Registrations will commence from the first week of November.', 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80', NULL, NULL, 'Education Desk', NULL, 2, NULL, 'published', '2026-06-14 15:55:04', NULL, 0, 0, NULL, 1, NULL, NULL, '2026-06-14 15:55:04', '2026-06-14 15:55:04'),
+('ca435e52-4315-46eb-b0e5-ab09c1e0fb72', 'ghrghghrbv bcgchgvb', 'ghrghghr', 'blog', '<p>gbgb b fv&nbsp; &nbsp; fv r rgbet g rg r&nbsp;</p>', 'v vf vd dv vd v vxdf huwdvhfwbucvhdb ciuwb fhbrjic j', '/ADMISSION/uploads/article_featured_1780658855_6a22b2a7162a4.jpg', 'bgb', '8b0478e7-602f-11f1-9ea0-a0510b1a7448', NULL, '8b0478e7-602f-11f1-9ea0-a0510b1a7448', 2, '[2]', 'published', '2026-06-05 11:25:00', 42, 5, 0, NULL, 1, '2026-06-12 11:36:00', '2026-06-12 11:36:00', '2026-06-05 11:27:35', '2026-06-14 16:59:14');
 
 -- --------------------------------------------------------
 
@@ -427,6 +435,28 @@ CREATE TABLE `article_categories` (
 
 INSERT INTO `article_categories` (`id`, `category_name`, `category_slug`, `parent_id`, `sort_order`, `created_at`) VALUES
 (2, 'ytrdfgtryhg', 'ytrdfgtryhg', NULL, 0, '2026-06-05 10:44:20');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `article_comments`
+--
+
+CREATE TABLE `article_comments` (
+  `id` int(11) NOT NULL,
+  `article_id` char(36) NOT NULL,
+  `user_id` varchar(36) NOT NULL,
+  `comment_text` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `article_comments`
+--
+
+INSERT INTO `article_comments` (`id`, `article_id`, `user_id`, `comment_text`, `created_at`) VALUES
+(1, '5ba7e718-4bb4-4946-834e-ee0b36c1d8d5', 'user-1234-uuid', 'hlo', '2026-06-15 04:15:11'),
+(2, '5ba7e718-4bb4-4946-834e-ee0b36c1d8d5', '64e20c70-d8d7-402f-a700-53c759a659d4', 'hlo', '2026-06-17 11:44:46');
 
 -- --------------------------------------------------------
 
@@ -478,7 +508,7 @@ INSERT INTO `article_tags` (`id`, `article_id`, `tag_id`) VALUES
 CREATE TABLE `audience_segments` (
   `id` char(36) NOT NULL DEFAULT uuid(),
   `segment_name` varchar(255) NOT NULL,
-  `filters_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `filters_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`filters_json`)),
   `user_count` int(11) DEFAULT 0,
   `refresh_schedule` varchar(50) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -504,8 +534,8 @@ CREATE TABLE `audit_logs` (
   `audit_action` enum('create','update','delete','login','export') NOT NULL,
   `entity_type` varchar(100) NOT NULL,
   `entity_id` varchar(36) DEFAULT NULL,
-  `old_value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `new_value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `old_value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`old_value`)),
+  `new_value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`new_value`)),
   `ip_address` varchar(45) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -536,7 +566,7 @@ CREATE TABLE `blacklisted_entities` (
 
 CREATE TABLE `calculator_config` (
   `id` int(11) NOT NULL DEFAULT 1,
-  `loan_providers` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `loan_providers` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`loan_providers`)),
   `default_interest_rate_pct` float DEFAULT 10.5,
   `max_tenure_months` int(11) DEFAULT 84,
   `min_loan_amount` decimal(10,2) DEFAULT 0.00,
@@ -544,7 +574,7 @@ CREATE TABLE `calculator_config` (
   `processing_fee_pct` float DEFAULT 1,
   `tax_rate` float DEFAULT 0.18,
   `is_active` tinyint(1) DEFAULT 1,
-  `affiliate_links` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `affiliate_links` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`affiliate_links`)),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ;
 
@@ -571,8 +601,8 @@ CREATE TABLE `calculator_sessions` (
   `loan_amount` decimal(10,2) NOT NULL,
   `tenure_months` int(11) NOT NULL,
   `interest_rate` float NOT NULL,
-  `emi_results` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-  `provider_compared` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `emi_results` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`emi_results`)),
+  `provider_compared` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`provider_compared`)),
   `lead_captured_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -587,8 +617,8 @@ CREATE TABLE `chart_configurations` (
   `id` char(36) NOT NULL,
   `chart_name` varchar(255) DEFAULT NULL,
   `chart_type` enum('line','bar','area','pie','donut','funnel','heatmap') DEFAULT NULL,
-  `query_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `visualization_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `query_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`query_json`)),
+  `visualization_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`visualization_json`)),
   `status` enum('active','inactive') DEFAULT 'active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1379,7 +1409,7 @@ CREATE TABLE `colleges` (
   `campus_type` enum('urban','semi-urban','rural') DEFAULT NULL,
   `overall_rating_avg` float DEFAULT 0,
   `total_reviews` int(11) DEFAULT 0,
-  `rating_distribution` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `rating_distribution` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`rating_distribution`)),
   `verified_reviews_count` int(11) DEFAULT 0,
   `publish_status` enum('draft','published','archived') DEFAULT 'draft'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -1417,7 +1447,7 @@ CREATE TABLE `college_admissions` (
   `id` char(36) NOT NULL,
   `college_id` char(36) NOT NULL,
   `admission_process` text DEFAULT NULL,
-  `accepted_exams` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `accepted_exams` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`accepted_exams`)),
   `admission_start_date` date DEFAULT NULL,
   `admission_end_date` date DEFAULT NULL,
   `merit_based` tinyint(1) DEFAULT 0,
@@ -1475,10 +1505,10 @@ CREATE TABLE `college_content` (
   `id` char(36) NOT NULL,
   `college_id` char(36) NOT NULL,
   `about_text` longtext DEFAULT NULL,
-  `highlights_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `accreditations_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `rankings_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `awards_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
+  `highlights_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`highlights_json`)),
+  `accreditations_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`accreditations_json`)),
+  `rankings_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`rankings_json`)),
+  `awards_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`awards_json`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1505,7 +1535,7 @@ CREATE TABLE `college_courses` (
   `annual_fee` decimal(10,2) DEFAULT NULL,
   `seats_available` int(11) DEFAULT NULL,
   `fee_last_updated` date DEFAULT NULL,
-  `specializations` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `specializations` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`specializations`)),
   `eligibility_criteria` text DEFAULT NULL,
   `application_fee` decimal(8,2) DEFAULT NULL,
   `emi_available` tinyint(1) DEFAULT 0
@@ -1613,8 +1643,8 @@ CREATE TABLE `college_hostels` (
   `mess_available` tinyint(1) DEFAULT 0,
   `mess_type` enum('veg','non-veg','both') DEFAULT NULL,
   `ac_available` tinyint(1) DEFAULT 0,
-  `room_types` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `security_features` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `room_types` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`room_types`)),
+  `security_features` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`security_features`)),
   `laundry_available` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1636,8 +1666,8 @@ CREATE TABLE `college_infrastructure` (
   `college_id` char(36) NOT NULL,
   `library` tinyint(1) DEFAULT 0,
   `library_books_count` int(11) DEFAULT NULL,
-  `sports_facilities` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `labs` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `sports_facilities` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`sports_facilities`)),
+  `labs` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`labs`)),
   `auditorium` tinyint(1) DEFAULT 0,
   `auditorium_capacity` int(11) DEFAULT NULL,
   `cafeteria` tinyint(1) DEFAULT 0,
@@ -1704,8 +1734,8 @@ CREATE TABLE `college_placements` (
   `placement_percentage` float DEFAULT NULL,
   `students_placed` int(11) DEFAULT NULL,
   `international_placements` int(11) DEFAULT NULL,
-  `top_recruiters` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `sector_wise_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `top_recruiters` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`top_recruiters`)),
+  `sector_wise_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`sector_wise_json`)),
   `placement_report_pdf` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1771,7 +1801,7 @@ CREATE TABLE `commissions` (
 CREATE TABLE `compare_config` (
   `id` int(11) NOT NULL,
   `max_entities` tinyint(4) DEFAULT 4,
-  `compare_fields_config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Ordered list of field groups',
+  `compare_fields_config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Ordered list of field groups' CHECK (json_valid(`compare_fields_config`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1785,7 +1815,7 @@ CREATE TABLE `compare_config` (
 CREATE TABLE `compare_sessions` (
   `id` char(36) NOT NULL,
   `comparison_type` enum('college','course','exam') NOT NULL,
-  `entity_ids` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'JSON array of 2-4 UUIDs',
+  `entity_ids` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'JSON array of 2-4 UUIDs' CHECK (json_valid(`entity_ids`)),
   `user_id` char(36) DEFAULT NULL COMMENT 'Nullable for anonymous users',
   `session_id` varchar(255) DEFAULT NULL COMMENT 'Anonymous tracking',
   `is_saved` tinyint(1) DEFAULT 0,
@@ -1807,7 +1837,7 @@ CREATE TABLE `consultants` (
   `profile_picture` varchar(255) DEFAULT NULL,
   `consultant_rating` float DEFAULT NULL,
   `verified_consultant` tinyint(1) DEFAULT 0,
-  `specialization_countries` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `specialization_countries` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`specialization_countries`)),
   `fee_range` varchar(100) DEFAULT NULL,
   `logo_url` varchar(255) DEFAULT NULL,
   `contact_email` varchar(150) DEFAULT NULL,
@@ -1868,7 +1898,7 @@ CREATE TABLE `courses` (
   `description` longtext DEFAULT NULL,
   `eligibility` text DEFAULT NULL,
   `career_scope` text DEFAULT NULL,
-  `top_recruiters` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `top_recruiters` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`top_recruiters`)),
   `avg_salary_lpa` decimal(5,2) DEFAULT NULL,
   `salary_range_min` decimal(5,2) DEFAULT NULL,
   `salary_range_max` decimal(5,2) DEFAULT NULL,
@@ -1899,9 +1929,9 @@ CREATE TABLE `course_career_paths` (
   `course_id` char(36) NOT NULL,
   `job_role` varchar(255) NOT NULL,
   `avg_salary_lpa` decimal(5,2) DEFAULT NULL,
-  `top_companies` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `top_companies` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`top_companies`)),
   `growth_outlook` enum('high','medium','low') DEFAULT NULL,
-  `skills_required` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `skills_required` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`skills_required`)),
   `fresher_salary_lpa` decimal(5,2) DEFAULT NULL,
   `experienced_salary_lpa` decimal(5,2) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -1977,7 +2007,7 @@ CREATE TABLE `dashboard_attachments` (
   `entity_id` char(36) DEFAULT NULL,
   `file_url` varchar(255) DEFAULT NULL,
   `file_type` varchar(255) DEFAULT NULL,
-  `metadata_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `metadata_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata_json`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1991,8 +2021,8 @@ CREATE TABLE `dashboard_filters` (
   `id` char(36) NOT NULL,
   `filter_key` varchar(255) DEFAULT NULL,
   `filter_type` varchar(255) DEFAULT NULL,
-  `options_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `default_value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `options_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`options_json`)),
+  `default_value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`default_value`)),
   `is_global` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -2008,7 +2038,7 @@ CREATE TABLE `dashboard_layouts` (
   `role_id` char(36) DEFAULT NULL,
   `layout_name` varchar(255) DEFAULT NULL,
   `is_default` tinyint(1) DEFAULT 0,
-  `layout_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `layout_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`layout_json`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -2024,7 +2054,7 @@ CREATE TABLE `dashboard_search_logs` (
   `user_id` char(36) DEFAULT NULL,
   `search_query` varchar(255) DEFAULT NULL,
   `results_count` int(11) DEFAULT NULL,
-  `clicked_result` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `clicked_result` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`clicked_result`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -2038,7 +2068,7 @@ CREATE TABLE `dashboard_snapshots` (
   `id` char(36) NOT NULL,
   `metric_key` varchar(255) DEFAULT NULL,
   `metric_value` decimal(15,2) DEFAULT NULL,
-  `dimension_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `dimension_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`dimension_json`)),
   `snapshot_type` enum('hourly','daily','weekly','monthly') DEFAULT NULL,
   `recorded_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -2055,8 +2085,8 @@ CREATE TABLE `dashboard_widgets` (
   `widget_name` varchar(255) DEFAULT NULL,
   `widget_type` enum('metric','chart','table','feed','alert','ai_summary','system_health','leaderboard') DEFAULT NULL,
   `data_source` varchar(255) DEFAULT NULL,
-  `config_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `default_size` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `config_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`config_json`)),
+  `default_size` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`default_size`)),
   `is_realtime` tinyint(1) DEFAULT 0,
   `cache_duration` int(11) DEFAULT 300,
   `status` enum('active','inactive','draft') DEFAULT 'active',
@@ -2075,8 +2105,8 @@ CREATE TABLE `dynamic_fields` (
   `field_key` varchar(255) DEFAULT NULL,
   `field_label` varchar(255) DEFAULT NULL,
   `field_type` varchar(255) DEFAULT NULL,
-  `validation_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `settings_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `validation_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`validation_json`)),
+  `settings_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`settings_json`)),
   `sort_order` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -2091,7 +2121,7 @@ CREATE TABLE `dynamic_modules` (
   `module_key` varchar(255) DEFAULT NULL,
   `module_name` varchar(255) DEFAULT NULL,
   `entity_type` varchar(255) DEFAULT NULL,
-  `config_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `config_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`config_json`)),
   `status` enum('active','inactive') DEFAULT 'active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -2123,10 +2153,10 @@ CREATE TABLE `exams` (
   `total_marks` int(11) DEFAULT NULL,
   `total_questions` int(11) DEFAULT NULL,
   `duration_minutes` int(11) DEFAULT NULL,
-  `subjects_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `marking_scheme` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `sections` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `language_options` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `subjects_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`subjects_json`)),
+  `marking_scheme` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`marking_scheme`)),
+  `sections` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`sections`)),
+  `language_options` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`language_options`)),
   `application_fee_general` decimal(8,2) DEFAULT NULL,
   `application_fee_obc` decimal(8,2) DEFAULT NULL,
   `application_fee_sc_st` decimal(8,2) DEFAULT NULL,
@@ -2208,7 +2238,7 @@ CREATE TABLE `exam_dates` (
 CREATE TABLE `exam_resources` (
   `id` char(36) NOT NULL,
   `exam_id` char(36) NOT NULL,
-  `sample_papers_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
+  `sample_papers_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`sample_papers_json`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -2227,8 +2257,8 @@ INSERT INTO `exam_resources` (`id`, `exam_id`, `sample_papers_json`) VALUES
 CREATE TABLE `exam_results` (
   `id` char(36) NOT NULL,
   `exam_id` char(36) NOT NULL,
-  `percentile_vs_marks_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `cutoff_pdfs_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
+  `percentile_vs_marks_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`percentile_vs_marks_json`)),
+  `cutoff_pdfs_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`cutoff_pdfs_json`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -2249,7 +2279,7 @@ CREATE TABLE `exam_syllabus` (
   `exam_id` char(36) NOT NULL,
   `subject` varchar(255) NOT NULL,
   `topic` varchar(255) NOT NULL,
-  `subtopics` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `subtopics` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`subtopics`)),
   `weightage_pct` float DEFAULT NULL,
   `chapter_pdf_url` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -2300,7 +2330,7 @@ CREATE TABLE `exports` (
   `id` char(36) NOT NULL,
   `user_id` char(36) NOT NULL,
   `export_type` varchar(255) DEFAULT NULL,
-  `filters_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `filters_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`filters_json`)),
   `file_url` varchar(255) DEFAULT NULL,
   `status` enum('pending','processing','completed','failed') DEFAULT 'pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -2322,7 +2352,7 @@ CREATE TABLE `foreign_universities` (
   `acceptance_rate` float DEFAULT NULL,
   `tuition_usd_annual` decimal(10,2) DEFAULT NULL,
   `living_cost_usd_monthly` decimal(8,2) DEFAULT NULL,
-  `intake_months` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `intake_months` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`intake_months`)),
   `official_url` varchar(255) DEFAULT NULL,
   `min_ielts` float DEFAULT NULL,
   `min_toefl` int(11) DEFAULT NULL,
@@ -2336,7 +2366,7 @@ CREATE TABLE `foreign_universities` (
   `min_pte` float DEFAULT NULL,
   `min_gmat` int(11) DEFAULT NULL,
   `min_gpa` varchar(50) DEFAULT NULL,
-  `degrees_offered` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `degrees_offered` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`degrees_offered`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -2426,7 +2456,7 @@ CREATE TABLE `kpi_definitions` (
   `metric_key` varchar(255) DEFAULT NULL,
   `metric_name` varchar(255) DEFAULT NULL,
   `metric_type` enum('count','sum','percentage','average') DEFAULT NULL,
-  `query_config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `query_config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`query_config`)),
   `chart_type` varchar(255) DEFAULT NULL,
   `cache_duration` int(11) DEFAULT 300,
   `is_realtime` tinyint(1) DEFAULT 0,
@@ -2479,7 +2509,7 @@ CREATE TABLE `leads` (
   `attribution_model` enum('first_touch','last_touch','linear','position_based') DEFAULT NULL,
   `first_touch_source` varchar(255) DEFAULT NULL,
   `last_touch_source` varchar(255) DEFAULT NULL,
-  `touchpoints_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `touchpoints_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`touchpoints_json`)),
   `revenue_attributed` decimal(10,2) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -2543,7 +2573,7 @@ CREATE TABLE `media_files` (
   `cdn_url` varchar(255) DEFAULT NULL,
   `file_type` enum('image','video','pdf','doc','svg') DEFAULT 'image',
   `file_size_kb` int(11) DEFAULT NULL,
-  `dimensions_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `dimensions_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`dimensions_json`)),
   `alt_text` varchar(255) DEFAULT NULL,
   `uploaded_by` char(36) DEFAULT NULL,
   `folder_path` varchar(255) DEFAULT NULL,
@@ -2644,7 +2674,7 @@ CREATE TABLE `notification_templates` (
   `subject` varchar(255) DEFAULT NULL,
   `body_html` longtext DEFAULT NULL,
   `body_text` text DEFAULT NULL,
-  `variables_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `variables_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`variables_json`)),
   `language` enum('en','hi') DEFAULT 'en',
   `is_active` tinyint(1) DEFAULT 1,
   `category` enum('transactional','marketing','alert') NOT NULL,
@@ -2716,7 +2746,7 @@ CREATE TABLE `partner_content_requests` (
   `college_id` varchar(36) NOT NULL,
   `requested_by` varchar(36) NOT NULL,
   `content_type` enum('info','photo','placement','course','ranking') NOT NULL,
-  `submitted_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `submitted_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`submitted_data`)),
   `status` enum('pending','approved','rejected') DEFAULT 'pending',
   `reviewed_by` varchar(36) DEFAULT NULL,
   `review_notes` text DEFAULT NULL,
@@ -2773,12 +2803,12 @@ CREATE TABLE `payments` (
 CREATE TABLE `predictor_config` (
   `id` varchar(36) NOT NULL,
   `exam_id` varchar(36) NOT NULL,
-  `model_weights` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `model_weights` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`model_weights`)),
   `data_year` year(4) NOT NULL,
   `prediction_accuracy` float DEFAULT NULL,
   `min_score` int(11) DEFAULT 0,
   `max_score` int(11) NOT NULL,
-  `category_adjustments` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `category_adjustments` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`category_adjustments`)),
   `state_quota_enabled` tinyint(1) DEFAULT 0,
   `home_state_quota_pct` float DEFAULT 0,
   `counselling_round_model` tinyint(4) DEFAULT 1,
@@ -2800,7 +2830,7 @@ CREATE TABLE `predictor_submissions` (
   `input_category` enum('General','OBC','SC','ST','EWS','PwD') DEFAULT NULL,
   `input_state` varchar(100) DEFAULT NULL,
   `input_course_pref` char(36) DEFAULT NULL,
-  `predicted_colleges` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `predicted_colleges` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`predicted_colleges`)),
   `confidence_score` float DEFAULT NULL,
   `model_year` year(4) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -2861,7 +2891,7 @@ CREATE TABLE `rankings` (
   `rank_position` int(11) DEFAULT NULL,
   `rank_band` varchar(100) DEFAULT NULL,
   `score` float DEFAULT NULL,
-  `sub_scores` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `sub_scores` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`sub_scores`)),
   `source_url` varchar(255) DEFAULT NULL,
   `published_date` date DEFAULT NULL,
   `previous_year_rank` int(11) DEFAULT NULL,
@@ -2962,7 +2992,7 @@ CREATE TABLE `reviews` (
   `batch_year` year(4) DEFAULT NULL,
   `course_id` char(36) DEFAULT NULL,
   `helpful_votes` int(11) DEFAULT 0,
-  `media_urls` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `media_urls` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`media_urls`)),
   `moderation_status` enum('pending','approved','rejected','escalated') DEFAULT 'pending',
   `moderation_reason` text DEFAULT NULL,
   `moderated_by` char(36) DEFAULT NULL,
@@ -3025,7 +3055,7 @@ CREATE TABLE `review_reports` (
 CREATE TABLE `roles` (
   `id` varchar(36) NOT NULL,
   `role_name` varchar(100) NOT NULL,
-  `permissions` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `permissions` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`permissions`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -3047,9 +3077,9 @@ INSERT INTO `roles` (`id`, `role_name`, `permissions`, `created_at`, `updated_at
 CREATE TABLE `role_dashboard_configs` (
   `id` char(36) NOT NULL,
   `role_name` varchar(255) DEFAULT NULL,
-  `default_layout_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `default_widgets_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `permissions_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
+  `default_layout_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`default_layout_json`)),
+  `default_widgets_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`default_widgets_json`)),
+  `permissions_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`permissions_json`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -3062,9 +3092,9 @@ CREATE TABLE `saved_reports` (
   `id` char(36) NOT NULL,
   `user_id` char(36) NOT NULL,
   `report_name` varchar(255) DEFAULT NULL,
-  `filters_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `widgets_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `schedule_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `filters_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`filters_json`)),
+  `widgets_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`widgets_json`)),
+  `schedule_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`schedule_json`)),
   `export_format` enum('pdf','csv','xlsx') DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -3090,7 +3120,7 @@ CREATE TABLE `scholarships` (
   `gender` enum('all','male','female','transgender') DEFAULT 'all',
   `category` enum('all','sc','st','obc','ews','minority','pwd') DEFAULT 'all',
   `state_specific` varchar(255) DEFAULT NULL,
-  `course_levels` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'JSON array of course levels',
+  `course_levels` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'JSON array of course levels' CHECK (json_valid(`course_levels`)),
   `apply_start` date DEFAULT NULL,
   `apply_end` date DEFAULT NULL,
   `official_link` varchar(255) DEFAULT NULL,
@@ -3120,9 +3150,9 @@ CREATE TABLE `search_indices` (
   `entity_type` enum('college','exam','course','article','scholarship') NOT NULL,
   `indexed_at` timestamp NULL DEFAULT NULL,
   `document_count` int(11) DEFAULT 0,
-  `search_weight_config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `facets_config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `stop_words` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `search_weight_config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`search_weight_config`)),
+  `facets_config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`facets_config`)),
+  `stop_words` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`stop_words`)),
   `language` enum('en','hi') DEFAULT 'en',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -3144,7 +3174,7 @@ CREATE TABLE `search_queries` (
   `user_id` char(36) DEFAULT NULL,
   `zero_results` tinyint(1) DEFAULT 0,
   `device_type` enum('mobile','desktop','tablet') DEFAULT NULL,
-  `filters_applied` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `filters_applied` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`filters_applied`)),
   `search_timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -3173,7 +3203,7 @@ CREATE TABLE `search_suggestions` (
 CREATE TABLE `search_synonyms` (
   `id` int(11) NOT NULL,
   `canonical` varchar(255) NOT NULL,
-  `synonyms` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `synonyms` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`synonyms`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -3226,14 +3256,14 @@ CREATE TABLE `seo_meta` (
   `meta_keywords` varchar(255) DEFAULT NULL,
   `og_image_url` varchar(255) DEFAULT NULL,
   `canonical_url` varchar(255) DEFAULT NULL,
-  `schema_markup` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `schema_markup` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`schema_markup`)),
   `noindex` tinyint(1) DEFAULT 0,
-  `breadcrumb_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `breadcrumb_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`breadcrumb_json`)),
   `og_title` varchar(255) DEFAULT NULL,
   `og_description` text DEFAULT NULL,
   `og_image` varchar(255) DEFAULT NULL,
   `schema_type` enum('College','Exam','Article','FAQPage','BreadcrumbList') DEFAULT NULL,
-  `schema_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `schema_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`schema_json`)),
   `primary_keyword` varchar(255) DEFAULT NULL,
   `keyword_density` float DEFAULT NULL,
   `robots_directive` enum('index_follow','noindex','nofollow') DEFAULT NULL,
@@ -3301,7 +3331,7 @@ CREATE TABLE `shortlist_analytics` (
   `shortlist_count` int(11) DEFAULT 0,
   `avg_shortlists_per_user` float DEFAULT 0,
   `shortlist_to_apply_rate` float DEFAULT 0,
-  `most_shortlisted_colleges` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `most_shortlisted_colleges` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`most_shortlisted_colleges`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -3408,16 +3438,23 @@ CREATE TABLE `student_profiles` (
   `class_12_score` float DEFAULT NULL,
   `class_12_stream` enum('science','commerce','arts','vocational') DEFAULT NULL,
   `class_12_board` varchar(100) DEFAULT NULL,
-  `preferred_courses` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `preferred_courses` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`preferred_courses`)),
   `target_year` year(4) DEFAULT NULL,
-  `exam_scores` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `shortlisted_college_ids` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `exam_scores` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`exam_scores`)),
+  `shortlisted_college_ids` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`shortlisted_college_ids`)),
   `profile_completeness` tinyint(4) DEFAULT 0 CHECK (`profile_completeness` between 0 and 100),
   `avatar_url` varchar(255) DEFAULT NULL,
   `bio` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `student_profiles`
+--
+
+INSERT INTO `student_profiles` (`id`, `user_id`, `dob`, `gender`, `city`, `state`, `class_12_score`, `class_12_stream`, `class_12_board`, `preferred_courses`, `target_year`, `exam_scores`, `shortlisted_college_ids`, `profile_completeness`, `avatar_url`, `bio`, `created_at`, `updated_at`) VALUES
+('f604bef7-4c31-455c-8506-4c059deb9021', '64e20c70-d8d7-402f-a700-53c759a659d4', NULL, NULL, 'Hoshiarpur', NULL, NULL, NULL, NULL, '[\"BCA\"]', NULL, NULL, NULL, 0, NULL, NULL, '2026-06-17 11:16:21', '2026-06-17 11:16:21');
 
 -- --------------------------------------------------------
 
@@ -3453,7 +3490,7 @@ CREATE TABLE `subscription_plans` (
   `plan_name` varchar(255) NOT NULL,
   `plan_type` enum('basic','standard','premium','enterprise') NOT NULL,
   `price` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `features` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `features` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`features`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -3501,7 +3538,7 @@ CREATE TABLE `system_config` (
   `mfa_enabled` tinyint(1) DEFAULT 1,
   `session_timeout_mins` int(11) DEFAULT 60,
   `max_login_attempts` int(11) DEFAULT 5,
-  `ip_whitelist` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `ip_whitelist` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`ip_whitelist`)),
   `api_rate_limit_per_min` int(11) DEFAULT 60,
   `backup_schedule` varchar(100) DEFAULT '0 0 * * *',
   `backup_retention_days` int(11) DEFAULT 30,
@@ -3599,7 +3636,7 @@ CREATE TABLE `universities` (
   `campus_type` enum('urban','semi-urban','rural') DEFAULT NULL,
   `overall_rating_avg` float DEFAULT 0,
   `total_reviews` int(11) DEFAULT 0,
-  `rating_distribution` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `rating_distribution` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`rating_distribution`)),
   `verified_reviews_count` int(11) DEFAULT 0,
   `publish_status` enum('draft','published','archived') DEFAULT 'draft'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -3636,7 +3673,7 @@ CREATE TABLE `university_admissions` (
   `id` char(36) NOT NULL,
   `university_id` char(36) NOT NULL,
   `admission_process` text DEFAULT NULL,
-  `accepted_exams` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `accepted_exams` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`accepted_exams`)),
   `admission_start_date` date DEFAULT NULL,
   `admission_end_date` date DEFAULT NULL,
   `merit_based` tinyint(1) DEFAULT 0,
@@ -3693,10 +3730,10 @@ CREATE TABLE `university_content` (
   `id` char(36) NOT NULL,
   `university_id` char(36) NOT NULL,
   `about_text` longtext DEFAULT NULL,
-  `highlights_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `accreditations_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `rankings_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `awards_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
+  `highlights_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`highlights_json`)),
+  `accreditations_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`accreditations_json`)),
+  `rankings_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`rankings_json`)),
+  `awards_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`awards_json`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -3723,7 +3760,7 @@ CREATE TABLE `university_courses` (
   `annual_fee` decimal(10,2) DEFAULT NULL,
   `seats_available` int(11) DEFAULT NULL,
   `fee_last_updated` date DEFAULT NULL,
-  `specializations` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `specializations` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`specializations`)),
   `eligibility_criteria` text DEFAULT NULL,
   `application_fee` decimal(8,2) DEFAULT NULL,
   `emi_available` tinyint(1) DEFAULT 0
@@ -3824,8 +3861,8 @@ CREATE TABLE `university_hostels` (
   `mess_available` tinyint(1) DEFAULT 0,
   `mess_type` enum('veg','non-veg','both') DEFAULT NULL,
   `ac_available` tinyint(1) DEFAULT 0,
-  `room_types` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `security_features` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `room_types` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`room_types`)),
+  `security_features` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`security_features`)),
   `laundry_available` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -3847,8 +3884,8 @@ CREATE TABLE `university_infrastructure` (
   `university_id` char(36) NOT NULL,
   `library` tinyint(1) DEFAULT 0,
   `library_books_count` int(11) DEFAULT NULL,
-  `sports_facilities` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `labs` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `sports_facilities` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`sports_facilities`)),
+  `labs` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`labs`)),
   `auditorium` tinyint(1) DEFAULT 0,
   `auditorium_capacity` int(11) DEFAULT NULL,
   `cafeteria` tinyint(1) DEFAULT 0,
@@ -3914,8 +3951,8 @@ CREATE TABLE `university_placements` (
   `placement_percentage` float DEFAULT NULL,
   `students_placed` int(11) DEFAULT NULL,
   `international_placements` int(11) DEFAULT NULL,
-  `top_recruiters` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `sector_wise_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `top_recruiters` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`top_recruiters`)),
+  `sector_wise_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`sector_wise_json`)),
   `placement_report_pdf` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -3976,8 +4013,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `full_name`, `email`, `phone`, `password_hash`, `auth_provider`, `status`, `role_id`, `is_super_admin`, `college_access`, `email_verified`, `phone_verified`, `mfa_enabled`, `last_login_at`, `last_login_ip`, `login_count`, `created_at`, `updated_at`) VALUES
+('64e20c70-d8d7-402f-a700-53c759a659d4', 'Madhav Arora', 'madhavarora132005@gmail.com', '+919877275894', '$2y$10$6EPeZE02GC57pypaUAp.LezNs62SufTYnB4QZgKw41JOpG4Hg6Q8K', 'phone_otp', 'active', NULL, 0, NULL, 1, 1, 0, '2026-06-17 11:32:06', '::1', 2, '2026-06-17 11:16:21', '2026-06-17 11:40:43'),
 ('8b0478e7-602f-11f1-9ea0-a0510b1a7448', 'Madhav Arora', 'admi@example.com', NULL, '$2y$10$.P/prjvLjX3zn27/DW1j..roInHmRD3LUgJNgGpMyyhO9cj5/AJDa', 'email', 'suspended', '169481d3-602f-11f1-9ea0-a0510b1a7448', 1, NULL, 0, 0, 0, NULL, NULL, 0, '2026-06-04 16:07:43', '2026-06-04 16:07:58'),
-('a85f4bf4-5c3b-11f1-a48e-c8f7507a8de6', 'Super Admin', 'admin@example.com', NULL, '$2y$10$RTMB7txQfeY7yMgStWBiLuNJUymVTRIXn45SAYuLYH.mXiKmWVLaG', 'email', 'active', 'a84ab069-5c3b-11f1-a48e-c8f7507a8de6', 1, NULL, 0, 0, 0, NULL, NULL, 0, '2026-05-30 15:24:17', '2026-06-04 15:57:46');
+('a85f4bf4-5c3b-11f1-a48e-c8f7507a8de6', 'Super Admin', 'admin@example.com', NULL, '$2y$10$RTMB7txQfeY7yMgStWBiLuNJUymVTRIXn45SAYuLYH.mXiKmWVLaG', 'email', 'active', 'a84ab069-5c3b-11f1-a48e-c8f7507a8de6', 1, NULL, 0, 0, 0, NULL, NULL, 0, '2026-05-30 15:24:17', '2026-06-04 15:57:46'),
+('user-1234-uuid', 'Rahul Sharma', 'rahul.sharma@example.com', NULL, '$2y$10$Bk1vvPMZIOT6KwTEMLu1s.DoWuHmf/YNnY2wvG.7fTElDetlF4IXe', 'email', 'active', NULL, 0, NULL, 0, 0, 0, NULL, NULL, 0, '2026-06-15 04:15:11', '2026-06-15 04:15:11');
 
 -- --------------------------------------------------------
 
@@ -3989,8 +4028,8 @@ CREATE TABLE `user_dashboard_widgets` (
   `id` char(36) NOT NULL,
   `user_id` char(36) NOT NULL,
   `widget_id` char(36) NOT NULL,
-  `position_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `settings_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `position_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`position_json`)),
+  `settings_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`settings_json`)),
   `is_hidden` tinyint(1) DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -4007,7 +4046,7 @@ CREATE TABLE `visa_guides` (
   `visa_type` varchar(100) NOT NULL,
   `processing_time_days` int(11) DEFAULT NULL,
   `visa_fee_usd` decimal(8,2) DEFAULT NULL,
-  `documents_required` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `documents_required` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`documents_required`)),
   `success_tips` text DEFAULT NULL,
   `pswv_duration_months` int(11) DEFAULT NULL,
   `proof_of_funds_usd` decimal(10,2) DEFAULT NULL,
@@ -4152,6 +4191,14 @@ ALTER TABLE `article_categories`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `category_slug` (`category_slug`),
   ADD KEY `parent_id` (`parent_id`);
+
+--
+-- Indexes for table `article_comments`
+--
+ALTER TABLE `article_comments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `article_id` (`article_id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `article_revisions`
@@ -5047,6 +5094,12 @@ ALTER TABLE `article_categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `article_comments`
+--
+ALTER TABLE `article_comments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `article_tags`
 --
 ALTER TABLE `article_tags`
@@ -5272,6 +5325,13 @@ ALTER TABLE `articles`
 --
 ALTER TABLE `article_categories`
   ADD CONSTRAINT `article_categories_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `article_categories` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `article_comments`
+--
+ALTER TABLE `article_comments`
+  ADD CONSTRAINT `article_comments_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `article_comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `article_revisions`
@@ -5725,7 +5785,6 @@ ALTER TABLE `users`
 --
 ALTER TABLE `user_dashboard_widgets`
   ADD CONSTRAINT `user_dashboard_widgets_ibfk_1` FOREIGN KEY (`widget_id`) REFERENCES `dashboard_widgets` (`id`) ON DELETE CASCADE;
-SET FOREIGN_KEY_CHECKS = 1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

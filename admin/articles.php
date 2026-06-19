@@ -39,17 +39,21 @@ foreach($stats as $s) $counts[$s['status']] = $s['cnt'];
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body { background-color: var(--bg-light); }
+        body { background-color: var(--bg-light); overflow-x: clip; }
         .admin-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; }
+        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 1000; transition: transform 0.3s ease; }
         .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-header .logo { font-size: 1.3rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
         .sidebar-nav { padding: 24px 0; flex: 1; }
         .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; }
         .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
-        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; }
-        .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
-        .content-area { padding: 32px; }
+        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; min-width: 0; }
+        .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
+        .content-area { padding: 32px; min-width: 0; }
+        .menu-toggle { display: none; background: transparent; border: 1px solid var(--border-color); color: var(--text-dark); width: 42px; height: 42px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 1.4rem; line-height: 1; }
+        .menu-toggle:hover { background: #f1f5f9; }
+        .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 900; opacity: 0; transition: opacity 0.3s ease; }
+        .sidebar-backdrop.show { display: block; opacity: 1; }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .page-header h2 { font-size: 2rem; font-weight: 800; }
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
@@ -59,8 +63,8 @@ foreach($stats as $s) $counts[$s['status']] = $s['cnt'];
         .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
         .tab-link { padding: 7px 14px; font-weight: 600; color: var(--text-muted); border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; font-size: 0.85rem; text-decoration: none; transition: all 0.2s; white-space: nowrap; }
         .tab-link:hover, .tab-link.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-        .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow-x: auto; }
+        table { min-width: 1000px; border-collapse: collapse; font-size: 0.88rem; }
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #f1f5f9; }
         tr:hover { background-color: rgba(0,0,0,0.015); }
@@ -84,13 +88,36 @@ foreach($stats as $s) $counts[$s['status']] = $s['cnt'];
         .sub-links { display: flex; gap: 8px; margin-bottom: 20px; }
         .sub-link { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-decoration: none; padding: 5px 10px; border-radius: 6px; transition: all 0.2s; }
         .sub-link:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); box-shadow: 0 0 40px rgba(0,0,0,0.35); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .menu-toggle { display: inline-flex; }
+            .topbar { padding: 0 20px; }
+            .content-area { padding: 20px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .page-header h2 { font-size: 1.5rem; }
+            .panel { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        }
+        @media (max-width: 576px) {
+            .content-area { padding: 14px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .topbar { padding: 0 14px; height: 64px; }
+            .filter-bar form { width: 100%; }
+            .search-box { flex: 1; min-width: 0; }
+            .search-box input { width: 100%; min-width: 0; }
+        }
     </style>
 </head>
 <body>
 <div class="admin-layout">
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <?php include 'sidebar.php'; ?>
     <main class="main-content">
         <header class="topbar">
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation"><i class="ph ph-list"></i></button>
             <div class="user-profile">
                 <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
                 <a href="logout.php" style="margin-left:16px; color:#19376d;"><i class="ph ph-sign-out" style="font-size:1.5rem;"></i></a>
@@ -146,8 +173,7 @@ foreach($stats as $s) $counts[$s['status']] = $s['cnt'];
                 <?php if(empty($articles)): ?>
                     <p style="color:var(--text-muted); text-align:center; padding:40px;">No articles found.</p>
                 <?php else: ?>
-                <div style="overflow-x:auto;">
-                    <table>
+                    <table class="admin-table">
                         <thead>
                             <tr>
                                 <th>Title</th>
@@ -183,11 +209,22 @@ foreach($stats as $s) $counts[$s['status']] = $s['cnt'];
                             <?php endforeach; ?>
                         </tbody>
                     </table>
-                </div>
                 <?php endif; ?>
             </div>
         </div>
     </main>
 </div>
+<script>
+(function(){
+    var toggle  = document.getElementById('menuToggle');
+    var sidebar = document.querySelector('.sidebar');
+    var backdrop = document.getElementById('sidebarBackdrop');
+    function open(){  if(sidebar){ sidebar.classList.add('open'); } if(backdrop){ backdrop.classList.add('show'); } document.body.style.overflow = 'hidden'; }
+    function close(){ if(sidebar){ sidebar.classList.remove('open'); } if(backdrop){ backdrop.classList.remove('show'); } document.body.style.overflow = ''; }
+    if(toggle)  toggle.addEventListener('click', function(){ sidebar && sidebar.classList.contains('open') ? close() : open(); });
+    if(backdrop) backdrop.addEventListener('click', close);
+    window.addEventListener('resize', function(){ if(window.innerWidth > 992){ close(); } });
+})();
+</script>
 </body>
 </html>
