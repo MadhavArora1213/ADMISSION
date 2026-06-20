@@ -51,6 +51,8 @@ try { $cn=$college['name']; $sl=$slug; $s=$pdo->prepare("SELECT *, article_title
 $updates = array_merge($updates, $articles);
 usort($updates, function($a,$b){ return strtotime($b['event_date']??'0') - strtotime($a['event_date']??'0'); });
 try { $s=$pdo->prepare("SELECT r.*,u.full_name AS user_name FROM reviews r LEFT JOIN users u ON u.id=r.user_id WHERE r.college_id=? AND r.moderation_status='approved' ORDER BY r.created_at DESC LIMIT 30"); $s->execute([$cid]); $reviews=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
+$seatMatrix = [];
+try { $s=$pdo->prepare("SELECT sm.*, cc.course_name FROM seat_matrix sm JOIN college_courses cc ON cc.id = sm.course_id WHERE sm.college_id = ? ORDER BY cc.course_name, FIELD(sm.category, 'General','OBC','SC','ST','EWS','PwD','NRI','Mgmt')"); $s->execute([$cid]); $seatMatrix=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 
 $qnaCount = count($faqs) + count($qnaList);
 $year = $college['established_year'] ?? $college['founded_year'] ?? '';
@@ -87,7 +89,7 @@ foreach ($gallery as $m) {
 $tabIcons = [
     'info'=>'ph-info','courses'=>'ph-book-open','fees'=>'ph-currency-inr',
     'reviews'=>'ph-star','admissions'=>'ph-paper-plane-tilt','placements'=>'ph-briefcase',
-    'cutoffs'=>'ph-scissors','rankings'=>'ph-trophy','gallery'=>'ph-images',
+    'cutoffs'=>'ph-scissors','seat_matrix'=>'ph-table','rankings'=>'ph-trophy','gallery'=>'ph-images',
     'infrastructure'=>'ph-buildings','faculty'=>'ph-chalkboard-teacher',
     'compare'=>'ph-scales','qna'=>'ph-chat-circle','news'=>'ph-newspaper',
 ];
@@ -214,9 +216,15 @@ if (isset($_SESSION['user_id'])) {
           <i class="ph ph-heart"></i> Save
         </button>
         <?php if ($brochureUrl): ?>
+        <?php if ($isLoggedIn): ?>
         <button type="button" class="college-btn-primary" onclick="sendBrochure()" id="brochureBtnHero">
           <i class="ph ph-download-simple"></i> Brochure
         </button>
+        <?php else: ?>
+        <button type="button" class="college-btn-primary" onclick="openLoginPrompt()" id="brochureBtnHero">
+          <i class="ph ph-download-simple"></i> Brochure
+        </button>
+        <?php endif; ?>
         <?php endif; ?>
         <?php if ($prospectusUrl): ?>
         <a href="<?= htmlspecialchars($prospectusUrl) ?>" target="_blank" class="college-btn-primary">
@@ -452,7 +460,18 @@ if (isset($_SESSION['user_id'])) {
         <!-- ── REVIEWS ───────────────────────────────────────────── -->
         <?php elseif ($tab === 'reviews'): ?>
           <section class="college-section">
-            <h2>Student Reviews <span class="college-count">(<?= $reviewCount ?>)</span></h2>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+              <h2 style="margin:0">Student Reviews <span class="college-count">(<?= $reviewCount ?>)</span></h2>
+              <?php if ($isLoggedIn): ?>
+              <button type="button" onclick="openReviewModal()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;background:linear-gradient(135deg,#0B2447,#19376D);color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .25s">
+                <i class="ph ph-pencil-simple"></i> Write a Review
+              </button>
+              <?php else: ?>
+              <button type="button" onclick="openLoginPrompt()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;background:#fff;color:#0B2447;border:2px solid #0B2447;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .25s">
+                <i class="ph ph-pencil-simple"></i> Write a Review
+              </button>
+              <?php endif; ?>
+            </div>
             <?php if (array_filter(array_column($ratingItems, 'val'))): ?>
             <div class="college-rating-row" style="margin-bottom:24px">
               <?php foreach ($ratingItems as $ri): if ((float)$ri['val'] <= 0) continue; ?>
@@ -857,7 +876,17 @@ if (isset($_SESSION['user_id'])) {
             <?php else: ?>
             <div class="college-faculty-grid">
               <?php foreach ($faculty as $fc): ?>
-              <div class="college-faculty-card">
+              <div class="college-faculty-card" onclick="openFacultyModal(this.dataset)" style="cursor:pointer;"
+                data-faculty_name="<?= htmlspecialchars($fc['faculty_name']) ?>"
+                data-designation="<?= htmlspecialchars($fc['designation'] ?? '') ?>"
+                data-department="<?= htmlspecialchars($fc['department'] ?? '') ?>"
+                data-qualification="<?= htmlspecialchars($fc['qualification'] ?? '') ?>"
+                data-specialization="<?= htmlspecialchars($fc['specialization'] ?? '') ?>"
+                data-phd_from="<?= htmlspecialchars($fc['phd_from'] ?? '') ?>"
+                data-experience_years="<?= htmlspecialchars((string)($fc['experience_years'] ?? '')) ?>"
+                data-research_papers="<?= htmlspecialchars((string)($fc['research_papers'] ?? '')) ?>"
+                data-photo_url="<?= htmlspecialchars(cImg($fc['photo_url'] ?? '')) ?>"
+                data-linkedin_url="<?= htmlspecialchars($fc['linkedin_url'] ?? '') ?>">
                 <?php if ($fc['photo_url']): ?><img src="<?= cImg($fc['photo_url']) ?>" alt="<?= htmlspecialchars($fc['faculty_name']) ?>">
                 <?php else: ?><div class="cf-avatar"><i class="ph ph-user"></i></div><?php endif; ?>
                 <div>
@@ -871,6 +900,90 @@ if (isset($_SESSION['user_id'])) {
             </div>
             <?php endif; ?>
           </section>
+
+<!-- Faculty Detail Modal -->
+<div id="facultyModal" style="display:none;position:fixed;inset:0;z-index:10002;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);">
+  <div id="facultyModalBox" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;max-width:440px;width:calc(100% - 32px);max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.25);box-sizing:border-box;">
+    <div id="facultyModalBody"></div>
+  </div>
+</div>
+<script>
+function openFacultyModal(ds) {
+  var photo = ds.photo_url
+    ? '<img src="' + ds.photo_url + '" style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 4px 20px rgba(0,0,0,.15);">'
+    : '<div style="width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#e0e7ff,#c7d2fe);display:flex;align-items:center;justify-content:center;color:#4f46e5;font-size:2rem;border:4px solid #fff;box-shadow:0 4px 20px rgba(0,0,0,.1);"><i class="ph ph-user"></i></div>';
+
+  var html = ''
+    // Cover banner
+    + '<div style="background:linear-gradient(135deg,#0B2447 0%,#19376D 60%,#1e40af 100%);height:100px;border-radius:16px 16px 0 0;position:relative;">'
+    + '<button onclick="closeFacultyModal()" style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.15);border:none;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:.85rem;backdrop-filter:blur(4px);" onmouseover="this.style.background=\'rgba(255,255,255,0.25)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.15)\'"><i class="ph ph-x"></i></button>'
+    + '<div style="position:absolute;bottom:-40px;left:50%;transform:translateX(-50%);">' + photo + '</div>'
+    + '</div>'
+
+    // Name + designation
+    + '<div style="text-align:center;padding:52px 24px 16px;">'
+    + '<h3 style="margin:0;font-size:18px;font-weight:800;color:#0f172a;">' + (ds.faculty_name || '') + '</h3>'
+    + (ds.designation ? '<div style="font-size:13px;color:#19376D;font-weight:600;margin-top:4px;">' + ds.designation + '</div>' : '')
+    + (ds.department ? '<div style="font-size:12px;color:#64748b;margin-top:2px;"><i class="ph ph-buildings" style="font-size:.75rem;"></i> ' + ds.department + '</div>' : '')
+    + '</div>'
+
+    // Stats row
+    + '<div style="display:flex;justify-content:center;gap:0;margin:0 24px 16px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">';
+
+  var stats = [];
+  if (ds.experience_years) stats.push([ds.experience_years, 'Exp (Yrs)', '#0B2447']);
+  if (ds.research_papers && ds.research_papers !== '0') stats.push([ds.research_papers, 'Papers', '#19376D']);
+  if (ds.qualification) stats.push([ds.qualification.split(',')[0].trim(), 'Degree', '#0f172a']);
+
+  stats.forEach(function(s, i) {
+    html += '<div style="flex:1;text-align:center;padding:12px 8px;' + (i > 0 ? 'border-left:1px solid #e2e8f0;' : '') + '">'
+      + '<div style="font-size:15px;font-weight:800;color:' + s[2] + ';">' + s[0] + '</div>'
+      + '<div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-top:2px;">' + s[1] + '</div>'
+      + '</div>';
+  });
+
+  html += '</div>';
+
+  // Details list
+  var details = [
+    ['ph-medal', 'Specialization', ds.specialization],
+    ['ph-read-cv-logo', 'PhD From', ds.phd_from],
+  ];
+
+  var hasDetails = details.some(function(d) { return d[2]; });
+  if (hasDetails) {
+    html += '<div style="margin:0 24px 16px;padding:16px;background:#f8fafc;border-radius:12px;border:1px solid #f1f5f9;">';
+    details.forEach(function(d) {
+      if (d[2]) {
+        html += '<div style="display:flex;align-items:center;gap:10px;' + (d !== details[details.length - 1] ? 'padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid #e2e8f0;' : '') + '">'
+          + '<div style="width:32px;height:32px;border-radius:8px;background:#fff;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+          + '<i class="ph ' + d[0] + '" style="font-size:.9rem;color:#19376D;"></i></div>'
+          + '<div><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;font-weight:600;">' + d[1] + '</div>'
+          + '<div style="font-size:13px;color:#0f172a;font-weight:600;margin-top:1px;">' + d[2] + '</div></div></div>';
+      }
+    });
+    html += '</div>';
+  }
+
+  // LinkedIn button
+  if (ds.linkedin_url) {
+    html += '<div style="margin:0 24px 24px;">'
+      + '<a href="' + ds.linkedin_url + '" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px 16px;background:#0077b5;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;" onmouseover="this.style.background=\'#006097\'" onmouseout="this.style.background=\'#0077b5\'">'
+      + '<i class="ph ph-linkedin-logo" style="font-size:1rem;"></i> View LinkedIn Profile</a></div>';
+  }
+
+  document.getElementById('facultyModalBody').innerHTML = html;
+  document.getElementById('facultyModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+function closeFacultyModal() {
+  document.getElementById('facultyModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.getElementById('facultyModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeFacultyModal();
+});
+</script>
 
         <!-- ── COMPARE ───────────────────────────────────────────── -->
         <?php elseif ($tab === 'compare'): ?>
@@ -888,6 +1001,92 @@ if (isset($_SESSION['user_id'])) {
               <div class="compare-card"><strong><?= $college['naac_grade'] ? htmlspecialchars($college['naac_grade']) : '—' ?></strong><span>NAAC Grade</span></div>
             </div>
             <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/colleges.php" class="college-btn-primary" style="display:inline-flex;margin-top:24px"><i class="ph ph-scales"></i> Browse Colleges to Compare</a>
+          </section>
+
+        <!-- ── SEAT MATRIX ─────────────────────────────────────── -->
+        <?php elseif ($tab === 'seat_matrix'): ?>
+          <section class="college-section">
+            <h2>Seat Matrix <?= $seatMatrix ? '<span class="college-count">(' . htmlspecialchars((string)($seatMatrix[0]['year'] ?? date('Y'))) . ')</span>' : '' ?></h2>
+            <?php if (empty($seatMatrix)): ?>
+            <div class="tab-empty-state"><i class="ph ph-table"></i><p>No seat matrix data available for this college yet.</p></div>
+            <?php else: ?>
+            <?php
+              $coursesSeats = [];
+              foreach($seatMatrix as $row) {
+                $cn = $row['course_name'];
+                if (!isset($coursesSeats[$cn])) $coursesSeats[$cn] = ['year'=>$row['year'],'source'=>$row['source'],'rows'=>[]];
+                $coursesSeats[$cn]['rows'][] = $row;
+              }
+            ?>
+            <?php foreach($coursesSeats as $courseName => $data): ?>
+            <div style="background:#fff;border:1px solid rgba(15,23,42,0.06);border-radius:16px;overflow:hidden;margin-bottom:24px">
+              <div style="padding:20px 24px;border-bottom:1px solid rgba(15,23,42,0.06);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+                <h3 style="margin:0;font-size:1.1rem;font-weight:800;color:#0B2447"><i class="ph ph-graduation-cap" style="margin-right:6px"></i><?= htmlspecialchars($courseName) ?></h3>
+                <span style="font-size:.78rem;color:rgba(15,23,42,0.4);background:rgba(11,36,71,0.04);padding:4px 12px;border-radius:20px"><?= htmlspecialchars((string)$data['source']) ?></span>
+              </div>
+              <div style="overflow-x:auto">
+                <table style="width:100%;border-collapse:collapse;font-size:.9rem">
+                  <thead>
+                    <tr style="background:#f8fafc">
+                      <th style="padding:12px 20px;text-align:left;font-weight:700;color:rgba(15,23,42,0.5);font-size:.78rem;text-transform:uppercase;letter-spacing:.5px">Category</th>
+                      <th style="padding:12px 20px;text-align:center;font-weight:700;color:rgba(15,23,42,0.5);font-size:.78rem;text-transform:uppercase;letter-spacing:.5px">Total Seats</th>
+                      <th style="padding:12px 20px;text-align:center;font-weight:700;color:rgba(15,23,42,0.5);font-size:.78rem;text-transform:uppercase;letter-spacing:.5px">Filled</th>
+                      <th style="padding:12px 20px;text-align:center;font-weight:700;color:rgba(15,23,42,0.5);font-size:.78rem;text-transform:uppercase;letter-spacing:.5px">Vacant</th>
+                      <th style="padding:12px 20px;text-align:left;font-weight:700;color:rgba(15,23,42,0.5);font-size:.78rem;text-transform:uppercase;letter-spacing:.5px">Occupancy</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                      $totalSeats = 0; $totalFilled = 0;
+                      foreach($data['rows'] as $row):
+                        $vacant = max(0, (int)$row['total_seats'] - (int)$row['filled_seats']);
+                        $pct = (int)$row['total_seats'] > 0 ? round(((int)$row['filled_seats'] / (int)$row['total_seats']) * 100) : 0;
+                        $totalSeats += (int)$row['total_seats'];
+                        $totalFilled += (int)$row['filled_seats'];
+                        $catColors = ['General'=>'#0B2447','OBC'=>'#19376D','SC'=>'#7c3aed','ST'=>'#dc2626','EWS'=>'#059669','PwD'=>'#d97706','NRI'=>'#2563eb','Mgmt'=>'#64748b'];
+                        $color = $catColors[$row['category']] ?? '#64748b';
+                    ?>
+                    <tr style="border-bottom:1px solid rgba(15,23,42,0.04)">
+                      <td style="padding:12px 20px;font-weight:600;color:#0f172a">
+                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:<?= $color ?>;margin-right:8px"></span><?= htmlspecialchars($row['category']) ?>
+                      </td>
+                      <td style="padding:12px 20px;text-align:center;font-weight:700;color:#0f172a"><?= (int)$row['total_seats'] ?></td>
+                      <td style="padding:12px 20px;text-align:center;color:rgba(15,23,42,0.6)"><?= (int)$row['filled_seats'] ?></td>
+                      <td style="padding:12px 20px;text-align:center;color:<?= $vacant > 0 ? '#059669' : '#DC2626' ?>;font-weight:600"><?= $vacant ?></td>
+                      <td style="padding:12px 20px">
+                        <div style="display:flex;align-items:center;gap:10px">
+                          <div style="flex:1;height:8px;background:rgba(15,23,42,0.06);border-radius:8px;overflow:hidden;min-width:80px">
+                            <div style="height:100%;width:<?= $pct ?>%;background:<?= $pct >= 95 ? '#DC2626' : ($pct >= 80 ? '#d97706' : '#059669') ?>;border-radius:8px;transition:width .5s"></div>
+                          </div>
+                          <span style="font-size:.82rem;font-weight:700;color:<?= $pct >= 95 ? '#DC2626' : ($pct >= 80 ? '#d97706' : '#059669') ?>;min-width:36px"><?= $pct ?>%</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <?php
+                      $totalVacant = $totalSeats - $totalFilled;
+                      $totalPct = $totalSeats > 0 ? round(($totalFilled / $totalSeats) * 100) : 0;
+                    ?>
+                    <tr style="background:#f8fafc;font-weight:700">
+                      <td style="padding:14px 20px;color:#0B2447"><i class="ph ph-calculator" style="margin-right:6px"></i>Total</td>
+                      <td style="padding:14px 20px;text-align:center;color:#0B2447;font-size:1rem"><?= $totalSeats ?></td>
+                      <td style="padding:14px 20px;text-align:center;color:#0B2447"><?= $totalFilled ?></td>
+                      <td style="padding:14px 20px;text-align:center;color:#059669"><?= $totalVacant ?></td>
+                      <td style="padding:14px 20px">
+                        <div style="display:flex;align-items:center;gap:10px">
+                          <div style="flex:1;height:8px;background:rgba(15,23,42,0.06);border-radius:8px;overflow:hidden;min-width:80px">
+                            <div style="height:100%;width:<?= $totalPct ?>%;background:linear-gradient(90deg,#0B2447,#19376D);border-radius:8px"></div>
+                          </div>
+                          <span style="font-size:.82rem;font-weight:700;color:#0B2447;min-width:36px"><?= $totalPct ?>%</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <?php endforeach; ?>
+            <?php endif; ?>
           </section>
 
         <!-- ── Q&A ───────────────────────────────────────────────── -->
@@ -924,13 +1123,36 @@ if (isset($_SESSION['user_id'])) {
             <div class="college-news-list">
               <?php foreach ($updates as $up): ?>
               <article class="college-news-item">
-                <div class="cn-meta">
-                  <span class="news-type-badge"><?= htmlspecialchars(ucwords(str_replace('_',' ',$up['update_type']??'news'))) ?></span>
-                  <?php if ($up['event_date']): ?><span><i class="ph ph-calendar"></i> <?= date('d M Y', strtotime($up['event_date'])) ?></span><?php endif; ?>
+                <?php if (!empty($up['image_url']) || !empty($up['article_slug'])): ?>
+                <div class="cn-thumb">
+                  <img src="<?= cImg($up['image_url'] ?? $up['featured_image_url'] ?? '') ?>" alt="<?= htmlspecialchars($up['title']) ?>">
                 </div>
-                <h4><?= htmlspecialchars($up['title']) ?></h4>
-                <?php if ($up['description']): ?><p><?= nl2br(htmlspecialchars($up['description'])) ?></p><?php endif; ?>
-                <?php if ($up['action_url']): ?><a href="<?= htmlspecialchars($up['action_url']) ?>" target="_blank" rel="noopener">Read more <i class="ph ph-arrow-right"></i></a><?php endif; ?>
+                <?php endif; ?>
+                <div class="cn-body">
+                  <div class="cn-meta">
+                    <span class="news-type-badge"><?= htmlspecialchars(ucwords(str_replace('_',' ',$up['update_type']??'news'))) ?></span>
+                    <?php if ($up['event_date']): ?><span><i class="ph ph-calendar"></i> <?= date('d M Y', strtotime($up['event_date'])) ?></span><?php endif; ?>
+                  </div>
+                  <h4>
+                    <?php if (!empty($up['article_slug'])): ?>
+                      <a href="/ADMISSION/news_details.php?slug=<?= urlencode($up['article_slug']) ?>"><?= htmlspecialchars($up['title']) ?></a>
+                    <?php elseif (!empty($up['action_url'])): ?>
+                      <a href="<?= htmlspecialchars($up['action_url']) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($up['title']) ?></a>
+                    <?php elseif (!empty($up['id'])): ?>
+                      <a href="/ADMISSION/college_update_detail.php?id=<?= urlencode($up['id']) ?>"><?= htmlspecialchars($up['title']) ?></a>
+                    <?php else: ?>
+                      <?= htmlspecialchars($up['title']) ?>
+                    <?php endif; ?>
+                  </h4>
+                  <?php if ($up['description']): ?><p><?= nl2br(htmlspecialchars(mb_strimwidth($up['description'], 0, 180, '...'))) ?></p><?php endif; ?>
+                  <?php if (!empty($up['article_slug'])): ?>
+                    <a href="/ADMISSION/news_details.php?slug=<?= urlencode($up['article_slug']) ?>">Read more <i class="ph ph-arrow-right"></i></a>
+                  <?php elseif (!empty($up['action_url'])): ?>
+                    <a href="<?= htmlspecialchars($up['action_url']) ?>" target="_blank" rel="noopener">Read more <i class="ph ph-arrow-right"></i></a>
+                  <?php elseif (!empty($up['id'])): ?>
+                    <a href="/ADMISSION/college_update_detail.php?id=<?= urlencode($up['id']) ?>">Read more <i class="ph ph-arrow-right"></i></a>
+                  <?php endif; ?>
+                </div>
               </article>
               <?php endforeach; ?>
             </div>
@@ -950,7 +1172,7 @@ if (isset($_SESSION['user_id'])) {
         <?php if (!empty($updates)): ?>
         <ul class="college-notify-list">
           <?php foreach (array_slice($updates, 0, 4) as $up): ?>
-          <li><a href="<?= collegeUrl($slug, 'news') ?>"><?= htmlspecialchars($up['title']) ?></a></li>
+          <li><a href="<?= !empty($up['article_slug']) ? '/ADMISSION/news_details.php?slug='.urlencode($up['article_slug']) : (!empty($up['id']) ? '/ADMISSION/college_update_detail.php?id='.urlencode($up['id']) : collegeUrl($slug, 'news')) ?>"><?= htmlspecialchars($up['title']) ?></a></li>
           <?php endforeach; ?>
         </ul>
         <?php else: ?>
@@ -1398,6 +1620,10 @@ function savePref(key, value) {
 }
 
 function sendCourseList() {
+  <?php if (!$isLoggedIn): ?>
+  openLoginPrompt();
+  return;
+  <?php endif; ?>
   var btn = document.getElementById('courseListBtnHero') || document.getElementById('courseListBtn') || document.getElementById('courseListBtnSidebar');
   if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ph ph-spinner" style="animation:spin 1s linear infinite"></i> Sending...'; }
   var formData = new FormData();
@@ -1419,6 +1645,10 @@ function sendCourseList() {
 }
 
 function sendBrochure() {
+  <?php if (!$isLoggedIn): ?>
+  openLoginPrompt();
+  return;
+  <?php endif; ?>
   var btn = document.getElementById('brochureBtnHero');
   if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ph ph-spinner" style="animation:spin 1s linear infinite"></i> Sending...'; }
   var formData = new FormData();
@@ -1447,7 +1677,203 @@ function loadSimilarColleges(collegeId) {
       else renderSimilarColleges([]);
     }).catch(function(){ renderSimilarColleges([]); });
 }
+
+/* ── Review Modal ── */
+function openReviewModal() {
+  document.getElementById('reviewModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeReviewModal() {
+  document.getElementById('reviewModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function setStarRating(category, value) {
+  var container = document.getElementById('stars-' + category);
+  if (!container) return;
+  container.dataset.value = value;
+  var stars = container.querySelectorAll('i');
+  stars.forEach(function(s, idx) {
+    if (idx < value) { s.className = 'ph ph-star-fill'; s.style.color = '#f59e0b'; }
+    else { s.className = 'ph ph-star'; s.style.color = 'rgba(15,23,42,0.15)'; }
+  });
+  var avg = document.getElementById('overall_avg_display');
+  if (avg && category === 'overall') avg.textContent = value + '.0';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.star-rating-group').forEach(function(group) {
+    var cat = group.dataset.category;
+    var stars = group.querySelectorAll('i');
+    stars.forEach(function(star, idx) {
+      star.addEventListener('click', function() { setStarRating(cat, idx + 1); });
+      star.addEventListener('mouseenter', function() {
+        stars.forEach(function(s, i) {
+          if (i <= idx) { s.style.color = '#f59e0b'; } else { s.style.color = 'rgba(15,23,42,0.15)'; }
+        });
+      });
+      star.addEventListener('mouseleave', function() {
+        var val = parseInt(group.dataset.value) || 0;
+        stars.forEach(function(s, i) {
+          if (i < val) { s.style.color = '#f59e0b'; } else { s.style.color = 'rgba(15,23,42,0.15)'; }
+        });
+      });
+    });
+  });
+});
+
+function submitReview() {
+  var btn = document.getElementById('reviewSubmitBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ph ph-spinner" style="animation:spin 1s linear infinite"></i> Submitting...'; }
+
+  var overall = parseInt(document.getElementById('stars-overall').dataset.value) || 0;
+  if (overall < 1) { alert('Please select an overall rating.'); if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ph ph-check-circle"></i> Submit Review'; } return; }
+
+  var payload = {
+    college_id: '<?= htmlspecialchars($cid) ?>',
+    overall_rating: overall,
+    academics_rating: parseInt(document.getElementById('stars-value_money').dataset.value) || 0,
+    faculty_rating: parseInt(document.getElementById('stars-faculty').dataset.value) || 0,
+    placements_rating: parseInt(document.getElementById('stars-placements').dataset.value) || 0,
+    infrastructure_rating: parseInt(document.getElementById('stars-infrastructure').dataset.value) || 0,
+    campus_life_rating: parseInt(document.getElementById('stars-campus_life').dataset.value) || 0,
+    food_rating: overall,
+    review_title: document.getElementById('reviewTitle').value.trim(),
+    review_body: document.getElementById('reviewBody').value.trim(),
+    pros: document.getElementById('reviewPros').value.trim(),
+    cons: document.getElementById('reviewCons').value.trim(),
+    batch_year: parseInt(document.getElementById('reviewBatch').value) || 0,
+    course_id: document.getElementById('reviewCourse').value
+  };
+
+  fetch('<?= rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/") ?>/api/submit_review.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r) { return r.text().then(function(t) { try { return { ok: r.ok, status: r.status, data: JSON.parse(t) }; } catch(e) { return { ok: false, status: r.status, data: { error: 'Server returned invalid response', raw: t.substring(0, 500) } }; } }); })
+  .then(function(result) {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ph ph-check-circle"></i> Submit Review'; }
+    var data = result.data;
+    if (data.ok) {
+      closeReviewModal();
+      var msg = document.getElementById('reviewSuccessMsg');
+      if (msg) { msg.style.display = 'block'; setTimeout(function(){ msg.style.display = 'none'; }, 5000); }
+    } else if (data.error === 'login_required') {
+      openLoginPrompt();
+    } else {
+      alert(data.message || data.error || 'Failed to submit review.');
+    }
+  })
+  .catch(function(err) {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ph ph-check-circle"></i> Submit Review'; }
+    alert('Network error: ' + (err.message || 'Please try again.'));
+  });
+}
 </script>
+
+<!-- Review Modal -->
+<div id="reviewModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeReviewModal()">
+  <div style="background:#fff;border-radius:20px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.2);position:relative">
+    <div style="padding:28px 32px 0;border-bottom:1px solid rgba(15,23,42,0.06);display:flex;align-items:center;justify-content:space-between">
+      <h3 style="margin:0;font-size:1.3rem;font-weight:800;color:#0B2447;display:flex;align-items:center;gap:10px"><i class="ph ph-star" style="font-size:1.4rem"></i> Write a Review</h3>
+      <button onclick="closeReviewModal()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:rgba(15,23,42,0.3);padding:4px"><i class="ph ph-x"></i></button>
+    </div>
+
+    <div id="reviewSuccessMsg" style="display:none;margin:16px 20px 0;padding:14px 20px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:12px;color:#059669;font-weight:600;font-size:.9rem">
+      <i class="ph ph-check-circle"></i> Review submitted! It will appear after moderation.
+    </div>
+
+    <div style="padding:24px 32px 32px">
+      <!-- Overall Rating -->
+      <div style="text-align:center;margin-bottom:24px;padding:20px;background:linear-gradient(135deg,rgba(11,36,71,0.03),rgba(11,36,71,0.06));border-radius:14px">
+        <div style="font-size:.85rem;color:rgba(15,23,42,0.5);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Overall Rating</div>
+        <div id="stars-overall" class="star-rating-group" data-category="overall" data-value="0" style="display:flex;gap:6px;justify-content:center;margin-bottom:4px">
+          <i class="ph ph-star" style="font-size:2rem;cursor:pointer;color:rgba(15,23,42,0.15);transition:color .15s"></i>
+          <i class="ph ph-star" style="font-size:2rem;cursor:pointer;color:rgba(15,23,42,0.15);transition:color .15s"></i>
+          <i class="ph ph-star" style="font-size:2rem;cursor:pointer;color:rgba(15,23,42,0.15);transition:color .15s"></i>
+          <i class="ph ph-star" style="font-size:2rem;cursor:pointer;color:rgba(15,23,42,0.15);transition:color .15s"></i>
+          <i class="ph ph-star" style="font-size:2rem;cursor:pointer;color:rgba(15,23,42,0.15);transition:color .15s"></i>
+        </div>
+        <div style="font-size:1.2rem;font-weight:800;color:#0B2447"><span id="overall_avg_display">0.0</span>/5</div>
+      </div>
+
+      <!-- Category Ratings -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px">
+        <?php foreach([
+          ['key'=>'placements','label'=>'Placements'],
+          ['key'=>'faculty','label'=>'Faculty'],
+          ['key'=>'infrastructure','label'=>'Infrastructure'],
+          ['key'=>'campus_life','label'=>'Campus Life'],
+          ['key'=>'value_money','label'=>'Value for Money'],
+        ] as $cat): ?>
+        <div style="padding:14px;background:#f8fafc;border-radius:12px;border:1px solid rgba(15,23,42,0.06)">
+          <div style="font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.5);margin-bottom:8px"><?= $cat['label'] ?></div>
+          <div id="stars-<?= $cat['key'] ?>" class="star-rating-group" data-category="<?= $cat['key'] ?>" data-value="0" style="display:flex;gap:4px">
+            <i class="ph ph-star" style="font-size:1.3rem;cursor:pointer;color:rgba(15,23,42,0.15);transition:color .15s"></i>
+            <i class="ph ph-star" style="font-size:1.3rem;cursor:pointer;color:rgba(15,23,42,0.15);transition:color .15s"></i>
+            <i class="ph ph-star" style="font-size:1.3rem;cursor:pointer;color:rgba(15,23,42,0.15);transition:color .15s"></i>
+            <i class="ph ph-star" style="font-size:1.3rem;cursor:pointer;color:rgba(15,23,42,0.15);transition:color .15s"></i>
+            <i class="ph ph-star" style="font-size:1.3rem;cursor:pointer;color:rgba(15,23,42,0.15);transition:color .15s"></i>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+
+      <!-- Review Title -->
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:.85rem;font-weight:700;color:rgba(15,23,42,0.6);margin-bottom:6px">Review Title</label>
+        <input type="text" id="reviewTitle" placeholder="Summarize your experience" maxlength="200" style="width:100%;padding:12px 16px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.95rem;font-family:inherit;box-sizing:border-box;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'">
+      </div>
+
+      <!-- Review Body -->
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:.85rem;font-weight:700;color:rgba(15,23,42,0.6);margin-bottom:6px">Your Review *</label>
+        <textarea id="reviewBody" rows="4" placeholder="Tell us about your experience at this college..." style="width:100%;padding:12px 16px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.95rem;font-family:inherit;resize:vertical;box-sizing:border-box;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'"></textarea>
+      </div>
+
+      <!-- Pros & Cons -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+        <div>
+          <label style="display:block;font-size:.85rem;font-weight:700;color:rgba(15,23,42,0.6);margin-bottom:6px"><i class="ph ph-thumbs-up" style="color:#059669"></i> Pros</label>
+          <textarea id="reviewPros" rows="2" placeholder="What did you like?" style="width:100%;padding:10px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.88rem;font-family:inherit;resize:vertical;box-sizing:border-box;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'"></textarea>
+        </div>
+        <div>
+          <label style="display:block;font-size:.85rem;font-weight:700;color:rgba(15,23,42,0.6);margin-bottom:6px"><i class="ph ph-thumbs-down" style="color:#DC2626"></i> Cons</label>
+          <textarea id="reviewCons" rows="2" placeholder="What could be improved?" style="width:100%;padding:10px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.88rem;font-family:inherit;resize:vertical;box-sizing:border-box;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'"></textarea>
+        </div>
+      </div>
+
+      <!-- Batch Year & Course -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px">
+        <div>
+          <label style="display:block;font-size:.85rem;font-weight:700;color:rgba(15,23,42,0.6);margin-bottom:6px">Batch Year</label>
+          <select id="reviewBatch" style="width:100%;padding:10px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.88rem;font-family:inherit;background:#fff;box-sizing:border-box">
+            <option value="">Select Year</option>
+            <?php for($y = date('Y'); $y >= 2010; $y--): ?>
+            <option value="<?= $y ?>"><?= $y ?></option>
+            <?php endfor; ?>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:.85rem;font-weight:700;color:rgba(15,23,42,0.6);margin-bottom:6px">Course</label>
+          <select id="reviewCourse" style="width:100%;padding:10px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.88rem;font-family:inherit;background:#fff;box-sizing:border-box">
+            <option value="">Select Course</option>
+            <?php foreach($courses as $co): ?>
+            <option value="<?= htmlspecialchars($co['id'] ?? '') ?>"><?= htmlspecialchars($co['course_name'] ?? '') ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button type="button" id="reviewSubmitBtn" onclick="submitReview()" style="width:100%;padding:14px;background:linear-gradient(135deg,#0B2447,#19376D);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px">
+        <i class="ph ph-check-circle"></i> Submit Review
+      </button>
+    </div>
+  </div>
+</div>
+
 <style>
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @media(min-width:480px){

@@ -3,6 +3,8 @@ declare(strict_types=1);
 error_reporting(E_ALL);
 ini_set('display_errors', '0');
 
+if (session_status() === PHP_SESSION_NONE) session_start();
+
 require_once __DIR__ . '/admin/db.php';
 require_once __DIR__ . '/includes/exam_helpers.php';
 
@@ -135,7 +137,7 @@ $tabIcons = [
     
     <?php if ($tab === 'info'): ?>
       <h2 style="font-size:1.5rem;font-weight:800;color:var(--cp-blue);margin-bottom:24px">About <?= htmlspecialchars($exam['exam_abbreviation']) ?></h2>
-      <p style="font-size:1.05rem;line-height:1.7;color:rgba(15,23,42,0.8)"><?= nl2br(htmlspecialchars($exam['normalisation_method'] ?? 'No additional details provided.')) ?></p>
+      <p style="font-size:1.05rem;line-height:1.7;color:rgba(15,23,42,0.8)"><?= nl2br(htmlspecialchars($exam['normalisation_method'] ?: $exam['exam_name'] . ' is a ' . $exam['exam_level'] . ' level ' . $exam['exam_mode'] . ' examination conducted by ' . $exam['conducting_body'] . '. It is held ' . $exam['exam_frequency'] . ' and attracts ' . number_format($exam['applicants_last_year']) . '+ applicants every year.')) ?></p>
       
       <h3 style="margin-top:40px;font-size:1.3rem;font-weight:700">Exam Highlights</h3>
       <div class="info-grid">
@@ -214,7 +216,48 @@ $tabIcons = [
       </div>
 
       <h3 style="font-size:1.3rem;font-weight:700;margin-bottom:16px">Marking Scheme</h3>
-      <p style="font-size:1.05rem;line-height:1.7;color:rgba(15,23,42,0.8)"><?= nl2br(htmlspecialchars($exam['marking_scheme'])) ?></p>
+      <?php
+        $msData = json_decode($exam['marking_scheme'], true);
+        if (is_array($msData)):
+      ?>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:32px">
+        <?php foreach ($msData as $action => $label):
+          $actStr = (string)$action;
+          $isPositive = (strpos($actStr, '+') === 0);
+          $bgColor = $isPositive ? 'rgba(22,163,74,0.06)' : 'rgba(220,38,38,0.06)';
+          $borderColor = $isPositive ? 'rgba(22,163,74,0.15)' : 'rgba(220,38,38,0.15)';
+          $textColor = $isPositive ? '#16a34a' : '#dc2626';
+          $desc = $isPositive ? 'Correct answer' : (stripos($label, 'unattempt') !== false ? 'Unattempted' : 'Incorrect answer');
+        ?>
+        <div style="display:flex;align-items:center;gap:14px;padding:18px 20px;background:<?= $bgColor ?>;border:1.5px solid <?= $borderColor ?>;border-radius:14px">
+          <div style="width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;font-weight:800;color:<?= $textColor ?>;background:#fff;flex-shrink:0;border:1.5px solid <?= $borderColor ?>">
+            <?= htmlspecialchars($actStr) ?>
+          </div>
+          <div>
+            <div style="font-size:.92rem;font-weight:700;color:#0F172A"><?= htmlspecialchars($label) ?></div>
+            <div style="font-size:.78rem;color:rgba(15,23,42,.5)"><?= $desc ?></div>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <?php else: ?>
+      <p style="font-size:1.05rem;line-height:1.7;color:rgba(15,23,42,0.8);margin-bottom:32px"><?= nl2br(htmlspecialchars($exam['marking_scheme'])) ?></p>
+      <?php endif; ?>
+
+      <?php
+        $sections = json_decode($exam['sections'], true);
+        if (is_array($sections) && count($sections) > 0):
+      ?>
+      <h3 style="font-size:1.3rem;font-weight:700;margin-bottom:16px">Sections</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:32px">
+        <?php foreach ($sections as $i => $sec): ?>
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:rgba(37,99,235,.06);border:1.5px solid rgba(37,99,235,.12);border-radius:10px;font-size:.88rem;font-weight:600;color:#19376D">
+          <span style="width:24px;height:24px;border-radius:6px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;flex-shrink:0"><?= $i + 1 ?></span>
+          <?= htmlspecialchars($sec) ?>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <?php endif; ?>
 
     <?php elseif ($tab === 'syllabus'): ?>
       <h2 style="font-size:1.5rem;font-weight:800;color:var(--cp-blue);margin-bottom:24px">Syllabus</h2>
@@ -267,6 +310,12 @@ $tabIcons = [
           <div class="info-icon"><i class="ph ph-currency-inr"></i></div>
           <div class="info-body"><h4>Female Candidates</h4><p>₹<?= number_format((float)$exam['application_fee_female']) ?></p></div>
         </div>
+        <?php if ($exam['application_fee_pwd']): ?>
+        <div class="info-card">
+          <div class="info-icon"><i class="ph ph-currency-inr"></i></div>
+          <div class="info-body"><h4>PwD Category</h4><p>₹<?= number_format((float)$exam['application_fee_pwd']) ?></p></div>
+        </div>
+        <?php endif; ?>
       </div>
 
     <?php elseif ($tab === 'cutoffs'): ?>

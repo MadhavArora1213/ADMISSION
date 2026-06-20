@@ -216,8 +216,7 @@ body.bg-light{background:var(--cp-bg)}
 .college-breadcrumb i{font-size:.7rem;opacity:.6}
 
 .college-hero-card{
-  display:flex;justify-content:space-between;align-items:flex-end;
-  gap:24px;flex-wrap:wrap;margin-top:20px;
+  margin-top:20px;
 }
 .college-hero-main{display:flex;gap:20px;align-items:flex-start;flex:1;min-width:0}
 .college-hero-logo{
@@ -237,7 +236,10 @@ body.bg-light{background:var(--cp-bg)}
   display:flex;align-items:center;gap:5px;
   border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(6px);
 }
-.college-hero-actions{display:flex;gap:10px;flex-wrap:wrap;align-self:flex-end;align-items:center}
+.college-hero-actions{
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+  margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.15);
+}
 .college-hero-actions .college-applied-badge{
   display:inline-flex;white-space:nowrap;
   background:rgba(255,255,255,0.95);border-color:rgba(5,150,105,0.4);color:#059669;
@@ -666,11 +668,17 @@ body.bg-light{background:var(--cp-bg)}
 .college-news-item{
   padding:18px 20px;border:1.5px solid var(--cp-border);
   border-radius:14px;background:#fff;transition:all var(--cp-trans);
+  display:flex;gap:16px;align-items:flex-start;
 }
 .college-news-item:hover{border-color:rgba(37,99,235,.2);box-shadow:var(--cp-shadow-md)}
-.college-news-item h4{margin:8px 0 6px;color:var(--cp-text);font-size:.95rem;font-weight:700}
-.college-news-item p{margin:0;color:rgba(15,23,42,0.65);font-size:.87rem;line-height:1.6}
-.college-news-item a{
+.cn-thumb{flex:0 0 120px;width:120px;height:90px;border-radius:10px;overflow:hidden}
+.cn-thumb img{width:100%;height:100%;object-fit:cover}
+.cn-body{flex:1;min-width:0}
+.cn-body h4{margin:6px 0 4px;color:var(--cp-text);font-size:.95rem;font-weight:700}
+.cn-body h4 a{color:inherit;text-decoration:none}
+.cn-body h4 a:hover{color:var(--cp-blue)}
+.cn-body p{margin:0;color:rgba(15,23,42,0.65);font-size:.87rem;line-height:1.5}
+.cn-body a{
   display:inline-flex;align-items:center;gap:4px;margin-top:8px;
   color:var(--cp-blue);font-size:.82rem;font-weight:600;text-decoration:none;
 }
@@ -729,7 +737,7 @@ body.bg-light{background:var(--cp-bg)}
   .clc-img{width:100%;height:180px}
   .college-hero-title{font-size:1.35rem}
   .college-hero-card{flex-direction:column;align-items:stretch}
-  .college-hero-actions{justify-content:flex-start}
+  .college-hero-actions{justify-content:flex-start;border-top:none;padding-top:0;margin-top:12px}
   .college-detail-tabs{gap:0}
   .college-detail-tabs a{padding:12px 12px;font-size:.8rem}
   .college-tab-content{padding:18px}
@@ -741,4 +749,6 @@ body.bg-light{background:var(--cp-bg)}
   .college-faculty-grid{grid-template-columns:1fr}
   .college-info-grid{grid-template-columns:1fr 1fr}
   .college-gallery-grid{grid-template-columns:repeat(2,1fr)}
+  .college-news-item{flex-direction:column}
+  .cn-thumb{flex:none;width:100%;height:160px}
 }

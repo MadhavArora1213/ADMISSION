@@ -3,12 +3,14 @@ declare(strict_types=1);
 error_reporting(E_ALL);
 ini_set('display_errors', '0');
 
+if (session_status() === PHP_SESSION_NONE) session_start();
+
 require_once __DIR__ . '/admin/db.php';
 require_once __DIR__ . '/includes/college_helpers.php';
 require_once __DIR__ . '/includes/course_helpers.php';
 
 $slug = trim($_GET['slug'] ?? '');
-$tab  = trim($_GET['tab'] ?? 'info');
+$tab  = trim($_GET['tab'] ?? 'basic');
 $tabs = courseTabs();
 
 if ($slug === '') {
@@ -16,7 +18,7 @@ if ($slug === '') {
     exit;
 }
 if (!isset($tabs[$tab])) {
-    $tab = 'info';
+    $tab = 'basic';
 }
 
 $course = loadCourseBySlug($pdo, $slug);
@@ -29,15 +31,32 @@ if (!$course) {
 $course_id = $course['id'];
 $specs = getCourseSpecializations($pdo, $course_id);
 $careers = getCourseCareers($pdo, $course_id);
-$colleges = getCollegesForCourse($pdo, $course['course_name']);
 
 $pageTitle = $course['course_name'] . ' 2026: Scope, Fees, Specializations, Jobs & Top Colleges';
 $metaDesc = 'Details about ' . $course['course_name'] . ' including average salary, eligibility, specializations, career paths and top colleges in India.';
 
 $tabIcons = [
-    'info'=>'ph-info', 'specializations'=>'ph-git-branch', 'careers'=>'ph-briefcase', 'colleges'=>'ph-buildings'
+    'basic'           => 'ph-info',
+    'scope'           => 'ph-compass',
+    'salary'          => 'ph-money',
+    'specializations' => 'ph-git-branch',
+    'careers'         => 'ph-briefcase',
 ];
 
+function recruiterInitials(string $name): string {
+    $words = explode(' ', trim($name));
+    if (count($words) >= 2) {
+        return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+    }
+    return strtoupper(substr($name, 0, 2));
+}
+
+$recruiters = [];
+if (!empty($course['top_recruiters'])) {
+    $recruiters = json_decode($course['top_recruiters'], true) ?: [];
+}
+
+$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -50,61 +69,119 @@ $tabIcons = [
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=<?= time() ?>">
-  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/college-pages.css?v=<?= time() ?>">
+  <link rel="stylesheet" href="<?= $basePath ?>/assets/css/style.css?v=<?= time() ?>">
+  <link rel="stylesheet" href="<?= $basePath ?>/assets/css/college-pages.css?v=<?= time() ?>">
   <style>
     .course-hero { background: linear-gradient(135deg, #0B2447 0%, #19376D 100%), url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.627 0l.83.83-49.12 49.12L5.5 49.12 54.627 0zM0 54.627l.83.83L5.5 54.627 0 49.12v5.507z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E"); padding: 80px 0 60px; color: #fff; position: relative; overflow: hidden; }
     .course-hero::after { content:''; position:absolute; bottom:0; left:0; right:0; height:40px; background:linear-gradient(to top, rgba(255,255,255,0.1), transparent); pointer-events:none; }
     .course-hero-inner { display: flex; gap: 32px; align-items: flex-start; position: relative; z-index: 2; }
     .course-hero-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 3rem; font-weight: 800; margin: 0 0 20px 0; line-height: 1.2; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
     .course-hero-chips { display: flex; flex-wrap: wrap; gap: 12px; }
-    .course-hero-chips span { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 30px; font-size: 0.95rem; font-weight: 600; backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .course-hero-chips span { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 30px; font-size: 0.95rem; font-weight: 600; backdrop-filter: blur(8px); }
     .course-hero-chips span i { font-size: 1.2rem; }
     .course-hero-actions { margin-left: auto; display: flex; flex-direction: column; gap: 12px; }
     .course-btn-primary { background: #fff; color: var(--cp-blue); padding: 16px 32px; border-radius: 50px; font-weight: 800; text-decoration: none; text-align: center; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.15); font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px; }
     .course-btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0,0,0,0.2); background: #f8fafc; color: #0f172a; }
-    
-    .course-tabs-sticky { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.95); border-bottom: 1px solid var(--cp-border); box-shadow: 0 4px 20px rgba(0,0,0,0.04); backdrop-filter: blur(10px); }
-    .shiksha-tabs-nav ul { display: flex; list-style: none; padding: 0; margin: 0; overflow-x: auto; gap: 40px; }
-    .shiksha-tabs-nav li a { display: flex; align-items: center; gap: 10px; padding: 22px 0; color: rgba(15,23,42,0.45); font-weight: 700; text-decoration: none; border-bottom: 3px solid transparent; transition: all 0.3s ease; white-space: nowrap; font-size: 1rem; }
-    .shiksha-tabs-nav li a:hover { color: var(--cp-blue); }
+
+    .course-tabs-sticky { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.97); border-bottom: 1px solid var(--cp-border); box-shadow: 0 4px 20px rgba(0,0,0,0.04); backdrop-filter: blur(10px); }
+    .shiksha-tabs-nav ul { display: flex; list-style: none; padding: 0; margin: 0; overflow-x: auto; gap: 0; }
+    .shiksha-tabs-nav li a { display: flex; align-items: center; gap: 10px; padding: 20px 24px; color: rgba(15,23,42,0.45); font-weight: 700; text-decoration: none; border-bottom: 3px solid transparent; transition: all 0.3s ease; white-space: nowrap; font-size: 0.95rem; }
+    .shiksha-tabs-nav li a:hover { color: var(--cp-blue); background: rgba(11,36,71,0.02); }
     .shiksha-tabs-nav li a.active { color: var(--cp-blue); border-bottom-color: var(--cp-blue); }
-    
+
     .tab-content { padding: 50px 0; min-height: 50vh; }
-    
+
     .info-card { background: #fff; border-radius: 20px; padding: 40px; border: 1px solid var(--cp-border); box-shadow: 0 10px 40px rgba(0,0,0,0.03); margin-bottom: 32px; position: relative; overflow: hidden; }
     .info-card::before { content:''; position:absolute; left:0; top:0; width:6px; height:100%; background: linear-gradient(to bottom, var(--cp-blue), #19376D); border-radius: 20px 0 0 20px; }
-    .info-card-title { font-size: 1.6rem; font-weight: 800; color: var(--cp-blue); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
-    .info-card-title i { color: #19376D; background: rgba(11,36,71,0.06); padding: 10px; border-radius: 12px; font-size: 1.5rem; }
-    .info-card-content { font-size: 1.1rem; line-height: 1.8; color: rgba(15,23,42,0.65); }
+    .info-card-title { font-size: 1.5rem; font-weight: 800; color: var(--cp-blue); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+    .info-card-title i { color: #19376D; background: rgba(11,36,71,0.06); padding: 10px; border-radius: 12px; font-size: 1.4rem; }
+    .info-card-content { font-size: 1.08rem; line-height: 1.8; color: rgba(15,23,42,0.65); }
+
+    .highlight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px; }
+    .highlight-box { background: #fff; border: 1px solid var(--cp-border); border-radius: 16px; padding: 24px; text-align: center; transition: all 0.3s ease; }
+    .highlight-box:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.06); }
+    .highlight-box i { font-size: 2rem; color: var(--cp-blue); margin-bottom: 10px; display: block; }
+    .highlight-box .hl-val { font-size: 1.4rem; font-weight: 800; color: #0f172a; display: block; margin-bottom: 4px; }
+    .highlight-box .hl-label { font-size: 0.85rem; color: rgba(15,23,42,0.45); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .recruiter-grid { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 24px; }
+    .recruiter-item { display: flex; align-items: center; gap: 14px; background: #fff; border: 1px solid var(--cp-border); border-radius: 14px; padding: 14px 20px; transition: all 0.3s ease; flex: 0 0 auto; }
+    .recruiter-item:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.06); border-color: var(--cp-blue); transform: translateY(-2px); }
+    .recruiter-logo { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; background: var(--cp-blue); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; overflow: hidden; }
+    .recruiter-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .recruiter-name { font-weight: 700; color: #0f172a; font-size: 0.95rem; white-space: nowrap; }
+
+    .salary-overview { background: #fff; border-radius: 20px; border: 1px solid var(--cp-border); overflow: hidden; margin-bottom: 32px; }
+    .salary-overview-header { background: linear-gradient(135deg, #0B2447, #19376D); padding: 32px 40px; color: #fff; }
+    .salary-overview-header h3 { margin: 0; font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+    .salary-range-row { display: flex; align-items: center; gap: 24px; padding: 28px 40px; border-bottom: 1px solid rgba(15,23,42,0.06); }
+    .salary-range-row:last-child { border-bottom: none; }
+    .salary-range-label { font-weight: 700; color: #0f172a; font-size: 1rem; min-width: 140px; }
+    .salary-range-bar { flex: 1; height: 10px; background: rgba(11,36,71,0.06); border-radius: 10px; position: relative; overflow: hidden; }
+    .salary-range-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, #0B2447, #19376D); transition: width 1s ease; }
+    .salary-range-val { font-weight: 800; color: var(--cp-blue); font-size: 1.1rem; min-width: 120px; text-align: right; }
 
     .specs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-top: 32px; }
     .spec-card { background: #fff; border: 1px solid var(--cp-border); border-radius: 20px; padding: 30px; transition: all 0.3s ease; display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden; }
     .spec-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(11,36,71,0.06); border-color: var(--cp-blue); }
-    .spec-card-icon { width: 50px; height: 50px; background: rgba(11,36,71,0.06); color: var(--cp-blue); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 8px; transition: all 0.3s ease; }
+    .spec-card-icon { width: 50px; height: 50px; background: rgba(11,36,71,0.06); color: var(--cp-blue); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; transition: all 0.3s ease; }
     .spec-card:hover .spec-card-icon { background: var(--cp-blue); color: #fff; transform: scale(1.1) rotate(5deg); }
-    .spec-card h4 { font-size: 1.25rem; color: #0f172a; margin: 0; font-weight: 800; }
-    .spec-card p { font-size: 1rem; color: rgba(15,23,42,0.45); margin: 0; line-height: 1.6; }
-    
+    .spec-card h4 { font-size: 1.2rem; color: #0f172a; margin: 0; font-weight: 800; }
+    .spec-card p { font-size: 0.98rem; color: rgba(15,23,42,0.5); margin: 0; line-height: 1.6; }
+    .spec-popular-badge { position: absolute; top: 16px; right: 16px; background: linear-gradient(135deg, #0B2447, #19376D); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
     .career-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px; margin-top: 32px; }
-    .career-card { background: #fff; border-radius: 20px; padding: 30px; border: 1px solid var(--cp-border); box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: all 0.3s ease; }
+    .career-card { background: #fff; border-radius: 20px; padding: 0; border: 1px solid var(--cp-border); box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: all 0.3s ease; overflow: hidden; }
     .career-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(11,36,71,0.08); border-color: var(--cp-blue); }
-    .career-role { font-size: 1.4rem; font-weight: 800; color: #0f172a; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
-    .career-role i { color: #19376D; font-size: 1.8rem; background: rgba(11,36,71,0.04); padding: 12px; border-radius: 14px; }
-    .career-salary-box { display: flex; background: #f8fafc; border-radius: 16px; padding: 20px; margin-bottom: 24px; border: 1px solid rgba(15,23,42,0.08); }
-    .career-salary-item { flex: 1; text-align: center; }
-    .career-salary-item:first-child { border-right: 1px solid rgba(15,23,42,0.08); }
-    .career-salary-label { font-size: 0.85rem; color: rgba(15,23,42,0.45); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-    .career-salary-val { font-size: 1.25rem; font-weight: 800; color: #0B2447; }
-    .career-companies { font-size: 0.95rem; color: rgba(15,23,42,0.65); line-height: 1.6; }
-    .career-companies strong { color: #0f172a; display: block; margin-bottom: 8px; font-weight: 700; }
-    
-    .clg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-top: 32px; }
-    .clg-mini-card { background: #fff; border: 1px solid var(--cp-border); border-radius: 20px; padding: 20px; display: flex; align-items: center; gap: 20px; text-decoration: none; transition: all 0.3s ease; }
-    .clg-mini-card:hover { box-shadow: 0 15px 35px rgba(0,0,0,0.06); border-color: var(--cp-blue); transform: translateX(5px); }
-    .clg-mini-img { width: 70px; height: 70px; border-radius: 14px; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .clg-mini-info h4 { font-size: 1.1rem; color: #0f172a; margin: 0 0 6px 0; font-weight: 800; line-height: 1.4; }
-    .clg-mini-info p { font-size: 0.9rem; color: rgba(15,23,42,0.45); margin: 0; display: flex; align-items: center; gap: 6px; }
+    .career-card-top { padding: 28px 28px 0; }
+    .career-role { font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+    .career-role i { color: #fff; font-size: 1.2rem; background: linear-gradient(135deg, #0B2447, #19376D); padding: 10px; border-radius: 12px; }
+    .career-growth { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-top: 8px; }
+    .career-growth.high { background: rgba(16,185,129,0.1); color: #059669; }
+    .career-growth.medium { background: rgba(245,158,11,0.1); color: #D97706; }
+    .career-growth.low { background: rgba(239,68,68,0.1); color: #DC2626; }
+    .career-salary-box { display: flex; margin: 20px 0 0; background: #f8fafc; border-top: 1px solid rgba(15,23,42,0.06); border-bottom: 1px solid rgba(15,23,42,0.06); }
+    .career-salary-item { flex: 1; text-align: center; padding: 18px 12px; }
+    .career-salary-item:first-child { border-right: 1px solid rgba(15,23,42,0.06); }
+    .career-salary-label { font-size: 0.78rem; color: rgba(15,23,42,0.45); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .career-salary-val { font-size: 1.2rem; font-weight: 800; color: #0B2447; }
+    .career-card-body { padding: 20px 28px 28px; }
+    .career-companies-label, .career-skills-label { font-size: 0.85rem; color: rgba(15,23,42,0.45); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .career-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .career-tag { background: rgba(11,36,71,0.05); color: var(--cp-blue); padding: 5px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+    .career-skills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .career-skill { background: rgba(16,185,129,0.08); color: #059669; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+
+    .section-header { margin-bottom: 8px; }
+    .section-header h2 { font-size: 1.8rem; font-weight: 800; color: var(--cp-blue); margin: 0 0 8px 0; }
+    .section-header p { color: rgba(15,23,42,0.45); font-size: 1.08rem; margin: 0; }
+
+    .empty-state { background: #fff; padding: 60px 20px; text-align: center; border-radius: 20px; border: 1px dashed rgba(15,23,42,0.15); }
+    .empty-state i { font-size: 3rem; color: rgba(15,23,42,0.2); margin-bottom: 12px; display: block; }
+    .empty-state p { font-size: 1.08rem; color: rgba(15,23,42,0.4); }
+
+    @media (max-width: 768px) {
+      .course-hero { padding: 70px 0 40px; }
+      .course-hero-inner { flex-direction: column; gap: 24px; }
+      .course-hero-title { font-size: 2rem; }
+      .course-hero-actions { margin-left: 0; width: 100%; }
+      .course-btn-primary { width: 100%; justify-content: center; }
+      .shiksha-tabs-nav ul { gap: 0; }
+      .shiksha-tabs-nav li a { padding: 16px 14px; font-size: 0.85rem; gap: 6px; }
+      .shiksha-tabs-nav li a i { font-size: 1.1rem; }
+      .tab-content { padding: 30px 0; }
+      .info-card { padding: 24px; }
+      .highlight-grid { grid-template-columns: repeat(2, 1fr); }
+      .specs-grid { grid-template-columns: 1fr; }
+      .career-grid { grid-template-columns: 1fr; }
+      .salary-range-row { flex-direction: column; align-items: flex-start; gap: 8px; padding: 20px 24px; }
+      .salary-range-val { text-align: left; }
+      .recruiter-item { flex: 1 1 calc(50% - 8px); min-width: 0; }
+    }
+    @media (max-width: 480px) {
+      .highlight-grid { grid-template-columns: 1fr; }
+      .recruiter-item { flex: 1 1 100%; }
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -120,22 +197,19 @@ $tabIcons = [
         <?php if(!empty($course['course_level'])): ?>
         <span><i class="ph ph-graduation-cap"></i> <?= htmlspecialchars((string)$course['course_level']) ?> Level</span>
         <?php endif; ?>
-        
         <?php if(!empty($course['duration_years'])): ?>
         <span><i class="ph ph-clock"></i> <?= htmlspecialchars((string)$course['duration_years']) ?> Years</span>
         <?php endif; ?>
-        
         <?php if(!empty($course['total_colleges_offering'])): ?>
-        <span><i class="ph ph-buildings"></i> Offered by <?= htmlspecialchars((string)$course['total_colleges_offering']) ?> Colleges</span>
+        <span><i class="ph ph-buildings"></i> <?= number_format((int)$course['total_colleges_offering']) ?>+ Colleges</span>
         <?php endif; ?>
-        
         <?php if(!empty($course['avg_salary_lpa'])): ?>
-        <span><i class="ph ph-currency-inr"></i> ₹<?= htmlspecialchars((string)$course['avg_salary_lpa']) ?> LPA Avg Salary</span>
+        <span><i class="ph ph-currency-inr"></i> ₹<?= htmlspecialchars((string)$course['avg_salary_lpa']) ?> LPA Avg</span>
         <?php endif; ?>
       </div>
     </div>
     <div class="course-hero-actions">
-      <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/colleges" class="course-btn-primary">
+      <a href="<?= $basePath ?>/colleges?course=<?= urlencode((string)($course['course_name'] ?? '')) ?>" class="course-btn-primary">
         Browse Colleges <i class="ph ph-arrow-right"></i>
       </a>
     </div>
@@ -159,133 +233,304 @@ $tabIcons = [
 
 <!-- CONTENT -->
 <div class="container tab-content">
-  <div class="container tab-content">
-    
-    <?php if ($tab === 'info'): ?>
-      <div class="info-card">
-        <h2 class="info-card-title"><i class="ph ph-info"></i> About <?= htmlspecialchars((string)($course['course_name'] ?? '')) ?></h2>
-        <div class="info-card-content">
-          <?= nl2br(htmlspecialchars((string)($course['description'] ?? 'Details not available.'))) ?>
-        </div>
-      </div>
-      
-      <div class="info-card">
-        <h2 class="info-card-title"><i class="ph ph-check-circle"></i> Eligibility Criteria</h2>
-        <div class="info-card-content">
-          <?= nl2br(htmlspecialchars((string)($course['eligibility'] ?? 'Details not available.'))) ?>
-        </div>
-      </div>
 
-      <div class="info-card">
-        <h2 class="info-card-title"><i class="ph ph-rocket"></i> Career Scope & Future</h2>
-        <div class="info-card-content">
-          <?= nl2br(htmlspecialchars((string)($course['career_scope'] ?? 'Details not available.'))) ?>
-        </div>
+  <?php if ($tab === 'basic'): ?>
+
+    <div class="highlight-grid">
+      <div class="highlight-box">
+        <i class="ph ph-graduation-cap"></i>
+        <span class="hl-val"><?= htmlspecialchars((string)($course['course_level'] ?? 'N/A')) ?></span>
+        <span class="hl-label">Course Level</span>
       </div>
-      
-      <?php if (!empty($course['top_recruiters'])): ?>
-      <div class="info-card" style="padding-top:30px;">
-        <h3 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;color:var(--cp-blue);display:flex;align-items:center;gap:10px;"><i class="ph ph-buildings" style="color:#19376D"></i> Top Recruiters</h3>
-        <div style="display:flex;flex-wrap:wrap;gap:12px;">
-          <?php 
-            $recs = json_decode($course['top_recruiters'], true);
-            if (!is_array($recs)) $recs = explode(',', $course['top_recruiters']);
-            foreach($recs as $tr): 
+      <div class="highlight-box">
+        <i class="ph ph-clock"></i>
+        <span class="hl-val"><?= htmlspecialchars((string)($course['duration_years'] ?? 'N/A')) ?> Year<?= ((int)($course['duration_years'] ?? 0)) > 1 ? 's' : '' ?></span>
+        <span class="hl-label">Duration</span>
+      </div>
+      <div class="highlight-box">
+        <i class="ph ph-currency-inr"></i>
+        <span class="hl-val">₹<?= htmlspecialchars((string)($course['avg_salary_lpa'] ?? 'N/A')) ?> LPA</span>
+        <span class="hl-label">Avg Salary</span>
+      </div>
+      <div class="highlight-box">
+        <i class="ph ph-buildings"></i>
+        <span class="hl-val"><?= number_format((int)($course['total_colleges_offering'] ?? 0)) ?>+</span>
+        <span class="hl-label">Colleges Offering</span>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h2 class="info-card-title"><i class="ph ph-info"></i> About <?= htmlspecialchars((string)($course['course_name'] ?? '')) ?></h2>
+      <div class="info-card-content">
+        <?= nl2br(htmlspecialchars((string)($course['description'] ?? 'Details not available.'))) ?>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h2 class="info-card-title"><i class="ph ph-check-circle"></i> Eligibility Criteria</h2>
+      <div class="info-card-content">
+        <?= nl2br(htmlspecialchars((string)($course['eligibility'] ?? 'Details not available.'))) ?>
+      </div>
+    </div>
+
+    <?php if (!empty($recruiters)): ?>
+    <div class="info-card">
+      <h2 class="info-card-title"><i class="ph ph-buildings"></i> Top Recruiters</h2>
+      <div class="recruiter-grid">
+        <?php foreach($recruiters as $tr): ?>
+          <?php
+            $rName = is_array($tr) ? ($tr['name'] ?? '') : (string)$tr;
+            $rLogo = is_array($tr) ? ($tr['logo'] ?? '') : '';
           ?>
-            <span style="background:var(--cp-light);border:1px solid rgba(15,23,42,0.08);padding:10px 20px;border-radius:30px;font-weight:700;font-size:0.95rem;color:var(--cp-blue);display:inline-flex;align-items:center;gap:6px;transition:all 0.3s ease;cursor:default;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 10px rgba(0,0,0,0.05)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'"><i class="ph ph-briefcase"></i> <?= htmlspecialchars(trim((string)$tr)) ?></span>
-          <?php endforeach; ?>
+          <div class="recruiter-item">
+            <div class="recruiter-logo">
+              <?php if (!empty($rLogo) && file_exists(__DIR__ . '/' . $rLogo)): ?>
+                <img src="<?= $basePath . '/' . htmlspecialchars($rLogo) ?>" alt="<?= htmlspecialchars($rName) ?>">
+              <?php else: ?>
+                <?= recruiterInitials($rName) ?>
+              <?php endif; ?>
+            </div>
+            <span class="recruiter-name"><?= htmlspecialchars($rName) ?></span>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+    <?php endif; ?>
+
+  <?php elseif ($tab === 'scope'): ?>
+
+    <div class="info-card">
+      <h2 class="info-card-title"><i class="ph ph-book-open"></i> About <?= htmlspecialchars((string)($course['course_name'] ?? '')) ?></h2>
+      <div class="info-card-content">
+        <?= nl2br(htmlspecialchars((string)($course['description'] ?? 'Details not available.'))) ?>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h2 class="info-card-title"><i class="ph ph-rocket"></i> Career Scope & Future</h2>
+      <div class="info-card-content">
+        <?= nl2br(htmlspecialchars((string)($course['career_scope'] ?? 'Details not available.'))) ?>
+      </div>
+    </div>
+
+    <?php if (!empty($careers)): ?>
+    <div class="info-card">
+      <h2 class="info-card-title"><i class="ph ph-chart-line-up"></i> Growth Outlook</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;">
+        <?php
+          $high = 0; $medium = 0; $low = 0;
+          foreach($careers as $c) {
+            $g = $c['growth_outlook'] ?? 'medium';
+            if ($g === 'high') $high++;
+            elseif ($g === 'low') $low++;
+            else $medium++;
+          }
+        ?>
+        <div style="background:rgba(16,185,129,0.08);border-radius:14px;padding:20px;text-align:center;">
+          <div style="font-size:2rem;font-weight:800;color:#059669;"><?= $high ?></div>
+          <div style="font-size:0.85rem;color:#059669;font-weight:700;text-transform:uppercase;">High Growth</div>
+        </div>
+        <div style="background:rgba(245,158,11,0.08);border-radius:14px;padding:20px;text-align:center;">
+          <div style="font-size:2rem;font-weight:800;color:#D97706;"><?= $medium ?></div>
+          <div style="font-size:0.85rem;color:#D97706;font-weight:700;text-transform:uppercase;">Medium Growth</div>
+        </div>
+        <div style="background:rgba(239,68,68,0.08);border-radius:14px;padding:20px;text-align:center;">
+          <div style="font-size:2rem;font-weight:800;color:#DC2626;"><?= $low ?></div>
+          <div style="font-size:0.85rem;color:#DC2626;font-weight:700;text-transform:uppercase;">Low Growth</div>
         </div>
       </div>
-      <?php endif; ?>
+    </div>
+    <?php endif; ?>
 
-    <?php elseif ($tab === 'specializations'): ?>
-      <h2 style="font-size:1.8rem;font-weight:800;color:var(--cp-blue);margin-bottom:8px">Popular Specializations</h2>
-      <p style="color:rgba(15,23,42,0.45);font-size:1.1rem;margin-bottom:32px">Explore the various branches and specialized fields within this course.</p>
-      
-      <?php if(empty($specs)): ?>
-        <div style="background:#fff;padding:60px 20px;text-align:center;border-radius:20px;border:1px dashed rgba(15,23,42,0.15)">
-          <i class="ph ph-empty" style="font-size:3rem;color:rgba(15,23,42,0.4);margin-bottom:10px"></i>
-          <p style="font-size:1.1rem;color:rgba(15,23,42,0.45)">No specific specializations listed for this course yet.</p>
+  <?php elseif ($tab === 'salary'): ?>
+
+    <div class="salary-overview">
+      <div class="salary-overview-header">
+        <h3><i class="ph ph-chart-line-up"></i> Salary Overview — <?= htmlspecialchars((string)($course['course_name'] ?? '')) ?></h3>
+      </div>
+      <?php if (!empty($course['salary_range_min']) && !empty($course['salary_range_max'])): ?>
+        <?php
+          $min = (float)$course['salary_range_min'];
+          $max = (float)$course['salary_range_max'];
+          $avg = (float)($course['avg_salary_lpa'] ?? 0);
+          $maxRef = max($max, 1);
+        ?>
+        <div class="salary-range-row">
+          <span class="salary-range-label">Minimum</span>
+          <div class="salary-range-bar"><div class="salary-range-fill" style="width:<?= round($min/$maxRef*100) ?>%"></div></div>
+          <span class="salary-range-val">₹<?= number_format($min, 1) ?> LPA</span>
+        </div>
+        <div class="salary-range-row">
+          <span class="salary-range-label">Average</span>
+          <div class="salary-range-bar"><div class="salary-range-fill" style="width:<?= round($avg/$maxRef*100) ?>%"></div></div>
+          <span class="salary-range-val">₹<?= number_format($avg, 1) ?> LPA</span>
+        </div>
+        <div class="salary-range-row">
+          <span class="salary-range-label">Maximum</span>
+          <div class="salary-range-bar"><div class="salary-range-fill" style="width:100%"></div></div>
+          <span class="salary-range-val">₹<?= number_format($max, 1) ?> LPA</span>
         </div>
       <?php else: ?>
-        <div class="specs-grid">
-          <?php foreach($specs as $s): ?>
-          <div class="spec-card">
-            <div class="spec-card-icon"><i class="ph ph-star"></i></div>
-            <h4><?= htmlspecialchars((string)$s['specialization_name']) ?></h4>
-            <p><?= htmlspecialchars((string)$s['description']) ?></p>
+        <div class="salary-range-row">
+          <span class="salary-range-label">Average Salary</span>
+          <div class="salary-range-bar"><div class="salary-range-fill" style="width:50%"></div></div>
+          <span class="salary-range-val">₹<?= htmlspecialchars((string)($course['avg_salary_lpa'] ?? 'N/A')) ?> LPA</span>
+        </div>
+      <?php endif; ?>
+    </div>
+
+    <?php if (!empty($recruiters)): ?>
+    <div class="info-card">
+      <h2 class="info-card-title"><i class="ph ph-buildings"></i> Top Recruiters</h2>
+      <div class="recruiter-grid">
+        <?php foreach($recruiters as $tr): ?>
+          <?php
+            $rName = is_array($tr) ? ($tr['name'] ?? '') : (string)$tr;
+            $rLogo = is_array($tr) ? ($tr['logo'] ?? '') : '';
+          ?>
+          <div class="recruiter-item">
+            <div class="recruiter-logo">
+              <?php if (!empty($rLogo) && file_exists(__DIR__ . '/' . $rLogo)): ?>
+                <img src="<?= $basePath . '/' . htmlspecialchars($rLogo) ?>" alt="<?= htmlspecialchars($rName) ?>">
+              <?php else: ?>
+                <?= recruiterInitials($rName) ?>
+              <?php endif; ?>
+            </div>
+            <span class="recruiter-name"><?= htmlspecialchars($rName) ?></span>
           </div>
-          <?php endforeach; ?>
-        </div>
-      <?php endif; ?>
+        <?php endforeach; ?>
+      </div>
+    </div>
+    <?php endif; ?>
 
-    <?php elseif ($tab === 'careers'): ?>
-      <h2 style="font-size:1.8rem;font-weight:800;color:var(--cp-blue);margin-bottom:8px">Career & Job Opportunities</h2>
-      <p style="color:rgba(15,23,42,0.45);font-size:1.1rem;margin-bottom:32px">Discover the top roles, salary expectations, and top hiring companies.</p>
-      
-      <?php if(empty($careers)): ?>
-        <div style="background:#fff;padding:60px 20px;text-align:center;border-radius:20px;border:1px dashed rgba(15,23,42,0.15)">
-          <i class="ph ph-empty" style="font-size:3rem;color:rgba(15,23,42,0.4);margin-bottom:10px"></i>
-          <p style="font-size:1.1rem;color:rgba(15,23,42,0.45)">No career data available right now.</p>
+    <?php if (!empty($careers)): ?>
+    <div class="section-header" style="margin-top:32px;">
+      <h2><i class="ph ph-money" style="color:var(--cp-blue)"></i> Salary by Role</h2>
+      <p>Expected salary range for different career roles after <?= htmlspecialchars((string)($course['course_name'] ?? '')) ?>.</p>
+    </div>
+    <div class="career-grid">
+      <?php foreach($careers as $cr): ?>
+      <div class="career-card">
+        <div class="career-card-top">
+          <div class="career-role">
+            <i class="ph ph-briefcase"></i>
+            <?= htmlspecialchars((string)$cr['job_role']) ?>
+          </div>
+          <span class="career-growth <?= htmlspecialchars((string)($cr['growth_outlook'] ?? 'medium')) ?>">
+            <i class="ph ph-trend-up"></i> <?= ucfirst(htmlspecialchars((string)($cr['growth_outlook'] ?? 'medium'))) ?> Growth
+          </span>
         </div>
-      <?php else: ?>
-        <div class="career-grid">
-          <?php foreach($careers as $cr): ?>
-          <div class="career-card">
+        <div class="career-salary-box">
+          <div class="career-salary-item">
+            <div class="career-salary-label">Fresher</div>
+            <div class="career-salary-val">₹<?= htmlspecialchars((string)$cr['fresher_salary_lpa']) ?>L</div>
+          </div>
+          <div class="career-salary-item">
+            <div class="career-salary-label">Experienced</div>
+            <div class="career-salary-val">₹<?= htmlspecialchars((string)$cr['experienced_salary_lpa']) ?>L</div>
+          </div>
+        </div>
+      </div>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
+  <?php elseif ($tab === 'specializations'): ?>
+
+    <div class="section-header">
+      <h2>Popular Specializations</h2>
+      <p>Explore the various branches and specialized fields within <?= htmlspecialchars((string)($course['course_name'] ?? '')) ?>.</p>
+    </div>
+
+    <?php if(empty($specs)): ?>
+      <div class="empty-state">
+        <i class="ph ph-empty"></i>
+        <p>No specializations listed for this course yet.</p>
+      </div>
+    <?php else: ?>
+      <div class="specs-grid">
+        <?php foreach($specs as $s): ?>
+        <div class="spec-card">
+          <?php if (!empty($s['is_popular'])): ?>
+            <span class="spec-popular-badge">Popular</span>
+          <?php endif; ?>
+          <div class="spec-card-icon"><i class="ph ph-git-branch"></i></div>
+          <h4><?= htmlspecialchars((string)$s['specialization_name']) ?></h4>
+          <p><?= htmlspecialchars((string)$s['description']) ?></p>
+        </div>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
+
+  <?php elseif ($tab === 'careers'): ?>
+
+    <div class="section-header">
+      <h2>Career Paths & Opportunities</h2>
+      <p>Discover the top roles, salary expectations, and skills needed after <?= htmlspecialchars((string)($course['course_name'] ?? '')) ?>.</p>
+    </div>
+
+    <?php if(empty($careers)): ?>
+      <div class="empty-state">
+        <i class="ph ph-empty"></i>
+        <p>No career data available right now.</p>
+      </div>
+    <?php else: ?>
+      <div class="career-grid">
+        <?php foreach($careers as $cr): ?>
+        <div class="career-card">
+          <div class="career-card-top">
             <div class="career-role">
               <i class="ph ph-briefcase"></i>
               <?= htmlspecialchars((string)$cr['job_role']) ?>
             </div>
-            
-            <div class="career-salary-box">
-              <div class="career-salary-item">
-                <div class="career-salary-label">Fresher</div>
-                <div class="career-salary-val">₹<?= htmlspecialchars((string)$cr['fresher_salary_lpa']) ?>L</div>
-              </div>
-              <div class="career-salary-item">
-                <div class="career-salary-label">Experienced</div>
-                <div class="career-salary-val">₹<?= htmlspecialchars((string)$cr['experienced_salary_lpa']) ?>L</div>
-              </div>
+            <span class="career-growth <?= htmlspecialchars((string)($cr['growth_outlook'] ?? 'medium')) ?>">
+              <i class="ph ph-trend-up"></i> <?= ucfirst(htmlspecialchars((string)($cr['growth_outlook'] ?? 'medium'))) ?> Growth
+            </span>
+          </div>
+          <div class="career-salary-box">
+            <div class="career-salary-item">
+              <div class="career-salary-label">Fresher</div>
+              <div class="career-salary-val">₹<?= htmlspecialchars((string)$cr['fresher_salary_lpa']) ?>L</div>
             </div>
-            
-            <div class="career-companies">
-              <strong><i class="ph ph-buildings"></i> Top Hiring Companies</strong>
-              <?php 
-                $comps = json_decode($cr['top_companies'] ?? '', true);
-                echo htmlspecialchars((string)(is_array($comps) ? implode(', ', $comps) : ($cr['top_companies'] ?? '')));
-              ?>
+            <div class="career-salary-item">
+              <div class="career-salary-label">Experienced</div>
+              <div class="career-salary-val">₹<?= htmlspecialchars((string)$cr['experienced_salary_lpa']) ?>L</div>
             </div>
           </div>
-          <?php endforeach; ?>
-        </div>
-      <?php endif; ?>
-
-    <?php elseif ($tab === 'colleges'): ?>
-      <h2 style="font-size:1.8rem;font-weight:800;color:var(--cp-blue);margin-bottom:8px">Top Colleges offering <?= htmlspecialchars((string)($course['course_name'] ?? 'this course')) ?></h2>
-      <p style="color:rgba(15,23,42,0.45);font-size:1.1rem;margin-bottom:32px">Find the best institutions across India offering this program.</p>
-      
-      <?php if(empty($colleges)): ?>
-        <div style="background:#fff;padding:60px 20px;text-align:center;border-radius:20px;border:1px dashed rgba(15,23,42,0.15)">
-          <i class="ph ph-empty" style="font-size:3rem;color:rgba(15,23,42,0.4);margin-bottom:10px"></i>
-          <p style="font-size:1.1rem;color:rgba(15,23,42,0.45)">No colleges found offering this course yet.</p>
-        </div>
-      <?php else: ?>
-        <div class="clg-grid">
-          <?php foreach($colleges as $clg): ?>
-          <a href="<?= collegeUrl($clg['slug'] ?? '') ?>" class="clg-mini-card">
-            <img src="<?= cImg($clg['logo'] ?? '') ?>" class="clg-mini-img" alt="<?= htmlspecialchars((string)($clg['name'] ?? '')) ?>">
-            <div class="clg-mini-info">
-              <h4><?= htmlspecialchars((string)($clg['name'] ?? '')) ?></h4>
-              <p><i class="ph ph-map-pin" style="color:var(--cp-blue)"></i> <?= htmlspecialchars((string)($clg['city'] ?? '')) ?>, <?= htmlspecialchars((string)($clg['state_name'] ?? 'India')) ?></p>
+          <div class="career-card-body">
+            <?php
+              $comps = json_decode($cr['top_companies'] ?? '[]', true);
+              if (!is_array($comps)) $comps = [];
+            ?>
+            <?php if (!empty($comps)): ?>
+            <div class="career-companies-label"><i class="ph ph-buildings"></i> Top Hiring Companies</div>
+            <div class="career-tags">
+              <?php foreach($comps as $comp): ?>
+                <span class="career-tag"><?= htmlspecialchars((string)$comp) ?></span>
+              <?php endforeach; ?>
             </div>
-          </a>
-          <?php endforeach; ?>
-        </div>
-      <?php endif; ?>
+            <?php endif; ?>
 
+            <?php
+              $skills = json_decode($cr['skills_required'] ?? '[]', true);
+              if (!is_array($skills)) $skills = [];
+            ?>
+            <?php if (!empty($skills)): ?>
+            <div class="career-skills-label"><i class="ph ph-lightning"></i> Skills Required</div>
+            <div class="career-skills">
+              <?php foreach($skills as $skill): ?>
+                <span class="career-skill"><?= htmlspecialchars((string)$skill) ?></span>
+              <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
     <?php endif; ?>
 
-  </div>
+  <?php endif; ?>
+
 </div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

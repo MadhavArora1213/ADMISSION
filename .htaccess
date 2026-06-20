@@ -30,11 +30,11 @@ Options +FollowSymLinks
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^college/([a-zA-Z0-9-]+)/([a-zA-Z0-9-]+)/?$ college.php?slug=$1&tab=$2 [QSA,L]
+    RewriteRule ^college/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/?$ college.php?slug=$1&tab=$2 [QSA,L]
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^college/([a-zA-Z0-9-]+)/?$ college.php?slug=$1 [QSA,L]
+    RewriteRule ^college/([a-zA-Z0-9_-]+)/?$ college.php?slug=$1 [QSA,L]
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d

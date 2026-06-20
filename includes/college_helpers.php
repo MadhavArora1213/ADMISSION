@@ -42,6 +42,7 @@ function collegeTabs(): array {
         'admissions'     => 'Admissions',
         'placements'     => 'Placements',
         'cutoffs'        => 'Cut-Offs',
+        'seat_matrix'    => 'Seat Matrix',
         'rankings'       => 'Rankings',
         'gallery'        => 'Gallery',
         'infrastructure' => 'Infrastructure',

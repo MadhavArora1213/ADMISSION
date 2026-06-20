@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
+if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/admin/db.php';
 require_once __DIR__ . '/includes/exam_helpers.php';
+require_once __DIR__ . '/includes/college_helpers.php';
 
 $level = $_GET['level'] ?? 'all';
 $mode  = $_GET['mode'] ?? 'all';
@@ -29,6 +31,16 @@ $stmt = $pdo->prepare("SELECT * FROM exams WHERE $whereSql ORDER BY applicants_l
 $stmt->execute($params);
 $exams = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$stats = [
+    'total'    => cCol($pdo, "SELECT COUNT(*) FROM exams WHERE status != 'cancelled'"),
+    'national' => cCol($pdo, "SELECT COUNT(*) FROM exams WHERE status != 'cancelled' AND exam_level='national'"),
+    'state'    => cCol($pdo, "SELECT COUNT(*) FROM exams WHERE status != 'cancelled' AND exam_level='state'"),
+    'online'   => cCol($pdo, "SELECT COUNT(*) FROM exams WHERE status != 'cancelled' AND exam_mode='online'"),
+    'offline'  => cCol($pdo, "SELECT COUNT(*) FROM exams WHERE status != 'cancelled' AND exam_mode='offline'"),
+];
+
+$levelLabels = ['national'=>'National Level','state'=>'State Level','university'=>'University Level','institute'=>'Institute Level'];
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,106 +48,211 @@ $exams = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Top Entrance Exams in India 2026 - AdmissionSeason</title>
+  <meta name="description" content="List of top entrance exams in India 2026 for Engineering, Medical, Management, Law and more. Check exam dates, eligibility, pattern and syllabus.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=<?= time() ?>">
-  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/college-pages.css?v=<?= time() ?>">
+  <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
   <style>
-    .exams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
-    .exam-card { background: var(--cp-card); border-radius: 16px; border: 1px solid var(--cp-border); padding: 24px; transition: var(--cp-trans); display: flex; flex-direction: column; height: 100%; box-shadow: var(--cp-shadow); }
-    .exam-card:hover { transform: translateY(-4px); box-shadow: var(--cp-shadow-lg); border-color: var(--cp-blue); }
-    .exam-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
-    .exam-logo { width: 64px; height: 64px; border-radius: 12px; object-fit: contain; background: #fff; border: 1px solid rgba(15,23,42,0.08); padding: 4px; flex-shrink: 0; }
-    .exam-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.25rem; font-weight: 800; color: var(--cp-blue); margin: 0 0 4px 0; line-height: 1.3; }
-    .exam-abbr { font-size: 0.85rem; color: var(--cp-muted); background: var(--cp-light); padding: 2px 8px; border-radius: 6px; font-weight: 600; }
-    .exam-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; flex-grow: 1; }
-    .meta-item { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: rgba(15,23,42,0.65); }
-    .meta-item i { color: var(--cp-blue); font-size: 1.1rem; }
-    .exam-footer { border-top: 1px solid var(--cp-border); padding-top: 16px; display: flex; justify-content: space-between; align-items: center; }
-    .exam-btn { background: linear-gradient(135deg, var(--cp-blue), var(--cp-blue2)); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; font-size: 0.9rem; transition: var(--cp-trans); }
-    .exam-btn:hover { box-shadow: 0 8px 20px rgba(11,36,71,0.2); }
+    .exams-hero{background:linear-gradient(135deg,#0B2447 0%,#19376D 50%,#0B2447 100%),url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.627 0l.83.83-49.12 49.12L5.5 49.12 54.627 0zM0 54.627l.83.83L5.5 54.627 0 49.12v5.507z' fill='%23ffffff' fill-opacity='0.04' fill-rule='evenodd'/%3E%3C/svg%3E");padding:72px 0 48px;color:#fff;position:relative;overflow:hidden}
+    .exams-hero::before{content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(255,255,255,.06) 0%,transparent 70%);pointer-events:none}
+    .exams-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#0B2447,#19376D,#0B2447)}
+    .exams-hero .container{position:relative;z-index:2}
+    .exams-breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:.85rem;color:rgba(255,255,255,.5)}
+    .exams-breadcrumb a{color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s}
+    .exams-breadcrumb a:hover{color:#fff}
+    .exams-breadcrumb i{font-size:.7rem}
+    .exams-hero h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:2.5rem;font-weight:800;margin:0 0 10px;line-height:1.2;text-shadow:0 2px 20px rgba(0,0,0,.2)}
+    .exams-hero-sub{margin:0 0 28px;color:rgba(255,255,255,.7);font-size:1.08rem;max-width:600px}
+    .exams-hero-sub strong{color:#fff;font-weight:700}
+    .exams-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+    .exam-stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:18px 16px;text-align:center;backdrop-filter:blur(8px);transition:all .3s;text-decoration:none;color:inherit}
+    .exam-stat:hover{background:rgba(255,255,255,.16);transform:translateY(-2px)}
+    .exam-stat-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.6rem;font-weight:800;color:#fff;display:block;line-height:1}
+    .exam-stat-lbl{font-size:.72rem;color:rgba(255,255,255,.6);margin-top:4px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+    .exam-stat i{font-size:1.4rem;color:rgba(255,255,255,.5);margin-bottom:6px;display:block}
+    @media(max-width:768px){
+      .exams-hero{padding:60px 0 36px}
+      .exams-hero h1{font-size:1.6rem}
+      .exams-hero-sub{font-size:.95rem}
+      .exams-stats{grid-template-columns:repeat(3,1fr);gap:10px}
+      .exam-stat{padding:14px 10px}
+      .exam-stat-val{font-size:1.3rem}
+    }
+    @media(max-width:480px){
+      .exams-stats{grid-template-columns:repeat(2,1fr)}
+    }
+    .exams-layout{display:grid;grid-template-columns:260px 1fr;gap:28px;padding:36px 0 60px}
+    .exams-main{min-width:0}
+    .exams-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:8px}
+    .exams-head h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.35rem;font-weight:800;color:#0B2447;margin:0}
+    .exams-count{background:rgba(11,36,71,.06);color:#0B2447;padding:5px 14px;border-radius:20px;font-size:.82rem;font-weight:700;white-space:nowrap}
+    .exams-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px}
+    .exam-card{background:#fff;border-radius:16px;border:1.5px solid rgba(15,23,42,.06);padding:0;transition:all .25s;overflow:hidden;display:flex;flex-direction:column}
+    .exam-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.08);border-color:rgba(37,99,235,.2)}
+    .exam-card-top{padding:24px 24px 16px;display:flex;align-items:flex-start;gap:14px}
+    .exam-logo{width:60px;height:60px;border-radius:14px;object-fit:contain;background:#f8fafc;border:1.5px solid rgba(15,23,42,.06);padding:6px;flex-shrink:0}
+    .exam-info{flex:1;min-width:0}
+    .exam-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.05rem;font-weight:800;color:#0B2447;margin:0 0 4px;line-height:1.3}
+    .exam-name a{color:inherit;text-decoration:none}
+    .exam-name a:hover{color:#2563eb}
+    .exam-abbr-tag{display:inline-block;font-size:.75rem;color:#64748b;background:#f1f5f9;padding:2px 10px;border-radius:6px;font-weight:600}
+    .exam-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;padding:0 24px 20px;flex:1}
+    .exam-meta-item{display:flex;align-items:center;gap:7px;font-size:.83rem;color:rgba(15,23,42,.6)}
+    .exam-meta-item i{color:#2563eb;font-size:1rem;flex-shrink:0}
+    .exam-footer{border-top:1.5px solid rgba(15,23,42,.05);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;background:#fafbfc}
+    .exam-by{font-size:.78rem;color:rgba(15,23,42,.4);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+    .exam-detail-btn{display:inline-flex;align-items:center;gap:5px;padding:9px 20px;border-radius:10px;background:linear-gradient(135deg,#0B2447,#19376D);color:#fff;font-size:.82rem;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap}
+    .exam-detail-btn:hover{box-shadow:0 6px 16px rgba(11,36,71,.25);transform:translateY(-1px)}
+
+    .exams-empty{text-align:center;padding:60px 20px;color:#94a3b8}
+    .exams-empty i{font-size:3rem;margin-bottom:12px;display:block}
+    .exams-empty h3{font-size:1.1rem;color:#64748b;margin:0 0 6px}
+    .exams-empty p{font-size:.9rem;margin:0}
+
+    /* Sidebar filters */
+    .exam-filter-card{background:#fff;border-radius:14px;border:1.5px solid rgba(15,23,42,.06);padding:20px;position:sticky;top:100px}
+    .exam-filter-card h3{font-size:1rem;font-weight:800;color:#0B2447;margin:0 0 16px;display:flex;align-items:center;gap:8px}
+    .exam-filter-group{margin-bottom:20px}
+    .exam-filter-group:last-child{margin-bottom:0}
+    .exam-filter-title{font-size:.78rem;font-weight:700;color:rgba(15,23,42,.45);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+    .exam-filter-list{list-style:none;padding:0;margin:0}
+    .exam-filter-list li{margin:0}
+    .exam-filter-list a{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:10px;font-size:.88rem;color:rgba(15,23,42,.65);text-decoration:none;font-weight:500;transition:all .2s}
+    .exam-filter-list a:hover{background:rgba(37,99,235,.05);color:#2563eb}
+    .exam-filter-list a.active{background:rgba(37,99,235,.08);color:#2563eb;font-weight:700}
+    .exam-filter-list a i{font-size:1rem;opacity:.5}
+    .exam-filter-list a.active i{opacity:1}
+
+    @media(max-width:768px){
+      .exams-layout{grid-template-columns:1fr}
+      .exams-grid{grid-template-columns:1fr}
+      .exam-filter-card{position:static}
+      .exams-hero h1{font-size:1.5rem}
+    }
   </style>
 </head>
 <body class="bg-light">
 
 <?php include __DIR__ . '/includes/navbar.php'; ?>
 
-<div class="shiksha-breadcrumb" style="background:#fff;border-bottom:1px solid rgba(15,23,42,0.08);padding:15px 0">
+<!-- Hero -->
+<div class="exams-hero">
   <div class="container">
-    <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/index.php">Home</a>
-    <i class="ph ph-caret-right"></i>
-    <span>Entrance Exams</span>
+    <div class="exams-breadcrumb">
+      <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/index.php">Home</a>
+      <i class="ph ph-caret-right"></i>
+      <span>Exams</span>
+    </div>
+    <h1>Top Entrance Exams in India</h1>
+    <p class="exams-hero-sub">Explore engineering, medical, management, law & other entrance exams<?= $level !== 'all' ? ' — showing <strong>' . htmlspecialchars($levelLabels[$level] ?? $level) . '</strong> exams' : '' ?></p>
+    <div class="exams-stats">
+      <a href="<?= examsUrl() ?>" class="exam-stat">
+        <i class="ph ph-stack"></i>
+        <span class="exam-stat-val"><?= number_format($stats['total']) ?>+</span>
+        <span class="exam-stat-lbl">Total Exams</span>
+      </a>
+      <a href="<?= examsUrl(['level'=>'national']) ?>" class="exam-stat">
+        <i class="ph ph-flag"></i>
+        <span class="exam-stat-val"><?= number_format($stats['national']) ?>+</span>
+        <span class="exam-stat-lbl">National Level</span>
+      </a>
+      <a href="<?= examsUrl(['level'=>'state']) ?>" class="exam-stat">
+        <i class="ph ph-map-pin"></i>
+        <span class="exam-stat-val"><?= number_format($stats['state']) ?>+</span>
+        <span class="exam-stat-lbl">State Level</span>
+      </a>
+      <a href="<?= examsUrl(['mode'=>'online']) ?>" class="exam-stat">
+        <i class="ph ph-monitor"></i>
+        <span class="exam-stat-val"><?= number_format($stats['online']) ?>+</span>
+        <span class="exam-stat-lbl">Online Exams</span>
+      </a>
+      <a href="<?= examsUrl(['mode'=>'offline']) ?>" class="exam-stat">
+        <i class="ph ph-building-office"></i>
+        <span class="exam-stat-val"><?= number_format($stats['offline']) ?>+</span>
+        <span class="exam-stat-lbl">Offline Exams</span>
+      </a>
+    </div>
   </div>
 </div>
 
-<div class="container" style="padding:40px 0; display:grid; grid-template-columns:260px 1fr; gap:32px;">
-  
-  <aside class="college-filters">
-    <h3 style="font-size:1.1rem;margin-bottom:16px;font-weight:700">Filter Exams</h3>
-    
-    <div class="filter-group">
-      <div class="filter-title">Exam Level</div>
-      <ul class="filter-list">
-        <li><a href="<?= examsUrl(['level'=>'all','mode'=>$mode,'q'=>$search]) ?>" <?= $level==='all'?'style="font-weight:700;color:var(--cp-blue)"':'' ?>>All Levels</a></li>
-        <li><a href="<?= examsUrl(['level'=>'national','mode'=>$mode,'q'=>$search]) ?>" <?= $level==='national'?'style="font-weight:700;color:var(--cp-blue)"':'' ?>>National Level</a></li>
-        <li><a href="<?= examsUrl(['level'=>'state','mode'=>$mode,'q'=>$search]) ?>" <?= $level==='state'?'style="font-weight:700;color:var(--cp-blue)"':'' ?>>State Level</a></li>
-        <li><a href="<?= examsUrl(['level'=>'university','mode'=>$mode,'q'=>$search]) ?>" <?= $level==='university'?'style="font-weight:700;color:var(--cp-blue)"':'' ?>>University Level</a></li>
-      </ul>
-    </div>
+<div class="container">
+  <div class="exams-layout">
 
-    <div class="filter-group" style="margin-top:24px">
-      <div class="filter-title">Exam Mode</div>
-      <ul class="filter-list">
-        <li><a href="<?= examsUrl(['mode'=>'all','level'=>$level,'q'=>$search]) ?>" <?= $mode==='all'?'style="font-weight:700;color:var(--cp-blue)"':'' ?>>All Modes</a></li>
-        <li><a href="<?= examsUrl(['mode'=>'online','level'=>$level,'q'=>$search]) ?>" <?= $mode==='online'?'style="font-weight:700;color:var(--cp-blue)"':'' ?>>Online (CBT)</a></li>
-        <li><a href="<?= examsUrl(['mode'=>'offline','level'=>$level,'q'=>$search]) ?>" <?= $mode==='offline'?'style="font-weight:700;color:var(--cp-blue)"':'' ?>>Offline (Pen-Paper)</a></li>
-      </ul>
-    </div>
-  </aside>
+    <!-- Sidebar -->
+    <aside>
+      <div class="exam-filter-card">
+        <h3><i class="ph ph-funnel"></i> Filter Exams</h3>
 
-  <main>
-    <div style="margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;">
-      <h1 style="font-size:1.8rem;font-weight:800;color:var(--cp-blue)">Top Entrance Exams in India</h1>
-      <span style="color:var(--cp-muted);font-weight:600"><?= count($exams) ?> Exams Found</span>
-    </div>
-
-    <div class="exams-grid">
-      <?php foreach ($exams as $ex): ?>
-      <div class="exam-card">
-        <div class="exam-header">
-          <img src="<?= cImg($ex['conducting_body_logo']) ?>" class="exam-logo" alt="<?= htmlspecialchars($ex['exam_abbreviation']) ?>">
-          <div>
-            <h2 class="exam-title"><?= htmlspecialchars($ex['exam_name']) ?></h2>
-            <span class="exam-abbr"><?= htmlspecialchars($ex['exam_abbreviation']) ?></span>
-          </div>
+        <div class="exam-filter-group">
+          <div class="exam-filter-title">Exam Level</div>
+          <ul class="exam-filter-list">
+            <li><a href="<?= examsUrl(['level'=>'all','mode'=>$mode,'q'=>$search]) ?>" class="<?= $level==='all'?'active':'' ?>"><i class="ph ph-stack"></i> All Levels</a></li>
+            <li><a href="<?= examsUrl(['level'=>'national','mode'=>$mode,'q'=>$search]) ?>" class="<?= $level==='national'?'active':'' ?>"><i class="ph ph-flag"></i> National Level</a></li>
+            <li><a href="<?= examsUrl(['level'=>'state','mode'=>$mode,'q'=>$search]) ?>" class="<?= $level==='state'?'active':'' ?>"><i class="ph ph-map-pin"></i> State Level</a></li>
+            <li><a href="<?= examsUrl(['level'=>'university','mode'=>$mode,'q'=>$search]) ?>" class="<?= $level==='university'?'active':'' ?>"><i class="ph ph-buildings"></i> University Level</a></li>
+          </ul>
         </div>
-        <div class="exam-meta">
-          <div class="meta-item"><i class="ph ph-bank"></i> <?= ucfirst($ex['exam_level']) ?> Level</div>
-          <div class="meta-item"><i class="ph ph-laptop"></i> <?= ucfirst($ex['exam_mode']) ?> Mode</div>
-          <?php if($ex['applicants_last_year']): ?>
-          <div class="meta-item"><i class="ph ph-users"></i> <?= number_format($ex['applicants_last_year']/100000, 1) ?>L+ Applicants</div>
-          <?php endif; ?>
-          <div class="meta-item"><i class="ph ph-timer"></i> <?= $ex['duration_minutes'] ?> Mins</div>
-        </div>
-        <div class="exam-footer">
-          <span style="font-size:0.8rem;color:rgba(15,23,42,0.45);font-weight:600">By <?= htmlspecialchars($ex['conducting_body']) ?></span>
-          <a href="<?= examUrl($ex['exam_slug']) ?>" class="exam-btn">View Details</a>
+
+        <div class="exam-filter-group">
+          <div class="exam-filter-title">Exam Mode</div>
+          <ul class="exam-filter-list">
+            <li><a href="<?= examsUrl(['mode'=>'all','level'=>$level,'q'=>$search]) ?>" class="<?= $mode==='all'?'active':'' ?>"><i class="ph ph-squares-four"></i> All Modes</a></li>
+            <li><a href="<?= examsUrl(['mode'=>'online','level'=>$level,'q'=>$search]) ?>" class="<?= $mode==='online'?'active':'' ?>"><i class="ph ph-laptop"></i> Online (CBT)</a></li>
+            <li><a href="<?= examsUrl(['mode'=>'offline','level'=>$level,'q'=>$search]) ?>" class="<?= $mode==='offline'?'active':'' ?>"><i class="ph ph-pencil-simple"></i> Offline (Pen-Paper)</a></li>
+          </ul>
         </div>
       </div>
-      <?php endforeach; ?>
-    </div>
-    
-    <?php if (empty($exams)): ?>
-      <div style="text-align:center;padding:60px 20px;color:var(--cp-muted)">
-        <i class="ph ph-magnifying-glass" style="font-size:3rem;margin-bottom:10px"></i>
+    </aside>
+
+    <!-- Main -->
+    <main class="exams-main">
+      <div class="exams-head">
+        <h2>Showing <?= count($exams) ?> Exam<?= count($exams) !== 1 ? 's' : '' ?></h2>
+        <?php if ($level !== 'all' || $mode !== 'all' || $search !== ''): ?>
+        <a href="exams.php" style="font-size:.82rem;color:#2563eb;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px"><i class="ph ph-x-circle"></i> Clear Filters</a>
+        <?php endif; ?>
+      </div>
+
+      <?php if (!empty($exams)): ?>
+      <div class="exams-grid">
+        <?php foreach ($exams as $ex): ?>
+        <div class="exam-card">
+          <div class="exam-card-top">
+            <img src="<?= cImg($ex['conducting_body_logo']) ?>" class="exam-logo" alt="<?= htmlspecialchars($ex['exam_abbreviation']) ?>">
+            <div class="exam-info">
+              <h3 class="exam-name"><a href="<?= examUrl($ex['exam_slug']) ?>"><?= htmlspecialchars($ex['exam_name']) ?></a></h3>
+              <span class="exam-abbr-tag"><?= htmlspecialchars($ex['exam_abbreviation']) ?></span>
+            </div>
+          </div>
+          <div class="exam-meta">
+            <div class="exam-meta-item"><i class="ph ph-bank"></i> <?= ucfirst($ex['exam_level']) ?> Level</div>
+            <div class="exam-meta-item"><i class="ph ph-laptop"></i> <?= ucfirst($ex['exam_mode']) ?> Mode</div>
+            <?php if ($ex['applicants_last_year']): ?>
+            <div class="exam-meta-item"><i class="ph ph-users"></i> <?= number_format($ex['applicants_last_year']/100000, 1) ?>L+ Applicants</div>
+            <?php endif; ?>
+            <?php if ($ex['duration_minutes']): ?>
+            <div class="exam-meta-item"><i class="ph ph-timer"></i> <?= $ex['duration_minutes'] ?> Mins</div>
+            <?php endif; ?>
+          </div>
+          <div class="exam-footer">
+            <span class="exam-by">By <?= htmlspecialchars($ex['conducting_body'] ?: 'N/A') ?></span>
+            <a href="<?= examUrl($ex['exam_slug']) ?>" class="exam-detail-btn">View Details <i class="ph ph-arrow-right"></i></a>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <?php else: ?>
+      <div class="exams-empty">
+        <i class="ph ph-magnifying-glass"></i>
         <h3>No exams found</h3>
         <p>Try adjusting your filters or search query.</p>
       </div>
-    <?php endif; ?>
+      <?php endif; ?>
 
-  </main>
+    </main>
+  </div>
 </div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

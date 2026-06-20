@@ -92,6 +92,11 @@ $typeLabel    = ucwords(str_replace('_', ' ', $article['article_type']));
 $publishDate  = !empty($article['publish_at']) ? date('F d, Y', strtotime($article['publish_at'])) : '';
 $readingTime  = $article['reading_time_mins'] ?? max(1, (int)ceil(str_word_count(strip_tags($article['content_body'] ?? '')) / 200));
 
+$shareUrl   = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/news_details.php?slug=' . urlencode($slug);
+$shareImage = cImg($article['featured_image_url'] ?? '');
+$shareDesc  = mb_strimwidth(strip_tags($article['excerpt'] ?? $article['content_body'] ?? ''), 0, 160, '...');
+$siteName   = 'AdmissionSeason';
+
 // Fetch real tag names from the tags table using IDs stored in articles.tags
 $tags = [];
 if (!empty($article['tags'])) {
@@ -138,8 +143,55 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= htmlspecialchars($article['article_title']) ?> - AdmissionSeason</title>
-  <meta name="description" content="<?= htmlspecialchars($article['excerpt'] ?? '') ?>">
+  <title><?= htmlspecialchars($article['article_title']) ?> - <?= $siteName ?></title>
+  <meta name="description" content="<?= htmlspecialchars($shareDesc) ?>">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="<?= $shareUrl ?>">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="<?= $shareUrl ?>">
+  <meta property="og:title" content="<?= htmlspecialchars($article['article_title']) ?>">
+  <meta property="og:description" content="<?= htmlspecialchars($shareDesc) ?>">
+  <meta property="og:image" content="<?= $shareImage ?>">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="<?= $siteName ?>">
+  <meta property="og:locale" content="en_IN">
+  <?php if (!empty($article['category_name'])): ?>
+  <meta property="article:section" content="<?= htmlspecialchars($article['category_name']) ?>">
+  <?php endif; ?>
+  <?php if ($publishDate): ?>
+  <meta property="article:published_time" content="<?= date('c', strtotime($article['publish_at'])) ?>">
+  <?php endif; ?>
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="<?= $shareUrl ?>">
+  <meta name="twitter:title" content="<?= htmlspecialchars($article['article_title']) ?>">
+  <meta name="twitter:description" content="<?= htmlspecialchars($shareDesc) ?>">
+  <meta name="twitter:image" content="<?= $shareImage ?>">
+  <meta name="twitter:site" content="@AdmissionSeason">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'NewsArticle',
+    'headline' => $article['article_title'],
+    'description' => $shareDesc,
+    'datePublished' => $article['publish_at'] ?? '',
+    'author' => ['@type' => 'Organization', 'name' => $article['custom_author_name'] ?: $siteName],
+    'publisher' => [
+      '@type' => 'Organization',
+      'name' => $siteName,
+      'logo' => ['@type' => 'ImageObject', 'url' => 'https://images.unsplash.com/photo-1562774053-701939374585?w=200&q=80']
+    ],
+    'mainEntityOfPage' => $shareUrl,
+    'image' => $shareImage,
+    'articleSection' => $typeLabel,
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -233,9 +285,11 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
       <!-- Share Bar -->
       <div class="art-share-bar">
         <span>Share this article:</span>
-        <a href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']) ?>" target="_blank" class="share-btn share-fb"><i class="ph ph-facebook-logo"></i> Facebook</a>
-        <a href="https://twitter.com/intent/tweet?url=<?= urlencode('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']) ?>&text=<?= urlencode($article['article_title']) ?>" target="_blank" class="share-btn share-tw"><i class="ph ph-x-logo"></i> Twitter</a>
-        <a href="https://api.whatsapp.com/send?text=<?= urlencode($article['article_title'].' http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']) ?>" target="_blank" class="share-btn share-wa"><i class="ph ph-whatsapp-logo"></i> WhatsApp</a>
+        <a href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode($shareUrl) ?>" target="_blank" rel="noopener noreferrer" class="share-btn share-fb"><i class="ph ph-facebook-logo"></i> Facebook</a>
+        <a href="https://twitter.com/intent/tweet?url=<?= urlencode($shareUrl) ?>&text=<?= urlencode($article['article_title'] . ' — ' . $siteName) ?>" target="_blank" rel="noopener noreferrer" class="share-btn share-tw"><i class="ph ph-x-logo"></i> X</a>
+        <a href="https://api.whatsapp.com/send?text=<?= urlencode($article['article_title'] . ' ' . $shareUrl) ?>" target="_blank" rel="noopener noreferrer" class="share-btn share-wa"><i class="ph ph-whatsapp-logo"></i> WhatsApp</a>
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?= urlencode($shareUrl) ?>" target="_blank" rel="noopener noreferrer" class="share-btn share-li"><i class="ph ph-linkedin-logo"></i> LinkedIn</a>
+        <a href="https://t.me/share/url?url=<?= urlencode($shareUrl) ?>&text=<?= urlencode($article['article_title']) ?>" target="_blank" rel="noopener noreferrer" class="share-btn share-tg"><i class="ph ph-telegram-logo"></i> Telegram</a>
       </div>
 
       <!-- ═══ NPS RATING WIDGET ═══ -->

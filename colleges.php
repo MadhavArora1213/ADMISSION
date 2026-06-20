@@ -12,6 +12,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $type   = $_GET['type'] ?? 'all';
 $state  = isset($_GET['state']) ? (int)$_GET['state'] : 0;
 $search = trim($_GET['q'] ?? '');
+$course = trim($_GET['course'] ?? '');
 $sort   = $_GET['sort'] ?? 'featured';
 $page   = max(1, (int)($_GET['page'] ?? 1));
 $perPage = 20;
@@ -30,6 +31,10 @@ if ($type !== 'all') {
 if ($state > 0) {
     $where[] = 'c.state_id = :state';
     $params['state'] = $state;
+}
+if ($course !== '') {
+    $where[] = 'EXISTS (SELECT 1 FROM college_courses cc WHERE cc.college_id = c.id AND cc.course_name LIKE :course)';
+    $params['course'] = '%' . $course . '%';
 }
 if ($search !== '') {
     $where[] = '(c.name LIKE :q OR ci.name LIKE :q OR s.name LIKE :q)';
@@ -153,7 +158,7 @@ $pageTitle = 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions
       <span>Colleges</span>
     </div>
     <h1 class="shiksha-title">Find Your Dream College in India</h1>
-    <p class="college-list-sub"><?= number_format($total) ?> colleges found<?= $search ? ' for "' . htmlspecialchars($search) . '"' : '' ?><?= $state > 0 ? ' in ' . htmlspecialchars(array_column($states, 'name', 'id')[$state] ?? '') : '' ?></p>
+    <p class="college-list-sub"><?= number_format($total) ?> colleges found<?= $course ? ' offering <strong>' . htmlspecialchars($course) . '</strong>' : '' ?><?= $search ? ' for "' . htmlspecialchars($search) . '"' : '' ?><?= $state > 0 ? ' in ' . htmlspecialchars(array_column($states, 'name', 'id')[$state] ?? '') : '' ?></p>
     <!-- Quick stats -->
     <div class="cl-stats-bar">
       <div class="cl-stat">
@@ -181,7 +186,7 @@ $pageTitle = 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions
   <div class="container">
     <div class="shiksha-tabs">
       <?php foreach (['all' => 'All Colleges', 'govt' => '🏛️ Government', 'private' => '🏢 Private', 'deemed' => '🎓 Deemed', 'autonomous' => '⚙️ Autonomous'] as $k => $label): ?>
-      <a href="<?= collegesUrl(array_filter(['type' => $k !== 'all' ? $k : null, 'state' => $state ?: null, 'q' => $search ?: null, 'sort' => $sort !== 'featured' ? $sort : null])) ?>"
+      <a href="<?= collegesUrl(array_filter(['type' => $k !== 'all' ? $k : null, 'state' => $state ?: null, 'q' => $search ?: null, 'course' => $course ?: null, 'sort' => $sort !== 'featured' ? $sort : null])) ?>"
          class="<?= $type === $k ? 'active' : '' ?>"><?= $label ?></a>
       <?php endforeach; ?>
     </div>
@@ -199,6 +204,7 @@ $pageTitle = 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions
       <div class="college-filter-bar">
         <form method="get" class="college-search-form">
           <?php if ($type !== 'all'): ?><input type="hidden" name="type" value="<?= htmlspecialchars($type) ?>"><?php endif; ?>
+          <?php if ($course !== ''): ?><input type="hidden" name="course" value="<?= htmlspecialchars($course) ?>"><?php endif; ?>
           <?php if ($sort !== 'featured'): ?><input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>"><?php endif; ?>
           <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="Search college, city or state…" id="college-search-input">
           <select name="state">
@@ -211,12 +217,22 @@ $pageTitle = 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions
         </form>
       </div>
 
+      <?php if ($course !== ''): ?>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 24px;background:#fff;border-bottom:1px solid rgba(15,23,42,0.06);">
+        <span style="font-size:.85rem;color:rgba(15,23,42,0.5);font-weight:600;">Filtered by course:</span>
+        <span style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0B2447,#19376D);color:#fff;padding:6px 16px;border-radius:20px;font-size:.85rem;font-weight:700;">
+          <i class="ph ph-graduation-cap"></i> <?= htmlspecialchars($course) ?>
+          <a href="<?= collegesUrl(array_filter(['type'=>$type!=='all'?$type:null,'state'=>$state?:null,'q'=>$search?:null,'sort'=>$sort!=='featured'?$sort:null])) ?>" style="color:#fff;text-decoration:none;margin-left:4px;opacity:.8;" title="Remove filter"><i class="ph ph-x-circle"></i></a>
+        </span>
+      </div>
+      <?php endif; ?>
+
       <!-- Sort bar -->
       <div class="sort-bar">
         <label>Sort by:</label>
         <select onchange="window.location=this.value" id="sort-select">
           <?php foreach (['featured'=>'Featured First','rating'=>'Top Rated','nirf'=>'NIRF Rank','name'=>'Name A-Z','newest'=>'Newest'] as $sk=>$sl): ?>
-          <option value="<?= collegesUrl(array_filter(['type'=>$type!=='all'?$type:null,'state'=>$state?:null,'q'=>$search?:null,'sort'=>$sk,'page'=>null])) ?>" <?= $sort===$sk?'selected':'' ?>><?= $sl ?></option>
+          <option value="<?= collegesUrl(array_filter(['type'=>$type!=='all'?$type:null,'state'=>$state?:null,'q'=>$search?:null,'course'=>$course?:null,'sort'=>$sk,'page'=>null])) ?>" <?= $sort===$sk?'selected':'' ?>><?= $sl ?></option>
           <?php endforeach; ?>
         </select>
         <span class="sort-result-count">Showing <?= (($page-1)*$perPage)+1 ?>–<?= min($page*$perPage,$total) ?> of <?= number_format($total) ?> colleges</span>

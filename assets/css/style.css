@@ -3200,7 +3200,9 @@ select {
   position: absolute;
   top: 100%;
   left: 0;
-  width: 750px;
+  width: max-content;
+  min-width: 500px;
+  max-width: 900px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -3208,7 +3210,7 @@ select {
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.6);
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 30px;
   padding: 30px;
   visibility: hidden;
@@ -3271,6 +3273,10 @@ select {
   border-bottom: none !important;
   background: transparent !important;
   transition: transform 0.2s, color 0.2s !important;
+  white-space: normal !important;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
 }
 
 .mega-col ul li a:hover {
@@ -4201,6 +4207,8 @@ select {
 .share-fb { background: #19376D; color: #fff; }
 .share-tw { background: #000; color: #fff; }
 .share-wa { background: #0B2447; color: #fff; }
+.share-li { background: #0a66c2; color: #fff; }
+.share-tg { background: #0088cc; color: #fff; }
 
 /* --- Related Articles --- */
 .art-related {

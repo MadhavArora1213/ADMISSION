@@ -36,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
 
             $stmt = $pdo->prepare("
-                INSERT INTO college_faculty (id, college_id, faculty_name, designation, department, qualification, experience_years, photo_url, research_papers) 
-                VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO college_faculty (id, college_id, faculty_name, designation, department, qualification, experience_years, photo_url, research_papers, linkedin_url, specialization, phd_from) 
+                VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $college_id,
@@ -47,7 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_POST['qualification'] ?: null,
                 $_POST['experience_years'] ?: null,
                 $photo_url,
-                $_POST['research_papers'] ?: 0
+                $_POST['research_papers'] ?: 0,
+                $_POST['linkedin_url'] ?: null,
+                $_POST['specialization'] ?: null,
+                $_POST['phd_from'] ?: null
             ]);
             header("Location: college_faculty.php?college_id=$college_id&msg=added");
             exit;
@@ -175,6 +178,9 @@ $faculty = $stmt->fetchAll();
                             <div class="form-group"><label>Qualification</label><input type="text" name="qualification" class="form-control" placeholder="e.g. Ph.D"></div>
                             <div class="form-group"><label>Experience (Years)</label><input type="number" name="experience_years" class="form-control"></div>
                             <div class="form-group"><label>Research Papers</label><input type="number" name="research_papers" class="form-control" value="0"></div>
+                            <div class="form-group"><label>Specialization</label><input type="text" name="specialization" class="form-control" placeholder="e.g. Machine Learning"></div>
+                            <div class="form-group"><label>PhD From</label><input type="text" name="phd_from" class="form-control" placeholder="e.g. IIT Bombay"></div>
+                            <div class="form-group"><label>LinkedIn URL</label><input type="url" name="linkedin_url" class="form-control" placeholder="https://linkedin.com/in/..."></div>
                             <div class="form-group"><label>Upload Photo</label><input type="file" name="photo_file" class="form-control" accept="image/*"></div>
                             <div class="form-group"><label>OR Photo URL</label><input type="url" name="photo_url" class="form-control"></div>
                         </div>
