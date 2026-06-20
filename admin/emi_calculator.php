@@ -142,10 +142,10 @@ if ($tab === 'config') {
         tr:hover { background-color: rgba(0,0,0,0.015); }
         
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; white-space: nowrap;}
-        .b-green { background:#dcfce7; color:#166534; }
-        .b-gray { background:#f1f5f9; color:#475569; }
+        .b-green { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .b-gray { background:#F8FAFC; color:rgba(15,23,42,0.65); }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); }
         
         .btn-primary { padding: 12px 24px; font-size: 0.95rem; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;}
         .btn-primary:hover { opacity: 0.9; }
@@ -167,11 +167,11 @@ if ($tab === 'config') {
         .dynamic-row .form-group label { font-size: 0.75rem; }
         .dynamic-row .form-group input { padding: 8px 12px; font-size: 0.9rem;}
         
-        .btn-danger-sm { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight:bold; height: 36px;}
-        .btn-danger-sm:hover { background: #fecaca; }
+        .btn-danger-sm { background: rgba(15,23,42,0.06); color: #0B2447; border: 1px solid rgba(15,23,42,0.06); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight:bold; height: 36px;}
+        .btn-danger-sm:hover { background: rgba(15,23,42,0.06); }
         
         .btn-secondary-sm { background: #fff; color: var(--text-dark); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; margin-top: 10px;}
-        .btn-secondary-sm:hover { background: #f1f5f9; }
+        .btn-secondary-sm:hover { background: #F8FAFC; }
     </style>
 </head>
 <body>
@@ -206,7 +206,7 @@ if ($tab === 'config') {
                     
                     <div style="margin-bottom:24px; display:flex; align-items:center; gap:10px;">
                         <input type="checkbox" name="is_active" id="is_active" value="1" <?php echo $config['is_active'] ? 'checked' : ''; ?> style="width:20px; height:20px; cursor:pointer;">
-                        <label for="is_active" style="font-weight:700; color:#1e293b; font-size:1.1rem; cursor:pointer;">Enable Calculator on Frontend</label>
+                        <label for="is_active" style="font-weight:700; color:rgba(15,23,42,0.9); font-size:1.1rem; cursor:pointer;">Enable Calculator on Frontend</label>
                     </div>
 
                     <div class="form-grid">
@@ -361,7 +361,7 @@ if ($tab === 'config') {
                         </div>
                         <div style="background:#fff; border:1px solid var(--border-color); padding:10px 20px; border-radius:8px;">
                             <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Loan Leads (Clicks)</div>
-                            <div style="font-size:1.5rem; font-weight:800; color:#166534;"><?php echo number_format($stat_leads); ?></div>
+                            <div style="font-size:1.5rem; font-weight:800; color:#0B2447;"><?php echo number_format($stat_leads); ?></div>
                         </div>
                     </div>
                     <form method="GET">
@@ -416,7 +416,7 @@ if ($tab === 'config') {
                                             $emi = json_decode($s['emi_results'], true);
                                             if($emi && isset($emi['monthly_emi'])):
                                         ?>
-                                            <div style="font-size:0.85rem; margin-top:4px; font-weight:700; color:#b91c1c;">EMI: ₹<?php echo number_format($emi['monthly_emi']); ?>/mo</div>
+                                            <div style="font-size:0.85rem; margin-top:4px; font-weight:700; color:#0B2447;">EMI: ₹<?php echo number_format($emi['monthly_emi']); ?>/mo</div>
                                         <?php endif; ?>
                                     </td>
                                     <td>

@@ -155,18 +155,18 @@ $api_keys = $pdo->query("SELECT a.*, u.full_name as creator_name FROM api_keys a
         .btn-primary { padding: 12px 24px; font-size: 0.95rem; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;}
         .btn-primary:hover { opacity: 0.9; }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; }
-        .msg-warning { padding: 14px 20px; border-radius: 8px; background: #fef9c3; color: #854d0e; margin-bottom: 20px; border: 1px solid #fde047; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); }
+        .msg-warning { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0F172A; margin-bottom: 20px; border: 1px solid #19376D; }
         
         /* API Keys Table */
         table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: top;}
         th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; background: #f8fafc; }
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block;}
-        .s-active { background:#dcfce7; color:#166534; }
-        .s-revoked { background:#fee2e2; color:#dc2626; }
+        .s-active { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .s-revoked { background:rgba(15,23,42,0.06); color:#0F172A; }
         .btn-action { padding: 6px 10px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; color: var(--text-dark); text-decoration: none;}
-        .btn-action:hover { background: #f1f5f9; }
+        .btn-action:hover { background: #F8FAFC; }
     </style>
 </head>
 <body>

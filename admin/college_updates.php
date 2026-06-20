@@ -85,7 +85,7 @@ $active_tab = 'college_updates';
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
         .form-group { margin-bottom: 16px; }
         .form-group.full { grid-column: 1 / -1; }
-        .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
+        .form-control { width: 100%; padding: 10px 14px; border: 1px solid rgba(15,23,42,0.15); border-radius: 8px; box-sizing: border-box; }
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; }
@@ -102,8 +102,8 @@ $active_tab = 'college_updates';
                 <h2><a href="colleges.php" style="color:var(--text-muted)"><i class="ph ph-arrow-left"></i></a> <?= htmlspecialchars($college['name']) ?> — News & Updates</h2>
             </div>
             <?php include 'includes/college_tabs_nav.php'; ?>
-            <?php if (isset($_GET['msg'])): ?><div style="padding:12px;background:#dcfce7;color:#166534;border-radius:8px;margin-bottom:16px">Saved successfully.</div><?php endif; ?>
-            <?php if ($error): ?><div style="padding:12px;background:#fee2e2;color:#991b1b;border-radius:8px;margin-bottom:16px"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+            <?php if (isset($_GET['msg'])): ?><div style="padding:12px;background:rgba(11,36,71,0.04);color:#0B2447;border-radius:8px;margin-bottom:16px">Saved successfully.</div><?php endif; ?>
+            <?php if ($error): ?><div style="padding:12px;background:rgba(15,23,42,0.06);color:#0B2447;border-radius:8px;margin-bottom:16px"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
             <div class="panel">
                 <h3><i class="ph ph-plus-circle"></i> Add Update / News</h3>
@@ -146,7 +146,7 @@ $active_tab = 'college_updates';
                             <form method="post" style="display:inline" onsubmit="return confirm('Delete?')">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="id" value="<?= htmlspecialchars($u['id']) ?>">
-                                <button type="submit" style="background:none;border:none;color:#dc2626;cursor:pointer"><i class="ph ph-trash"></i></button>
+                                <button type="submit" style="background:none;border:none;color:#0F172A;cursor:pointer"><i class="ph ph-trash"></i></button>
                             </form>
                         </td>
                     </tr>

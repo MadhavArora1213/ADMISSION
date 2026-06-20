@@ -66,37 +66,37 @@ $tabIcons = [
     
     .course-tabs-sticky { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.95); border-bottom: 1px solid var(--cp-border); box-shadow: 0 4px 20px rgba(0,0,0,0.04); backdrop-filter: blur(10px); }
     .shiksha-tabs-nav ul { display: flex; list-style: none; padding: 0; margin: 0; overflow-x: auto; gap: 40px; }
-    .shiksha-tabs-nav li a { display: flex; align-items: center; gap: 10px; padding: 22px 0; color: #64748b; font-weight: 700; text-decoration: none; border-bottom: 3px solid transparent; transition: all 0.3s ease; white-space: nowrap; font-size: 1rem; }
+    .shiksha-tabs-nav li a { display: flex; align-items: center; gap: 10px; padding: 22px 0; color: rgba(15,23,42,0.45); font-weight: 700; text-decoration: none; border-bottom: 3px solid transparent; transition: all 0.3s ease; white-space: nowrap; font-size: 1rem; }
     .shiksha-tabs-nav li a:hover { color: var(--cp-blue); }
     .shiksha-tabs-nav li a.active { color: var(--cp-blue); border-bottom-color: var(--cp-blue); }
     
     .tab-content { padding: 50px 0; min-height: 50vh; }
     
     .info-card { background: #fff; border-radius: 20px; padding: 40px; border: 1px solid var(--cp-border); box-shadow: 0 10px 40px rgba(0,0,0,0.03); margin-bottom: 32px; position: relative; overflow: hidden; }
-    .info-card::before { content:''; position:absolute; left:0; top:0; width:6px; height:100%; background: linear-gradient(to bottom, var(--cp-blue), #3b82f6); border-radius: 20px 0 0 20px; }
+    .info-card::before { content:''; position:absolute; left:0; top:0; width:6px; height:100%; background: linear-gradient(to bottom, var(--cp-blue), #19376D); border-radius: 20px 0 0 20px; }
     .info-card-title { font-size: 1.6rem; font-weight: 800; color: var(--cp-blue); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
-    .info-card-title i { color: #3b82f6; background: #eff6ff; padding: 10px; border-radius: 12px; font-size: 1.5rem; }
-    .info-card-content { font-size: 1.1rem; line-height: 1.8; color: #475569; }
+    .info-card-title i { color: #19376D; background: rgba(11,36,71,0.06); padding: 10px; border-radius: 12px; font-size: 1.5rem; }
+    .info-card-content { font-size: 1.1rem; line-height: 1.8; color: rgba(15,23,42,0.65); }
 
     .specs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-top: 32px; }
     .spec-card { background: #fff; border: 1px solid var(--cp-border); border-radius: 20px; padding: 30px; transition: all 0.3s ease; display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden; }
     .spec-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(11,36,71,0.06); border-color: var(--cp-blue); }
-    .spec-card-icon { width: 50px; height: 50px; background: #eff6ff; color: var(--cp-blue); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 8px; transition: all 0.3s ease; }
+    .spec-card-icon { width: 50px; height: 50px; background: rgba(11,36,71,0.06); color: var(--cp-blue); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 8px; transition: all 0.3s ease; }
     .spec-card:hover .spec-card-icon { background: var(--cp-blue); color: #fff; transform: scale(1.1) rotate(5deg); }
     .spec-card h4 { font-size: 1.25rem; color: #0f172a; margin: 0; font-weight: 800; }
-    .spec-card p { font-size: 1rem; color: #64748b; margin: 0; line-height: 1.6; }
+    .spec-card p { font-size: 1rem; color: rgba(15,23,42,0.45); margin: 0; line-height: 1.6; }
     
     .career-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px; margin-top: 32px; }
     .career-card { background: #fff; border-radius: 20px; padding: 30px; border: 1px solid var(--cp-border); box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: all 0.3s ease; }
     .career-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(11,36,71,0.08); border-color: var(--cp-blue); }
     .career-role { font-size: 1.4rem; font-weight: 800; color: #0f172a; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
-    .career-role i { color: #f59e0b; font-size: 1.8rem; background: #fffbeb; padding: 12px; border-radius: 14px; }
-    .career-salary-box { display: flex; background: #f8fafc; border-radius: 16px; padding: 20px; margin-bottom: 24px; border: 1px solid #e2e8f0; }
+    .career-role i { color: #19376D; font-size: 1.8rem; background: rgba(11,36,71,0.04); padding: 12px; border-radius: 14px; }
+    .career-salary-box { display: flex; background: #f8fafc; border-radius: 16px; padding: 20px; margin-bottom: 24px; border: 1px solid rgba(15,23,42,0.08); }
     .career-salary-item { flex: 1; text-align: center; }
-    .career-salary-item:first-child { border-right: 1px solid #e2e8f0; }
-    .career-salary-label { font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-    .career-salary-val { font-size: 1.25rem; font-weight: 800; color: #16a34a; }
-    .career-companies { font-size: 0.95rem; color: #475569; line-height: 1.6; }
+    .career-salary-item:first-child { border-right: 1px solid rgba(15,23,42,0.08); }
+    .career-salary-label { font-size: 0.85rem; color: rgba(15,23,42,0.45); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .career-salary-val { font-size: 1.25rem; font-weight: 800; color: #0B2447; }
+    .career-companies { font-size: 0.95rem; color: rgba(15,23,42,0.65); line-height: 1.6; }
     .career-companies strong { color: #0f172a; display: block; margin-bottom: 8px; font-weight: 700; }
     
     .clg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-top: 32px; }
@@ -104,7 +104,7 @@ $tabIcons = [
     .clg-mini-card:hover { box-shadow: 0 15px 35px rgba(0,0,0,0.06); border-color: var(--cp-blue); transform: translateX(5px); }
     .clg-mini-img { width: 70px; height: 70px; border-radius: 14px; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .clg-mini-info h4 { font-size: 1.1rem; color: #0f172a; margin: 0 0 6px 0; font-weight: 800; line-height: 1.4; }
-    .clg-mini-info p { font-size: 0.9rem; color: #64748b; margin: 0; display: flex; align-items: center; gap: 6px; }
+    .clg-mini-info p { font-size: 0.9rem; color: rgba(15,23,42,0.45); margin: 0; display: flex; align-items: center; gap: 6px; }
   </style>
 </head>
 <body class="bg-light">
@@ -185,14 +185,14 @@ $tabIcons = [
       
       <?php if (!empty($course['top_recruiters'])): ?>
       <div class="info-card" style="padding-top:30px;">
-        <h3 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;color:var(--cp-blue);display:flex;align-items:center;gap:10px;"><i class="ph ph-buildings" style="color:#3b82f6"></i> Top Recruiters</h3>
+        <h3 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;color:var(--cp-blue);display:flex;align-items:center;gap:10px;"><i class="ph ph-buildings" style="color:#19376D"></i> Top Recruiters</h3>
         <div style="display:flex;flex-wrap:wrap;gap:12px;">
           <?php 
             $recs = json_decode($course['top_recruiters'], true);
             if (!is_array($recs)) $recs = explode(',', $course['top_recruiters']);
             foreach($recs as $tr): 
           ?>
-            <span style="background:var(--cp-light);border:1px solid #e2e8f0;padding:10px 20px;border-radius:30px;font-weight:700;font-size:0.95rem;color:var(--cp-blue);display:inline-flex;align-items:center;gap:6px;transition:all 0.3s ease;cursor:default;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 10px rgba(0,0,0,0.05)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'"><i class="ph ph-briefcase"></i> <?= htmlspecialchars(trim((string)$tr)) ?></span>
+            <span style="background:var(--cp-light);border:1px solid rgba(15,23,42,0.08);padding:10px 20px;border-radius:30px;font-weight:700;font-size:0.95rem;color:var(--cp-blue);display:inline-flex;align-items:center;gap:6px;transition:all 0.3s ease;cursor:default;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 10px rgba(0,0,0,0.05)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'"><i class="ph ph-briefcase"></i> <?= htmlspecialchars(trim((string)$tr)) ?></span>
           <?php endforeach; ?>
         </div>
       </div>
@@ -200,12 +200,12 @@ $tabIcons = [
 
     <?php elseif ($tab === 'specializations'): ?>
       <h2 style="font-size:1.8rem;font-weight:800;color:var(--cp-blue);margin-bottom:8px">Popular Specializations</h2>
-      <p style="color:#64748b;font-size:1.1rem;margin-bottom:32px">Explore the various branches and specialized fields within this course.</p>
+      <p style="color:rgba(15,23,42,0.45);font-size:1.1rem;margin-bottom:32px">Explore the various branches and specialized fields within this course.</p>
       
       <?php if(empty($specs)): ?>
-        <div style="background:#fff;padding:60px 20px;text-align:center;border-radius:20px;border:1px dashed #cbd5e1">
-          <i class="ph ph-empty" style="font-size:3rem;color:#94a3b8;margin-bottom:10px"></i>
-          <p style="font-size:1.1rem;color:#64748b">No specific specializations listed for this course yet.</p>
+        <div style="background:#fff;padding:60px 20px;text-align:center;border-radius:20px;border:1px dashed rgba(15,23,42,0.15)">
+          <i class="ph ph-empty" style="font-size:3rem;color:rgba(15,23,42,0.4);margin-bottom:10px"></i>
+          <p style="font-size:1.1rem;color:rgba(15,23,42,0.45)">No specific specializations listed for this course yet.</p>
         </div>
       <?php else: ?>
         <div class="specs-grid">
@@ -221,12 +221,12 @@ $tabIcons = [
 
     <?php elseif ($tab === 'careers'): ?>
       <h2 style="font-size:1.8rem;font-weight:800;color:var(--cp-blue);margin-bottom:8px">Career & Job Opportunities</h2>
-      <p style="color:#64748b;font-size:1.1rem;margin-bottom:32px">Discover the top roles, salary expectations, and top hiring companies.</p>
+      <p style="color:rgba(15,23,42,0.45);font-size:1.1rem;margin-bottom:32px">Discover the top roles, salary expectations, and top hiring companies.</p>
       
       <?php if(empty($careers)): ?>
-        <div style="background:#fff;padding:60px 20px;text-align:center;border-radius:20px;border:1px dashed #cbd5e1">
-          <i class="ph ph-empty" style="font-size:3rem;color:#94a3b8;margin-bottom:10px"></i>
-          <p style="font-size:1.1rem;color:#64748b">No career data available right now.</p>
+        <div style="background:#fff;padding:60px 20px;text-align:center;border-radius:20px;border:1px dashed rgba(15,23,42,0.15)">
+          <i class="ph ph-empty" style="font-size:3rem;color:rgba(15,23,42,0.4);margin-bottom:10px"></i>
+          <p style="font-size:1.1rem;color:rgba(15,23,42,0.45)">No career data available right now.</p>
         </div>
       <?php else: ?>
         <div class="career-grid">
@@ -262,12 +262,12 @@ $tabIcons = [
 
     <?php elseif ($tab === 'colleges'): ?>
       <h2 style="font-size:1.8rem;font-weight:800;color:var(--cp-blue);margin-bottom:8px">Top Colleges offering <?= htmlspecialchars((string)($course['course_name'] ?? 'this course')) ?></h2>
-      <p style="color:#64748b;font-size:1.1rem;margin-bottom:32px">Find the best institutions across India offering this program.</p>
+      <p style="color:rgba(15,23,42,0.45);font-size:1.1rem;margin-bottom:32px">Find the best institutions across India offering this program.</p>
       
       <?php if(empty($colleges)): ?>
-        <div style="background:#fff;padding:60px 20px;text-align:center;border-radius:20px;border:1px dashed #cbd5e1">
-          <i class="ph ph-empty" style="font-size:3rem;color:#94a3b8;margin-bottom:10px"></i>
-          <p style="font-size:1.1rem;color:#64748b">No colleges found offering this course yet.</p>
+        <div style="background:#fff;padding:60px 20px;text-align:center;border-radius:20px;border:1px dashed rgba(15,23,42,0.15)">
+          <i class="ph ph-empty" style="font-size:3rem;color:rgba(15,23,42,0.4);margin-bottom:10px"></i>
+          <p style="font-size:1.1rem;color:rgba(15,23,42,0.45)">No colleges found offering this course yet.</p>
         </div>
       <?php else: ?>
         <div class="clg-grid">

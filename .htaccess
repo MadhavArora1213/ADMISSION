@@ -11,7 +11,7 @@ Options +FollowSymLinks
 # -------------------------------------------------
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /ADMISSION/ADMISSION/
+    RewriteBase /ADMISSION/
 
     # Force HTTPS (skip on local XAMPP)
     RewriteCond %{HTTPS} off

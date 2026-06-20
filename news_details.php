@@ -16,7 +16,10 @@ if (!function_exists('cAll')) {
 }
 if (!function_exists('cImg')) {
     function cImg(?string $url = ''): string {
-        return $url ?: 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&q=80';
+        if (!$url) return 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&q=80';
+        if (str_starts_with($url, 'http') || str_starts_with($url, '//')) return $url;
+        $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+        return $base . '/' . ltrim($url, '/');
     }
 }
 

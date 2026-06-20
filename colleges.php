@@ -112,25 +112,25 @@ $pageTitle = 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions
     .cl-stat-val{font-size:1.5rem;font-weight:800;color:#fff;font-family:'Plus Jakarta Sans',sans-serif}
     .cl-stat-lbl{font-size:.75rem;color:rgba(255,255,255,.7);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
     .sort-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-      padding:14px 24px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:.85rem}
-    .sort-bar label{color:#64748b;font-weight:500}
-    .sort-bar select{padding:6px 12px;border:1.5px solid #e2e8f0;border-radius:8px;
+      padding:14px 24px;background:#f8fafc;border-bottom:1px solid rgba(15,23,42,0.08);font-size:.85rem}
+    .sort-bar label{color:rgba(15,23,42,0.45);font-weight:500}
+    .sort-bar select{padding:6px 12px;border:1.5px solid rgba(15,23,42,0.08);border-radius:8px;
       font-size:.83rem;background:#fff;cursor:pointer;font-family:inherit}
-    .sort-result-count{margin-left:auto;color:#94a3b8;font-size:.82rem}
+    .sort-result-count{margin-left:auto;color:rgba(15,23,42,0.4);font-size:.82rem}
     .clc-featured-badge{
       position:absolute;top:10px;right:10px;
-      background:linear-gradient(135deg,#f97316,#ef4444);
+      background:linear-gradient(135deg,#19376D,#0F172A);
       color:#fff;font-size:.65rem;font-weight:700;
       padding:3px 9px;border-radius:6px;text-transform:uppercase;letter-spacing:.5px;
     }
     .col-type-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:0}
     .col-type-btn{
       padding:8px 20px;border-radius:100px;font-size:.83rem;font-weight:600;
-      text-decoration:none;border:1.5px solid #e2e8f0;color:#64748b;
+      text-decoration:none;border:1.5px solid rgba(15,23,42,0.08);color:rgba(15,23,42,0.45);
       transition:all .2s;white-space:nowrap;
     }
     .col-type-btn:hover,.col-type-btn.active{
-      background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;border-color:transparent;
+      background:linear-gradient(135deg,#19376D,#19376D);color:#fff;border-color:transparent;
       box-shadow:0 4px 12px rgba(37,99,235,.3);
     }
     @media(max-width:768px){
@@ -225,7 +225,7 @@ $pageTitle = 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions
       <!-- College cards -->
       <?php if (empty($colleges)): ?>
         <div class="shiksha-empty">
-          <i class="ph ph-buildings" style="font-size:3rem;color:#e2e8f0;display:block;margin-bottom:12px"></i>
+          <i class="ph ph-buildings" style="font-size:3rem;color:rgba(15,23,42,0.08);display:block;margin-bottom:12px"></i>
           <p>No colleges found. Try adjusting your filters.</p>
         </div>
       <?php else: ?>
@@ -342,10 +342,10 @@ $pageTitle = 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions
         </ul>
       </div>
 
-      <div class="shiksha-widget" style="background:linear-gradient(135deg,#eff6ff,#f5f3ff);border-color:rgba(79,70,229,.2)">
-        <h4 class="shiksha-widget-title" style="color:#4f46e5">📬 Get Admission Alerts</h4>
-        <p style="font-size:.85rem;color:#475569;margin-bottom:12px">Stay updated with college deadlines, exam dates &amp; cutoffs.</p>
-        <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/signup.php" style="display:block;text-align:center;padding:10px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border-radius:10px;text-decoration:none;font-weight:600;font-size:.87rem">
+      <div class="shiksha-widget" style="background:linear-gradient(135deg,rgba(11,36,71,0.06),rgba(11,36,71,0.04));border-color:rgba(79,70,229,.2)">
+        <h4 class="shiksha-widget-title" style="color:#19376D">📬 Get Admission Alerts</h4>
+        <p style="font-size:.85rem;color:rgba(15,23,42,0.65);margin-bottom:12px">Stay updated with college deadlines, exam dates &amp; cutoffs.</p>
+        <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/signup.php" style="display:block;text-align:center;padding:10px;background:linear-gradient(135deg,#19376D,#0B2447);color:#fff;border-radius:10px;text-decoration:none;font-weight:600;font-size:.87rem">
           Create Free Account →
         </a>
       </div>

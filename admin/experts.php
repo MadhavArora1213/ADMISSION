@@ -49,8 +49,8 @@ if (isset($_GET['edit_id'])) {
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h2{font-size:2rem;font-weight:800}.panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}.panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}tr:hover{background:rgba(0,0,0,.015)}.badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700}.sub-links{display:flex;gap:8px;margin-bottom:20px}.sub-link{font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .2s}.sub-link:hover,.sub-link.active{background:rgba(0,0,0,.05);color:var(--primary)}.form-control{width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:8px;font-family:inherit;font-size:.95rem;box-sizing:border-box}.form-group{margin-bottom:16px}.form-group label{display:block;font-weight:600;margin-bottom:7px;font-size:.9rem;color:var(--text-muted)}.msg-alert{padding:14px 20px;border-radius:8px;background:#dcfce7;color:#166534;border:1px solid #bbf7d0;margin-bottom:20px}
-        .stats-micro {display:flex; gap:8px; font-size:0.75rem; color:#64748b; margin-top:4px;}
+        body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h2{font-size:2rem;font-weight:800}.panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}.panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}tr:hover{background:rgba(0,0,0,.015)}.badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700}.sub-links{display:flex;gap:8px;margin-bottom:20px}.sub-link{font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .2s}.sub-link:hover,.sub-link.active{background:rgba(0,0,0,.05);color:var(--primary)}.form-control{width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:8px;font-family:inherit;font-size:.95rem;box-sizing:border-box}.form-group{margin-bottom:16px}.form-group label{display:block;font-weight:600;margin-bottom:7px;font-size:.9rem;color:var(--text-muted)}.msg-alert{padding:14px 20px;border-radius:8px;background:rgba(11,36,71,0.04);color:#0B2447;border:1px solid rgba(11,36,71,0.04);margin-bottom:20px}
+        .stats-micro {display:flex; gap:8px; font-size:0.75rem; color:rgba(15,23,42,0.45); margin-top:4px;}
         .stats-micro span {display:flex; align-items:center; gap:3px;}
     </style>
 </head>
@@ -129,7 +129,7 @@ if (isset($_GET['edit_id'])) {
 
                         <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="ph ph-floppy-disk"></i> Save Expert</button>
                         <?php if($edit_e): ?>
-                        <a href="experts.php" class="btn" style="display:block; text-align:center; margin-top:10px; background:#f1f5f9; text-decoration:none; color:var(--text-color); padding:10px; border-radius:8px;">Cancel Edit</a>
+                        <a href="experts.php" class="btn" style="display:block; text-align:center; margin-top:10px; background:#F8FAFC; text-decoration:none; color:var(--text-color); padding:10px; border-radius:8px;">Cancel Edit</a>
                         <?php endif; ?>
                     </form>
                 </div>
@@ -148,30 +148,30 @@ if (isset($_GET['edit_id'])) {
                                             <?php echo htmlspecialchars($e['expert_name']); ?>
                                         </div>
                                         <?php if($e['linkedin_url']): ?>
-                                        <a href="<?php echo htmlspecialchars($e['linkedin_url']); ?>" target="_blank" style="font-size:0.75rem; color:#0284c7; text-decoration:none;"><i class="ph ph-linkedin-logo"></i> LinkedIn</a>
+                                        <a href="<?php echo htmlspecialchars($e['linkedin_url']); ?>" target="_blank" style="font-size:0.75rem; color:#19376D; text-decoration:none;"><i class="ph ph-linkedin-logo"></i> LinkedIn</a>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <div style="font-size:0.8rem; color:var(--primary); font-weight:600;"><?php echo htmlspecialchars($e['expert_designation']); ?></div>
                                         <div style="font-size:0.75rem; color:var(--text-muted);"><?php echo htmlspecialchars($e['expert_college']); ?></div>
-                                        <div style="font-size:0.75rem; color:#475569; margin-top:2px;">Spec: <?php echo htmlspecialchars($e['specialization']); ?></div>
+                                        <div style="font-size:0.75rem; color:rgba(15,23,42,0.65); margin-top:2px;">Spec: <?php echo htmlspecialchars($e['specialization']); ?></div>
                                     </td>
                                     <td>
                                         <div class="stats-micro">
-                                            <span title="Answers Given"><i class="ph ph-chat-text" style="color:#16a34a;"></i> <?php echo number_format($e['answer_count']); ?> ans</span>
-                                            <span title="Response Rate"><i class="ph ph-chart-line-up" style="color:#7c3aed;"></i> <?php echo number_format($e['response_rate_pct']); ?>%</span>
+                                            <span title="Answers Given"><i class="ph ph-chat-text" style="color:#0B2447;"></i> <?php echo number_format($e['answer_count']); ?> ans</span>
+                                            <span title="Response Rate"><i class="ph ph-chart-line-up" style="color:#0B2447;"></i> <?php echo number_format($e['response_rate_pct']); ?>%</span>
                                         </div>
                                         <div style="font-size:0.7rem; color:var(--text-muted); margin-top:4px;">Avg Wait: <?php echo number_format($e['avg_response_hours'], 1); ?> hrs</div>
                                     </td>
                                     <td>
                                         <a href="?toggle_verified_id=<?php echo $e['id']; ?>" style="text-decoration:none;">
-                                            <?php if($e['verified_badge']): ?><i class="ph-fill ph-seal-check" style="color:#0ea5e9;font-size:1.5rem;" title="Verified"></i>
+                                            <?php if($e['verified_badge']): ?><i class="ph-fill ph-seal-check" style="color:#19376D;font-size:1.5rem;" title="Verified"></i>
                                             <?php else: ?><i class="ph ph-seal" style="color:var(--text-muted);font-size:1.5rem;" title="Unverified"></i><?php endif; ?>
                                         </a>
                                     </td>
                                     <td>
                                         <a href="?edit_id=<?php echo $e['id']; ?>" style="color:var(--primary); margin-right:8px;"><i class="ph ph-pencil-simple"></i></a>
-                                        <a href="?delete_id=<?php echo $e['id']; ?>" onclick="return confirm('Delete expert profile?');" style="color:#dc2626;"><i class="ph ph-trash"></i></a>
+                                        <a href="?delete_id=<?php echo $e['id']; ?>" onclick="return confirm('Delete expert profile?');" style="color:#0F172A;"><i class="ph ph-trash"></i></a>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>

@@ -57,11 +57,11 @@ $colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetc
         .form-group label{display:block;font-size:.85rem;font-weight:700;color:var(--text-main);margin-bottom:8px;}
         .form-control{width:100%;padding:10px 12px;border:1px solid var(--border-color);border-radius:8px;font-size:.9rem;font-family:inherit;}
         .btn-primary{background:var(--primary);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:600;cursor:pointer;transition:all .2s;}
-        .btn-primary:hover{background:#1e3a8a;}
-        .btn-danger{background:#dc2626;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:600;cursor:pointer;text-decoration:none;font-size:0.75rem;}
+        .btn-primary:hover{background:#0B2447;}
+        .btn-danger{background:#0F172A;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:600;cursor:pointer;text-decoration:none;font-size:0.75rem;}
         .alert{padding:12px 16px;border-radius:8px;margin-bottom:20px;font-size:0.9rem;font-weight:600;}
-        .alert-success{background:#dcfce7;color:#166534;}
-        .progress-bar-container {width:100%;background:#e2e8f0;border-radius:10px;overflow:hidden;height:8px;margin-top:6px;}
+        .alert-success{background:rgba(11,36,71,0.04);color:#0B2447;}
+        .progress-bar-container {width:100%;background:rgba(15,23,42,0.08);border-radius:10px;overflow:hidden;height:8px;margin-top:6px;}
         .progress-bar {height:100%;background:var(--primary);}
     </style>
 </head>
@@ -163,7 +163,7 @@ $colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetc
                             <tr>
                                 <td style="font-weight:600; color:var(--primary);"><?php echo htmlspecialchars($row['college_name'] ?? 'Unknown'); ?></td>
                                 <td><?php echo htmlspecialchars($row['course_name'] ?? 'Unknown'); ?></td>
-                                <td><span class="badge" style="background:#f1f5f9; color:#475569; padding:4px 8px;"><?php echo htmlspecialchars($row['category']); ?></span></td>
+                                <td><span class="badge" style="background:#F8FAFC; color:rgba(15,23,42,0.65); padding:4px 8px;"><?php echo htmlspecialchars($row['category']); ?></span></td>
                                 <td><?php echo htmlspecialchars($row['year']); ?></td>
                                 <td style="min-width:150px;">
                                     <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:700;">
@@ -174,7 +174,7 @@ $colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetc
                                         <span><?php echo $pct; ?>%</span>
                                     </div>
                                     <div class="progress-bar-container">
-                                        <div class="progress-bar" style="width:<?php echo $pct; ?>%; <?php if($pct >= 90) echo 'background:#dc2626;'; elseif($pct >= 70) echo 'background:#eab308;'; ?>"></div>
+                                        <div class="progress-bar" style="width:<?php echo $pct; ?>%; <?php if($pct >= 90) echo 'background:#0F172A;'; elseif($pct >= 70) echo 'background:#19376D;'; ?>"></div>
                                     </div>
                                 </td>
                                 <td><?php echo htmlspecialchars($row['source'] ?? '-'); ?></td>

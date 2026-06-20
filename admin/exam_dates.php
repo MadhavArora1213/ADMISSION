@@ -100,13 +100,13 @@ if (!empty($datesList)) {
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
-        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-        .action-btn.edit { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; margin-right: 8px; }
+        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: rgba(15,23,42,0.06); color: #0B2447; border: 1px solid rgba(15,23,42,0.06); }
+        .action-btn.edit { background: rgba(11,36,71,0.06); color: #19376D; border-color: rgba(11,36,71,0.06); margin-right: 8px; }
         .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding-bottom: 12px; }
         .tab-link { padding: 8px 16px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
         .tab-link:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
         .tab-link.active { background: var(--primary); color: white; }
-        .msg-alert { padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 24px; border: 1px solid #bbf7d0; }
+        .msg-alert { padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 24px; border: 1px solid rgba(11,36,71,0.04); }
     </style>
 </head>
 <body>
@@ -220,7 +220,7 @@ if (!empty($datesList)) {
                                 <td><?php echo $d['event_date'] ? date('M d, Y', strtotime($d['event_date'])) : '-'; ?></td>
                                 <td><?php echo $d['application_start'] ? date('M d, Y', strtotime($d['application_start'])) : '-'; ?></td>
                                 <td><?php echo $d['exam_date'] ? date('M d, Y', strtotime($d['exam_date'])) : '-'; ?></td>
-                                <td><?php echo $d['is_tentative'] ? '<span style="color:#b45309;">Yes</span>' : 'No'; ?></td>
+                                <td><?php echo $d['is_tentative'] ? '<span style="color:#19376D;">Yes</span>' : 'No'; ?></td>
                                 <td>
                                     <button type="button" class="action-btn edit" onclick='editYear(<?php echo json_encode($d); ?>)' title="Edit"><i class="ph ph-pencil-simple"></i></button>
                                     <a href="?exam_id=<?php echo $exam_id; ?>&action=delete&id=<?php echo $d['id']; ?>" class="action-btn" onclick="return confirm('Delete this year profile?');" title="Delete"><i class="ph ph-trash"></i></a>

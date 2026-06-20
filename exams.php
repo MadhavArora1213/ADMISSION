@@ -47,11 +47,11 @@ $exams = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .exam-card { background: var(--cp-card); border-radius: 16px; border: 1px solid var(--cp-border); padding: 24px; transition: var(--cp-trans); display: flex; flex-direction: column; height: 100%; box-shadow: var(--cp-shadow); }
     .exam-card:hover { transform: translateY(-4px); box-shadow: var(--cp-shadow-lg); border-color: var(--cp-blue); }
     .exam-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
-    .exam-logo { width: 64px; height: 64px; border-radius: 12px; object-fit: contain; background: #fff; border: 1px solid #e2e8f0; padding: 4px; flex-shrink: 0; }
+    .exam-logo { width: 64px; height: 64px; border-radius: 12px; object-fit: contain; background: #fff; border: 1px solid rgba(15,23,42,0.08); padding: 4px; flex-shrink: 0; }
     .exam-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.25rem; font-weight: 800; color: var(--cp-blue); margin: 0 0 4px 0; line-height: 1.3; }
     .exam-abbr { font-size: 0.85rem; color: var(--cp-muted); background: var(--cp-light); padding: 2px 8px; border-radius: 6px; font-weight: 600; }
     .exam-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; flex-grow: 1; }
-    .meta-item { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: #475569; }
+    .meta-item { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: rgba(15,23,42,0.65); }
     .meta-item i { color: var(--cp-blue); font-size: 1.1rem; }
     .exam-footer { border-top: 1px solid var(--cp-border); padding-top: 16px; display: flex; justify-content: space-between; align-items: center; }
     .exam-btn { background: linear-gradient(135deg, var(--cp-blue), var(--cp-blue2)); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; font-size: 0.9rem; transition: var(--cp-trans); }
@@ -62,7 +62,7 @@ $exams = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <?php include __DIR__ . '/includes/navbar.php'; ?>
 
-<div class="shiksha-breadcrumb" style="background:#fff;border-bottom:1px solid #e2e8f0;padding:15px 0">
+<div class="shiksha-breadcrumb" style="background:#fff;border-bottom:1px solid rgba(15,23,42,0.08);padding:15px 0">
   <div class="container">
     <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/index.php">Home</a>
     <i class="ph ph-caret-right"></i>
@@ -120,7 +120,7 @@ $exams = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <div class="meta-item"><i class="ph ph-timer"></i> <?= $ex['duration_minutes'] ?> Mins</div>
         </div>
         <div class="exam-footer">
-          <span style="font-size:0.8rem;color:#64748b;font-weight:600">By <?= htmlspecialchars($ex['conducting_body']) ?></span>
+          <span style="font-size:0.8rem;color:rgba(15,23,42,0.45);font-weight:600">By <?= htmlspecialchars($ex['conducting_body']) ?></span>
           <a href="<?= examUrl($ex['exam_slug']) ?>" class="exam-btn">View Details</a>
         </div>
       </div>

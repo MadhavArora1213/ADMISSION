@@ -53,14 +53,14 @@ $reviews = $stmt->fetchAll();
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em; }
         tr:hover { background-color: rgba(0,0,0,0.02); }
         .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
-        .status-pending { background: #fef08a; color: #854d0e; }
-        .status-approved { background: #dcfce7; color: #166534; }
-        .status-rejected { background: #fee2e2; color: #991b1b; }
-        .status-escalated { background: #ffedd5; color: #c2410c; }
+        .status-pending { background: rgba(11,36,71,0.06); color: #0F172A; }
+        .status-approved { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .status-rejected { background: rgba(15,23,42,0.06); color: #0B2447; }
+        .status-escalated { background: rgba(11,36,71,0.04); color: #0B2447; }
         .action-links { display: flex; gap: 8px; }
-        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color); }
+        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #F8FAFC; color: var(--text-dark); border: 1px solid var(--border-color); }
         .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .msg-alert { padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 24px; border: 1px solid #bbf7d0; }
+        .msg-alert { padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 24px; border: 1px solid rgba(11,36,71,0.04); }
     </style>
 </head>
 <body>
@@ -113,11 +113,11 @@ $reviews = $stmt->fetchAll();
                                         </td>
                                         <td>
                                             <div style="font-weight: 600; color: var(--primary);"><?php echo htmlspecialchars($r['college_name']); ?></div>
-                                            <div style="font-size: 0.8rem; color: var(--text-muted);">by <?php echo htmlspecialchars($r['user_name']); ?> <?php if($r['is_verified_alumnus']) echo '<i class="ph-fill ph-seal-check" style="color:#0ea5e9;" title="Verified Alumnus"></i>'; ?></div>
+                                            <div style="font-size: 0.8rem; color: var(--text-muted);">by <?php echo htmlspecialchars($r['user_name']); ?> <?php if($r['is_verified_alumnus']) echo '<i class="ph-fill ph-seal-check" style="color:#19376D;" title="Verified Alumnus"></i>'; ?></div>
                                         </td>
                                         <td>
                                             <div style="display:flex; align-items:center; gap:4px; font-weight:700;">
-                                                <i class="ph-fill ph-star" style="color:#fbbf24;"></i> <?php echo $r['overall_rating']; ?>
+                                                <i class="ph-fill ph-star" style="color:#19376D;"></i> <?php echo $r['overall_rating']; ?>
                                             </div>
                                         </td>
                                         <td>
@@ -125,9 +125,9 @@ $reviews = $stmt->fetchAll();
                                         </td>
                                         <td>
                                             <div style="display:flex; gap:4px;">
-                                                <?php if($r['fraud_flag']): ?><span class="badge" style="background:#fee2e2; color:#991b1b;" title="Fraud Flag"><i class="ph ph-warning"></i> Fraud</span><?php endif; ?>
-                                                <?php if($r['ai_spam_score'] > 0.7): ?><span class="badge" style="background:#ffedd5; color:#c2410c;" title="High Spam Score"><i class="ph ph-robot"></i> Spam</span><?php endif; ?>
-                                                <?php if($r['open_reports'] > 0): ?><span class="badge" style="background:#fee2e2; color:#991b1b;" title="Open Reports"><i class="ph ph-flag"></i> <?php echo $r['open_reports']; ?></span><?php endif; ?>
+                                                <?php if($r['fraud_flag']): ?><span class="badge" style="background:rgba(15,23,42,0.06); color:#0B2447;" title="Fraud Flag"><i class="ph ph-warning"></i> Fraud</span><?php endif; ?>
+                                                <?php if($r['ai_spam_score'] > 0.7): ?><span class="badge" style="background:rgba(11,36,71,0.04); color:#0B2447;" title="High Spam Score"><i class="ph ph-robot"></i> Spam</span><?php endif; ?>
+                                                <?php if($r['open_reports'] > 0): ?><span class="badge" style="background:rgba(15,23,42,0.06); color:#0B2447;" title="Open Reports"><i class="ph ph-flag"></i> <?php echo $r['open_reports']; ?></span><?php endif; ?>
                                                 <?php if(!$r['fraud_flag'] && $r['ai_spam_score'] <= 0.7 && $r['open_reports'] == 0): ?><span style="color:var(--text-muted); font-size:0.8rem;">Clean</span><?php endif; ?>
                                             </div>
                                         </td>

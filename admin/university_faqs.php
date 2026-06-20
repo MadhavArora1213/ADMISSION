@@ -81,7 +81,7 @@ $faqs = $stmt->fetchAll();
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
         .form-group { margin-bottom: 16px; }
         .form-group.full { grid-column: 1 / -1; }
-        .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; }
+        .form-control { width: 100%; padding: 10px 14px; border: 1px solid rgba(15,23,42,0.15); border-radius: 8px; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
@@ -118,10 +118,10 @@ $faqs = $stmt->fetchAll();
                 </div>
 
                 <?php if(isset($_GET['msg'])): ?>
-                    <div style="padding: 16px; background: #dcfce7; color: #166534; border-radius: 8px; margin-bottom: 24px; border: 1px solid #bbf7d0;">Action completed successfully!</div>
+                    <div style="padding: 16px; background: rgba(11,36,71,0.04); color: #0B2447; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(11,36,71,0.04);">Action completed successfully!</div>
                 <?php endif; ?>
                 <?php if($error): ?>
-                    <div style="padding: 16px; background: #fee2e2; color: #991b1b; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fecaca;"><?php echo htmlspecialchars($error); ?></div>
+                    <div style="padding: 16px; background: rgba(15,23,42,0.06); color: #0B2447; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(15,23,42,0.06);"><?php echo htmlspecialchars($error); ?></div>
                 <?php endif; ?>
 
                 <div class="panel">
@@ -155,11 +155,11 @@ $faqs = $stmt->fetchAll();
                                         <td style="font-weight:600; width:50%;"><?php echo htmlspecialchars($f['question_text']); ?></td>
                                         <td><?php echo htmlspecialchars($f['category']?:'-'); ?></td>
                                         <td><?php echo htmlspecialchars($f['sort_order']); ?></td>
-                                        <td><?php echo $f['is_active'] ? '<span style="color:#166534;background:#dcfce7;padding:2px 8px;border-radius:12px;font-size:0.8rem;">Active</span>' : '<span style="color:#991b1b;background:#fee2e2;padding:2px 8px;border-radius:12px;font-size:0.8rem;">Inactive</span>'; ?></td>
+                                        <td><?php echo $f['is_active'] ? '<span style="color:#0B2447;background:rgba(11,36,71,0.04);padding:2px 8px;border-radius:12px;font-size:0.8rem;">Active</span>' : '<span style="color:#0B2447;background:rgba(15,23,42,0.06);padding:2px 8px;border-radius:12px;font-size:0.8rem;">Inactive</span>'; ?></td>
                                         <td>
                                             <form action="" method="POST" style="display:inline;" onsubmit="return confirm('Delete?');">
                                                 <input type="hidden" name="action" value="delete"><input type="hidden" name="f_id" value="<?php echo $f['id']; ?>">
-                                                <button type="submit" style="background:none; border:none; color:#dc2626; cursor:pointer;"><i class="ph ph-trash" style="font-size:1.2rem;"></i></button>
+                                                <button type="submit" style="background:none; border:none; color:#0F172A; cursor:pointer;"><i class="ph ph-trash" style="font-size:1.2rem;"></i></button>
                                             </form>
                                         </td>
                                     </tr>

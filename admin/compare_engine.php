@@ -93,22 +93,22 @@ $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
         
         .btn-primary { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .btn-primary:hover { background: #1d4ed8; }
-        .btn-secondary { background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size:0.85rem;}
-        .btn-secondary:hover { background: #e2e8f0; }
-        .btn-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight:bold;}
-        .btn-danger:hover { background: #fecaca; }
+        .btn-primary:hover { background: #19376D; }
+        .btn-secondary { background: #F8FAFC; color: var(--text-dark); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size:0.85rem;}
+        .btn-secondary:hover { background: rgba(15,23,42,0.08); }
+        .btn-danger { background: rgba(15,23,42,0.06); color: #0B2447; border: 1px solid rgba(15,23,42,0.06); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight:bold;}
+        .btn-danger:hover { background: rgba(15,23,42,0.06); }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; font-weight:500; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); font-weight:500; }
         
         table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #f8fafc; }
         tr:hover { background-color: #f8fafc; }
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
-        .badge-college { background: #dbeafe; color: #1e40af; }
-        .badge-course { background: #dcfce7; color: #166534; }
-        .badge-exam { background: #fef9c3; color: #854d0e; }
+        .badge-college { background: rgba(11,36,71,0.06); color: #19376D; }
+        .badge-course { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .badge-exam { background: rgba(11,36,71,0.04); color: #0F172A; }
         
         .category-box { border: 1px solid var(--border-color); padding: 16px; border-radius: 12px; background: #f8fafc;}
         .category-box h4 { margin-top:0; color:var(--primary); margin-bottom:12px; display:flex; align-items:center; gap:6px; font-size:1rem;}
@@ -241,7 +241,7 @@ $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <i class="ph-fill ph-bookmark" style="color:var(--primary); font-size:1.1rem; margin-right:8px;" title="Saved"></i>
                                     <?php endif; ?>
                                     <?php if($session['share_token']): ?>
-                                        <i class="ph ph-share-network" style="color:#10b981; font-size:1.1rem;" title="Shared: <?php echo htmlspecialchars($session['share_token']); ?>"></i>
+                                        <i class="ph ph-share-network" style="color:#19376D; font-size:1.1rem;" title="Shared: <?php echo htmlspecialchars($session['share_token']); ?>"></i>
                                     <?php endif; ?>
                                 </td>
                                 <td style="font-size:0.85rem; color:var(--text-muted);"><?php echo date('d M Y H:i', strtotime($session['created_at'])); ?></td>

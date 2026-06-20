@@ -47,11 +47,11 @@ if (!isset($navColleges)) {
               <div class="pro-user-menu-header"><?= htmlspecialchars($_SESSION['user_name']) ?></div>
               <a href="profile.php" class="pro-user-menu-item"><i class="ph ph-user"></i> My Profile</a>
               <div class="pro-user-menu-divider"></div>
-              <a href="logout.php" class="pro-user-menu-item logout"><i class="ph ph-sign-out"></i> Logout</a>
+              <a href="/ADMISSION/logout.php?redirect=<?= urlencode($_SERVER['REQUEST_URI'] ?? '/') ?>" class="pro-user-menu-item logout"><i class="ph ph-sign-out"></i> Logout</a>
             </div>
           </div>
         <?php else: ?>
-          <a href="login.php" class="pro-user-btn" title="Login"><i class="ph-fill ph-user-plus"></i></a>
+          <a href="/ADMISSION/login.php" class="pro-user-btn" title="Login"><i class="ph-fill ph-user-plus"></i></a>
         <?php endif; ?>
       </div>
     </div>

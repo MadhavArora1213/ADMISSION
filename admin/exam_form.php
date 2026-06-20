@@ -318,8 +318,8 @@ function getValue($arr, $key, $default = '') {
         .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
         .checkbox-group label { margin-bottom: 0; cursor: pointer; }
         
-        .error-alert { padding: 16px; background: #fee2e2; color: #991b1b; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fecaca; }
-        .msg-alert { padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 24px; border: 1px solid #bbf7d0; }
+        .error-alert { padding: 16px; background: rgba(15,23,42,0.06); color: #0B2447; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(15,23,42,0.06); }
+        .msg-alert { padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 24px; border: 1px solid rgba(11,36,71,0.04); }
         
         .form-actions { display: flex; justify-content: flex-end; gap: 16px; margin-top: 32px; }
         
@@ -529,13 +529,13 @@ function getValue($arr, $key, $default = '') {
                             <div class="form-group full">
                                 <label>Subjects</label>
                                 <div id="subjects_container" style="margin-bottom: 10px;"></div>
-                                <button type="button" class="btn btn-sm" onclick="addSubject()" style="background:#e2e8f0; border:1px solid #cbd5e1; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add Subject</button>
+                                <button type="button" class="btn btn-sm" onclick="addSubject()" style="background:rgba(15,23,42,0.08); border:1px solid rgba(15,23,42,0.15); padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add Subject</button>
                                 <input type="hidden" name="subjects_json" id="subjects_json" value='<?php echo getValue($exam, 'subjects_json'); ?>'>
                             </div>
                             <div class="form-group full">
                                 <label>Sections</label>
                                 <div id="sections_container" style="margin-bottom: 10px;"></div>
-                                <button type="button" class="btn btn-sm" onclick="addSection()" style="background:#e2e8f0; border:1px solid #cbd5e1; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add Section</button>
+                                <button type="button" class="btn btn-sm" onclick="addSection()" style="background:rgba(15,23,42,0.08); border:1px solid rgba(15,23,42,0.15); padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add Section</button>
                                 <input type="hidden" name="sections" id="sections" value='<?php echo getValue($exam, 'sections'); ?>'>
                             </div>
                             <div class="form-group full">
@@ -666,11 +666,11 @@ function getValue($arr, $key, $default = '') {
                                         <div>
                                             <a href="../<?php echo htmlspecialchars($sp['url']); ?>" target="_blank" style="color:var(--primary); text-decoration:none; font-weight: 600;"><i class="ph ph-file-pdf"></i> View File</a>
                                         </div>
-                                        <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+                                        <button type="button" onclick="this.parentElement.remove()" style="background:rgba(15,23,42,0.06); color:#0B2447; border:1px solid rgba(15,23,42,0.06); padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
                                     </div>
                                     <?php endforeach; ?>
                                 </div>
-                                <button type="button" class="btn btn-sm" onclick="addSamplePaper()" style="background:#e2e8f0; border:1px solid #cbd5e1; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add New Sample Paper</button>
+                                <button type="button" class="btn btn-sm" onclick="addSamplePaper()" style="background:rgba(15,23,42,0.08); border:1px solid rgba(15,23,42,0.15); padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add New Sample Paper</button>
                             </div>
                         </div>
                     </div>
@@ -687,7 +687,7 @@ function getValue($arr, $key, $default = '') {
                             <div class="form-group full">
                                 <label>Percentile vs Marks</label>
                                 <div id="pvm_container" style="margin-bottom: 10px;"></div>
-                                <button type="button" class="btn btn-sm" onclick="addPvmYear()" style="background:#e2e8f0; border:1px solid #cbd5e1; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add Year Data</button>
+                                <button type="button" class="btn btn-sm" onclick="addPvmYear()" style="background:rgba(15,23,42,0.08); border:1px solid rgba(15,23,42,0.15); padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add Year Data</button>
                                 <input type="hidden" name="percentile_vs_marks_json" id="percentile_vs_marks_json" value='<?php echo getValue($exam_results, 'percentile_vs_marks_json'); ?>'>
                             </div>
                         </div>
@@ -709,11 +709,11 @@ function getValue($arr, $key, $default = '') {
                                         <div>
                                             <a href="../<?php echo htmlspecialchars($co['url']); ?>" target="_blank" style="color:var(--primary); text-decoration:none; font-weight: 600;"><i class="ph ph-file-pdf"></i> View File</a>
                                         </div>
-                                        <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+                                        <button type="button" onclick="this.parentElement.remove()" style="background:rgba(15,23,42,0.06); color:#0B2447; border:1px solid rgba(15,23,42,0.06); padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
                                     </div>
                                     <?php endforeach; ?>
                                 </div>
-                                <button type="button" class="btn btn-sm" onclick="addCutoffFile()" style="background:#e2e8f0; border:1px solid #cbd5e1; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add New Document</button>
+                                <button type="button" class="btn btn-sm" onclick="addCutoffFile()" style="background:rgba(15,23,42,0.08); border:1px solid rgba(15,23,42,0.15); padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add New Document</button>
                             </div>
                         </div>
                     </div>
@@ -906,7 +906,7 @@ function getValue($arr, $key, $default = '') {
                 <input type="text" class="form-control sub-name" placeholder="Subject Name" value="${name}">
                 <input type="number" class="form-control sub-qs" placeholder="Questions" value="${qs}" style="width:100px;">
                 <input type="number" class="form-control sub-marks" placeholder="Marks" value="${marks}" style="width:100px;">
-                <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+                <button type="button" onclick="this.parentElement.remove()" style="background:rgba(15,23,42,0.06); color:#0B2447; border:1px solid rgba(15,23,42,0.06); padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
             `;
             container.appendChild(div);
         };
@@ -921,7 +921,7 @@ function getValue($arr, $key, $default = '') {
                 <input type="text" class="form-control sec-name" placeholder="Section Name" value="${name}">
                 <input type="number" class="form-control sec-qs" placeholder="Questions" value="${qs}" style="width:100px;">
                 <input type="number" class="form-control sec-time" placeholder="Time (Mins)" value="${time}" style="width:120px;">
-                <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+                <button type="button" onclick="this.parentElement.remove()" style="background:rgba(15,23,42,0.06); color:#0B2447; border:1px solid rgba(15,23,42,0.06); padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
             `;
             container.appendChild(div);
         };
@@ -937,7 +937,7 @@ function getValue($arr, $key, $default = '') {
                 <input type="text" name="new_sp_subjects[]" class="form-control" placeholder="Subject" style="width: 150px;" required>
                 <input type="text" name="new_sp_descriptions[]" class="form-control" placeholder="Description" style="flex:1;">
                 <input type="file" name="new_sp_files[]" class="form-control" accept=".pdf,.doc,.docx" required style="width: 200px;">
-                <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+                <button type="button" onclick="this.parentElement.remove()" style="background:rgba(15,23,42,0.06); color:#0B2447; border:1px solid rgba(15,23,42,0.06); padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
             `;
             container.appendChild(div);
         };
@@ -953,7 +953,7 @@ function getValue($arr, $key, $default = '') {
                 <input type="text" name="new_co_subjects[]" class="form-control" placeholder="Subject" style="width: 150px;" required>
                 <input type="text" name="new_co_descriptions[]" class="form-control" placeholder="Description" style="flex:1;">
                 <input type="file" name="new_co_files[]" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx" required style="width: 200px;">
-                <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+                <button type="button" onclick="this.parentElement.remove()" style="background:rgba(15,23,42,0.06); color:#0B2447; border:1px solid rgba(15,23,42,0.06); padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
             `;
             container.appendChild(div);
         };
@@ -965,12 +965,12 @@ function getValue($arr, $key, $default = '') {
             sec.className = 'pvm-year-section';
             sec.style.cssText = 'background: #fff; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px;';
             sec.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px; border-bottom: 1px solid #F8FAFC; padding-bottom: 10px;">
                     <input type="text" class="form-control pvm-year-input" placeholder="Year (e.g. 2023)" value="${year}" style="width: 150px; font-weight:bold;">
-                    <button type="button" onclick="this.closest('.pvm-year-section').remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:0.85rem;"><i class="ph ph-trash"></i> Remove Year</button>
+                    <button type="button" onclick="this.closest('.pvm-year-section').remove()" style="background:rgba(15,23,42,0.06); color:#0B2447; border:1px solid rgba(15,23,42,0.06); padding:6px 12px; border-radius:4px; cursor:pointer; font-size:0.85rem;"><i class="ph ph-trash"></i> Remove Year</button>
                 </div>
                 <div class="pvm-rows-container"></div>
-                <button type="button" onclick="window.addPvmRow(this.closest('.pvm-year-section'))" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.85rem; margin-top:5px;">+ Add Row</button>
+                <button type="button" onclick="window.addPvmRow(this.closest('.pvm-year-section'))" style="background:rgba(11,36,71,0.04); color:#19376D; border:1px solid rgba(11,36,71,0.06); padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.85rem; margin-top:5px;">+ Add Row</button>
             `;
             container.appendChild(sec);
             if(!year) window.addPvmRow(sec);
@@ -987,7 +987,7 @@ function getValue($arr, $key, $default = '') {
             div.innerHTML = `
                 <input type="number" class="form-control pvm-marks" placeholder="Marks" value="${mVal}" style="width:120px;" step="0.1">
                 <input type="number" class="form-control pvm-perc" placeholder="Percentile" value="${pVal}" style="width:120px;" step="0.01">
-                <button type="button" onclick="this.parentElement.remove()" style="background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; padding:8px; border-radius:4px; cursor:pointer;"><i class="ph ph-x"></i></button>
+                <button type="button" onclick="this.parentElement.remove()" style="background:#F8FAFC; color:rgba(15,23,42,0.45); border:1px solid rgba(15,23,42,0.15); padding:8px; border-radius:4px; cursor:pointer;"><i class="ph ph-x"></i></button>
             `;
             container.appendChild(div);
         };

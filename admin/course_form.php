@@ -163,8 +163,8 @@ function getValue($arr, $key, $default = '') {
         .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 1rem; }
         .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 32px; }
         .error-alert, .msg-alert { padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid; }
-        .error-alert { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
-        .msg-alert { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+        .error-alert { background: rgba(15,23,42,0.06); color: #0B2447; border-color: rgba(15,23,42,0.06); }
+        .msg-alert { background: rgba(11,36,71,0.04); color: #0B2447; border-color: rgba(11,36,71,0.04); }
         .form-actions { display: flex; justify-content: flex-end; gap: 16px; margin-top: 32px; }
         .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding-bottom: 12px; }
         .tab-link { padding: 8px 16px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
@@ -330,7 +330,7 @@ function getValue($arr, $key, $default = '') {
                                         <?php if(!empty($recruiter['logo'])): ?>
                                         <img src="../<?php echo htmlspecialchars($recruiter['logo']); ?>" alt="logo" style="height: 30px; object-fit: contain;">
                                         <?php endif; ?>
-                                        <button type="button" class="btn btn-danger remove-recruiter" style="padding: 0 15px; height: 100%; border-radius: 8px; border: 1px solid #fecaca; background: #fee2e2; color: #991b1b; cursor: pointer;">&times;</button>
+                                        <button type="button" class="btn btn-danger remove-recruiter" style="padding: 0 15px; height: 100%; border-radius: 8px; border: 1px solid rgba(15,23,42,0.06); background: rgba(15,23,42,0.06); color: #0B2447; cursor: pointer;">&times;</button>
                                     </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -369,7 +369,7 @@ function getValue($arr, $key, $default = '') {
                     <input type="text" name="recruiter_name[]" class="form-control" placeholder="Company Name" style="flex: 1;">
                     <input type="hidden" name="recruiter_logo[]" value="">
                     <input type="file" name="recruiter_logo_file[]" class="form-control" style="flex: 1;" accept="image/*">
-                    <button type="button" class="btn btn-danger remove-recruiter" style="padding: 0 15px; height: 100%; border-radius: 8px; border: 1px solid #fecaca; background: #fee2e2; color: #991b1b; cursor: pointer;">&times;</button>
+                    <button type="button" class="btn btn-danger remove-recruiter" style="padding: 0 15px; height: 100%; border-radius: 8px; border: 1px solid rgba(15,23,42,0.06); background: rgba(15,23,42,0.06); color: #0B2447; cursor: pointer;">&times;</button>
                 </div>`;
                 $('#recruiters-container').append(row);
             });

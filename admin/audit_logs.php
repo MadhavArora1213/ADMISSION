@@ -49,20 +49,20 @@ $logs = $stmt->fetchAll();
         .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 24px;}
         table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: top;}
-        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #f1f5f9; }
+        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #F8FAFC; }
         tr:hover { background-color: rgba(0,0,0,0.015); }
         
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; white-space: nowrap; text-transform: uppercase;}
-        .a-create { background:#dcfce7; color:#166534; }
-        .a-update { background:#dbeafe; color:#1e40af; }
-        .a-delete { background:#fee2e2; color:#dc2626; }
-        .a-login { background:#fefce8; color:#ca8a04; }
-        .a-export { background:#f3e8ff; color:#7e22ce; }
+        .a-create { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .a-update { background:rgba(11,36,71,0.06); color:#19376D; }
+        .a-delete { background:rgba(15,23,42,0.06); color:#0F172A; }
+        .a-login { background:rgba(11,36,71,0.04); color:#19376D; }
+        .a-export { background:rgba(11,36,71,0.04); color:#0B2447; }
         
         .search-box { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 14px; width: 300px;}
         .search-box input { border: none; outline: none; font-size: 0.9rem; width: 100%; }
         
-        .json-viewer { font-family: monospace; font-size: 0.75rem; background: #f1f5f9; padding: 8px; border-radius: 6px; max-height: 100px; overflow-y: auto; max-width: 300px; white-space: pre-wrap; word-break: break-all;}
+        .json-viewer { font-family: monospace; font-size: 0.75rem; background: #F8FAFC; padding: 8px; border-radius: 6px; max-height: 100px; overflow-y: auto; max-width: 300px; white-space: pre-wrap; word-break: break-all;}
     </style>
 </head>
 <body>
@@ -124,13 +124,13 @@ $logs = $stmt->fetchAll();
                                         <div style="display:flex; gap:10px;">
                                             <?php if($l['old_value']): ?>
                                                 <div>
-                                                    <div style="font-size:0.7rem; font-weight:700; color:#dc2626; margin-bottom:2px;">OLD VALUE</div>
+                                                    <div style="font-size:0.7rem; font-weight:700; color:#0F172A; margin-bottom:2px;">OLD VALUE</div>
                                                     <div class="json-viewer"><?php echo htmlspecialchars($l['old_value']); ?></div>
                                                 </div>
                                             <?php endif; ?>
                                             <?php if($l['new_value']): ?>
                                                 <div>
-                                                    <div style="font-size:0.7rem; font-weight:700; color:#166534; margin-bottom:2px;">NEW VALUE</div>
+                                                    <div style="font-size:0.7rem; font-weight:700; color:#0B2447; margin-bottom:2px;">NEW VALUE</div>
                                                     <div class="json-viewer"><?php echo htmlspecialchars($l['new_value']); ?></div>
                                                 </div>
                                             <?php endif; ?>

@@ -197,13 +197,13 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
         textarea.form-control { resize: vertical; min-height: 120px; }
         .char-count { font-size: 0.75rem; color: var(--text-muted); text-align: right; margin-top: 4px; }
         .form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
-        .error-alert { padding: 14px 18px; border-radius: 8px; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; margin-bottom: 20px; }
-        .msg-alert { padding: 14px 18px; border-radius: 8px; background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; margin-bottom: 20px; }
+        .error-alert { padding: 14px 18px; border-radius: 8px; background: rgba(15,23,42,0.06); color: #0B2447; border: 1px solid rgba(15,23,42,0.06); margin-bottom: 20px; }
+        .msg-alert { padding: 14px 18px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; border: 1px solid rgba(11,36,71,0.04); margin-bottom: 20px; }
         .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-        .tag-check { display: flex; align-items: center; gap: 5px; background: #f1f5f9; border: 1px solid var(--border-color); border-radius: 6px; padding: 5px 10px; cursor: pointer; transition: all 0.2s; }
+        .tag-check { display: flex; align-items: center; gap: 5px; background: #F8FAFC; border: 1px solid var(--border-color); border-radius: 6px; padding: 5px 10px; cursor: pointer; transition: all 0.2s; }
         .tag-check:has(input:checked) { background: var(--primary); color: white; border-color: var(--primary); }
         .tag-check input { display: none; }
-        .seo-meter { height: 6px; border-radius: 3px; background: #e2e8f0; margin-top: 5px; overflow: hidden; }
+        .seo-meter { height: 6px; border-radius: 3px; background: rgba(15,23,42,0.08); margin-top: 5px; overflow: hidden; }
         .seo-meter-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
         .revision-item { background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .badge { padding: 3px 10px; border-radius: 5px; font-size: 0.72rem; font-weight: 700; }
@@ -341,7 +341,7 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                 </div>
 
                 <div class="form-actions">
-                    <a href="articles.php" class="btn" style="background:#f1f5f9; color:#475569;">Cancel</a>
+                    <a href="articles.php" class="btn" style="background:#F8FAFC; color:rgba(15,23,42,0.65);">Cancel</a>
                     <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Save Article</button>
                 </div>
             </form>
@@ -354,13 +354,13 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                     <div class="form-group">
                         <label>Meta Title <small style="color:var(--text-muted);">(max 70 chars)</small></label>
                         <input type="text" name="meta_title" class="form-control" maxlength="70" id="meta_title" value="<?php echo v($seo,'meta_title'); ?>">
-                        <div class="seo-meter"><div class="seo-meter-fill" id="mt_fill" style="background:#22c55e; width:0%;"></div></div>
+                        <div class="seo-meter"><div class="seo-meter-fill" id="mt_fill" style="background:#0B2447; width:0%;"></div></div>
                         <div class="char-count"><span id="mtc">0</span>/70</div>
                     </div>
                     <div class="form-group">
                         <label>Meta Description <small style="color:var(--text-muted);">(max 160 chars)</small></label>
                         <textarea name="meta_description" class="form-control" maxlength="160" rows="3" id="meta_desc"><?php echo v($seo,'meta_description'); ?></textarea>
-                        <div class="seo-meter"><div class="seo-meter-fill" id="md_fill" style="background:#22c55e; width:0%;"></div></div>
+                        <div class="seo-meter"><div class="seo-meter-fill" id="md_fill" style="background:#0B2447; width:0%;"></div></div>
                         <div class="char-count"><span id="mdc">0</span>/160</div>
                     </div>
                     <div class="form-grid">
@@ -404,7 +404,7 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                         <div class="form-group"><label>Scheduled Publish At</label><input type="datetime-local" name="scheduled_at" class="form-control" value="<?php echo !empty($article['scheduled_at']) ? date('Y-m-d\TH:i', strtotime($article['scheduled_at'])) : ''; ?>"></div>
                         <div class="form-group"><label>Auto Unpublish At</label><input type="datetime-local" name="unpublish_at" class="form-control" value="<?php echo !empty($article['unpublish_at']) ? date('Y-m-d\TH:i', strtotime($article['unpublish_at'])) : ''; ?>"></div>
                     </div>
-                    <div style="background:#f1f5f9; border-radius:10px; padding:16px; margin-top:8px;">
+                    <div style="background:#F8FAFC; border-radius:10px; padding:16px; margin-top:8px;">
                         <div style="display:flex; gap:24px; font-size:0.88rem;">
                             <div><span style="color:var(--text-muted);">Auto-save version:</span> <strong><?php echo v($article,'auto_save_version','1'); ?></strong></div>
                             <div><span style="color:var(--text-muted);">Last draft saved:</span> <strong><?php echo !empty($article['draft_saved_at']) ? date('d M Y H:i', strtotime($article['draft_saved_at'])) : 'Never'; ?></strong></div>
@@ -427,7 +427,7 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                         <div style="font-weight:700;">Version <?php echo $rev['version']; ?></div>
                         <div style="font-size:0.82rem; color:var(--text-muted);">By <?php echo htmlspecialchars($rev['user_name'] ?: 'Admin'); ?> on <?php echo date('d M Y H:i', strtotime($rev['saved_at'])); ?></div>
                     </div>
-                    <span class="badge" style="background:#e0e7ff; color:#3730a3;">v<?php echo $rev['version']; ?></span>
+                    <span class="badge" style="background:rgba(11,36,71,0.06); color:#19376D;">v<?php echo $rev['version']; ?></span>
                 </div>
                 <?php endforeach; endif; ?>
             </div>
@@ -461,7 +461,7 @@ function setupCounter(inputId, countId, max, fillId) {
         if(fill) {
             const pct = Math.min((len/max)*100, 100);
             fill.style.width = pct + '%';
-            fill.style.background = pct < 50 ? '#f59e0b' : pct <= 90 ? '#22c55e' : '#ef4444';
+            fill.style.background = pct < 50 ? '#19376D' : pct <= 90 ? '#0B2447' : '#0F172A';
         }
     }
     el.addEventListener('input', update);

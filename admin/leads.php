@@ -73,26 +73,26 @@ $counsellors = $counselStmt->fetchAll();
         .search-box input { border: none; outline: none; font-size: 0.95rem; width: 100%; background: transparent; }
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
-        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.78rem; letter-spacing: 0.05em; background: #f1f5f9; }
+        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.78rem; letter-spacing: 0.05em; background: #F8FAFC; }
         tr:hover { background-color: rgba(0,0,0,0.02); }
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
-        .s-new { background: #dbeafe; color: #1e40af; }
-        .s-contacted { background: #fef08a; color: #854d0e; }
-        .s-qualified { background: #e0e7ff; color: #3730a3; }
-        .s-converted { background: #dcfce7; color: #166534; }
-        .s-lost { background: #fee2e2; color: #991b1b; }
-        .s-invalid { background: #f1f5f9; color: #64748b; }
-        .p-low { background: #f1f5f9; color: #475569; }
-        .p-medium { background: #fef9c3; color: #854d0e; }
-        .p-high { background: #ffedd5; color: #c2410c; }
-        .p-urgent { background: #fee2e2; color: #991b1b; }
-        .d-pending { background: #fef9c3; color: #854d0e; }
-        .d-delivered { background: #dcfce7; color: #166534; }
-        .d-failed { background: #fee2e2; color: #991b1b; }
-        .d-disputed { background: #ffedd5; color: #c2410c; }
-        .action-btn { width: 30px; height: 30px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color); text-decoration: none; }
+        .s-new { background: rgba(11,36,71,0.06); color: #19376D; }
+        .s-contacted { background: rgba(11,36,71,0.06); color: #0F172A; }
+        .s-qualified { background: rgba(11,36,71,0.06); color: #19376D; }
+        .s-converted { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .s-lost { background: rgba(15,23,42,0.06); color: #0B2447; }
+        .s-invalid { background: #F8FAFC; color: rgba(15,23,42,0.45); }
+        .p-low { background: #F8FAFC; color: rgba(15,23,42,0.65); }
+        .p-medium { background: rgba(11,36,71,0.04); color: #0F172A; }
+        .p-high { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .p-urgent { background: rgba(15,23,42,0.06); color: #0B2447; }
+        .d-pending { background: rgba(11,36,71,0.04); color: #0F172A; }
+        .d-delivered { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .d-failed { background: rgba(15,23,42,0.06); color: #0B2447; }
+        .d-disputed { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .action-btn { width: 30px; height: 30px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; background: #F8FAFC; color: var(--text-dark); border: 1px solid var(--border-color); text-decoration: none; }
         .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); }
     </style>
 </head>
 <body>
@@ -126,9 +126,9 @@ $counsellors = $counselStmt->fetchAll();
             ?>
             <div class="stats-grid">
                 <div class="stat-card"><div class="num"><?php echo $totalAll; ?></div><div class="label">Total Leads</div></div>
-                <div class="stat-card"><div class="num" style="color:#1e40af;"><?php echo $totals['new']; ?></div><div class="label">New</div></div>
-                <div class="stat-card"><div class="num" style="color:#3730a3;"><?php echo $totals['qualified']; ?></div><div class="label">Qualified</div></div>
-                <div class="stat-card"><div class="num" style="color:#166534;"><?php echo $totals['converted']; ?></div><div class="label">Converted</div></div>
+                <div class="stat-card"><div class="num" style="color:#19376D;"><?php echo $totals['new']; ?></div><div class="label">New</div></div>
+                <div class="stat-card"><div class="num" style="color:#19376D;"><?php echo $totals['qualified']; ?></div><div class="label">Qualified</div></div>
+                <div class="stat-card"><div class="num" style="color:#0B2447;"><?php echo $totals['converted']; ?></div><div class="label">Converted</div></div>
             </div>
 
             <div class="filter-bar">
@@ -178,7 +178,7 @@ $counsellors = $counselStmt->fetchAll();
                                     <div style="font-size:0.8rem; color:var(--text-muted);"><?php echo htmlspecialchars($l['email']); ?></div>
                                     <?php if($l['city']): ?><div style="font-size:0.75rem; color:var(--text-muted);"><?php echo htmlspecialchars($l['city'].', '.$l['state']); ?></div><?php endif; ?>
                                 </td>
-                                <td><?php echo $l['lead_type'] ? '<span class="badge" style="background:#e0e7ff;color:#3730a3;">'.ucfirst($l['lead_type']).'</span>' : '-'; ?></td>
+                                <td><?php echo $l['lead_type'] ? '<span class="badge" style="background:rgba(11,36,71,0.06);color:#19376D;">'.ucfirst($l['lead_type']).'</span>' : '-'; ?></td>
                                 <td>
                                     <div style="font-size:0.85rem; font-weight:600;"><?php echo htmlspecialchars($l['college_name'] ?: '-'); ?></div>
                                     <div style="font-size:0.78rem; color:var(--text-muted);"><?php echo htmlspecialchars($l['course_name'] ?: ''); ?></div>

@@ -9,6 +9,9 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$isLoggedIn = isset($_SESSION['user_id']);
+$loginUrl = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']);
+
 $slug = trim($_GET['slug'] ?? '');
 $tab  = trim($_GET['tab'] ?? 'info');
 $tabs = collegeTabs();
@@ -39,11 +42,14 @@ try { $s=$pdo->prepare("SELECT * FROM college_courses WHERE college_id=? ORDER B
 try { $s=$pdo->prepare("SELECT * FROM college_placements WHERE college_id=? ORDER BY placement_year DESC"); $s->execute([$cid]); $placements=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 try { $s=$pdo->prepare("SELECT cc.*,e.exam_name,co.course_name FROM college_cutoffs cc LEFT JOIN exams e ON e.id=cc.exam_id LEFT JOIN courses co ON co.id=cc.course_id WHERE cc.college_id=? ORDER BY cc.cutoff_year DESC,e.exam_name ASC"); $s->execute([$cid]); $cutoffs=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 try { $s=$pdo->prepare("SELECT * FROM rankings WHERE college_id=? ORDER BY ranking_year DESC,rank_position ASC"); $s->execute([$cid]); $rankings=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
-try { $s=$pdo->prepare("SELECT id,college_id,image_url,video_url,caption,image_type,document_url,document_type,logo_url,cover_image_url FROM college_media WHERE college_id=? ORDER BY sort_order ASC"); $s->execute([$cid]); $gallery=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
+try { $s=$pdo->prepare("SELECT id,college_id,image_url,video_url,video_type,caption,image_type,document_url,document_type,logo_url,cover_image_url,`360_tour_url`,virtual_tour_enabled FROM college_media WHERE college_id=? ORDER BY sort_order ASC"); $s->execute([$cid]); $gallery=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 try { $s=$pdo->prepare("SELECT * FROM college_faculty WHERE college_id=? ORDER BY faculty_name ASC"); $s->execute([$cid]); $faculty=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 try { $s=$pdo->prepare("SELECT * FROM college_faqs WHERE college_id=? AND is_active=1 ORDER BY sort_order ASC"); $s->execute([$cid]); $faqs=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 try { $s=$pdo->prepare("SELECT * FROM college_qna WHERE college_id=? AND status='approved' ORDER BY created_at DESC LIMIT 50"); $s->execute([$cid]); $qnaList=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 try { $s=$pdo->prepare("SELECT * FROM college_updates WHERE college_id=? AND status='published' ORDER BY event_date DESC,created_at DESC LIMIT 30"); $s->execute([$cid]); $updates=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
+try { $cn=$college['name']; $sl=$slug; $s=$pdo->prepare("SELECT *, article_title AS title, excerpt AS description, featured_image_url AS image_url, publish_at AS event_date, article_type AS update_type FROM articles WHERE status='published' AND (article_title LIKE ? OR article_title LIKE ? OR tags LIKE ? OR tags LIKE ?) ORDER BY publish_at DESC LIMIT 10"); $s->execute(["%$cn%","%$sl%","%$cn%","%$sl%"]); $articles=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
+$updates = array_merge($updates, $articles);
+usort($updates, function($a,$b){ return strtotime($b['event_date']??'0') - strtotime($a['event_date']??'0'); });
 try { $s=$pdo->prepare("SELECT r.*,u.full_name AS user_name FROM reviews r LEFT JOIN users u ON u.id=r.user_id WHERE r.college_id=? AND r.moderation_status='approved' ORDER BY r.created_at DESC LIMIT 30"); $s->execute([$cid]); $reviews=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 
 $qnaCount = count($faqs) + count($qnaList);
@@ -65,9 +71,15 @@ $ratingItems = [
 ];
 
 $brochureUrl = '';
+$prospectusUrl = '';
 foreach ($gallery as $m) {
-    if (!empty($m['document_url']) && ($m['document_type'] ?? '') === 'brochure') {
-        $brochureUrl = $m['document_url']; break;
+    if (!empty($m['document_url'])) {
+        $docType = $m['document_type'] ?? '';
+        if ($docType === 'brochure' && !$brochureUrl) {
+            $brochureUrl = $m['document_url'];
+        } elseif ($docType === 'prospectus' && !$prospectusUrl) {
+            $prospectusUrl = $m['document_url'];
+        }
     }
 }
 
@@ -79,6 +91,16 @@ $tabIcons = [
     'infrastructure'=>'ph-buildings','faculty'=>'ph-chalkboard-teacher',
     'compare'=>'ph-scales','qna'=>'ph-chat-circle','news'=>'ph-newspaper',
 ];
+
+// Check if logged-in user already applied to this college
+$userAlreadyApplied = null;
+if (isset($_SESSION['user_id'])) {
+    try {
+        $ua = $pdo->prepare("SELECT application_number, status FROM applications WHERE user_id = ? AND college_id = ? LIMIT 1");
+        $ua->execute([$_SESSION['user_id'], $cid]);
+        $userAlreadyApplied = $ua->fetch(PDO::FETCH_ASSOC) ?: null;
+    } catch(Exception $e) {}
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -97,37 +119,52 @@ $tabIcons = [
     /* Detail page extras */
     .cr-sub-ratings{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
     .cr-sub-item{display:flex;align-items:center;justify-content:space-between;
-      font-size:.8rem;color:#475569;gap:8px}
-    .cr-sub-bar{flex:1;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden}
-    .cr-sub-fill{height:100%;background:linear-gradient(90deg,#2563eb,#4f46e5);border-radius:2px}
-    .cr-sub-val{font-weight:700;color:#111827;min-width:24px;text-align:right}
+      font-size:.8rem;color:rgba(15,23,42,0.65);gap:8px}
+    .cr-sub-bar{flex:1;height:4px;background:rgba(15,23,42,0.08);border-radius:2px;overflow:hidden}
+    .cr-sub-fill{height:100%;background:linear-gradient(90deg,#19376D,#19376D);border-radius:2px}
+    .cr-sub-val{font-weight:700;color:#0F172A;min-width:24px;text-align:right}
     .overview-stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:24px}
-    .overview-stat{text-align:center;padding:18px 12px;background:linear-gradient(135deg,#f8fafc,#eff6ff);
+    .overview-stat{text-align:center;padding:18px 12px;background:linear-gradient(135deg,#f8fafc,rgba(11,36,71,0.06));
       border-radius:14px;border:1px solid rgba(37,99,235,.1)}
-    .overview-stat-val{font-size:1.4rem;font-weight:800;color:#1e40af;font-family:'Plus Jakarta Sans',sans-serif}
-    .overview-stat-lbl{font-size:.72rem;color:#64748b;margin-top:4px;text-transform:uppercase;letter-spacing:.4px}
+    .overview-stat-val{font-size:1.4rem;font-weight:800;color:#19376D;font-family:'Plus Jakarta Sans',sans-serif}
+    .overview-stat-lbl{font-size:.72rem;color:rgba(15,23,42,0.45);margin-top:4px;text-transform:uppercase;letter-spacing:.4px}
     .course-level-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase}
-    .level-ug{background:#f0fdf4;color:#16a34a}
-    .level-pg{background:#eff6ff;color:#2563eb}
-    .level-phd{background:#faf5ff;color:#7c3aed}
-    .level-diploma{background:#fff7ed;color:#c2410c}
-    .level-certificate{background:#fef3c7;color:#92400e}
+    .level-ug{background:rgba(11,36,71,0.04);color:#0B2447}
+    .level-pg{background:rgba(11,36,71,0.06);color:#19376D}
+    .level-phd{background:rgba(11,36,71,0.04);color:#0B2447}
+    .level-diploma{background:rgba(11,36,71,0.04);color:#0B2447}
+    .level-certificate{background:rgba(11,36,71,0.06);color:#0F172A}
     .placement-highlight{
       display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;
     }
-    .ph-stat{padding:20px;background:linear-gradient(135deg,#eff6ff,#e0e7ff);
+    .ph-stat{padding:20px;background:linear-gradient(135deg,rgba(11,36,71,0.06),rgba(11,36,71,0.06));
       border-radius:14px;border:1px solid rgba(37,99,235,.15);text-align:center}
-    .ph-stat strong{display:block;font-size:1.3rem;font-weight:800;color:#1e40af}
-    .ph-stat span{font-size:.75rem;color:#64748b;text-transform:uppercase;letter-spacing:.4px}
+    .ph-stat strong{display:block;font-size:1.3rem;font-weight:800;color:#19376D}
+    .ph-stat span{font-size:.75rem;color:rgba(15,23,42,0.45);text-transform:uppercase;letter-spacing:.4px}
     .compare-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:20px}
-    .compare-card{padding:20px;background:var(--cp-light,#f8fafc);border-radius:14px;border:1.5px solid #e2e8f0;text-align:center}
-    .compare-card strong{display:block;font-size:1.35rem;font-weight:800;color:#1e40af;margin-bottom:4px}
-    .compare-card span{font-size:.78rem;color:#64748b;text-transform:uppercase;letter-spacing:.4px}
-    .tab-empty-state{text-align:center;padding:48px 24px;color:#94a3b8}
+    .compare-card{padding:20px;background:var(--cp-light,#f8fafc);border-radius:14px;border:1.5px solid rgba(15,23,42,0.08);text-align:center}
+    .compare-card strong{display:block;font-size:1.35rem;font-weight:800;color:#19376D;margin-bottom:4px}
+    .compare-card span{font-size:.78rem;color:rgba(15,23,42,0.45);text-transform:uppercase;letter-spacing:.4px}
+    .tab-empty-state{text-align:center;padding:48px 24px;color:rgba(15,23,42,0.4)}
     .tab-empty-state i{font-size:3rem;display:block;margin-bottom:12px}
     .tab-empty-state p{font-size:.92rem}
     .news-type-badge{font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;
-      letter-spacing:.4px;background:#eff6ff;color:#2563eb;display:inline-block}
+      letter-spacing:.4px;background:rgba(11,36,71,0.06);color:#19376D;display:inline-block}
+
+    /* Tab scroll arrows */
+    .college-tabs-wrapper{position:relative;display:flex;align-items:center}
+    .college-tabs-wrapper .shiksha-tabs{flex:1;overflow-x:auto;scrollbar-width:none;scroll-behavior:smooth;
+      display:flex;gap:2px;padding:4px 0}
+    .college-tabs-wrapper .shiksha-tabs::-webkit-scrollbar{display:none}
+    .tab-arrow{
+      flex-shrink:0;width:32px;height:32px;border:none;border-radius:8px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;font-size:1rem;
+      color:#19376D;background:rgba(11,36,71,0.06);border:1px solid rgba(15,23,42,0.08);
+      transition:all .2s;z-index:2;margin:0 4px;
+    }
+    .tab-arrow:hover{background:#19376D;color:#fff;border-color:#19376D}
+    .tab-arrow:active{transform:scale(.95)}
+    .tab-arrow.hidden{display:none}
   </style>
 </head>
 <body class="bg-light">
@@ -158,7 +195,7 @@ $tabIcons = [
           <div class="college-hero-chips">
             <?php if ($location): ?><span><i class="ph ph-map-pin"></i> <?= htmlspecialchars($location) ?></span><?php endif; ?>
             <?php if ($overallRating > 0): ?>
-            <span><i class="ph ph-star-fill" style="color:#fbbf24"></i> <?= number_format((float)$overallRating,1) ?> / 5</span>
+            <span><i class="ph ph-star-fill" style="color:#19376D"></i> <?= number_format((float)$overallRating,1) ?> / 5</span>
             <span><?= $reviewCount ?> Reviews</span>
             <?php endif; ?>
             <?php if ($qnaCount > 0): ?><span><i class="ph ph-chat-circle"></i> Student Q&A</span><?php endif; ?>
@@ -176,17 +213,41 @@ $tabIcons = [
         <button type="button" class="college-btn-outline" title="Save to wishlist" onclick="this.innerHTML='<i class=\'ph-fill ph-heart\'></i> Saved'">
           <i class="ph ph-heart"></i> Save
         </button>
-        <a href="<?= collegeUrl($slug, 'compare') ?>" class="college-btn-outline">
-          <i class="ph ph-scales"></i> Compare
-        </a>
         <?php if ($brochureUrl): ?>
-        <a href="<?= htmlspecialchars($brochureUrl) ?>" target="_blank" class="college-btn-primary">
+        <button type="button" class="college-btn-primary" onclick="sendBrochure()" id="brochureBtnHero">
           <i class="ph ph-download-simple"></i> Brochure
+        </button>
+        <?php endif; ?>
+        <?php if ($prospectusUrl): ?>
+        <a href="<?= htmlspecialchars($prospectusUrl) ?>" target="_blank" class="college-btn-primary">
+          <i class="ph ph-file-text"></i> Prospectus
         </a>
+        <?php endif; ?>
+        <?php if (!empty($courses)): ?>
+        <?php if ($isLoggedIn): ?>
+        <button type="button" class="college-btn-primary" onclick="sendCourseList()" id="courseListBtnHero">
+          <i class="ph ph-files"></i> Course List
+        </button>
         <?php else: ?>
-        <a href="#apply" class="college-btn-primary">
+        <button type="button" class="college-btn-primary" onclick="openLoginPrompt()">
+          <i class="ph ph-files"></i> Course List
+        </button>
+        <?php endif; ?>
+        <?php endif; ?>
+        <?php if ($userAlreadyApplied): ?>
+        <div class="college-applied-badge">
+          <i class="ph-fill ph-check-circle"></i>
+          <span>Already Applied</span>
+          <span class="college-applied-appno"><?= htmlspecialchars($userAlreadyApplied['application_number']) ?></span>
+        </div>
+        <?php elseif ($isLoggedIn): ?>
+        <button type="button" class="college-btn-primary" onclick="openApplyModal()">
           <i class="ph ph-paper-plane-tilt"></i> Apply Now
-        </a>
+        </button>
+        <?php else: ?>
+        <button type="button" class="college-btn-primary" onclick="openLoginPrompt()">
+          <i class="ph ph-paper-plane-tilt"></i> Apply Now
+        </button>
         <?php endif; ?>
       </div>
     </div>
@@ -198,15 +259,19 @@ $tabIcons = [
      ══════════════════════════════════════════════════════════════════ -->
 <div class="shiksha-tabs-nav college-tabs-sticky">
   <div class="container">
-    <div class="shiksha-tabs college-detail-tabs">
-      <?php foreach ($tabs as $key => $label): ?>
-      <a href="<?= collegeUrl($slug, $key) ?>" class="<?= $tab === $key ? 'active' : '' ?>">
-        <?php if (isset($tabIcons[$key])): ?><i class="ph <?= $tabIcons[$key] ?>"></i> <?php endif; ?>
-        <?= htmlspecialchars($label) ?>
-        <?php if ($key === 'reviews' && $reviewCount > 0): ?><span style="background:#eff6ff;color:#2563eb;padding:1px 6px;border-radius:10px;font-size:.7rem;margin-left:3px"><?= $reviewCount ?></span><?php endif; ?>
-        <?php if ($key === 'qna' && $qnaCount > 0): ?><span style="background:#eff6ff;color:#2563eb;padding:1px 6px;border-radius:10px;font-size:.7rem;margin-left:3px"><?= $qnaCount ?></span><?php endif; ?>
-      </a>
-      <?php endforeach; ?>
+    <div class="college-tabs-wrapper">
+      <button class="tab-arrow tab-arrow-left" onclick="scrollTabs(-1)" aria-label="Scroll left"><i class="ph ph-caret-left"></i></button>
+      <div class="shiksha-tabs college-detail-tabs" id="collegeTabs">
+        <?php foreach ($tabs as $key => $label): ?>
+        <a href="<?= collegeUrl($slug, $key) ?>" class="<?= $tab === $key ? 'active' : '' ?>">
+          <?php if (isset($tabIcons[$key])): ?><i class="ph <?= $tabIcons[$key] ?>"></i> <?php endif; ?>
+          <?= htmlspecialchars($label) ?>
+          <?php if ($key === 'reviews' && $reviewCount > 0): ?><span style="background:rgba(11,36,71,0.06);color:#19376D;padding:1px 6px;border-radius:10px;font-size:.7rem;margin-left:3px"><?= $reviewCount ?></span><?php endif; ?>
+          <?php if ($key === 'qna' && $qnaCount > 0): ?><span style="background:rgba(11,36,71,0.06);color:#19376D;padding:1px 6px;border-radius:10px;font-size:.7rem;margin-left:3px"><?= $qnaCount ?></span><?php endif; ?>
+        </a>
+        <?php endforeach; ?>
+      </div>
+      <button class="tab-arrow tab-arrow-right" onclick="scrollTabs(1)" aria-label="Scroll right"><i class="ph ph-caret-right"></i></button>
     </div>
   </div>
 </div>
@@ -258,12 +323,31 @@ $tabIcons = [
 
           <?php if (!empty($highlights)): ?>
           <section class="college-section">
-            <h2>College Highlights</h2>
-            <ul class="college-highlight-list">
-              <?php foreach ($highlights as $h): ?>
-              <li><i class="ph ph-check-circle"></i> <?= htmlspecialchars(is_array($h) ? ($h['text'] ?? json_encode($h)) : (string)$h) ?></li>
-              <?php endforeach; ?>
-            </ul>
+            <div class="college-highlights-card">
+              <div class="college-highlights-header">
+                <?php if ($college['logo_url']): ?>
+                <img src="<?= cImg($college['logo_url']) ?>" alt="<?= htmlspecialchars($college['name']) ?>" class="college-highlights-logo">
+                <?php else: ?>
+                <div class="college-highlights-logo college-highlights-logo-placeholder"><i class="ph ph-graduation-cap"></i></div>
+                <?php endif; ?>
+                <div>
+                  <h2>College Highlights</h2>
+                  <p class="college-highlights-sub">Why <?= htmlspecialchars($college['name']) ?> stands out</p>
+                </div>
+              </div>
+              <div class="college-highlight-grid">
+                <?php foreach ($highlights as $i => $h):
+                  $text = htmlspecialchars(is_array($h) ? ($h['text'] ?? json_encode($h)) : (string)$h);
+                  $icons = ['ph-trophy','ph-star','ph-users','ph-map-pin','ph-medal','ph-books','ph-flask','ph-buildings','ph-globe-simple','ph-chart-line-up'];
+                  $icon = $icons[$i % count($icons)];
+                ?>
+                <div class="college-highlight-chip">
+                  <i class="ph <?= $icon ?>"></i>
+                  <span><?= $text ?></span>
+                </div>
+                <?php endforeach; ?>
+              </div>
+            </div>
           </section>
           <?php endif; ?>
 
@@ -294,7 +378,20 @@ $tabIcons = [
         <!-- ── COURSES ───────────────────────────────────────────── -->
         <?php elseif ($tab === 'courses'): ?>
           <section class="college-section">
-            <h2>Courses Offered <span class="college-count">(<?= count($courses) ?>)</span></h2>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+              <h2 style="margin:0">Courses Offered <span class="college-count">(<?= count($courses) ?>)</span></h2>
+              <?php if (!empty($courses)): ?>
+              <?php if ($isLoggedIn): ?>
+              <button type="button" onclick="sendCourseList()" id="courseListBtn" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#fff;color:#0B2447;border:2px solid #0B2447;border-radius:10px;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .25s">
+                <i class="ph ph-files"></i> Course List
+              </button>
+              <?php else: ?>
+              <button type="button" onclick="openLoginPrompt()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#fff;color:#0B2447;border:2px solid #0B2447;border-radius:10px;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .25s">
+                <i class="ph ph-files"></i> Course List
+              </button>
+              <?php endif; ?>
+              <?php endif; ?>
+            </div>
             <?php if (empty($courses)): ?>
             <div class="tab-empty-state"><i class="ph ph-book-open"></i><p>No courses listed yet for this college.</p></div>
             <?php else: ?>
@@ -310,14 +407,14 @@ $tabIcons = [
                 <tr>
                   <td>
                     <strong><?= htmlspecialchars($co['course_name'] ?? '—') ?></strong>
-                    <?php if (!empty($co['specializations'])): ?><br><small style="color:#94a3b8"><?= htmlspecialchars(is_string($co['specializations']) ? $co['specializations'] : implode(', ', json_decode($co['specializations'],true) ?: [])) ?></small><?php endif; ?>
-                    <?php if (!empty($co['eligibility_criteria'])): ?><br><small style="color:#94a3b8">Eligibility: <?= htmlspecialchars($co['eligibility_criteria']) ?></small><?php endif; ?>
+                    <?php if (!empty($co['specializations'])): ?><br><small style="color:rgba(15,23,42,0.4)"><?= htmlspecialchars(is_string($co['specializations']) ? $co['specializations'] : implode(', ', json_decode($co['specializations'],true) ?: [])) ?></small><?php endif; ?>
+                    <?php if (!empty($co['eligibility_criteria'])): ?><br><small style="color:rgba(15,23,42,0.4)">Eligibility: <?= htmlspecialchars($co['eligibility_criteria']) ?></small><?php endif; ?>
                   </td>
                   <td><span class="course-level-badge <?= $levelClass ?>"><?= htmlspecialchars($co['course_level'] ?? '—') ?></span></td>
                   <td><?= $co['duration_years'] ? htmlspecialchars((string)$co['duration_years']) . ' yrs' : '—' ?></td>
                   <td><?= htmlspecialchars((string)($co['seats_available'] ?? $co['seats'] ?? '—')) ?></td>
-                  <td><strong style="color:#16a34a"><?= formatFee(isset($co['annual_fee']) ? (float)$co['annual_fee'] : null) ?></strong></td>
-                  <td><?= !empty($co['emi_available']) ? '<span style="color:#16a34a;font-weight:700">✓ EMI</span>' : '<span style="color:#94a3b8">—</span>' ?></td>
+                  <td><strong style="color:#0B2447"><?= formatFee(isset($co['annual_fee']) ? (float)$co['annual_fee'] : null) ?></strong></td>
+                  <td><?= !empty($co['emi_available']) ? '<span style="color:#0B2447;font-weight:700">✓ EMI</span>' : '<span style="color:rgba(15,23,42,0.4)">—</span>' ?></td>
                 </tr>
                 <?php endforeach; ?>
                 </tbody>
@@ -340,7 +437,7 @@ $tabIcons = [
                 <?php foreach ($courses as $co): ?>
                 <tr>
                   <td><strong><?= htmlspecialchars($co['course_name'] ?? '—') ?></strong></td>
-                  <td><strong style="color:#16a34a"><?= formatFee(isset($co['annual_fee']) ? (float)$co['annual_fee'] : null) ?></strong></td>
+                  <td><strong style="color:#0B2447"><?= formatFee(isset($co['annual_fee']) ? (float)$co['annual_fee'] : null) ?></strong></td>
                   <td><?= formatFee(isset($co['semester_fee']) ? (float)$co['semester_fee'] : null) ?></td>
                   <td><?= formatFee(isset($co['total_fee']) ? (float)$co['total_fee'] : null) ?></td>
                   <td><?= formatFee(isset($co['application_fee']) ? (float)$co['application_fee'] : null) ?></td>
@@ -379,8 +476,8 @@ $tabIcons = [
                 </div>
                 <?php if ($rev['review_title']): ?><h4><?= htmlspecialchars($rev['review_title']) ?></h4><?php endif; ?>
                 <?php if ($rev['review_body']): ?><p><?= nl2br(htmlspecialchars($rev['review_body'])) ?></p><?php endif; ?>
-                <?php if ($rev['pros']): ?><p class="cr-pros"><strong>👍 Pros:</strong> <?= htmlspecialchars($rev['pros']) ?></p><?php endif; ?>
-                <?php if ($rev['cons']): ?><p class="cr-cons"><strong>👎 Cons:</strong> <?= htmlspecialchars($rev['cons']) ?></p><?php endif; ?>
+                <?php if ($rev['pros']): ?><p class="cr-pros"><strong><i class="ph ph-thumbs-up"></i> Pros:</strong> <?= htmlspecialchars($rev['pros']) ?></p><?php endif; ?>
+                <?php if ($rev['cons']): ?><p class="cr-cons"><strong><i class="ph ph-thumbs-down"></i> Cons:</strong> <?= htmlspecialchars($rev['cons']) ?></p><?php endif; ?>
               </article>
               <?php endforeach; ?>
             </div>
@@ -522,28 +619,153 @@ $tabIcons = [
           </section>
 
         <!-- ── GALLERY ───────────────────────────────────────────── -->
-        <?php elseif ($tab === 'gallery'): ?>
-          <section class="college-section">
-            <h2>Photo Gallery</h2>
-            <?php
-            $images = [];
+        <?php elseif ($tab === 'gallery'):
+            $gImages = []; $gVideos = []; $gDocs = []; $gTour360 = null;
             foreach ($gallery as $m) {
-                $imgUrl = $m['image_url'] ?? $m['cover_image_url'] ?? '';
-                if ($imgUrl) $images[] = array_merge($m, ['display_url' => $imgUrl]);
+                if (!empty($m['image_url'])) $gImages[] = $m;
+                elseif (!empty($m['video_url'])) $gVideos[] = $m;
+                elseif (!empty($m['document_url'])) $gDocs[] = $m;
+                if (!empty($m['360_tour_url']) && empty($m['image_url']) && empty($m['video_url']) && empty($m['document_url'])) $gTour360 = $m;
             }
-            if (empty($images)): ?>
-            <div class="tab-empty-state"><i class="ph ph-images"></i><p>No gallery images yet.</p></div>
+            $hasAny = count($gImages) || count($gVideos) || count($gDocs) || $gTour360;
+        ?>
+          <section class="college-section">
+            <h2>Media & Gallery</h2>
+
+            <?php if (!$hasAny): ?>
+            <div class="tab-empty-state"><i class="ph ph-images"></i><p>No media content uploaded yet.</p></div>
             <?php else: ?>
-            <div class="college-gallery-grid">
-              <?php foreach ($images as $img): ?>
-              <a href="<?= htmlspecialchars($img['display_url']) ?>" target="_blank" class="college-gallery-item">
-                <img src="<?= cImg($img['display_url']) ?>" alt="<?= htmlspecialchars($img['caption'] ?? $college['name']) ?>" loading="lazy">
-                <?php if ($img['caption']): ?><span><?= htmlspecialchars($img['caption']) ?></span><?php endif; ?>
-              </a>
+
+            <!-- Filter Tabs -->
+            <div class="gallery-filter-tabs" id="galleryTabs">
+              <button class="g-tab active" data-filter="all">All</button>
+              <?php if (count($gImages)): ?><button class="g-tab" data-filter="images">Images (<?= count($gImages) ?>)</button><?php endif; ?>
+              <?php if (count($gVideos)): ?><button class="g-tab" data-filter="videos">Videos (<?= count($gVideos) ?>)</button><?php endif; ?>
+              <?php if (count($gDocs)): ?><button class="g-tab" data-filter="documents">Documents (<?= count($gDocs) ?>)</button><?php endif; ?>
+              <?php if ($gTour360): ?><button class="g-tab" data-filter="tour360">360° Tour</button><?php endif; ?>
+            </div>
+
+            <!-- IMAGES -->
+            <?php if (count($gImages)):
+                $imgSubTypes = ['campus'=>'Campus','lab'=>'Lab','hostel'=>'Hostel','event'=>'Event','classroom'=>'Classroom'];
+                $grouped = [];
+                foreach ($gImages as $m) { $k = $m['image_type'] ?: 'other'; $grouped[$k][] = $m; }
+            ?>
+            <div class="gallery-section" data-gtype="images">
+              <h3 class="gallery-section-title"><i class="ph ph-image"></i> Images</h3>
+              <?php foreach ($grouped as $subType => $items): ?>
+              <h4 class="gallery-sub-title"><?= $imgSubTypes[$subType] ?? ucfirst($subType) ?></h4>
+              <div class="college-gallery-grid">
+                <?php foreach ($items as $m):
+                    $url = $m['image_url'] ?: ($m['cover_image_url'] ?: '');
+                    if (!$url) continue;
+                ?>
+                <a href="<?= htmlspecialchars($url) ?>" target="_blank" class="college-gallery-item" title="<?= htmlspecialchars($m['caption'] ?: '') ?>">
+                  <img src="<?= cImg($url) ?>" alt="<?= htmlspecialchars($m['caption'] ?? $college['name']) ?>" loading="lazy">
+                  <?php if ($m['caption']): ?><span><?= htmlspecialchars($m['caption']) ?></span><?php endif; ?>
+                </a>
+                <?php endforeach; ?>
+              </div>
               <?php endforeach; ?>
             </div>
             <?php endif; ?>
+
+            <!-- VIDEOS -->
+            <?php if (count($gVideos)):
+                $vidSubTypes = ['tour'=>'Campus Tour','placement'=>'Placement','event'=>'Event','alumni_talk'=>'Alumni Talk'];
+            ?>
+            <div class="gallery-section" data-gtype="videos">
+              <h3 class="gallery-section-title"><i class="ph ph-video-camera"></i> Videos</h3>
+              <?php foreach ($gVideos as $m):
+                $vUrl = $m['video_url'];
+                $vSub = $m['video_type'] ?: 'other';
+                $embedUrl = $vUrl;
+                if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/', $vUrl, $yt)) {
+                    $embedUrl = 'https://www.youtube.com/embed/' . $yt[1];
+                } elseif (preg_match('/vimeo\.com\/(\d+)/', $vUrl, $vm)) {
+                    $embedUrl = 'https://player.vimeo.com/video/' . $vm[1];
+                }
+                $isEmbed = (strpos($embedUrl, 'youtube.com/embed') !== false || strpos($embedUrl, 'player.vimeo.com') !== false || strpos($embedUrl, 'matterport') !== false);
+              ?>
+              <div class="gallery-video-card">
+                <div class="gallery-video-badge"><?= $vidSubTypes[$vSub] ?? ucfirst(str_replace('_',' ',$vSub)) ?></div>
+                <?php if ($isEmbed): ?>
+                <div class="gallery-video-wrap">
+                  <iframe src="<?= htmlspecialchars($embedUrl) ?>" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+                </div>
+                <?php else: ?>
+                <a href="<?= htmlspecialchars($vUrl) ?>" target="_blank" class="gallery-video-link">
+                  <div class="gallery-video-thumb"><i class="ph ph-play-circle" style="font-size:3rem;color:#fff"></i></div>
+                  <span>Watch Video <i class="ph ph-arrow-square-out"></i></span>
+                </a>
+                <?php endif; ?>
+                <?php if ($m['caption']): ?><p class="gallery-video-caption"><?= htmlspecialchars($m['caption']) ?></p><?php endif; ?>
+              </div>
+              <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
+            <!-- DOCUMENTS -->
+            <?php if (count($gDocs)):
+                $docSubTypes = ['brochure'=>'Brochure','prospectus'=>'Prospectus','annual_report'=>'Annual Report','ranking_cert'=>'Ranking Certificate'];
+                $docIcons = ['brochure'=>'ph-book-open','prospectus'=>'ph-notebook','annual_report'=>'ph-file-text','ranking_cert'=>'ph-medal'];
+            ?>
+            <div class="gallery-section" data-gtype="documents">
+              <h3 class="gallery-section-title"><i class="ph ph-files"></i> Documents</h3>
+              <div class="gallery-doc-list">
+              <?php foreach ($gDocs as $m):
+                $dUrl = $m['document_url'];
+                $dType = $m['document_type'] ?: 'document';
+                $isPdf = (stripos($dUrl, '.pdf') !== false);
+                $displayUrl = cImg($dUrl);
+              ?>
+              <a href="<?= htmlspecialchars($displayUrl) ?>" target="_blank" class="gallery-doc-card">
+                <div class="gallery-doc-icon">
+                  <i class="ph <?= $isPdf ? 'ph-file-pdf' : ($docIcons[$dType] ?? 'ph-file') ?>"></i>
+                </div>
+                <div class="gallery-doc-info">
+                  <span class="gallery-doc-name"><?= $docSubTypes[$dType] ?? ucfirst(str_replace('_',' ',$dType)) ?></span>
+                  <?php if ($m['caption']): ?><span class="gallery-doc-cap"><?= htmlspecialchars($m['caption']) ?></span><?php endif; ?>
+                </div>
+                <span class="gallery-doc-dl"><i class="ph ph-download-simple"></i> Download</span>
+              </a>
+              <?php endforeach; ?>
+              </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- 360 TOUR -->
+            <?php if ($gTour360): ?>
+            <div class="gallery-section" data-gtype="tour360">
+              <h3 class="gallery-section-title"><i class="ph ph-compass"></i> Virtual Tour (360°)</h3>
+              <?php $tourUrl = $gTour360['360_tour_url']; ?>
+              <div class="gallery-360-wrap">
+                <iframe src="<?= htmlspecialchars($tourUrl) ?>" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+              </div>
+              <p class="gallery-360-hint">Drag to look around. Scroll to zoom. Best viewed in fullscreen.</p>
+            </div>
+            <?php endif; ?>
+
+            <?php endif; ?>
           </section>
+
+          <script>
+          document.addEventListener('DOMContentLoaded', function() {
+              var tabs = document.getElementById('galleryTabs');
+              if (!tabs) return;
+              tabs.addEventListener('click', function(e) {
+                  var btn = e.target.closest('.g-tab');
+                  if (!btn) return;
+                  tabs.querySelectorAll('.g-tab').forEach(function(b){ b.classList.remove('active'); });
+                  btn.classList.add('active');
+                  var f = btn.getAttribute('data-filter');
+                  document.querySelectorAll('.gallery-section').forEach(function(sec) {
+                      if (f === 'all' || sec.getAttribute('data-gtype') === f) sec.style.display = '';
+                      else sec.style.display = 'none';
+                  });
+              });
+          });
+          </script>
 
         <!-- ── INFRASTRUCTURE ────────────────────────────────────── -->
         <?php elseif ($tab === 'infrastructure'): ?>
@@ -575,12 +797,42 @@ $tabIcons = [
             $sportsList = jsonLines($college['sports_facilities'] ?? '');
             $labsList   = jsonLines($college['labs'] ?? '');
             if (!empty($sportsList)): ?>
-            <h3 style="margin-top:24px">Sports Facilities</h3>
-            <div class="college-tag-row"><?php foreach ($sportsList as $sp): ?><span class="college-tag"><?= htmlspecialchars((string)$sp) ?></span><?php endforeach; ?></div>
+            <div class="infra-section-card">
+              <div class="infra-section-header">
+                <div class="infra-section-icon"><i class="ph ph-football"></i></div>
+                <h3>Sports Facilities</h3>
+              </div>
+              <div class="infra-chip-grid">
+                <?php
+                $sportIcons = ['cricket'=>'ph-baseball','football'=>'ph-football','basketball'=>'ph-basketball','tennis'=>'ph-paddle','swimming'=>'ph-waves','gym'=>'ph-barbell','badminton'=>'ph-paddle','volleyball'=>'ph-volleyball','squash'=>'ph-paddle','track'=>'ph-sneaker-move','athletic'=>'ph-sneaker-move','pool'=>'ph-waves','court'=>'ph-paddle'];
+                foreach ($sportsList as $sp):
+                  $spLower = strtolower((string)$sp);
+                  $spIcon = 'ph-star';
+                  foreach ($sportIcons as $k=>$v) { if (strpos($spLower, $k) !== false) { $spIcon = $v; break; } }
+                ?>
+                <div class="infra-chip">
+                  <i class="ph <?= $spIcon ?>"></i>
+                  <span><?= htmlspecialchars((string)$sp) ?></span>
+                </div>
+                <?php endforeach; ?>
+              </div>
+            </div>
             <?php endif; ?>
             <?php if (!empty($labsList)): ?>
-            <h3 style="margin-top:24px">Laboratories</h3>
-            <div class="college-tag-row"><?php foreach ($labsList as $lb): ?><span class="college-tag"><?= htmlspecialchars((string)$lb) ?></span><?php endforeach; ?></div>
+            <div class="infra-section-card">
+              <div class="infra-section-header">
+                <div class="infra-section-icon"><i class="ph ph-flask"></i></div>
+                <h3>Laboratories</h3>
+              </div>
+              <div class="infra-chip-grid">
+                <?php foreach ($labsList as $lb): ?>
+                <div class="infra-chip">
+                  <i class="ph ph-flask"></i>
+                  <span><?= htmlspecialchars((string)$lb) ?></span>
+                </div>
+                <?php endforeach; ?>
+              </div>
+            </div>
             <?php endif; ?>
             <?php endif; ?>
             <?php if ($college['hostel_available']): ?>
@@ -624,7 +876,7 @@ $tabIcons = [
         <?php elseif ($tab === 'compare'): ?>
           <section class="college-section">
             <h2>Compare <?= htmlspecialchars($college['name']) ?></h2>
-            <p style="color:#64748b;margin-bottom:20px">Compare on the basis of fees, placements, rankings, reviews and more.</p>
+            <p style="color:rgba(15,23,42,0.45);margin-bottom:20px">Compare on the basis of fees, placements, rankings, reviews and more.</p>
             <div class="compare-grid">
               <?php $mf=null; foreach($courses as $co){if($co['annual_fee']>0&&($mf===null||$co['annual_fee']<$mf))$mf=(float)$co['annual_fee'];} ?>
               <div class="compare-card"><strong><?= formatFee($mf) ?></strong><span>Min Annual Fee</span></div>
@@ -704,9 +956,21 @@ $tabIcons = [
         <?php else: ?>
         <p>Get admission alerts, exam dates and cutoff updates directly in your inbox.</p>
         <?php endif; ?>
-        <a href="<?= collegeUrl($slug, 'admissions') ?>" class="college-btn-primary college-widget-btn">
+        <?php if ($userAlreadyApplied): ?>
+        <div class="college-applied-badge">
+          <i class="ph-fill ph-check-circle"></i>
+          <span>Already Applied</span>
+          <span class="college-applied-appno"><?= htmlspecialchars($userAlreadyApplied['application_number']) ?></span>
+        </div>
+        <?php elseif ($isLoggedIn): ?>
+        <button type="button" class="college-btn-primary college-widget-btn" onclick="openApplyModal()">
           <i class="ph ph-paper-plane-tilt"></i> Apply Now
-        </a>
+        </button>
+        <?php else: ?>
+        <button type="button" class="college-btn-primary college-widget-btn" onclick="openLoginPrompt()">
+          <i class="ph ph-paper-plane-tilt"></i> Apply Now
+        </button>
+        <?php endif; ?>
       </div>
 
       <!-- Rating widget -->
@@ -714,9 +978,9 @@ $tabIcons = [
       <div class="shiksha-widget">
         <h4 class="shiksha-widget-title">⭐ Overall Rating</h4>
         <div style="text-align:center;padding:10px 0">
-          <div style="font-size:2.5rem;font-weight:800;color:#1e40af;font-family:'Plus Jakarta Sans',sans-serif"><?= number_format((float)$overallRating, 1) ?>/5</div>
-          <div style="color:#fbbf24;font-size:1.2rem;margin:4px 0">★★★★<?= $overallRating >= 4.5 ? '★' : '☆' ?></div>
-          <div style="font-size:.8rem;color:#94a3b8">Based on <?= $reviewCount ?> reviews</div>
+          <div style="font-size:2.5rem;font-weight:800;color:#19376D;font-family:'Plus Jakarta Sans',sans-serif"><?= number_format((float)$overallRating, 1) ?>/5</div>
+          <div style="color:#19376D;font-size:1.2rem;margin:4px 0">★★★★<?= $overallRating >= 4.5 ? '★' : '☆' ?></div>
+          <div style="font-size:.8rem;color:rgba(15,23,42,0.4)">Based on <?= $reviewCount ?> reviews</div>
         </div>
       </div>
       <?php endif; ?>
@@ -724,18 +988,27 @@ $tabIcons = [
       <!-- Popular courses -->
       <?php if (!empty($courses)): ?>
       <div class="shiksha-widget">
-        <h4 class="shiksha-widget-title">📚 Popular Courses</h4>
+        <h4 class="shiksha-widget-title"><i class="ph ph-book-bookmark"></i> Popular Courses</h4>
         <ul class="shiksha-widget-list">
           <?php foreach (array_slice($courses, 0, 6) as $co): ?>
           <li><a href="<?= collegeUrl($slug, 'courses') ?>"><?= htmlspecialchars($co['course_name'] ?? '') ?><span><?= formatFee(isset($co['annual_fee']) ? (float)$co['annual_fee'] : null) ?></span></a></li>
           <?php endforeach; ?>
         </ul>
+        <?php if ($isLoggedIn): ?>
+        <button type="button" onclick="sendCourseList()" id="courseListBtnSidebar" style="width:100%;margin-top:12px;padding:10px;background:#fff;color:#0B2447;border:2px solid #0B2447;border-radius:10px;font-size:.85rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .25s">
+          <i class="ph ph-files"></i> Course List
+        </button>
+        <?php else: ?>
+        <button type="button" onclick="openLoginPrompt()" style="width:100%;margin-top:12px;padding:10px;background:#fff;color:#0B2447;border:2px solid #0B2447;border-radius:10px;font-size:.85rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .25s">
+          <i class="ph ph-files"></i> Course List
+        </button>
+        <?php endif; ?>
       </div>
       <?php endif; ?>
 
       <!-- Quick links -->
       <div class="shiksha-widget">
-        <h4 class="shiksha-widget-title">🔗 Quick Links</h4>
+        <h4 class="shiksha-widget-title"><i class="ph ph-link"></i> Quick Links</h4>
         <ul class="shiksha-widget-list">
           <li><a href="<?= collegeUrl($slug, 'fees') ?>">Fee Structure</a></li>
           <li><a href="<?= collegeUrl($slug, 'placements') ?>">Placements</a></li>
@@ -757,6 +1030,432 @@ $tabIcons = [
 document.querySelectorAll('.college-detail-tabs a.active').forEach(el => {
   el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 });
+
+// Tab scroll arrows
+function scrollTabs(dir) {
+  const tabs = document.getElementById('collegeTabs');
+  if (!tabs) return;
+  const scrollAmt = 200;
+  tabs.scrollBy({ left: dir * scrollAmt, behavior: 'smooth' });
+}
+function updateTabArrows() {
+  const tabs = document.getElementById('collegeTabs');
+  if (!tabs) return;
+  const left = document.querySelector('.tab-arrow-left');
+  const right = document.querySelector('.tab-arrow-right');
+  if (left) left.classList.toggle('hidden', tabs.scrollLeft <= 5);
+  if (right) right.classList.toggle('hidden', tabs.scrollLeft + tabs.clientWidth >= tabs.scrollWidth - 5);
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const tabs = document.getElementById('collegeTabs');
+  if (tabs) {
+    updateTabArrows();
+    tabs.addEventListener('scroll', updateTabArrows);
+    window.addEventListener('resize', updateTabArrows);
+  }
+});
 </script>
+
+<!-- Login Required Prompt Modal -->
+<div id="loginPromptModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;max-width:400px;width:90%;box-shadow:0 25px 60px rgba(0,0,0,0.2);position:relative;overflow:hidden;">
+    <button onclick="closeLoginPrompt()" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:rgba(15,23,42,0.4);z-index:1;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s;" onmouseover="this.style.background='rgba(15,23,42,0.06)'" onmouseout="this.style.background='none'"><i class="ph ph-x"></i></button>
+    <div style="padding:36px 32px 28px;text-align:center;">
+      <div style="width:64px;height:64px;border-radius:50%;background:rgba(11,36,71,0.06);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <i class="ph-fill ph-lock" style="font-size:1.8rem;color:#19376D;"></i>
+      </div>
+      <h3 style="font-size:1.15rem;font-weight:800;color:#0f172a;margin:0 0 8px;">Login Required</h3>
+      <p style="font-size:.88rem;color:rgba(15,23,42,0.5);margin:0 0 24px;line-height:1.6;">You need to login first to apply for admission. It only takes a minute!</p>
+      <a href="<?= $loginUrl ?>" style="display:inline-flex;align-items:center;gap:8px;padding:13px 32px;background:#0B2447;color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;text-decoration:none;transition:all .25s;width:100%;justify-content:center;box-sizing:border-box;" onmouseover="this.style.background='#19376D'" onmouseout="this.style.background='#0B2447'">
+        <i class="ph ph-arrow-right"></i> Login to Apply
+      </a>
+      <p style="font-size:.78rem;color:rgba(15,23,42,0.35);margin-top:16px;">Don't have an account? <a href="<?= $loginUrl ?>&mode=register" style="color:#19376D;font-weight:600;text-decoration:none;">Sign up free</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- Apply Now Modal -->
+<div id="applyModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;max-width:520px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.2);position:relative;">
+    <button onclick="closeApplyModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:rgba(15,23,42,0.4);z-index:1;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s;" onmouseover="this.style.background='rgba(15,23,42,0.06)'" onmouseout="this.style.background='none'"><i class="ph ph-x"></i></button>
+    
+    <div style="padding:32px 32px 24px;">
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:rgba(11,36,71,0.06);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.5rem;color:#19376D;"><i class="ph-fill ph-paper-plane-tilt"></i></div>
+        <h2 style="font-size:1.3rem;font-weight:800;color:#0f172a;margin:0 0 4px;">Apply to <?= htmlspecialchars($college['name']) ?></h2>
+        <p style="font-size:.85rem;color:rgba(15,23,42,0.5);margin:0;">Fill in your details to submit your application</p>
+      </div>
+      
+      <form id="applyForm" onsubmit="submitApplication(event)">
+        <input type="hidden" name="college_id" value="<?= htmlspecialchars($cid) ?>">
+        
+        <div style="margin-bottom:16px;">
+          <label style="display:block;font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.6);margin-bottom:6px;">Full Name *</label>
+          <input type="text" name="full_name" required placeholder="Enter your full name" style="width:100%;padding:12px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;outline:none;transition:border .2s;box-sizing:border-box;" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'">
+        </div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <label style="display:block;font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.6);margin-bottom:6px;">Email *</label>
+            <input type="email" name="email" required placeholder="you@example.com" style="width:100%;padding:12px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;outline:none;transition:border .2s;box-sizing:border-box;" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'">
+          </div>
+          <div>
+            <label style="display:block;font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.6);margin-bottom:6px;">Phone *</label>
+            <input type="tel" name="phone" required placeholder="+91 XXXXX XXXXX" style="width:100%;padding:12px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;outline:none;transition:border .2s;box-sizing:border-box;" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'">
+          </div>
+        </div>
+        
+        <div style="margin-bottom:16px;">
+          <label style="display:block;font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.6);margin-bottom:6px;">Course Interested In</label>
+          <select name="course_id" style="width:100%;padding:12px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;outline:none;background:#fff;cursor:pointer;box-sizing:border-box;" onchange="document.getElementById('courseNameField').value=this.options[this.selectedIndex].text">
+            <option value="">Select a course</option>
+            <?php foreach($courses as $co): ?>
+            <option value="<?= htmlspecialchars($co['id'] ?? '') ?>"><?= htmlspecialchars($co['course_name'] ?? '') ?></option>
+            <?php endforeach; ?>
+          </select>
+          <input type="hidden" name="course_name" id="courseNameField" value="">
+        </div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <label style="display:block;font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.6);margin-bottom:6px;">Exam Score (if any)</label>
+            <input type="text" name="exam_score" placeholder="e.g. JEE: 98.5" style="width:100%;padding:12px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;outline:none;transition:border .2s;box-sizing:border-box;" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'">
+          </div>
+          <div>
+            <label style="display:block;font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.6);margin-bottom:6px;">Target Year</label>
+            <select name="target_year" style="width:100%;padding:12px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;outline:none;background:#fff;cursor:pointer;box-sizing:border-box;">
+              <option value="<?= date('Y') ?>"><?= date('Y') ?></option>
+              <option value="<?= date('Y')+1 ?>"><?= date('Y')+1 ?></option>
+            </select>
+          </div>
+        </div>
+        
+        <div style="margin-bottom:20px;">
+          <label style="display:block;font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.6);margin-bottom:6px;">Additional Notes</label>
+          <textarea name="notes" rows="3" placeholder="Any specific queries or information..." style="width:100%;padding:12px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;outline:none;resize:vertical;transition:border .2s;box-sizing:border-box;font-family:inherit;" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'"></textarea>
+        </div>
+        
+        <button type="submit" id="applySubmitBtn" style="width:100%;padding:14px;background:#0B2447;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="ph ph-paper-plane-tilt"></i> Submit Application
+        </button>
+        <p id="applyMsg" style="text-align:center;margin-top:12px;font-size:.85rem;display:none;"></p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function openLoginPrompt() {
+  const m = document.getElementById('loginPromptModal');
+  if (m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+}
+function closeLoginPrompt() {
+  const m = document.getElementById('loginPromptModal');
+  if (m) { m.style.display = 'none'; document.body.style.overflow = ''; }
+}
+document.getElementById('loginPromptModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeLoginPrompt();
+});
+
+function openApplyModal() {
+  const m = document.getElementById('applyModal');
+  if (m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+}
+function closeApplyModal() {
+  const m = document.getElementById('applyModal');
+  if (m) { m.style.display = 'none'; document.body.style.overflow = ''; }
+}
+document.getElementById('applyModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeApplyModal();
+});
+
+function submitApplication(e) {
+  e.preventDefault();
+  const form = document.getElementById('applyForm');
+  const btn = document.getElementById('applySubmitBtn');
+  const msg = document.getElementById('applyMsg');
+  
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ph ph-spinner" style="animation:spin 1s linear infinite"></i> Submitting...';
+  
+  fetch('<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/apply.php', {
+    method: 'POST',
+    body: new FormData(form)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      msg.style.color = '#0B2447';
+      msg.style.background = 'rgba(11,36,71,0.06)';
+      msg.style.padding = '12px';
+      msg.style.borderRadius = '10px';
+      msg.innerHTML = '<i class="ph-fill ph-check-circle" style="font-size:1.2rem;vertical-align:middle;margin-right:4px;"></i> ' + data.msg + '<br><strong style="font-size:.9rem;">Application No: ' + data.app_number + '</strong>';
+      msg.style.display = 'block';
+      btn.innerHTML = '<i class="ph ph-check"></i> Submitted!';
+      btn.style.background = '#059669';
+      form.reset();
+    } else {
+      if (data.already_applied) {
+        msg.style.color = '#92400e';
+        msg.style.background = 'rgba(251,191,36,0.1)';
+        msg.style.border = '1px solid rgba(251,191,36,0.3)';
+        msg.innerHTML = '<i class="ph-fill ph-warning-circle" style="font-size:1.2rem;vertical-align:middle;margin-right:4px;"></i> ' + data.msg + '<br><span style="font-size:.85rem;">Application No: <strong>' + data.app_number + '</strong> &middot; Status: ' + data.status + '</span>';
+      } else {
+        msg.style.color = '#dc2626';
+        msg.style.background = 'rgba(220,38,38,0.06)';
+        msg.style.border = 'none';
+        msg.innerHTML = data.msg;
+      }
+      msg.style.padding = '12px';
+      msg.style.borderRadius = '10px';
+      msg.style.display = 'block';
+      if (data.redirect) {
+        setTimeout(() => { window.location.href = '<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/' + data.redirect; }, 1500);
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Submit Application';
+      }
+    }
+  })
+  .catch(() => {
+    msg.style.color = '#dc2626';
+    msg.innerHTML = 'Network error. Please try again.';
+    msg.style.display = 'block';
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Submit Application';
+  });
+}
+</script>
+
+<!-- Shared Modal -->
+<div id="courseListModal" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);">
+  <div id="courseListModalInner" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;max-width:540px;width:calc(100% - 32px);max-height:80vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.25);box-sizing:border-box;">
+    <div id="clModalHeader" style="background:linear-gradient(135deg,#0B2447,#19376D);padding:16px 20px;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:2px;">AdmissionSeason</div>
+        <h3 style="margin:0;color:#fff;font-size:15px;font-weight:700;" id="clModalTitle">Emailed!</h3>
+      </div>
+      <button onclick="closeCourseListModal()" style="background:rgba(255,255,255,0.12);border:none;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:1rem;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'"><i class="ph ph-x"></i></button>
+    </div>
+    <div style="padding:20px 20px 14px;">
+      <div style="display:flex;align-items:center;gap:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin-bottom:16px;">
+        <div style="width:32px;height:32px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="ph-fill ph-check-circle" style="font-size:1.1rem;color:#16a34a;"></i>
+        </div>
+        <div style="min-width:0;">
+          <div style="font-size:13px;font-weight:700;color:#0f172a;" id="clModalSuccessMsg"></div>
+          <div style="font-size:11px;color:#64748b;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="clModalEmail"></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <div style="width:20px;height:20px;border-radius:50%;background:#0B2447;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">1</div>
+        <span style="font-size:13px;font-weight:700;color:#0f172a;">You may also be interested in</span>
+      </div>
+    </div>
+    <div id="clModalColleges" style="padding:0 20px 12px;display:grid;grid-template-columns:1fr;gap:10px;">
+      <div style="grid-column:1/-1;text-align:center;padding:32px;color:#94a3b8;">
+        <i class="ph ph-spinner" style="font-size:1.5rem;animation:spin 1s linear infinite;display:block;margin-bottom:8px;"></i>
+        <span style="font-size:13px;">Finding similar colleges...</span>
+      </div>
+    </div>
+    <div id="clModalPrefSection" style="padding:12px 20px;display:none;">
+      <div style="background:linear-gradient(135deg,#fefce8,#fef9c3);border:1px solid #fde68a;border-radius:10px;padding:14px 16px;text-align:center;">
+        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:8px;">Are you open to private colleges?</div>
+        <div style="display:flex;gap:8px;justify-content:center;" id="clPrefBtns">
+          <button onclick="savePref('open_to_private','yes')" style="padding:7px 24px;border:2px solid #92400e;background:#fff;color:#92400e;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;" onmouseover="this.style.background='#92400e';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#92400e'">Yes</button>
+          <button onclick="savePref('open_to_private','no')" style="padding:7px 24px;border:2px solid #92400e;background:#fff;color:#92400e;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;" onmouseover="this.style.background='#92400e';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#92400e'">No</button>
+        </div>
+      </div>
+    </div>
+    <div id="clModalFeedback" style="padding:0 20px 18px;display:none;">
+      <div style="text-align:center;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;">
+        <span style="font-size:12px;color:#475569;font-weight:600;">Is this recommendation relevant? </span>
+        <button onclick="savePref('recommendation_feedback','helpful')" style="background:none;border:1.5px solid #d1d5db;border-radius:6px;padding:5px 8px;cursor:pointer;margin-left:4px;color:#16a34a;" onmouseover="this.style.borderColor='#16a34a'" onmouseout="this.style.borderColor='#d1d5db'"><i class="ph-fill ph-thumbs-up"></i></button>
+        <button onclick="savePref('recommendation_feedback','not_helpful')" style="background:none;border:1.5px solid #d1d5db;border-radius:6px;padding:5px 8px;cursor:pointer;margin-left:3px;color:#dc2626;" onmouseover="this.style.borderColor='#dc2626'" onmouseout="this.style.borderColor='#d1d5db'"><i class="ph-fill ph-thumbs-down"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var clModalMode = 'course_list';
+
+function closeCourseListModal() {
+  var m = document.getElementById('courseListModal');
+  if (m) { m.style.display = 'none'; document.body.style.overflow = ''; }
+  clModalMode = 'course_list';
+}
+document.getElementById('courseListModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeCourseListModal();
+});
+
+function openModal(title, successMsg, email, collegeId) {
+  document.getElementById('clModalTitle').textContent = title;
+  document.getElementById('clModalSuccessMsg').textContent = successMsg;
+  document.getElementById('clModalEmail').textContent = email || '';
+  document.getElementById('courseListModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  document.getElementById('clModalColleges').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:#94a3b8;"><i class="ph ph-spinner" style="font-size:1.2rem;animation:spin 1s linear infinite;display:block;margin-bottom:6px;"></i><span style="font-size:12px;">Finding similar colleges...</span></div>';
+  document.getElementById('clModalPrefSection').style.display = 'none';
+  document.getElementById('clModalFeedback').style.display = 'none';
+  document.getElementById('clPrefBtns').innerHTML = '<button onclick="savePref(\'open_to_private\',\'yes\')" style="padding:7px 24px;border:2px solid #92400e;background:#fff;color:#92400e;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;" onmouseover="this.style.background=\'#92400e\';this.style.color=\'#fff\'" onmouseout="this.style.background=\'#fff\';this.style.color=\'#92400e\'">Yes</button><button onclick="savePref(\'open_to_private\',\'no\')" style="padding:7px 24px;border:2px solid #92400e;background:#fff;color:#92400e;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;" onmouseover="this.style.background=\'#92400e\';this.style.color=\'#fff\'" onmouseout="this.style.background=\'#fff\';this.style.color=\'#92400e\'">No</button>';
+  var fb = document.getElementById('clModalFeedback');
+  if (fb) fb.querySelector('div').innerHTML = '<span style="font-size:12px;color:#475569;font-weight:600;">Is this recommendation relevant? </span><button onclick="savePref(\'recommendation_feedback\',\'helpful\')" style="background:none;border:1.5px solid #d1d5db;border-radius:6px;padding:5px 8px;cursor:pointer;margin-left:4px;color:#16a34a;" onmouseover="this.style.borderColor=\'#16a34a\'" onmouseout="this.style.borderColor=\'#d1d5db\'"><i class="ph-fill ph-thumbs-up"></i></button><button onclick="savePref(\'recommendation_feedback\',\'not_helpful\')" style="background:none;border:1.5px solid #d1d5db;border-radius:6px;padding:5px 8px;cursor:pointer;margin-left:3px;color:#dc2626;" onmouseover="this.style.borderColor=\'#dc2626\'" onmouseout="this.style.borderColor=\'#d1d5db\'"><i class="ph-fill ph-thumbs-down"></i></button>';
+  loadSimilarColleges(collegeId);
+}
+
+function renderSimilarColleges(colleges) {
+  var container = document.getElementById('clModalColleges');
+  if (!colleges || colleges.length === 0) {
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:#94a3b8;font-size:13px;">No similar colleges found.</div>';
+    document.getElementById('clModalPrefSection').style.display = 'block';
+    document.getElementById('clModalFeedback').style.display = 'block';
+    return;
+  }
+  var btnLabel = clModalMode === 'brochure' ? 'Brochure' : 'Course List';
+  var btnIcon = clModalMode === 'brochure' ? 'ph-download-simple' : 'ph-download-simple';
+  var btnFn = clModalMode === 'brochure' ? 'sendBrochureFromModal' : 'sendCourseListFromModal';
+  var html = '';
+  colleges.forEach(function(c) {
+    var rating = c.overall_rating_avg ? parseFloat(c.overall_rating_avg).toFixed(1) : null;
+    var minFee = c.min_fee ? formatFeeNum(c.min_fee) : '\u2014';
+    var maxFee = c.max_fee ? formatFeeNum(c.max_fee) : '';
+    var feeRange = maxFee ? minFee + ' - ' + maxFee : minFee;
+    var location = [c.city_name, c.state_name].filter(Boolean).join(', ');
+    var logo = c.logo_url ? c.logo_url : '';
+    var verified = c.is_verified ? ' <i class="ph-fill ph-seal-check" style="color:#16a34a;font-size:.75rem;"></i>' : '';
+    html += '<div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px;box-sizing:border-box;overflow:hidden;">'
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+      + (logo ? '<img src="' + logo + '" style="width:32px;height:32px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0;flex-shrink:0;" onerror="this.style.display=\'none\'">' : '<div style="width:32px;height:32px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:.8rem;flex-shrink:0;"><i class="ph ph-graduation-cap"></i></div>')
+      + '<div style="flex:1;min-width:0;">'
+      + '<a href="<?= rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/") ?>/college/' + c.slug + '" target="_blank" style="font-size:12px;font-weight:700;color:#0f172a;text-decoration:none;line-height:1.3;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + c.name + verified + '</a>'
+      + '<div style="font-size:10px;color:#94a3b8;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><i class="ph ph-map-pin" style="font-size:.65rem;"></i> ' + location + '</div>'
+      + '</div></div>'
+      + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;font-size:11px;color:#64748b;">'
+      + '<span>Courses <strong style="color:#19376D;">' + (c.course_count || 0) + '</strong></span>'
+      + (rating ? '<span><i class="ph-fill ph-star" style="color:#eab308;font-size:.65rem;"></i> <strong style="color:#0f172a;">' + rating + '</strong></span>' : '')
+      + '<span style="margin-left:auto;">Fees <strong style="color:#0B2447;">' + feeRange + '</strong></span>'
+      + '</div>'
+      + '<button onclick="' + btnFn + '(\'' + c.id + '\', this)" style="width:100%;padding:8px 12px;background:#0B2447;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;box-sizing:border-box;" onmouseover="this.style.background=\'#19376D\'" onmouseout="this.style.background=\'#0B2447\'">'
+      + '<i class="ph ' + btnIcon + '"></i> ' + btnLabel + '</button>'
+      + '</div>';
+  });
+  container.innerHTML = html;
+  document.getElementById('clModalPrefSection').style.display = 'block';
+  document.getElementById('clModalFeedback').style.display = 'block';
+}
+
+function formatFeeNum(val) {
+  if (!val) return '\u2014';
+  val = parseFloat(val);
+  if (val >= 10000000) return '\u20B9' + (val / 10000000).toFixed(1) + ' Cr';
+  if (val >= 100000) return '\u20B9' + (val / 100000).toFixed(1) + ' L';
+  if (val >= 1000) return '\u20B9' + (val / 1000).toFixed(0) + 'K';
+  return '\u20B9' + val.toFixed(0);
+}
+
+function sendCourseListFromModal(collegeId, btn) {
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ph ph-spinner" style="animation:spin 1s linear infinite"></i> Sending...';
+  var fd = new FormData();
+  fd.append('college_id', collegeId);
+  fetch('<?= rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/") ?>/send_brochure.php', { method: 'POST', body: fd })
+    .then(function(r){ return r.json(); }).then(function(data) {
+      btn.disabled = false;
+      if (data.ok) { btn.innerHTML = '<i class="ph-fill ph-check-circle"></i> Sent!'; btn.style.background = '#16a34a'; }
+      else { btn.innerHTML = '<i class="ph ph-download-simple"></i> Course List'; alert(data.msg || 'Failed.'); }
+    }).catch(function() { btn.disabled = false; btn.innerHTML = '<i class="ph ph-download-simple"></i> Course List'; alert('Network error.'); });
+}
+
+function sendBrochureFromModal(collegeId, btn) {
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ph ph-spinner" style="animation:spin 1s linear infinite"></i> Sending...';
+  var fd = new FormData();
+  fd.append('college_id', collegeId);
+  fetch('<?= rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/") ?>/send_brochure_email.php', { method: 'POST', body: fd })
+    .then(function(r){ return r.json(); }).then(function(data) {
+      btn.disabled = false;
+      if (data.ok) { btn.innerHTML = '<i class="ph-fill ph-check-circle"></i> Sent!'; btn.style.background = '#16a34a'; }
+      else { btn.innerHTML = '<i class="ph ph-download-simple"></i> Brochure'; alert(data.msg || 'Failed.'); }
+    }).catch(function() { btn.disabled = false; btn.innerHTML = '<i class="ph ph-download-simple"></i> Brochure'; alert('Network error.'); });
+}
+
+function savePref(key, value) {
+  fetch('<?= rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/") ?>/api/save_preference.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key: key, value: value })
+  }).then(function(r){ return r.json(); }).then(function(data) {
+    if (key === 'open_to_private') {
+      var sec = document.getElementById('clPrefBtns');
+      if (sec) sec.innerHTML = '<span style="font-size:13px;color:#16a34a;font-weight:600;"><i class="ph-fill ph-check-circle"></i> Thanks! We\'ll keep that in mind.</span>';
+    }
+    if (key === 'recommendation_feedback') {
+      var fb = document.getElementById('clModalFeedback');
+      if (fb) fb.querySelector('div').innerHTML = '<span style="font-size:13px;color:#16a34a;font-weight:600;"><i class="ph-fill ph-check-circle"></i> Thank you for your feedback!</span>';
+    }
+  }).catch(function(){});
+}
+
+function sendCourseList() {
+  var btn = document.getElementById('courseListBtnHero') || document.getElementById('courseListBtn') || document.getElementById('courseListBtnSidebar');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ph ph-spinner" style="animation:spin 1s linear infinite"></i> Sending...'; }
+  var formData = new FormData();
+  formData.append('college_id', '<?= htmlspecialchars($cid) ?>');
+  clModalMode = 'course_list';
+  fetch('<?= rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/") ?>/send_brochure.php', { method: 'POST', body: formData })
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ph ph-files"></i> Course List'; }
+    if (data.ok) {
+      openModal('Course List Emailed', 'Course list has been emailed to ' + (data.email || 'your address.') , data.email, '<?= htmlspecialchars($cid) ?>');
+    } else if (data.redirect) { window.location.href = data.redirect; }
+    else { alert(data.msg || 'Failed to send email.'); }
+  })
+  .catch(function() {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ph ph-files"></i> Course List'; }
+    alert('Network error.');
+  });
+}
+
+function sendBrochure() {
+  var btn = document.getElementById('brochureBtnHero');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ph ph-spinner" style="animation:spin 1s linear infinite"></i> Sending...'; }
+  var formData = new FormData();
+  formData.append('college_id', '<?= htmlspecialchars($cid) ?>');
+  clModalMode = 'brochure';
+  fetch('<?= rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/") ?>/send_brochure_email.php', { method: 'POST', body: formData })
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ph ph-download-simple"></i> Brochure'; }
+    if (data.ok) {
+      openModal('Brochure Emailed', 'Brochure has been emailed to ' + (data.email || 'your address.'), data.email, '<?= htmlspecialchars($cid) ?>');
+    } else if (data.redirect) { window.location.href = data.redirect; }
+    else { alert(data.msg || 'Failed to send email.'); }
+  })
+  .catch(function() {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ph ph-download-simple"></i> Brochure'; }
+    alert('Network error.');
+  });
+}
+
+function loadSimilarColleges(collegeId) {
+  fetch('<?= rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/") ?>/api/get_similar_colleges.php?college_id=' + encodeURIComponent(collegeId))
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (data.ok) renderSimilarColleges(data.colleges);
+      else renderSimilarColleges([]);
+    }).catch(function(){ renderSimilarColleges([]); });
+}
+</script>
+<style>
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@media(min-width:480px){
+  #clModalColleges{grid-template-columns:1fr 1fr !important;}
+}
+@media(max-width:479px){
+  #courseListModalInner{max-height:90vh;}
+}
+</style>
 </body>
 </html>

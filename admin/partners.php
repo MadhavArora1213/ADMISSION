@@ -106,28 +106,28 @@ $stat_trial = $pdo->query("SELECT COUNT(*) FROM partners WHERE status = 'trial'"
         tr:hover { background-color: rgba(0,0,0,0.015); }
         
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; white-space: nowrap; text-transform: uppercase;}
-        .s-active { background:#dcfce7; color:#166534; }
-        .s-suspended { background:#fee2e2; color:#dc2626; }
-        .s-trial { background:#fefce8; color:#ca8a04; }
-        .s-churned { background:#f1f5f9; color:#475569; }
+        .s-active { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .s-suspended { background:rgba(15,23,42,0.06); color:#0F172A; }
+        .s-trial { background:rgba(11,36,71,0.04); color:#19376D; }
+        .s-churned { background:#F8FAFC; color:rgba(15,23,42,0.65); }
         
-        .o-pending { background:#fee2e2; color:#dc2626; }
-        .o-in_progress { background:#dbeafe; color:#1e40af; }
-        .o-completed { background:#dcfce7; color:#166534; }
+        .o-pending { background:rgba(15,23,42,0.06); color:#0F172A; }
+        .o-in_progress { background:rgba(11,36,71,0.06); color:#19376D; }
+        .o-completed { background:rgba(11,36,71,0.04); color:#0B2447; }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); }
         
         .btn-primary { padding: 10px 20px; font-size: 0.9rem; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;}
         .btn-primary:hover { opacity: 0.9; }
         .btn-action { padding: 6px 10px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; color: var(--text-dark); text-decoration: none;}
-        .btn-action:hover { background: #f1f5f9; }
+        .btn-action:hover { background: #F8FAFC; }
         
         .search-box { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 14px; width: 250px;}
         .search-box input { border: none; outline: none; font-size: 0.9rem; width: 100%; }
         
-        .progress-bar { height: 6px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 6px; }
+        .progress-bar { height: 6px; background: rgba(15,23,42,0.08); border-radius: 4px; overflow: hidden; margin-top: 6px; }
         .progress-fill { height: 100%; background: var(--primary); }
-        .progress-fill.danger { background: #dc2626; }
+        .progress-fill.danger { background: #0F172A; }
         
         /* Modal */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
@@ -168,11 +168,11 @@ $stat_trial = $pdo->query("SELECT COUNT(*) FROM partners WHERE status = 'trial'"
                 <div style="display:flex; gap:15px;">
                     <div style="background:#fff; border:1px solid var(--border-color); padding:10px 20px; border-radius:8px;">
                         <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Active Partners</div>
-                        <div style="font-size:1.5rem; font-weight:800; color:#166534;"><?php echo number_format($stat_active); ?></div>
+                        <div style="font-size:1.5rem; font-weight:800; color:#0B2447;"><?php echo number_format($stat_active); ?></div>
                     </div>
                     <div style="background:#fff; border:1px solid var(--border-color); padding:10px 20px; border-radius:8px;">
                         <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">On Trial</div>
-                        <div style="font-size:1.5rem; font-weight:800; color:#ca8a04;"><?php echo number_format($stat_trial); ?></div>
+                        <div style="font-size:1.5rem; font-weight:800; color:#19376D;"><?php echo number_format($stat_trial); ?></div>
                     </div>
                 </div>
                 <form method="GET">
@@ -229,7 +229,7 @@ $stat_trial = $pdo->query("SELECT COUNT(*) FROM partners WHERE status = 'trial'"
                                 </td>
                                 <td style="display: flex; gap: 8px;">
                                     <button class="btn-action" onclick='editPartner(<?php echo htmlspecialchars(json_encode($p), ENT_QUOTES, "UTF-8"); ?>)'><i class="ph ph-pencil-simple"></i> Edit</button>
-                                    <a href="?action=delete_partner&id=<?php echo urlencode($p['id']); ?>" class="btn-action" style="color:#dc2626; border-color:#fca5a5;" onclick="return confirm('Are you sure you want to delete this partner account? This action cannot be undone.');"><i class="ph ph-trash"></i> Delete</a>
+                                    <a href="?action=delete_partner&id=<?php echo urlencode($p['id']); ?>" class="btn-action" style="color:#0F172A; border-color:rgba(15,23,42,0.06);" onclick="return confirm('Are you sure you want to delete this partner account? This action cannot be undone.');"><i class="ph ph-trash"></i> Delete</a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

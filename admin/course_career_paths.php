@@ -116,11 +116,11 @@ if (isset($_GET['edit_id'])) {
         th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
         .action-links { display: flex; gap: 8px; }
-        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color); }
+        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #F8FAFC; color: var(--text-dark); border: 1px solid var(--border-color); }
         .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .action-btn.delete:hover { background: #dc2626; color: white; border-color: #dc2626; }
-        .msg-alert { padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 24px; border: 1px solid #bbf7d0; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+        .action-btn.delete:hover { background: #0F172A; color: white; border-color: #0F172A; }
+        .msg-alert { padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 24px; border: 1px solid rgba(11,36,71,0.04); }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; background: rgba(11,36,71,0.06); color: #19376D; border: 1px solid rgba(11,36,71,0.06); }
     </style>
 </head>
 <body>
@@ -199,7 +199,7 @@ if (isset($_GET['edit_id'])) {
                                 ?>
                                 <div class="skill-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
                                     <input type="text" name="skill[]" class="form-control" placeholder="Skill (e.g. Java)" value="<?php echo htmlspecialchars($skill); ?>" style="flex: 1;">
-                                    <button type="button" class="btn btn-danger remove-skill" style="padding: 0 15px; border-radius: 8px; border: 1px solid #fecaca; background: #fee2e2; color: #991b1b; cursor: pointer;">&times;</button>
+                                    <button type="button" class="btn btn-danger remove-skill" style="padding: 0 15px; border-radius: 8px; border: 1px solid rgba(15,23,42,0.06); background: rgba(15,23,42,0.06); color: #0B2447; cursor: pointer;">&times;</button>
                                 </div>
                                 <?php endforeach; ?>
                             </div>
@@ -224,7 +224,7 @@ if (isset($_GET['edit_id'])) {
                                     <?php if(!empty($company['logo'])): ?>
                                     <img src="../<?php echo htmlspecialchars($company['logo']); ?>" alt="logo" style="height: 30px; object-fit: contain;">
                                     <?php endif; ?>
-                                    <button type="button" class="btn btn-danger remove-company" style="padding: 0 15px; height: 100%; border-radius: 8px; border: 1px solid #fecaca; background: #fee2e2; color: #991b1b; cursor: pointer;">&times;</button>
+                                    <button type="button" class="btn btn-danger remove-company" style="padding: 0 15px; height: 100%; border-radius: 8px; border: 1px solid rgba(15,23,42,0.06); background: rgba(15,23,42,0.06); color: #0B2447; cursor: pointer;">&times;</button>
                                 </div>
                                 <?php endforeach; ?>
                             </div>
@@ -281,7 +281,7 @@ if (isset($_GET['edit_id'])) {
                 var row = `
                 <div class="skill-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
                     <input type="text" name="skill[]" class="form-control" placeholder="Skill (e.g. Java)" style="flex: 1;">
-                    <button type="button" class="btn btn-danger remove-skill" style="padding: 0 15px; border-radius: 8px; border: 1px solid #fecaca; background: #fee2e2; color: #991b1b; cursor: pointer;">&times;</button>
+                    <button type="button" class="btn btn-danger remove-skill" style="padding: 0 15px; border-radius: 8px; border: 1px solid rgba(15,23,42,0.06); background: rgba(15,23,42,0.06); color: #0B2447; cursor: pointer;">&times;</button>
                 </div>`;
                 $('#skills-container').append(row);
             });
@@ -301,7 +301,7 @@ if (isset($_GET['edit_id'])) {
                     <input type="text" name="company_name[]" class="form-control" placeholder="Company Name" style="flex: 1;">
                     <input type="hidden" name="company_logo[]" value="">
                     <input type="file" name="company_logo_file[]" class="form-control" style="flex: 1;" accept="image/*">
-                    <button type="button" class="btn btn-danger remove-company" style="padding: 0 15px; height: 100%; border-radius: 8px; border: 1px solid #fecaca; background: #fee2e2; color: #991b1b; cursor: pointer;">&times;</button>
+                    <button type="button" class="btn btn-danger remove-company" style="padding: 0 15px; height: 100%; border-radius: 8px; border: 1px solid rgba(15,23,42,0.06); background: rgba(15,23,42,0.06); color: #0B2447; cursor: pointer;">&times;</button>
                 </div>`;
                 $('#companies-container').append(row);
             });

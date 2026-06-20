@@ -24,7 +24,7 @@
             <span>Avg Package</span>
           </div>
           <div class="r-meta" style="align-items:flex-end">
-            <strong><?php if(!empty($cl['overall_rating_avg'])):?><i class="ph-fill ph-star" style="color:#f59e0b"></i> <?=number_format((float)$cl['overall_rating_avg'],1)?><?php else:?>N/A<?php endif;?></strong>
+            <strong><?php if(!empty($cl['overall_rating_avg'])):?><i class="ph-fill ph-star" style="color:#19376D"></i> <?=number_format((float)$cl['overall_rating_avg'],1)?><?php else:?>N/A<?php endif;?></strong>
             <span>Rating</span>
           </div>
         </a>
@@ -45,7 +45,7 @@
             <span>Avg Package</span>
           </div>
           <div class="r-meta" style="align-items:flex-end">
-            <strong><i class="ph-fill ph-star" style="color:#f59e0b"></i> <?=$cl['rating']?></strong>
+            <strong><i class="ph-fill ph-star" style="color:#19376D"></i> <?=$cl['rating']?></strong>
             <span>Rating</span>
           </div>
         </a>

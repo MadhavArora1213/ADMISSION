@@ -150,8 +150,8 @@ function v($arr, $key, $def='') { return isset($arr[$key]) ? htmlspecialchars($a
         .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted); }
         .form-control { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 1rem; box-sizing: border-box; }
         .form-actions { display: flex; justify-content: flex-end; gap: 16px; margin-top: 24px; }
-        .error-alert { padding: 16px; border-radius: 8px; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; margin-bottom: 24px; }
-        .msg-alert { padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; margin-bottom: 24px; }
+        .error-alert { padding: 16px; border-radius: 8px; background: rgba(15,23,42,0.06); color: #0B2447; border: 1px solid rgba(15,23,42,0.06); margin-bottom: 24px; }
+        .msg-alert { padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; border: 1px solid rgba(11,36,71,0.04); margin-bottom: 24px; }
         .call-log-item { background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
     </style>
@@ -339,7 +339,7 @@ function v($arr, $key, $def='') { return isset($arr[$key]) ? htmlspecialchars($a
                     <?php if(!empty($lead['touchpoints_json'])): ?>
                     <div style="margin-top:20px;">
                         <h4 style="font-size:0.9rem; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Touchpoints JSON</h4>
-                        <pre style="background:#f1f5f9; padding:16px; border-radius:8px; font-size:0.85rem; overflow:auto;"><?php echo htmlspecialchars(json_encode(json_decode($lead['touchpoints_json']), JSON_PRETTY_PRINT)); ?></pre>
+                        <pre style="background:#F8FAFC; padding:16px; border-radius:8px; font-size:0.85rem; overflow:auto;"><?php echo htmlspecialchars(json_encode(json_decode($lead['touchpoints_json']), JSON_PRETTY_PRINT)); ?></pre>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -377,7 +377,7 @@ function v($arr, $key, $def='') { return isset($arr[$key]) ? htmlspecialchars($a
                 <div class="call-log-item">
                     <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                         <div style="font-weight:700;"><?php echo date('d M Y, H:i', strtotime($cl['call_at'])); ?></div>
-                        <span class="badge" style="background:#e0e7ff;color:#3730a3;"><?php echo ucfirst(str_replace('_',' ',$cl['outcome'])); ?></span>
+                        <span class="badge" style="background:rgba(11,36,71,0.06);color:#19376D;"><?php echo ucfirst(str_replace('_',' ',$cl['outcome'])); ?></span>
                     </div>
                     <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:6px;">Duration: <?php echo $cl['duration_seconds'] ? $cl['duration_seconds'].'s' : 'N/A'; ?> &nbsp;|&nbsp; By: <?php echo htmlspecialchars($cl['caller_name'] ?: 'Admin'); ?></div>
                     <?php if($cl['notes']): ?><div style="font-size:0.9rem;"><?php echo nl2br(htmlspecialchars($cl['notes'])); ?></div><?php endif; ?>

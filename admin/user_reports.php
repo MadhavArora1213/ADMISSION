@@ -73,7 +73,7 @@ $stat_qa = $pdo->query("SELECT COUNT(*) FROM qa_reports WHERE moderation_action 
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; white-space: nowrap; text-transform: capitalize;}
         
         .btn-action { padding: 6px 10px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; color: var(--text-dark); text-decoration: none; display:inline-block;}
-        .btn-action:hover { background: #f1f5f9; }
+        .btn-action:hover { background: #F8FAFC; }
         .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
         .btn-primary:hover { opacity: 0.9; background: var(--primary); }
         
@@ -95,7 +95,7 @@ $stat_qa = $pdo->query("SELECT COUNT(*) FROM qa_reports WHERE moderation_action 
         <div class="content-area">
             <div class="page-header">
                 <div>
-                    <h2><i class="ph ph-flag" style="color:#b91c1c;"></i> User Reports Inbox</h2>
+                    <h2><i class="ph ph-flag" style="color:#0B2447;"></i> User Reports Inbox</h2>
                     <p style="color:var(--text-muted);">Unified moderation queue for user-flagged reviews and community content.</p>
                 </div>
             </div>
@@ -103,7 +103,7 @@ $stat_qa = $pdo->query("SELECT COUNT(*) FROM qa_reports WHERE moderation_action 
             <div class="stats-grid">
                 <div class="stat-card">
                     <h3>Total Pending Reports</h3>
-                    <div class="val" style="color:#b91c1c;"><?php echo number_format($stat_rev + $stat_qa); ?></div>
+                    <div class="val" style="color:#0B2447;"><?php echo number_format($stat_rev + $stat_qa); ?></div>
                 </div>
                 <div class="stat-card">
                     <h3>Reported Reviews</h3>
@@ -119,13 +119,13 @@ $stat_qa = $pdo->query("SELECT COUNT(*) FROM qa_reports WHERE moderation_action 
                 <a href="?tab=reviews" class="tab-link <?php echo $tab=='reviews'?'active':''; ?>">
                     Review Reports
                     <?php if($stat_rev > 0): ?>
-                        <span style="background:#dc2626; color:#fff; border-radius:10px; padding:2px 8px; font-size:0.7rem;"><?php echo $stat_rev; ?></span>
+                        <span style="background:#0F172A; color:#fff; border-radius:10px; padding:2px 8px; font-size:0.7rem;"><?php echo $stat_rev; ?></span>
                     <?php endif; ?>
                 </a>
                 <a href="?tab=qa" class="tab-link <?php echo $tab=='qa'?'active':''; ?>">
                     Community Q&A Reports
                     <?php if($stat_qa > 0): ?>
-                        <span style="background:#dc2626; color:#fff; border-radius:10px; padding:2px 8px; font-size:0.7rem;"><?php echo $stat_qa; ?></span>
+                        <span style="background:#0F172A; color:#fff; border-radius:10px; padding:2px 8px; font-size:0.7rem;"><?php echo $stat_qa; ?></span>
                     <?php endif; ?>
                 </a>
             </div>
@@ -158,7 +158,7 @@ $stat_qa = $pdo->query("SELECT COUNT(*) FROM qa_reports WHERE moderation_action 
                                     </td>
                                     <td>
                                         <?php if($r['report_reason']): ?>
-                                            <span class="badge" style="background:#fee2e2; color:#991b1b;"><?php echo str_replace('_', ' ', $r['report_reason']); ?></span>
+                                            <span class="badge" style="background:rgba(15,23,42,0.06); color:#0B2447;"><?php echo str_replace('_', ' ', $r['report_reason']); ?></span>
                                         <?php endif; ?>
                                         <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;"><?php echo htmlspecialchars($r['report_notes'] ?? ''); ?></div>
                                     </td>
@@ -194,15 +194,15 @@ $stat_qa = $pdo->query("SELECT COUNT(*) FROM qa_reports WHERE moderation_action 
                                     <td style="font-weight:600;"><?php echo htmlspecialchars($r['reporter_name']); ?></td>
                                     <td>
                                         <?php if($r['question_id']): ?>
-                                            <span class="badge" style="background:#dbeafe; color:#1e40af;">Question</span>
+                                            <span class="badge" style="background:rgba(11,36,71,0.06); color:#19376D;">Question</span>
                                             <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">ID: <?php echo substr($r['question_id'], 0, 8); ?>...</div>
                                         <?php else: ?>
-                                            <span class="badge" style="background:#f3e8ff; color:#7e22ce;">Answer</span>
+                                            <span class="badge" style="background:rgba(11,36,71,0.04); color:#0B2447;">Answer</span>
                                             <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">ID: <?php echo substr($r['answer_id'], 0, 8); ?>...</div>
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <span class="badge" style="background:#fee2e2; color:#991b1b;"><?php echo str_replace('_', ' ', $r['report_reason']); ?></span>
+                                        <span class="badge" style="background:rgba(15,23,42,0.06); color:#0B2447;"><?php echo str_replace('_', ' ', $r['report_reason']); ?></span>
                                         <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;"><?php echo htmlspecialchars($r['report_notes'] ?? ''); ?></div>
                                     </td>
                                     <td style="font-size:0.85rem;"><?php echo date('M d, Y', strtotime($r['created_at'])); ?></td>

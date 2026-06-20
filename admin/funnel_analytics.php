@@ -28,14 +28,14 @@ if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
         
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: #fff; padding: 24px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
-        .stat-card .icon { width: 48px; height: 48px; border-radius: 12px; background: #f1f5f9; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 16px; }
+        .stat-card .icon { width: 48px; height: 48px; border-radius: 12px; background: #F8FAFC; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 16px; }
         .stat-card .value { font-size: 1.8rem; font-weight: 800; color: var(--text-dark); margin-bottom: 4px; }
         .stat-card .label { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; }
         
         .chart-container { background: #fff; padding: 32px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-bottom: 30px; display: flex; flex-direction: column; align-items: center;}
         
         .funnel-stage { width: 100%; max-width: 600px; margin-bottom: 12px; display: flex; align-items: center; gap: 20px;}
-        .funnel-bar-container { flex: 1; height: 40px; background: #f1f5f9; border-radius: 6px; overflow: hidden; position: relative;}
+        .funnel-bar-container { flex: 1; height: 40px; background: #F8FAFC; border-radius: 6px; overflow: hidden; position: relative;}
         .funnel-bar { height: 100%; background: var(--primary); transition: width 1s ease-in-out;}
         .funnel-label { width: 150px; font-weight: 600; color: var(--text-dark); text-align: right;}
         .funnel-value { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #fff; font-weight: 700; font-size: 0.9rem; text-shadow: 0px 1px 2px rgba(0,0,0,0.2);}
@@ -84,7 +84,7 @@ if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
                 <div class="funnel-stage">
                     <div class="funnel-label">Visited Homepage</div>
                     <div class="funnel-bar-container">
-                        <div class="funnel-bar" style="width: 100%; background: #1e40af;"></div>
+                        <div class="funnel-bar" style="width: 100%; background: #19376D;"></div>
                         <div class="funnel-value">10,240 (100%)</div>
                     </div>
                 </div>
@@ -92,7 +92,7 @@ if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
                 <div class="funnel-stage">
                     <div class="funnel-label">Clicked Register</div>
                     <div class="funnel-bar-container">
-                        <div class="funnel-bar" style="width: 65%; background: #2563eb;"></div>
+                        <div class="funnel-bar" style="width: 65%; background: #19376D;"></div>
                         <div class="funnel-value">6,656 (65%)</div>
                     </div>
                 </div>
@@ -100,7 +100,7 @@ if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
                 <div class="funnel-stage">
                     <div class="funnel-label">Filled OTP Form</div>
                     <div class="funnel-bar-container">
-                        <div class="funnel-bar" style="width: 40%; background: #3b82f6;"></div>
+                        <div class="funnel-bar" style="width: 40%; background: #19376D;"></div>
                         <div class="funnel-value">4,096 (40%)</div>
                     </div>
                 </div>
@@ -108,7 +108,7 @@ if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
                 <div class="funnel-stage">
                     <div class="funnel-label">Verified Email</div>
                     <div class="funnel-bar-container">
-                        <div class="funnel-bar" style="width: 25%; background: #60a5fa;"></div>
+                        <div class="funnel-bar" style="width: 25%; background: #19376D;"></div>
                         <div class="funnel-value">2,560 (25%)</div>
                     </div>
                 </div>
@@ -116,7 +116,7 @@ if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
                 <div class="funnel-stage">
                     <div class="funnel-label">Completed Profile</div>
                     <div class="funnel-bar-container">
-                        <div class="funnel-bar" style="width: 14%; background: #93c5fd;"></div>
+                        <div class="funnel-bar" style="width: 14%; background: #19376D;"></div>
                         <div class="funnel-value">1,480 (14.4%)</div>
                     </div>
                 </div>

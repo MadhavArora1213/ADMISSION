@@ -44,14 +44,14 @@ $courses = $stmt->fetchAll();
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em; }
         tr:hover { background-color: rgba(0,0,0,0.02); }
         .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
-        .level-badge { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
-        .status-badge.active { background: #dcfce7; color: #166534; }
-        .status-badge.inactive { background: #fee2e2; color: #991b1b; }
+        .level-badge { background: rgba(11,36,71,0.04); color: #19376D; border: 1px solid rgba(11,36,71,0.08); }
+        .status-badge.active { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .status-badge.inactive { background: rgba(15,23,42,0.06); color: #0B2447; }
         .action-links { display: flex; gap: 8px; }
-        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color); }
+        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #F8FAFC; color: var(--text-dark); border: 1px solid var(--border-color); }
         .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .action-btn.delete:hover { background: #dc2626; color: white; border-color: #dc2626; }
-        .msg-alert { padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 24px; border: 1px solid #bbf7d0; }
+        .action-btn.delete:hover { background: #0F172A; color: white; border-color: #0F172A; }
+        .msg-alert { padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 24px; border: 1px solid rgba(11,36,71,0.04); }
     </style>
 </head>
 <body>
@@ -96,7 +96,7 @@ $courses = $stmt->fetchAll();
                                     <tr>
                                         <td style="font-weight: 600; color: var(--primary);">
                                             <?php echo htmlspecialchars($c['course_name']); ?>
-                                            <?php if($c['is_popular']): ?><i class="ph-fill ph-star" style="color: #fbbf24;" title="Popular"></i><?php endif; ?>
+                                            <?php if($c['is_popular']): ?><i class="ph-fill ph-star" style="color: #19376D;" title="Popular"></i><?php endif; ?>
                                         </td>
                                         <td><?php echo $c['cat_name'] ? htmlspecialchars($c['cat_name']) : htmlspecialchars($c['course_category']); ?></td>
                                         <td><span class="badge level-badge"><?php echo htmlspecialchars($c['course_level']); ?></span></td>

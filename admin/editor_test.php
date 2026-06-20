@@ -12,7 +12,7 @@ if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
 </head>
 <body style="font-family: Arial, sans-serif; padding: 20px;">
     <h2>Trumbowyg Diagnostic</h2>
-    <div id="status" style="background:#fef3c7; padding:10px; margin-bottom:15px; font-weight:bold;">Loading...</div>
+    <div id="status" style="background:rgba(11,36,71,0.06); padding:10px; margin-bottom:15px; font-weight:bold;">Loading...</div>
     <textarea id="content_body" rows="10" style="width:100%;"></textarea>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -23,8 +23,8 @@ if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
     <script>
     window.onerror = function(msg, url, line, col, err) {
         var s = document.getElementById('status');
-        s.style.background = '#fecaca';
-        s.style.color = '#7f1d1d';
+        s.style.background = 'rgba(15,23,42,0.06)';
+        s.style.color = '#0B2447';
         s.innerHTML = 'JS ERROR: ' + msg + '<br>File: ' + (url||'?').split('/').pop() + ':' + line + '<br>' + (err && err.stack ? err.stack : '');
     };
     </script>
@@ -33,7 +33,7 @@ if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
         var s = document.getElementById('status');
         try {
             if (typeof $.fn.trumbowyg !== 'function') {
-                s.style.background='#fecaca'; s.style.color='#7f1d1d';
+                s.style.background='rgba(15,23,42,0.06)'; s.style.color='#0B2447';
                 s.innerHTML = 'FAIL: trumbowyg.min.js did not load (CDN blocked?).';
                 return;
             }
@@ -47,13 +47,13 @@ if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
                 ],
                 plugins: { table: { rows: 5, columns: 5 } }
             });
-            s.style.background = '#dcfce7';
-            s.style.color = '#14532d';
+            s.style.background = 'rgba(11,36,71,0.04)';
+            s.style.color = '#0B2447';
             s.innerHTML = 'OK: Editor loaded. Try the TABLE button above -> click cells to pick size.';
             console.log('table plugin registered?', !!$.trumbowyg.plugins.table);
             console.log('table btn exists?', !!$('.trumbowyg-table-button').length);
         } catch(e) {
-            s.style.background='#fecaca'; s.style.color='#7f1d1d';
+            s.style.background='rgba(15,23,42,0.06)'; s.style.color='#0B2447';
             s.innerHTML = 'ERROR: ' + e.message;
             console.error(e);
         }

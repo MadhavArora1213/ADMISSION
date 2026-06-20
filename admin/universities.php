@@ -67,18 +67,18 @@ $universities = $stmt->fetchAll();
         tr:hover { background-color: rgba(0,0,0,0.02); }
         
         .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize; }
-        .status-active { background: #dcfce7; color: #166534; }
-        .status-pending { background: #fef08a; color: #854d0e; }
-        .status-archived { background: #fee2e2; color: #991b1b; }
+        .status-active { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .status-pending { background: rgba(11,36,71,0.06); color: #0F172A; }
+        .status-archived { background: rgba(15,23,42,0.06); color: #0B2447; }
         
-        .verified-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background: #e0e7ff; color: #3730a3; }
+        .verified-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background: rgba(11,36,71,0.06); color: #19376D; }
         
         .action-links { display: flex; gap: 8px; }
-        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: var(--text-dark); background: #f1f5f9; border: 1px solid var(--border-color); }
+        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: var(--text-dark); background: #F8FAFC; border: 1px solid var(--border-color); }
         .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .action-btn.delete:hover { background: #dc2626; color: white; border-color: #dc2626; }
+        .action-btn.delete:hover { background: #0F172A; color: white; border-color: #0F172A; }
         
-        .msg-alert { padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 24px; border: 1px solid #bbf7d0; }
+        .msg-alert { padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 24px; border: 1px solid rgba(11,36,71,0.04); }
     </style>
 </head>
 <body>
@@ -153,7 +153,7 @@ $universities = $stmt->fetchAll();
                                             if($university['city_name']) $loc[] = $university['city_name'];
                                             if($university['state_name']) $loc[] = $university['state_name'];
                                             echo htmlspecialchars(implode(', ', $loc));
-                                            if(empty($loc)) echo '<span style="color:#94a3b8;">Not set</span>';
+                                            if(empty($loc)) echo '<span style="color:rgba(15,23,42,0.4);">Not set</span>';
                                             ?>
                                         </td>
                                         <td>
@@ -174,7 +174,7 @@ $universities = $stmt->fetchAll();
                                             <?php if($university['is_verified']): ?>
                                                 <span class="verified-badge"><i class="ph-fill ph-seal-check"></i> Verified</span>
                                             <?php else: ?>
-                                                <span style="color:#94a3b8; font-size:0.85rem;">Unverified</span>
+                                                <span style="color:rgba(15,23,42,0.4); font-size:0.85rem;">Unverified</span>
                                             <?php endif; ?>
                                         </td>
                                         <td>

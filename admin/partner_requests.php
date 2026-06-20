@@ -83,23 +83,23 @@ $stat_pending = $pdo->query("SELECT COUNT(*) FROM partner_content_requests WHERE
         tr:hover { background-color: rgba(0,0,0,0.015); }
         
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; white-space: nowrap; text-transform: uppercase;}
-        .t-info { background:#dbeafe; color:#1e40af; }
-        .t-photo { background:#f3e8ff; color:#7e22ce; }
-        .t-placement { background:#dcfce7; color:#166534; }
-        .t-course { background:#ffedd5; color:#c2410c; }
-        .t-ranking { background:#fce7f3; color:#be185d; }
+        .t-info { background:rgba(11,36,71,0.06); color:#19376D; }
+        .t-photo { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .t-placement { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .t-course { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .t-ranking { background:rgba(11,36,71,0.04); color:#0B2447; }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); }
         
         .btn-primary { padding: 10px 20px; font-size: 0.9rem; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;}
         .btn-primary:hover { opacity: 0.9; }
         .btn-action { padding: 6px 10px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; color: var(--text-dark); text-decoration: none;}
-        .btn-action:hover { background: #f1f5f9; }
+        .btn-action:hover { background: #F8FAFC; }
         
         .search-box { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 14px; width: 250px;}
         .search-box input { border: none; outline: none; font-size: 0.9rem; width: 100%; }
         
-        .json-viewer { background:#1e293b; color:#a5b4fc; padding:15px; border-radius:8px; font-family:monospace; font-size:0.8rem; white-space:pre-wrap; max-height:200px; overflow-y:auto; margin-top:10px; border:1px solid #0f172a;}
+        .json-viewer { background:rgba(15,23,42,0.9); color:rgba(11,36,71,0.06); padding:15px; border-radius:8px; font-family:monospace; font-size:0.8rem; white-space:pre-wrap; max-height:200px; overflow-y:auto; margin-top:10px; border:1px solid #0f172a;}
         
         /* Modal */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
@@ -134,7 +134,7 @@ $stat_pending = $pdo->query("SELECT COUNT(*) FROM partner_content_requests WHERE
                     <a href="?tab=pending" class="tab-link <?php echo $tab=='pending'?'active':''; ?>">
                         Pending Review
                         <?php if($stat_pending > 0): ?>
-                            <span style="background:#dc2626; color:#fff; border-radius:10px; padding:2px 8px; font-size:0.7rem;"><?php echo $stat_pending; ?></span>
+                            <span style="background:#0F172A; color:#fff; border-radius:10px; padding:2px 8px; font-size:0.7rem;"><?php echo $stat_pending; ?></span>
                         <?php endif; ?>
                     </a>
                     <a href="?tab=approved" class="tab-link <?php echo $tab=='approved'?'active':''; ?>">Approved</a>
@@ -229,8 +229,8 @@ $stat_pending = $pdo->query("SELECT COUNT(*) FROM partner_content_requests WHERE
                 <button type="button" class="btn-action" style="padding:10px 20px;" onclick="closeModal()">Cancel</button>
                 
                 <div style="display:flex; gap:10px;" id="actionButtons">
-                    <button type="submit" name="status" value="rejected" class="btn-action" style="color:#dc2626; border-color:#fca5a5;"><i class="ph ph-x"></i> Reject</button>
-                    <button type="submit" name="status" value="approved" class="btn-primary" style="background:#166534;"><i class="ph ph-check"></i> Approve Update</button>
+                    <button type="submit" name="status" value="rejected" class="btn-action" style="color:#0F172A; border-color:rgba(15,23,42,0.06);"><i class="ph ph-x"></i> Reject</button>
+                    <button type="submit" name="status" value="approved" class="btn-primary" style="background:#0B2447;"><i class="ph ph-check"></i> Approve Update</button>
                 </div>
             </div>
         </form>

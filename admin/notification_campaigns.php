@@ -52,8 +52,8 @@ if (isset($_GET['edit_id'])) {
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h2{font-size:2rem;font-weight:800}.panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}.panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}tr:hover{background:rgba(0,0,0,.015)}.badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700}.sub-links{display:flex;gap:8px;margin-bottom:20px}.sub-link{font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .2s}.sub-link:hover,.sub-link.active{background:rgba(0,0,0,.05);color:var(--primary)}.form-control{width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:8px;font-family:inherit;font-size:.95rem;box-sizing:border-box}.form-group{margin-bottom:16px}.form-group label{display:block;font-weight:600;margin-bottom:7px;font-size:.9rem;color:var(--text-muted)}.msg-alert{padding:14px 20px;border-radius:8px;background:#dcfce7;color:#166534;border:1px solid #bbf7d0;margin-bottom:20px}
-        .stats-micro {display:flex; gap:8px; font-size:0.75rem; color:#64748b; margin-top:4px;}
+        body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h2{font-size:2rem;font-weight:800}.panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}.panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}tr:hover{background:rgba(0,0,0,.015)}.badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700}.sub-links{display:flex;gap:8px;margin-bottom:20px}.sub-link{font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .2s}.sub-link:hover,.sub-link.active{background:rgba(0,0,0,.05);color:var(--primary)}.form-control{width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:8px;font-family:inherit;font-size:.95rem;box-sizing:border-box}.form-group{margin-bottom:16px}.form-group label{display:block;font-weight:600;margin-bottom:7px;font-size:.9rem;color:var(--text-muted)}.msg-alert{padding:14px 20px;border-radius:8px;background:rgba(11,36,71,0.04);color:#0B2447;border:1px solid rgba(11,36,71,0.04);margin-bottom:20px}
+        .stats-micro {display:flex; gap:8px; font-size:0.75rem; color:rgba(15,23,42,0.45); margin-top:4px;}
         .stats-micro span {display:flex; align-items:center; gap:3px;}
     </style>
 </head>
@@ -127,7 +127,7 @@ if (isset($_GET['edit_id'])) {
                         <div class="form-group">
                             <label>Scheduled At</label>
                             <input type="datetime-local" name="scheduled_at" class="form-control" value="<?php echo isset($edit_cmp['scheduled_at']) ? date('Y-m-d\TH:i', strtotime($edit_cmp['scheduled_at'])) : ''; ?>">
-                            <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Leave blank to send immediately upon launch.</div>
+                            <div style="font-size:0.75rem; color:rgba(15,23,42,0.45); margin-top:4px;">Leave blank to send immediately upon launch.</div>
                         </div>
 
                         <div class="form-group">
@@ -141,7 +141,7 @@ if (isset($_GET['edit_id'])) {
 
                         <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="ph ph-floppy-disk"></i> Save Campaign</button>
                         <?php if($edit_cmp): ?>
-                        <a href="notification_campaigns.php" class="btn" style="display:block; text-align:center; margin-top:10px; background:#f1f5f9; text-decoration:none; color:var(--text-color); padding:10px; border-radius:8px;">Cancel Edit</a>
+                        <a href="notification_campaigns.php" class="btn" style="display:block; text-align:center; margin-top:10px; background:#F8FAFC; text-decoration:none; color:var(--text-color); padding:10px; border-radius:8px;">Cancel Edit</a>
                         <?php endif; ?>
                     </form>
                 </div>
@@ -164,7 +164,7 @@ if (isset($_GET['edit_id'])) {
                                     <td>
                                         <div style="font-size:0.8rem;">
                                             <span style="color:var(--text-muted);">Tpl:</span> <?php echo htmlspecialchars($c['template_name']); ?> 
-                                            <span class="badge" style="background:#e0e7ff;color:#3730a3; padding:1px 4px; font-size:0.6rem;"><?php echo $c['channel']; ?></span>
+                                            <span class="badge" style="background:rgba(11,36,71,0.06);color:#19376D; padding:1px 4px; font-size:0.6rem;"><?php echo $c['channel']; ?></span>
                                         </div>
                                         <div style="font-size:0.8rem; margin-top:3px;">
                                             <span style="color:var(--text-muted);">Seg:</span> <?php echo htmlspecialchars($c['segment_name']); ?>
@@ -172,23 +172,23 @@ if (isset($_GET['edit_id'])) {
                                     </td>
                                     <td>
                                         <?php 
-                                            $color = '#475569'; $bg = '#f1f5f9';
-                                            if($c['status'] == 'sent') { $color = '#166534'; $bg = '#dcfce7'; }
-                                            if($c['status'] == 'cancelled') { $color = '#dc2626'; $bg = '#fee2e2'; }
-                                            if($c['status'] == 'scheduled' || $c['status'] == 'sending') { $color = '#0284c7'; $bg = '#e0f2fe'; }
+                                            $color = 'rgba(15,23,42,0.65)'; $bg = '#F8FAFC';
+                                            if($c['status'] == 'sent') { $color = '#0B2447'; $bg = 'rgba(11,36,71,0.04)'; }
+                                            if($c['status'] == 'cancelled') { $color = '#0F172A'; $bg = 'rgba(15,23,42,0.06)'; }
+                                            if($c['status'] == 'scheduled' || $c['status'] == 'sending') { $color = '#19376D'; $bg = 'rgba(11,36,71,0.04)'; }
                                         ?>
                                         <span class="badge" style="background:<?php echo $bg; ?>;color:<?php echo $color; ?>;"><?php echo ucfirst($c['status']); ?></span>
                                     </td>
                                     <td>
                                         <div class="stats-micro">
-                                            <span title="Sent"><i class="ph ph-paper-plane-right" style="color:#0284c7;"></i> <?php echo number_format($c['sent_count']); ?></span>
-                                            <span title="Delivered"><i class="ph ph-check-circle" style="color:#16a34a;"></i> <?php echo number_format($c['delivered_count']); ?></span>
-                                            <span title="Opened"><i class="ph ph-envelope-open" style="color:#7c3aed;"></i> <?php echo number_format($c['opened_count']); ?></span>
+                                            <span title="Sent"><i class="ph ph-paper-plane-right" style="color:#19376D;"></i> <?php echo number_format($c['sent_count']); ?></span>
+                                            <span title="Delivered"><i class="ph ph-check-circle" style="color:#0B2447;"></i> <?php echo number_format($c['delivered_count']); ?></span>
+                                            <span title="Opened"><i class="ph ph-envelope-open" style="color:#0B2447;"></i> <?php echo number_format($c['opened_count']); ?></span>
                                         </div>
                                     </td>
                                     <td>
                                         <a href="?edit_id=<?php echo $c['id']; ?>" style="color:var(--primary); margin-right:8px;"><i class="ph ph-pencil-simple"></i></a>
-                                        <a href="?delete_id=<?php echo $c['id']; ?>" onclick="return confirm('Delete campaign?');" style="color:#dc2626;"><i class="ph ph-trash"></i></a>
+                                        <a href="?delete_id=<?php echo $c['id']; ?>" onclick="return confirm('Delete campaign?');" style="color:#0F172A;"><i class="ph ph-trash"></i></a>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>

@@ -54,9 +54,9 @@ $recentReports = $pdo->query("SELECT * FROM qa_reports WHERE moderation_action I
 
             <div class="stats-grid">
                 <div class="stat-card"><div class="num"><?php echo number_format($totalQuestions); ?></div><div class="label">Total Questions</div></div>
-                <div class="stat-card"><div class="num" style="color:#16a34a;"><?php echo number_format($totalAnswers); ?></div><div class="label">Total Answers</div></div>
-                <div class="stat-card"><div class="num" style="color:#0284c7;"><?php echo number_format($activeExperts); ?></div><div class="label">Verified Experts</div></div>
-                <div class="stat-card"><div class="num" style="color:#dc2626;"><?php echo number_format($pendingReports); ?></div><div class="label">Pending Reports</div></div>
+                <div class="stat-card"><div class="num" style="color:#0B2447;"><?php echo number_format($totalAnswers); ?></div><div class="label">Total Answers</div></div>
+                <div class="stat-card"><div class="num" style="color:#19376D;"><?php echo number_format($activeExperts); ?></div><div class="label">Verified Experts</div></div>
+                <div class="stat-card"><div class="num" style="color:#0F172A;"><?php echo number_format($pendingReports); ?></div><div class="label">Pending Reports</div></div>
             </div>
 
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
@@ -71,11 +71,11 @@ $recentReports = $pdo->query("SELECT * FROM qa_reports WHERE moderation_action I
                                     <td style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                         <strong><?php echo htmlspecialchars($q['question_text']); ?></strong>
                                     </td>
-                                    <td><span class="badge" style="background:#f1f5f9;color:#475569;"><?php echo ucfirst($q['question_category']); ?></span></td>
+                                    <td><span class="badge" style="background:#F8FAFC;color:rgba(15,23,42,0.65);"><?php echo ucfirst($q['question_category']); ?></span></td>
                                     <td>
-                                        <?php if($q['status'] == 'open'): ?><span class="badge" style="background:#dcfce7;color:#166534;">Open</span>
-                                        <?php elseif($q['status'] == 'answered'): ?><span class="badge" style="background:#e0e7ff;color:#3730a3;">Answered</span>
-                                        <?php else: ?><span class="badge" style="background:#fee2e2;color:#dc2626;">Closed</span><?php endif; ?>
+                                        <?php if($q['status'] == 'open'): ?><span class="badge" style="background:rgba(11,36,71,0.04);color:#0B2447;">Open</span>
+                                        <?php elseif($q['status'] == 'answered'): ?><span class="badge" style="background:rgba(11,36,71,0.06);color:#19376D;">Answered</span>
+                                        <?php else: ?><span class="badge" style="background:rgba(15,23,42,0.06);color:#0F172A;">Closed</span><?php endif; ?>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -98,8 +98,8 @@ $recentReports = $pdo->query("SELECT * FROM qa_reports WHERE moderation_action I
                             <tbody>
                                 <?php foreach($recentReports as $r): ?>
                                 <tr>
-                                    <td><span class="badge" style="background:#fee2e2;color:#dc2626;"><?php echo ucfirst($r['report_reason']); ?></span></td>
-                                    <td style="font-family:monospace; font-size:0.8rem; color:#64748b;">
+                                    <td><span class="badge" style="background:rgba(15,23,42,0.06);color:#0F172A;"><?php echo ucfirst($r['report_reason']); ?></span></td>
+                                    <td style="font-family:monospace; font-size:0.8rem; color:rgba(15,23,42,0.45);">
                                         <?php if($r['question_id']) echo "Q: " . substr($r['question_id'], 0, 8); ?>
                                         <?php if($r['answer_id']) echo "A: " . substr($r['answer_id'], 0, 8); ?>
                                     </td>

@@ -63,7 +63,7 @@ $reports = $stmtRep->fetchAll();
         .page-header h2 { font-size: 2rem; font-weight: 800; }
         .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); padding: 24px; box-shadow: var(--shadow-sm); margin-bottom: 24px;}
         .panel h3 { font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 24px; display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
-        .msg-alert { grid-column: 1 / -1; padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 16px; border: 1px solid #bbf7d0; }
+        .msg-alert { grid-column: 1 / -1; padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 16px; border: 1px solid rgba(11,36,71,0.04); }
         
         .detail-row { display: flex; border-bottom: 1px solid var(--border-color); padding: 12px 0; }
         .detail-row:last-child { border-bottom: none; }
@@ -77,10 +77,10 @@ $reports = $stmtRep->fetchAll();
         .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 1rem; }
         
         .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
-        .status-pending { background: #fef08a; color: #854d0e; }
-        .status-approved { background: #dcfce7; color: #166534; }
-        .status-rejected { background: #fee2e2; color: #991b1b; }
-        .status-escalated { background: #ffedd5; color: #c2410c; }
+        .status-pending { background: rgba(11,36,71,0.06); color: #0F172A; }
+        .status-approved { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .status-rejected { background: rgba(15,23,42,0.06); color: #0B2447; }
+        .status-escalated { background: rgba(11,36,71,0.04); color: #0B2447; }
     </style>
 </head>
 <body>
@@ -114,10 +114,10 @@ $reports = $stmtRep->fetchAll();
                             <span class="badge status-<?php echo $review['moderation_status']; ?>"><?php echo ucfirst($review['moderation_status']); ?></span>
                         </div>
                         
-                        <div style="display:flex; gap:16px; margin-bottom: 24px; background:#f1f5f9; padding:16px; border-radius:8px;">
+                        <div style="display:flex; gap:16px; margin-bottom: 24px; background:#F8FAFC; padding:16px; border-radius:8px;">
                             <div style="flex:1;">
                                 <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Overall Rating</div>
-                                <div style="font-size:1.5rem; font-weight:800; color:var(--primary); display:flex; align-items:center; gap:4px;"><i class="ph-fill ph-star" style="color:#fbbf24;"></i> <?php echo $review['overall_rating']; ?>/5</div>
+                                <div style="font-size:1.5rem; font-weight:800; color:var(--primary); display:flex; align-items:center; gap:4px;"><i class="ph-fill ph-star" style="color:#19376D;"></i> <?php echo $review['overall_rating']; ?>/5</div>
                             </div>
                             <div style="flex:1;">
                                 <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Author</div>
@@ -136,12 +136,12 @@ $reports = $stmtRep->fetchAll();
                         </div>
 
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px;">
-                            <div class="review-text" style="margin-top:0; border-left:4px solid #10b981;">
-                                <h4 style="margin-top:0; font-size:0.9rem; color:#047857; display:flex; align-items:center; gap:4px;"><i class="ph ph-thumbs-up"></i> Pros</h4>
+                            <div class="review-text" style="margin-top:0; border-left:4px solid #19376D;">
+                                <h4 style="margin-top:0; font-size:0.9rem; color:#0B2447; display:flex; align-items:center; gap:4px;"><i class="ph ph-thumbs-up"></i> Pros</h4>
                                 <?php echo nl2br(htmlspecialchars($review['pros'] ?: 'None provided')); ?>
                             </div>
-                            <div class="review-text" style="margin-top:0; border-left:4px solid #ef4444;">
-                                <h4 style="margin-top:0; font-size:0.9rem; color:#b91c1c; display:flex; align-items:center; gap:4px;"><i class="ph ph-thumbs-down"></i> Cons</h4>
+                            <div class="review-text" style="margin-top:0; border-left:4px solid #0F172A;">
+                                <h4 style="margin-top:0; font-size:0.9rem; color:#0B2447; display:flex; align-items:center; gap:4px;"><i class="ph ph-thumbs-down"></i> Cons</h4>
                                 <?php echo nl2br(htmlspecialchars($review['cons'] ?: 'None provided')); ?>
                             </div>
                         </div>
@@ -166,7 +166,7 @@ $reports = $stmtRep->fetchAll();
                             <div class="detail-row">
                                 <div class="detail-label"><?php echo $label; ?></div>
                                 <div class="detail-value" style="display:flex; align-items:center; gap:4px;">
-                                    <?php if($val != '-'): ?><i class="ph-fill ph-star" style="color:#fbbf24;"></i><?php endif; ?> <?php echo $val; ?>
+                                    <?php if($val != '-'): ?><i class="ph-fill ph-star" style="color:#19376D;"></i><?php endif; ?> <?php echo $val; ?>
                                 </div>
                             </div>
                             <?php endforeach; ?>
@@ -174,16 +174,16 @@ $reports = $stmtRep->fetchAll();
                     </div>
 
                     <?php if(!empty($reports)): ?>
-                    <div class="panel" style="border-color:#fca5a5;">
-                        <h3 style="color:#b91c1c;"><i class="ph ph-flag"></i> User Reports (<?php echo count($reports); ?>)</h3>
+                    <div class="panel" style="border-color:rgba(15,23,42,0.06);">
+                        <h3 style="color:#0B2447;"><i class="ph ph-flag"></i> User Reports (<?php echo count($reports); ?>)</h3>
                         <?php foreach($reports as $rep): ?>
-                        <div style="padding:12px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; margin-bottom:8px;">
+                        <div style="padding:12px; background:rgba(15,23,42,0.04); border:1px solid rgba(15,23,42,0.06); border-radius:8px; margin-bottom:8px;">
                             <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                                <strong style="color:#991b1b;"><?php echo ucfirst($rep['reason']); ?></strong>
-                                <span class="badge" style="background:#fff; color:#b91c1c; border:1px solid #fca5a5;"><?php echo ucfirst($rep['status']); ?></span>
+                                <strong style="color:#0B2447;"><?php echo ucfirst($rep['reason']); ?></strong>
+                                <span class="badge" style="background:#fff; color:#0B2447; border:1px solid rgba(15,23,42,0.06);"><?php echo ucfirst($rep['status']); ?></span>
                             </div>
                             <div style="font-size:0.9rem; margin-bottom:8px;"><?php echo htmlspecialchars($rep['description']); ?></div>
-                            <div style="font-size:0.75rem; color:#7f1d1d;">Reported by <?php echo htmlspecialchars($rep['reporter_name']); ?> on <?php echo date('M d, Y', strtotime($rep['created_at'])); ?></div>
+                            <div style="font-size:0.75rem; color:#0B2447;">Reported by <?php echo htmlspecialchars($rep['reporter_name']); ?> on <?php echo date('M d, Y', strtotime($rep['created_at'])); ?></div>
                         </div>
                         <?php endforeach; ?>
                     </div>
@@ -223,7 +223,7 @@ $reports = $stmtRep->fetchAll();
                         <h3><i class="ph ph-robot"></i> AI & Fraud Meta</h3>
                         <div class="detail-row"><div class="detail-label">Spam Score</div><div class="detail-value"><?php echo $review['ai_spam_score']; ?></div></div>
                         <div class="detail-row"><div class="detail-label">Sentiment</div><div class="detail-value"><?php echo ucfirst($review['ai_sentiment'] ?: 'N/A'); ?></div></div>
-                        <div class="detail-row"><div class="detail-label">Fraud Flag</div><div class="detail-value"><?php echo $review['fraud_flag'] ? '<span style="color:#dc2626; font-weight:700;">Yes</span>' : 'No'; ?></div></div>
+                        <div class="detail-row"><div class="detail-label">Fraud Flag</div><div class="detail-value"><?php echo $review['fraud_flag'] ? '<span style="color:#0F172A; font-weight:700;">Yes</span>' : 'No'; ?></div></div>
                         <div class="detail-row"><div class="detail-label">Duplicate Score</div><div class="detail-value"><?php echo $review['duplicate_score']; ?></div></div>
                         
                         <?php if($meta): ?>

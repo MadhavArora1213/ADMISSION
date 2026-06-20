@@ -54,8 +54,8 @@ $brokenLinks = $pdo->query("SELECT COUNT(*) FROM internal_links WHERE is_broken 
 
             <div class="stats-grid">
                 <div class="stat-card"><div class="num"><?php echo number_format($indexedCount); ?></div><div class="label">Indexed Pages</div></div>
-                <div class="stat-card"><div class="num" style="color:#eab308;"><?php echo number_format($notIndexedCount); ?></div><div class="label">Not Indexed</div></div>
-                <div class="stat-card"><div class="num" style="color:#dc2626;"><?php echo number_format($brokenLinks); ?></div><div class="label">Broken Internal Links</div></div>
+                <div class="stat-card"><div class="num" style="color:#19376D;"><?php echo number_format($notIndexedCount); ?></div><div class="label">Not Indexed</div></div>
+                <div class="stat-card"><div class="num" style="color:#0F172A;"><?php echo number_format($brokenLinks); ?></div><div class="label">Broken Internal Links</div></div>
                 <div class="stat-card"><div class="num"><?php echo count($templates); ?></div><div class="label">Active SEO Templates</div></div>
             </div>
 
@@ -73,11 +73,11 @@ $brokenLinks = $pdo->query("SELECT COUNT(*) FROM internal_links WHERE is_broken 
                                 <?php foreach($templates as $tpl): ?>
                                 <tr>
                                     <td style="font-weight:600; color:var(--primary);"><?php echo htmlspecialchars($tpl['template_name']); ?><div style="font-size:0.75rem; color:var(--text-muted);"><?php echo htmlspecialchars($tpl['template_slug_pattern']); ?></div></td>
-                                    <td><span class="badge" style="background:#e0e7ff;color:#3730a3;"><?php echo ucfirst($tpl['data_source']); ?></span></td>
+                                    <td><span class="badge" style="background:rgba(11,36,71,0.06);color:#19376D;"><?php echo ucfirst($tpl['data_source']); ?></span></td>
                                     <td><?php echo number_format($tpl['pages_generated']); ?></td>
                                     <td>
-                                        <?php if($tpl['is_active']): ?><i class="ph-fill ph-check-circle" style="color:#166534;"></i> Active
-                                        <?php else: ?><i class="ph-fill ph-minus-circle" style="color:#dc2626;"></i> Inactive<?php endif; ?>
+                                        <?php if($tpl['is_active']): ?><i class="ph-fill ph-check-circle" style="color:#0B2447;"></i> Active
+                                        <?php else: ?><i class="ph-fill ph-minus-circle" style="color:#0F172A;"></i> Inactive<?php endif; ?>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -93,7 +93,7 @@ $brokenLinks = $pdo->query("SELECT COUNT(*) FROM internal_links WHERE is_broken 
                 <div class="panel">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <h3 style="border:none; margin:0;"><i class="ph ph-map-trifold"></i> XML Sitemaps</h3>
-                        <button class="btn" style="padding:6px 12px; font-size:0.8rem; background:#f1f5f9; border:1px solid var(--border-color);"><i class="ph ph-arrows-clockwise"></i> Generate All</button>
+                        <button class="btn" style="padding:6px 12px; font-size:0.8rem; background:#F8FAFC; border:1px solid var(--border-color);"><i class="ph ph-arrows-clockwise"></i> Generate All</button>
                     </div>
                     <div style="margin-top:20px; overflow-x:auto;">
                         <table>
@@ -102,7 +102,7 @@ $brokenLinks = $pdo->query("SELECT COUNT(*) FROM internal_links WHERE is_broken 
                                 <?php foreach($sitemaps as $sm): ?>
                                 <tr>
                                     <td style="font-weight:600;"><a href="<?php echo htmlspecialchars($sm['sitemap_url']); ?>" target="_blank" style="color:var(--primary); text-decoration:none;"><?php echo htmlspecialchars($sm['sitemap_name']); ?></a></td>
-                                    <td><span class="badge" style="background:#f1f5f9;color:#475569;"><?php echo ucfirst($sm['sitemap_type']); ?></span></td>
+                                    <td><span class="badge" style="background:#F8FAFC;color:rgba(15,23,42,0.65);"><?php echo ucfirst($sm['sitemap_type']); ?></span></td>
                                     <td><?php echo number_format($sm['url_count']); ?></td>
                                     <td style="font-size:0.8rem; color:var(--text-muted);"><?php echo $sm['last_generated_at'] ? date('d M Y, H:i', strtotime($sm['last_generated_at'])) : 'Never'; ?></td>
                                 </tr>

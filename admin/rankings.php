@@ -89,12 +89,12 @@ $colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetc
         .form-group label{display:block;font-size:.85rem;font-weight:700;color:var(--text-main);margin-bottom:8px;}
         .form-control{width:100%;padding:10px 12px;border:1px solid var(--border-color);border-radius:8px;font-size:.9rem;font-family:inherit;}
         .btn-primary{background:var(--primary);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:600;cursor:pointer;transition:all .2s;}
-        .btn-primary:hover{background:#1e3a8a;}
-        .btn-danger{background:#dc2626;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:600;cursor:pointer;text-decoration:none;font-size:0.75rem;}
+        .btn-primary:hover{background:#0B2447;}
+        .btn-danger{background:#0F172A;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:600;cursor:pointer;text-decoration:none;font-size:0.75rem;}
         .alert{padding:12px 16px;border-radius:8px;margin-bottom:20px;font-size:0.9rem;font-weight:600;}
-        .alert-success{background:#dcfce7;color:#166534;}
-        .delta-up{color:#16a34a;font-weight:bold;}
-        .delta-down{color:#dc2626;font-weight:bold;}
+        .alert-success{background:rgba(11,36,71,0.04);color:#0B2447;}
+        .delta-up{color:#0B2447;font-weight:bold;}
+        .delta-down{color:#0F172A;font-weight:bold;}
         .delta-none{color:var(--text-muted);}
     </style>
 </head>

@@ -48,14 +48,14 @@ $cats = cAll($pdo, "SELECT DISTINCT course_category FROM courses WHERE status = 
   <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/college-pages.css?v=<?= time() ?>">
   <style>
     .courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
-    .course-card { background: #fff; border-radius: 20px; border: 1px solid #e2e8f0; padding: 28px; transition: all 0.3s ease; display: flex; flex-direction: column; height: 100%; box-shadow: 0 8px 25px rgba(0,0,0,0.02); }
+    .course-card { background: #fff; border-radius: 20px; border: 1px solid rgba(15,23,42,0.08); padding: 28px; transition: all 0.3s ease; display: flex; flex-direction: column; height: 100%; box-shadow: 0 8px 25px rgba(0,0,0,0.02); }
     .course-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(11,36,71,0.08); border-color: var(--cp-blue); }
     .course-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.3rem; font-weight: 800; color: #0f172a; margin: 0 0 20px 0; line-height: 1.4; transition: color 0.3s ease; }
     .course-card:hover .course-title { color: var(--cp-blue); }
     .course-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; flex-grow: 1; }
-    .meta-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #475569; font-weight: 500; }
+    .meta-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: rgba(15,23,42,0.65); font-weight: 500; }
     .meta-item i { color: var(--cp-blue); font-size: 1.2rem; }
-    .course-footer { border-top: 1px solid #f1f5f9; padding-top: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .course-footer { border-top: 1px solid #F8FAFC; padding-top: 20px; display: flex; justify-content: space-between; align-items: center; }
     .course-btn { background: transparent; color: var(--cp-blue); border: 2px solid var(--cp-blue); padding: 12px 20px; border-radius: 50px; font-weight: 700; text-decoration: none; text-align: center; transition: all 0.3s ease; width: 100%; display: block; font-size: 0.95rem; }
     .course-btn:hover { background: var(--cp-blue); color: #fff; box-shadow: 0 10px 20px rgba(11,36,71,0.15); }
   </style>
@@ -64,7 +64,7 @@ $cats = cAll($pdo, "SELECT DISTINCT course_category FROM courses WHERE status = 
 
 <?php include __DIR__ . '/includes/navbar.php'; ?>
 
-<div class="shiksha-breadcrumb" style="background:#fff;border-bottom:1px solid #e2e8f0;padding:15px 0">
+<div class="shiksha-breadcrumb" style="background:#fff;border-bottom:1px solid rgba(15,23,42,0.08);padding:15px 0">
   <div class="container">
     <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/index.php">Home</a>
     <i class="ph ph-caret-right"></i>

@@ -51,7 +51,7 @@ foreach($stats as $s) $counts[$s['status']] = $s['cnt'];
         .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
         .content-area { padding: 32px; min-width: 0; }
         .menu-toggle { display: none; background: transparent; border: 1px solid var(--border-color); color: var(--text-dark); width: 42px; height: 42px; border-radius: 8px; align-items: center; justify-content: center; cursor: pointer; font-size: 1.4rem; line-height: 1; }
-        .menu-toggle:hover { background: #f1f5f9; }
+        .menu-toggle:hover { background: #F8FAFC; }
         .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 900; opacity: 0; transition: opacity 0.3s ease; }
         .sidebar-backdrop.show { display: block; opacity: 1; }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
@@ -66,25 +66,25 @@ foreach($stats as $s) $counts[$s['status']] = $s['cnt'];
         .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow-x: auto; }
         table { min-width: 1000px; border-collapse: collapse; font-size: 0.88rem; }
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
-        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #f1f5f9; }
+        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #F8FAFC; }
         tr:hover { background-color: rgba(0,0,0,0.015); }
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; white-space: nowrap; }
-        .s-draft { background:#f1f5f9; color:#475569; }
-        .s-pending_review { background:#fef9c3; color:#854d0e; }
-        .s-published { background:#dcfce7; color:#166534; }
-        .s-archived { background:#f1f5f9; color:#94a3b8; }
-        .t-blog { background:#ede9fe; color:#5b21b6; }
-        .t-news { background:#dbeafe; color:#1e40af; }
-        .t-guide { background:#dcfce7; color:#166534; }
-        .t-exam_update { background:#ffedd5; color:#c2410c; }
-        .t-opinion { background:#fce7f3; color:#9d174d; }
-        .t-ranking { background:#fef9c3; color:#854d0e; }
-        .action-btn { width: 30px; height: 30px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color); text-decoration: none; }
+        .s-draft { background:#F8FAFC; color:rgba(15,23,42,0.65); }
+        .s-pending_review { background:rgba(11,36,71,0.04); color:#0F172A; }
+        .s-published { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .s-archived { background:#F8FAFC; color:rgba(15,23,42,0.4); }
+        .t-blog { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .t-news { background:rgba(11,36,71,0.06); color:#19376D; }
+        .t-guide { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .t-exam_update { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .t-opinion { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .t-ranking { background:rgba(11,36,71,0.04); color:#0F172A; }
+        .action-btn { width: 30px; height: 30px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; background: #F8FAFC; color: var(--text-dark); border: 1px solid var(--border-color); text-decoration: none; }
         .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .action-btn.delete:hover { background: #dc2626; border-color: #dc2626; }
+        .action-btn.delete:hover { background: #0F172A; border-color: #0F172A; }
         .search-box { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 14px; }
         .search-box input { border: none; outline: none; font-size: 0.9rem; width: 220px; }
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); }
         .sub-links { display: flex; gap: 8px; margin-bottom: 20px; }
         .sub-link { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-decoration: none; padding: 5px 10px; border-radius: 6px; transition: all 0.2s; }
         .sub-link:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
@@ -145,9 +145,9 @@ foreach($stats as $s) $counts[$s['status']] = $s['cnt'];
 
             <div class="stats-grid">
                 <div class="stat-card"><div class="num"><?php echo array_sum($counts); ?></div><div class="label">Total Articles</div></div>
-                <div class="stat-card"><div class="num" style="color:#166534;"><?php echo $counts['published']; ?></div><div class="label">Published</div></div>
-                <div class="stat-card"><div class="num" style="color:#854d0e;"><?php echo $counts['pending_review']; ?></div><div class="label">Pending Review</div></div>
-                <div class="stat-card"><div class="num" style="color:#475569;"><?php echo $counts['draft']; ?></div><div class="label">Drafts</div></div>
+                <div class="stat-card"><div class="num" style="color:#0B2447;"><?php echo $counts['published']; ?></div><div class="label">Published</div></div>
+                <div class="stat-card"><div class="num" style="color:#0F172A;"><?php echo $counts['pending_review']; ?></div><div class="label">Pending Review</div></div>
+                <div class="stat-card"><div class="num" style="color:rgba(15,23,42,0.65);"><?php echo $counts['draft']; ?></div><div class="label">Drafts</div></div>
             </div>
 
             <div class="filter-bar">

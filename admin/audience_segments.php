@@ -45,7 +45,7 @@ if (isset($_GET['edit_id'])) {
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h2{font-size:2rem;font-weight:800}.panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}.panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}tr:hover{background:rgba(0,0,0,.015)}.badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700}.sub-links{display:flex;gap:8px;margin-bottom:20px}.sub-link{font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .2s}.sub-link:hover,.sub-link.active{background:rgba(0,0,0,.05);color:var(--primary)}.form-control{width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:8px;font-family:inherit;font-size:.95rem;box-sizing:border-box}.form-group{margin-bottom:16px}.form-group label{display:block;font-weight:600;margin-bottom:7px;font-size:.9rem;color:var(--text-muted)}.msg-alert{padding:14px 20px;border-radius:8px;background:#dcfce7;color:#166534;border:1px solid #bbf7d0;margin-bottom:20px}
+        body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h2{font-size:2rem;font-weight:800}.panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}.panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}tr:hover{background:rgba(0,0,0,.015)}.badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700}.sub-links{display:flex;gap:8px;margin-bottom:20px}.sub-link{font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .2s}.sub-link:hover,.sub-link.active{background:rgba(0,0,0,.05);color:var(--primary)}.form-control{width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:8px;font-family:inherit;font-size:.95rem;box-sizing:border-box}.form-group{margin-bottom:16px}.form-group label{display:block;font-weight:600;margin-bottom:7px;font-size:.9rem;color:var(--text-muted)}.msg-alert{padding:14px 20px;border-radius:8px;background:rgba(11,36,71,0.04);color:#0B2447;border:1px solid rgba(11,36,71,0.04);margin-bottom:20px}
     </style>
 </head>
 <body>
@@ -100,7 +100,7 @@ if (isset($_GET['edit_id'])) {
                                 <button type="button" class="btn-primary" onclick="addFilter()" style="padding: 10px 15px;">Add</button>
                             </div>
                             <div id="filters_list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
-                            <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Define properties to filter users (e.g., state, stream).</div>
+                            <div style="font-size:0.75rem; color:rgba(15,23,42,0.45); margin-top:4px;">Define properties to filter users (e.g., state, stream).</div>
                         </div>
 
                         <div class="form-group">
@@ -112,12 +112,12 @@ if (isset($_GET['edit_id'])) {
                                 <option value="0 0 * * 0" <?php echo $cron=='0 0 * * 0'?'selected':''; ?>>Weekly on Sunday</option>
                                 <option value="0 0 1 * *" <?php echo $cron=='0 0 1 * *'?'selected':''; ?>>Monthly on the 1st</option>
                             </select>
-                            <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">How often the system should recalculate who is in this segment.</div>
+                            <div style="font-size:0.75rem; color:rgba(15,23,42,0.45); margin-top:4px;">How often the system should recalculate who is in this segment.</div>
                         </div>
 
                         <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="ph ph-floppy-disk"></i> Save Segment</button>
                         <?php if($edit_seg): ?>
-                        <a href="audience_segments.php" class="btn" style="display:block; text-align:center; margin-top:10px; background:#f1f5f9; text-decoration:none; color:var(--text-color); padding:10px; border-radius:8px;">Cancel Edit</a>
+                        <a href="audience_segments.php" class="btn" style="display:block; text-align:center; margin-top:10px; background:#F8FAFC; text-decoration:none; color:var(--text-color); padding:10px; border-radius:8px;">Cancel Edit</a>
                         <?php endif; ?>
                     </form>
                 </div>
@@ -132,11 +132,11 @@ if (isset($_GET['edit_id'])) {
                                 <?php foreach($segments as $s): ?>
                                 <tr>
                                     <td style="font-weight:600; color:var(--primary);"><?php echo htmlspecialchars($s['segment_name']); ?></td>
-                                    <td><span class="badge" style="background:#e0e7ff;color:#3730a3;"><i class="ph ph-users"></i> <?php echo number_format($s['user_count']); ?></span></td>
-                                    <td style="font-family:monospace; font-size:0.8rem; color:#64748b;"><?php echo htmlspecialchars($s['refresh_schedule']); ?></td>
+                                    <td><span class="badge" style="background:rgba(11,36,71,0.06);color:#19376D;"><i class="ph ph-users"></i> <?php echo number_format($s['user_count']); ?></span></td>
+                                    <td style="font-family:monospace; font-size:0.8rem; color:rgba(15,23,42,0.45);"><?php echo htmlspecialchars($s['refresh_schedule']); ?></td>
                                     <td>
                                         <a href="?edit_id=<?php echo $s['id']; ?>" style="color:var(--primary); margin-right:8px;"><i class="ph ph-pencil-simple"></i></a>
-                                        <a href="?delete_id=<?php echo $s['id']; ?>" onclick="return confirm('Delete segment?');" style="color:#dc2626;"><i class="ph ph-trash"></i></a>
+                                        <a href="?delete_id=<?php echo $s['id']; ?>" onclick="return confirm('Delete segment?');" style="color:#0F172A;"><i class="ph ph-trash"></i></a>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -167,7 +167,7 @@ function renderFilters() {
     list.innerHTML = '';
     for(const [key, val] of Object.entries(filtersObj)) {
         const badge = document.createElement('div');
-        badge.style.cssText = 'background:#4f46e5; color:#fff; padding:6px 12px; border-radius:20px; font-size:0.85rem; display:flex; align-items:center; gap:8px;';
+        badge.style.cssText = 'background:#19376D; color:#fff; padding:6px 12px; border-radius:20px; font-size:0.85rem; display:flex; align-items:center; gap:8px;';
         badge.innerHTML = `<span>${key}: <strong>${val}</strong></span> <button type="button" onclick="removeFilter('${key}')" style="background:none; border:none; color:#fff; cursor:pointer; font-weight:bold;">&times;</button>`;
         list.appendChild(badge);
     }

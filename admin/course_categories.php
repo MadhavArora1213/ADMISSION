@@ -92,11 +92,11 @@ if (isset($_GET['edit_id'])) {
         th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
         .action-links { display: flex; gap: 8px; }
-        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color); }
+        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #F8FAFC; color: var(--text-dark); border: 1px solid var(--border-color); }
         .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .action-btn.delete:hover { background: #dc2626; color: white; border-color: #dc2626; }
-        .msg-alert { grid-column: 1 / -1; padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 16px; border: 1px solid #bbf7d0; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .action-btn.delete:hover { background: #0F172A; color: white; border-color: #0F172A; }
+        .msg-alert { grid-column: 1 / -1; padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 16px; border: 1px solid rgba(11,36,71,0.04); }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; background: rgba(11,36,71,0.04); color: #19376D; border: 1px solid rgba(11,36,71,0.08); }
 
         .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-dark); }
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
@@ -192,7 +192,7 @@ if (isset($_GET['edit_id'])) {
                             <?php echo $edit_cat ? 'Update Category' : 'Save Category'; ?>
                         </button>
                         <?php if($edit_cat): ?>
-                        <a href="course_categories.php" class="btn" style="display:block; text-align:center; margin-top:8px; background:#f1f5f9; color:#475569;">Cancel Edit</a>
+                        <a href="course_categories.php" class="btn" style="display:block; text-align:center; margin-top:8px; background:#F8FAFC; color:rgba(15,23,42,0.65);">Cancel Edit</a>
                         <?php endif; ?>
                     </form>
                 </div>
@@ -220,7 +220,7 @@ if (isset($_GET['edit_id'])) {
                                         <?php if($cat['icon_url']): ?>
                                             <img src="<?php echo preg_match('/^https?:\/\//', $cat['icon_url']) ? htmlspecialchars($cat['icon_url']) : '../' . htmlspecialchars($cat['icon_url']); ?>" alt="icon" style="width: 32px; height: 32px; object-fit: cover; border-radius: 6px; background: #fff; padding: 2px; border: 1px solid var(--border-color);">
                                         <?php else: ?>
-                                            <div style="width: 32px; height: 32px; border-radius: 6px; background: #e2e8f0; display:flex; align-items:center; justify-content:center; color: #64748b;"><i class="ph ph-image"></i></div>
+                                            <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(15,23,42,0.08); display:flex; align-items:center; justify-content:center; color: rgba(15,23,42,0.45);"><i class="ph ph-image"></i></div>
                                         <?php endif; ?>
                                         <div>
                                             <?php echo htmlspecialchars($cat['category_name']); ?>

@@ -56,18 +56,18 @@ $exams = $stmt->fetchAll();
         tr:hover { background-color: rgba(0,0,0,0.02); }
         
         .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize; }
-        .status-active { background: #dcfce7; color: #166534; }
-        .status-upcoming { background: #e0e7ff; color: #3730a3; }
-        .status-completed { background: #f1f5f9; color: #475569; }
+        .status-active { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .status-upcoming { background: rgba(11,36,71,0.06); color: #19376D; }
+        .status-completed { background: #F8FAFC; color: rgba(15,23,42,0.65); }
         
-        .level-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .level-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; background: rgba(11,36,71,0.04); color: #19376D; border: 1px solid rgba(11,36,71,0.08); }
         
         .action-links { display: flex; gap: 8px; }
-        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: var(--text-dark); background: #f1f5f9; border: 1px solid var(--border-color); }
+        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: var(--text-dark); background: #F8FAFC; border: 1px solid var(--border-color); }
         .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .action-btn.delete:hover { background: #dc2626; color: white; border-color: #dc2626; }
+        .action-btn.delete:hover { background: #0F172A; color: white; border-color: #0F172A; }
         
-        .msg-alert { padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 24px; border: 1px solid #bbf7d0; }
+        .msg-alert { padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 24px; border: 1px solid rgba(11,36,71,0.04); }
     </style>
 </head>
 <body>

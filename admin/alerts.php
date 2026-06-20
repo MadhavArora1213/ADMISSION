@@ -40,21 +40,21 @@ $alerts = $stmt->fetchAll();
         .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 24px;}
         table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: top;}
-        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #f1f5f9; }
+        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #F8FAFC; }
         tr:hover { background-color: rgba(0,0,0,0.015); }
         
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; white-space: nowrap; text-transform: capitalize; }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); }
         
         /* Priorities */
-        .p-critical { background:#fef2f2; color:#dc2626; border: 1px solid #fca5a5; }
-        .p-high { background:#fff7ed; color:#ea580c; border: 1px solid #fdba74; }
-        .p-medium { background:#fefce8; color:#ca8a04; border: 1px solid #fde047; }
-        .p-low { background:#f0fdf4; color:#16a34a; border: 1px solid #86efac; }
+        .p-critical { background:rgba(15,23,42,0.04); color:#0F172A; border: 1px solid rgba(15,23,42,0.06); }
+        .p-high { background:rgba(11,36,71,0.04); color:#19376D; border: 1px solid rgba(11,36,71,0.06); }
+        .p-medium { background:rgba(11,36,71,0.04); color:#19376D; border: 1px solid #19376D; }
+        .p-low { background:rgba(11,36,71,0.04); color:#0B2447; border: 1px solid rgba(11,36,71,0.06); }
         
         .btn-action { padding: 4px 8px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; color: var(--text-dark); text-decoration: none;}
-        .btn-action:hover { background: #f1f5f9; }
+        .btn-action:hover { background: #F8FAFC; }
     </style>
 </head>
 <body>
@@ -109,10 +109,10 @@ $alerts = $stmt->fetchAll();
                                 </td>
                                 <td>
                                     <?php if($alert['is_resolved']): ?>
-                                        <span class="badge" style="background:#dcfce7; color:#166534;">Resolved</span>
+                                        <span class="badge" style="background:rgba(11,36,71,0.04); color:#0B2447;">Resolved</span>
                                         <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">By <?php echo htmlspecialchars($alert['resolved_by_name'] ?? 'Admin'); ?></div>
                                     <?php else: ?>
-                                        <span class="badge" style="background:#fef08a; color:#854d0e;">Active</span>
+                                        <span class="badge" style="background:rgba(11,36,71,0.06); color:#0F172A;">Active</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
