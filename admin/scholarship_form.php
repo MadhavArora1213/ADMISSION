@@ -126,10 +126,10 @@ $selected_levels = isset($sch['course_levels']) && $sch['course_levels'] ? json_
         .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
         
         .btn-primary { background: var(--primary); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-primary:hover { background: #1d4ed8; }
+        .btn-primary:hover { background: #19376D; }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; font-weight:500; }
-        .msg-error { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); font-weight:500; }
+        .msg-error { background: rgba(15,23,42,0.06); color: #0B2447; border-color: rgba(15,23,42,0.06); }
         
         .checkbox-group { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
         .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; cursor: pointer; }

@@ -109,18 +109,18 @@ $users = $stmt->fetchAll();
         .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 24px;}
         table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: top;}
-        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #f1f5f9; }
+        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #F8FAFC; }
         tr:hover { background-color: rgba(0,0,0,0.015); }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); }
         
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; white-space: nowrap; }
-        .s-active { background:#dcfce7; color:#166534; }
-        .s-suspended { background:#fee2e2; color:#dc2626; }
-        .s-pending_verification { background:#fef9c3; color:#854d0e; }
+        .s-active { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .s-suspended { background:rgba(15,23,42,0.06); color:#0F172A; }
+        .s-pending_verification { background:rgba(11,36,71,0.04); color:#0F172A; }
         
         .btn-action { padding: 6px 10px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; color: var(--text-dark); text-decoration: none;}
-        .btn-action:hover { background: #f1f5f9; }
+        .btn-action:hover { background: #F8FAFC; }
         
         .search-box { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 14px; width: 300px;}
         .search-box input { border: none; outline: none; font-size: 0.9rem; width: 100%; }
@@ -190,7 +190,7 @@ $users = $stmt->fetchAll();
                                     <div style="font-size:0.75rem; color:var(--text-muted);">Auth: <?php echo ucfirst($u['auth_provider']); ?></div>
                                 </td>
                                 <td>
-                                    <div><?php echo htmlspecialchars($u['email']); ?> <?php if($u['email_verified']) echo '<i class="ph-fill ph-check-circle" style="color:#16a34a;" title="Verified"></i>'; ?></div>
+                                    <div><?php echo htmlspecialchars($u['email']); ?> <?php if($u['email_verified']) echo '<i class="ph-fill ph-check-circle" style="color:#0B2447;" title="Verified"></i>'; ?></div>
                                     <div style="font-size:0.85rem; color:var(--text-muted);"><?php echo htmlspecialchars($u['phone']); ?></div>
                                 </td>
                                 <td>
@@ -199,9 +199,9 @@ $users = $stmt->fetchAll();
                                     </div>
                                     <div>
                                         <?php if($u['is_super_admin']): ?>
-                                            <span style="font-weight:700; color:#166534; font-size:0.85rem;">Super Admin</span>
+                                            <span style="font-weight:700; color:#0B2447; font-size:0.85rem;">Super Admin</span>
                                         <?php elseif($u['role_name']): ?>
-                                            <span style="font-weight:700; color:#1e40af; font-size:0.85rem;"><?php echo htmlspecialchars($u['role_name']); ?></span>
+                                            <span style="font-weight:700; color:#19376D; font-size:0.85rem;"><?php echo htmlspecialchars($u['role_name']); ?></span>
                                         <?php else: ?>
                                             <span style="color:var(--text-muted); font-size:0.85rem;">Standard User</span>
                                         <?php endif; ?>
@@ -215,11 +215,11 @@ $users = $stmt->fetchAll();
                                     <button class="btn-action" onclick="openRoleModal('<?php echo $u['id']; ?>', '<?php echo htmlspecialchars($u['full_name']); ?>', '<?php echo $u['role_id']; ?>', <?php echo $u['is_super_admin'] ? 'true' : 'false'; ?>)"><i class="ph ph-shield-star"></i> Assign Role</button>
                                     
                                     <?php if($u['status'] === 'active'): ?>
-                                        <a href="?action=suspend&id=<?php echo $u['id']; ?>" class="btn-action" onclick="return confirm('Suspend this user?')" style="color:#dc2626; border-color:#fca5a5;"><i class="ph ph-prohibit"></i> Suspend</a>
+                                        <a href="?action=suspend&id=<?php echo $u['id']; ?>" class="btn-action" onclick="return confirm('Suspend this user?')" style="color:#0F172A; border-color:rgba(15,23,42,0.06);"><i class="ph ph-prohibit"></i> Suspend</a>
                                     <?php else: ?>
-                                        <a href="?action=activate&id=<?php echo $u['id']; ?>" class="btn-action" style="color:#166534; border-color:#86efac;"><i class="ph ph-check-circle"></i> Activate</a>
+                                        <a href="?action=activate&id=<?php echo $u['id']; ?>" class="btn-action" style="color:#0B2447; border-color:rgba(11,36,71,0.06);"><i class="ph ph-check-circle"></i> Activate</a>
                                     <?php endif; ?>
-                                    <a href="?action=delete&id=<?php echo $u['id']; ?>" class="btn-action" onclick="return confirm('Are you sure you want to permanently delete this user?')" style="color:#991b1b; border-color:#fca5a5;"><i class="ph ph-trash"></i> Delete</a>
+                                    <a href="?action=delete&id=<?php echo $u['id']; ?>" class="btn-action" onclick="return confirm('Are you sure you want to permanently delete this user?')" style="color:#0B2447; border-color:rgba(15,23,42,0.06);"><i class="ph ph-trash"></i> Delete</a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -258,7 +258,7 @@ $users = $stmt->fetchAll();
             <div class="form-group" style="margin-top:20px;">
                 <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                     <input type="checkbox" name="is_super_admin" id="modal_is_super_admin" value="1">
-                    <span style="color:#166534; font-weight:800;">Grant Super Admin Access</span>
+                    <span style="color:#0B2447; font-weight:800;">Grant Super Admin Access</span>
                 </label>
                 <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Warning: Super Admins bypass all role restrictions and have full access to the system.</p>
             </div>
@@ -305,7 +305,7 @@ $users = $stmt->fetchAll();
             <div class="form-group" style="margin-top:20px;">
                 <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                     <input type="checkbox" name="is_super_admin" value="1">
-                    <span style="color:#166534; font-weight:800; text-transform:none;">Grant Super Admin Access</span>
+                    <span style="color:#0B2447; font-weight:800; text-transform:none;">Grant Super Admin Access</span>
                 </label>
                 <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; text-transform:none;">Super Admins bypass role restrictions and have full system access.</p>
             </div>

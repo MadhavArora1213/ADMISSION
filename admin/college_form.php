@@ -456,7 +456,7 @@ function getValue($arr, $key, $default = '') {
         .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
         .checkbox-group label { margin-bottom: 0; cursor: pointer; }
         
-        .error-alert { padding: 16px; background: #fee2e2; color: #991b1b; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fecaca; }
+        .error-alert { padding: 16px; background: rgba(15,23,42,0.06); color: #0B2447; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(15,23,42,0.06); }
         
         .form-actions { display: flex; justify-content: flex-end; gap: 16px; margin-top: 32px; }
         
@@ -512,7 +512,7 @@ function getValue($arr, $key, $default = '') {
                 <?php endif; ?>
 
                 <?php if(isset($_GET['msg']) && $_GET['msg'] == 'saved'): ?>
-                <div class="msg-alert" style="padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 24px; border: 1px solid #bbf7d0;">
+                <div class="msg-alert" style="padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 24px; border: 1px solid rgba(11,36,71,0.04);">
                     <i class="ph ph-check-circle"></i> Details saved successfully!
                 </div>
                 <?php endif; ?>

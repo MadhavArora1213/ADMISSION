@@ -65,9 +65,9 @@ $chat_logs = $pdo->query("SELECT * FROM ai_chat_sessions ORDER BY created_at DES
         .form-group label{display:block;font-size:.85rem;font-weight:700;color:var(--text-main);margin-bottom:8px;}
         .form-control{width:100%;padding:10px 12px;border:1px solid var(--border-color);border-radius:8px;font-size:.9rem;font-family:inherit;}
         .btn-primary{background:var(--primary);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:600;cursor:pointer;transition:all .2s;}
-        .btn-primary:hover{background:#1e3a8a;}
+        .btn-primary:hover{background:#0B2447;}
         .alert{padding:12px 16px;border-radius:8px;margin-bottom:20px;font-size:0.9rem;font-weight:600;}
-        .alert-success{background:#dcfce7;color:#166534;}
+        .alert-success{background:rgba(11,36,71,0.04);color:#0B2447;}
     </style>
 </head>
 <body>
@@ -301,9 +301,9 @@ $chat_logs = $pdo->query("SELECT * FROM ai_chat_sessions ORDER BY created_at DES
                                 <td style="font-family:monospace;"><?php echo substr(htmlspecialchars($log['session_token']), 0, 15); ?>...</td>
                                 <td>
                                     <?php if($log['lead_captured']): ?>
-                                        <span class="badge" style="background:#dcfce7; color:#166534;">Yes</span>
+                                        <span class="badge" style="background:rgba(11,36,71,0.04); color:#0B2447;">Yes</span>
                                     <?php else: ?>
-                                        <span class="badge" style="background:#fee2e2; color:#991b1b;">No</span>
+                                        <span class="badge" style="background:rgba(15,23,42,0.06); color:#0B2447;">No</span>
                                     <?php endif; ?>
                                 </td>
                                 <td><pre style="font-size:0.75rem; margin:0; max-width:200px; overflow:hidden; text-overflow:ellipsis;"><?php echo htmlspecialchars($log['entity_context']); ?></pre></td>
@@ -384,7 +384,7 @@ function renderUPF() {
     list.innerHTML = '';
     upf.forEach((f, idx) => {
         const badge = document.createElement('div');
-        badge.style.cssText = 'background:#14b8a6; color:#fff; padding:6px 12px; border-radius:20px; font-size:0.85rem; display:flex; align-items:center; gap:8px;';
+        badge.style.cssText = 'background:#19376D; color:#fff; padding:6px 12px; border-radius:20px; font-size:0.85rem; display:flex; align-items:center; gap:8px;';
         badge.innerHTML = `<span>${f}</span> <button type="button" onclick="removeUPF(${idx})" style="background:none; border:none; color:#fff; cursor:pointer; font-weight:bold;">&times;</button>`;
         list.appendChild(badge);
     });
@@ -427,7 +427,7 @@ function renderFW() {
     list.innerHTML = '';
     for(const [key, val] of Object.entries(featureWeights)) {
         const badge = document.createElement('div');
-        badge.style.cssText = 'background:#f59e0b; color:#fff; padding:6px 12px; border-radius:20px; font-size:0.85rem; display:flex; align-items:center; gap:8px;';
+        badge.style.cssText = 'background:#19376D; color:#fff; padding:6px 12px; border-radius:20px; font-size:0.85rem; display:flex; align-items:center; gap:8px;';
         badge.innerHTML = `<span>${key}: <strong>${val}</strong></span> <button type="button" onclick="removeFW('${key}')" style="background:none; border:none; color:#fff; cursor:pointer; font-weight:bold;">&times;</button>`;
         list.appendChild(badge);
     }

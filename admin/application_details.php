@@ -77,7 +77,7 @@ $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .form-control { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; font-family: inherit; }
         .btn-primary { background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; font-weight:500; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); font-weight:500; }
         
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; text-transform: capitalize; }
         
@@ -156,7 +156,7 @@ $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <div style="font-weight:700; margin-bottom:4px; text-transform:uppercase; font-size:0.8rem;"><?php echo str_replace('_', ' ', $doc['doc_type']); ?></div>
                                     <div style="font-size:0.75rem; color:var(--text-muted);">Uploaded: <?php echo date('d M Y', strtotime($doc['created_at'])); ?></div>
                                     <div style="margin-top:6px;">
-                                        <span class="badge" style="background: <?php echo $doc['verification_status']=='verified'?'#dcfce7':($doc['verification_status']=='rejected'?'#fee2e2':'#fef9c3'); ?>; color: <?php echo $doc['verification_status']=='verified'?'#166534':($doc['verification_status']=='rejected'?'#b91c1c':'#854d0e'); ?>;">
+                                        <span class="badge" style="background: <?php echo $doc['verification_status']=='verified'?'rgba(11,36,71,0.04)':($doc['verification_status']=='rejected'?'rgba(15,23,42,0.06)':'rgba(11,36,71,0.04)'); ?>; color: <?php echo $doc['verification_status']=='verified'?'#0B2447':($doc['verification_status']=='rejected'?'#0B2447':'#0F172A'); ?>;">
                                             <?php echo $doc['verification_status']; ?>
                                         </span>
                                     </div>
@@ -191,7 +191,7 @@ $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <td style="font-family:monospace;"><?php echo htmlspecialchars($pay['gateway_txn_id'] ?: '-'); ?></td>
                                         <td style="text-transform:capitalize;"><?php echo htmlspecialchars($pay['gateway']); ?></td>
                                         <td style="font-weight:600;">₹<?php echo number_format($pay['amount'], 2); ?></td>
-                                        <td><span class="badge" style="background:#f1f5f9;"><?php echo $pay['payment_status']; ?></span></td>
+                                        <td><span class="badge" style="background:#F8FAFC;"><?php echo $pay['payment_status']; ?></span></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>

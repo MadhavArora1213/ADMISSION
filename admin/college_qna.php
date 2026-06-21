@@ -78,13 +78,13 @@ $active_tab = 'college_qna';
         .tab-link.active { background: var(--primary); color: white; }
         .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px; }
         .form-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-        .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
+        .form-control { width: 100%; padding: 10px 14px; border: 1px solid rgba(15,23,42,0.15); border-radius: 8px; box-sizing: border-box; }
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: top; }
         th { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; }
         .badge { padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
-        .badge-pending { background: #fef3c7; color: #92400e; }
-        .badge-approved { background: #dcfce7; color: #166534; }
+        .badge-pending { background: rgba(11,36,71,0.06); color: #0F172A; }
+        .badge-approved { background: rgba(11,36,71,0.04); color: #0B2447; }
         @media (max-width: 768px) { .main-content { margin-left: 0; } .content-area { padding: 16px; } }
     </style>
 </head>
@@ -98,8 +98,8 @@ $active_tab = 'college_qna';
                 <h2><a href="colleges.php" style="color:var(--text-muted)"><i class="ph ph-arrow-left"></i></a> <?= htmlspecialchars($college['name']) ?> — Student Q&A</h2>
             </div>
             <?php include 'includes/college_tabs_nav.php'; ?>
-            <?php if (isset($_GET['msg'])): ?><div style="padding:12px;background:#dcfce7;color:#166534;border-radius:8px;margin-bottom:16px">Done.</div><?php endif; ?>
-            <?php if ($error): ?><div style="padding:12px;background:#fee2e2;color:#991b1b;border-radius:8px;margin-bottom:16px"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+            <?php if (isset($_GET['msg'])): ?><div style="padding:12px;background:rgba(11,36,71,0.04);color:#0B2447;border-radius:8px;margin-bottom:16px">Done.</div><?php endif; ?>
+            <?php if ($error): ?><div style="padding:12px;background:rgba(15,23,42,0.06);color:#0B2447;border-radius:8px;margin-bottom:16px"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
             <div class="panel">
                 <h3><i class="ph ph-plus-circle"></i> Add Q&A</h3>
@@ -132,13 +132,13 @@ $active_tab = 'college_qna';
                             <form method="post" style="display:inline">
                                 <input type="hidden" name="action" value="approve">
                                 <input type="hidden" name="id" value="<?= htmlspecialchars($q['id']) ?>">
-                                <button type="submit" style="background:none;border:none;color:#16a34a;cursor:pointer"><i class="ph ph-check"></i></button>
+                                <button type="submit" style="background:none;border:none;color:#0B2447;cursor:pointer"><i class="ph ph-check"></i></button>
                             </form>
                             <?php endif; ?>
                             <form method="post" style="display:inline" onsubmit="return confirm('Delete?')">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="id" value="<?= htmlspecialchars($q['id']) ?>">
-                                <button type="submit" style="background:none;border:none;color:#dc2626;cursor:pointer"><i class="ph ph-trash"></i></button>
+                                <button type="submit" style="background:none;border:none;color:#0F172A;cursor:pointer"><i class="ph ph-trash"></i></button>
                             </form>
                         </td>
                     </tr>

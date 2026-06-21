@@ -33,7 +33,7 @@ $profile = $stmtProfile->fetch(PDO::FETCH_ASSOC);
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background: #f1f5f9;
+      background: #F8FAFC;
       color: #0f172a;
       min-height: 100vh;
     }
@@ -53,14 +53,14 @@ $profile = $stmtProfile->fetch(PDO::FETCH_ASSOC);
       align-items: center;
       gap: 20px;
       padding-bottom: 28px;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid rgba(15,23,42,0.08);
       margin-bottom: 28px;
     }
     .profile-avatar {
       width: 64px;
       height: 64px;
       border-radius: 16px;
-      background: linear-gradient(135deg, #0b2447, #3b82f6);
+      background: linear-gradient(135deg, #0b2447, #19376D);
       color: #fff;
       display: flex;
       align-items: center;
@@ -75,18 +75,18 @@ $profile = $stmtProfile->fetch(PDO::FETCH_ASSOC);
       color: #0b2447;
     }
     .profile-header p {
-      color: #64748b;
+      color: rgba(15,23,42,0.45);
       font-size: 0.92rem;
     }
     .profile-field {
       display: flex;
       justify-content: space-between;
       padding: 14px 0;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid #F8FAFC;
       font-size: 0.95rem;
     }
     .profile-field:last-child { border-bottom: none; }
-    .profile-field .label { color: #64748b; font-weight: 600; }
+    .profile-field .label { color: rgba(15,23,42,0.45); font-weight: 600; }
     .profile-field .value { color: #0f172a; font-weight: 700; }
     .logout-btn {
       display: inline-flex;
@@ -94,7 +94,7 @@ $profile = $stmtProfile->fetch(PDO::FETCH_ASSOC);
       gap: 8px;
       margin-top: 24px;
       padding: 12px 28px;
-      background: #ef4444;
+      background: #0F172A;
       color: #fff;
       border: none;
       border-radius: 12px;
@@ -105,14 +105,14 @@ $profile = $stmtProfile->fetch(PDO::FETCH_ASSOC);
       transition: all 0.3s ease;
     }
     .logout-btn:hover {
-      background: #dc2626;
+      background: #0F172A;
       transform: translateY(-2px);
     }
     .back-link {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      color: #3b82f6;
+      color: #19376D;
       text-decoration: none;
       font-weight: 600;
       font-size: 0.9rem;

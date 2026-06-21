@@ -66,7 +66,7 @@ $total_guides = $pdo->query("SELECT count(*) FROM visa_guides")->fetchColumn();
         .search-box { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border-color); border-radius: 6px; padding: 7px 12px; margin-left: auto; }
         .search-box input { border: none; outline: none; font-size: 0.85rem; width: 220px; }
         .btn-primary { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items:center; gap:6px; }
-        .btn-primary:hover { background: #1d4ed8; }
+        .btn-primary:hover { background: #19376D; }
         
         .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -74,11 +74,11 @@ $total_guides = $pdo->query("SELECT count(*) FROM visa_guides")->fetchColumn();
         th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em; background: #f8fafc; }
         tr:hover { background-color: #f8fafc; }
         
-        .action-btn { width: 30px; height: 30px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color); text-decoration: none; transition: all 0.2s; }
+        .action-btn { width: 30px; height: 30px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; background: #F8FAFC; color: var(--text-dark); border: 1px solid var(--border-color); text-decoration: none; transition: all 0.2s; }
         .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .action-btn.delete:hover { background: #ef4444; color: white; border-color: #ef4444; }
+        .action-btn.delete:hover { background: #0F172A; color: white; border-color: #0F172A; }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; font-weight:500; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); font-weight:500; }
     </style>
 </head>
 <body>

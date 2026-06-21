@@ -18,7 +18,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         
         <a href="leads.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['leads.php','lead_form.php']) ? 'active' : ''; ?>" style="display:flex; justify-content:space-between; align-items:center;">
             <span style="display:flex; align-items:center; gap:12px;"><i class="ph ph-funnel"></i> Leads</span>
-            <span style="background: #ef4444; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: 700;">109</span>
+            <span style="background: #0F172A; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: 700;">109</span>
         </a>
         
         <a href="colleges.php" class="<?php echo ($current_page == 'colleges.php' || $current_page == 'college_form.php') ? 'active' : ''; ?>">
@@ -106,7 +106,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="audit_logs.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['audit_logs.php']) ? 'active' : ''; ?>"><i class="ph ph-file-search"></i> Audit Logs</a>
         <a href="alerts.php" style="display:flex; justify-content:space-between; align-items:center;" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['alerts.php']) ? 'active' : ''; ?>">
             <span style="display:flex; align-items:center; gap:12px;"><i class="ph ph-bell-ringing"></i> Alerts</span>
-            <span style="background: #eab308; color: #422006; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: 700;">5</span>
+            <span style="background: #19376D; color: #0F172A; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: 700;">5</span>
         </a>
         <a href="settings.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['settings.php']) ? 'active' : ''; ?>"><i class="ph ph-gear"></i> Settings</a>
     </nav>

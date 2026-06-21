@@ -8,19 +8,22 @@
   /* Oxford Royal Palette */
   --cp-blue:#0B2447;      /* Oxford Navy – Brand Core */
   --cp-blue2:#19376D;     /* Yale Blue – Secondary/Hover */
-  --cp-blue3:#1e4080;     /* Mid Blue – accents */
-  --cp-indigo:#2d5fb5;    /* Lighter Blue – gradients */
-  --cp-orange:#f97316;    /* Action orange */
-  --cp-green:#16a34a;     /* Success green */
-  --cp-gold:#eab308;      /* Rating gold */
-  --cp-red:#dc2626;
+  --cp-blue3:#19376D;     /* Yale Blue – accents */
+  --cp-indigo:#19376D;    /* Yale Blue – gradients */
+  --cp-orange:#0B2447;    /* Oxford Navy – replaces orange */
+  --cp-green:#0B2447;     /* Oxford Navy – replaces green */
+  --cp-gold:#19376D;      /* Yale Blue – replaces gold */
+  --cp-red:#0F172A;       /* Ink Black – replaces red */
+  --cp-primary:#0B2447;
+  --cp-primary-dark:#19376D;
+  --cp-text-muted:rgba(15,23,42,0.45);
   --cp-bg:#F8FAFC;        /* Snow Pearl – Background */
   --cp-white:#ffffff;
   --cp-card:#ffffff;
-  --cp-border:#e2e8f0;
+  --cp-border:rgba(15,23,42,0.1);
   --cp-text:#0F172A;      /* Ink Black – Typography */
-  --cp-muted:#64748b;
-  --cp-light:#f1f5f9;
+  --cp-muted:rgba(15,23,42,0.45);
+  --cp-light:rgba(11,36,71,0.04);
   --cp-radius:14px;--cp-radius-sm:8px;--cp-radius-lg:20px;
   --cp-shadow:0 1px 3px rgba(11,36,71,.06),0 4px 16px rgba(11,36,71,.06);
   --cp-shadow-md:0 4px 24px rgba(11,36,71,.10);
@@ -39,7 +42,7 @@ body.bg-light{background:var(--cp-bg)}
 
 /* Header strip */
 .shiksha-header{
-  background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#4f46e5 100%);
+  background:linear-gradient(135deg,#0B2447 0%,#19376D 50%,#19376D 100%);
   padding:32px 0 28px;position:relative;overflow:hidden;
 }
 .shiksha-header::before{
@@ -76,8 +79,8 @@ body.bg-light{background:var(--cp-bg)}
 .shiksha-layout{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start}
 .shiksha-content{background:var(--cp-white);border-radius:var(--cp-radius);
   border:1px solid var(--cp-border);padding:0;box-shadow:var(--cp-shadow)}
-.shiksha-sidebar{display:flex;flex-direction:column;gap:16px}
-.shiksha-widget{background:var(--cp-white);border-radius:var(--cp-radius);
+.shiksha-sidebar{display:flex;flex-direction:column;gap:16px;overflow:hidden}
+.shiksha-widget{background:var(--cp-white);border-radius:var(--cp-radius);overflow:hidden;
   border:1px solid var(--cp-border);padding:20px;box-shadow:var(--cp-shadow)}
 .shiksha-widget-title{font-size:.88rem;font-weight:700;text-transform:uppercase;
   letter-spacing:.5px;color:var(--cp-muted);margin-bottom:12px}
@@ -124,7 +127,7 @@ body.bg-light{background:var(--cp-bg)}
 .college-list-main{padding:0}
 .college-grid-list{display:flex;flex-direction:column}
 .college-list-card{
-  display:flex;gap:20px;padding:20px 24px;border-bottom:1px solid #f1f5f9;
+  display:flex;gap:20px;padding:20px 24px;border-bottom:1px solid #F8FAFC;
   text-decoration:none;color:inherit;transition:all var(--cp-trans);
   position:relative;overflow:hidden;
 }
@@ -133,14 +136,14 @@ body.bg-light{background:var(--cp-bg)}
   background:linear-gradient(180deg,var(--cp-blue),var(--cp-indigo));
   transform:scaleY(0);transform-origin:bottom;transition:transform var(--cp-trans);
 }
-.college-list-card:hover{background:#f8faff}
+.college-list-card:hover{background:#F8FAFC}
 .college-list-card:hover::before{transform:scaleY(1)}
 .college-list-card:hover h3{color:var(--cp-blue)}
 .college-list-card:last-child{border-bottom:none}
 
 .clc-img{
   width:180px;height:120px;flex-shrink:0;border-radius:12px;overflow:hidden;
-  position:relative;background:#e2e8f0;
+  position:relative;background:rgba(15,23,42,0.08);
 }
 .clc-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
 .college-list-card:hover .clc-img img{transform:scale(1.04)}
@@ -164,10 +167,10 @@ body.bg-light{background:var(--cp-bg)}
 .clc-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .clc-chip{
   font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:20px;
-  background:#eff6ff;color:var(--cp-blue);text-transform:uppercase;letter-spacing:.3px;
+  background:rgba(11,36,71,0.06);color:var(--cp-blue);text-transform:uppercase;letter-spacing:.3px;
 }
-.chip-green{background:#f0fdf4;color:var(--cp-green)}
-.chip-orange{background:#fff7ed;color:var(--cp-orange)}
+.chip-green{background:rgba(11,36,71,0.04);color:var(--cp-green)}
+.chip-orange{background:rgba(11,36,71,0.04);color:var(--cp-orange)}
 
 .clc-stats{
   display:flex;gap:0;margin-top:12px;border:1px solid var(--cp-border);
@@ -213,8 +216,7 @@ body.bg-light{background:var(--cp-bg)}
 .college-breadcrumb i{font-size:.7rem;opacity:.6}
 
 .college-hero-card{
-  display:flex;justify-content:space-between;align-items:flex-end;
-  gap:24px;flex-wrap:wrap;margin-top:20px;
+  margin-top:20px;
 }
 .college-hero-main{display:flex;gap:20px;align-items:flex-start;flex:1;min-width:0}
 .college-hero-logo{
@@ -234,7 +236,31 @@ body.bg-light{background:var(--cp-bg)}
   display:flex;align-items:center;gap:5px;
   border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(6px);
 }
-.college-hero-actions{display:flex;gap:10px;flex-wrap:wrap;align-self:flex-end}
+.college-hero-actions{
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+  margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.15);
+}
+.college-hero-actions .college-applied-badge{
+  display:inline-flex;white-space:nowrap;
+  background:rgba(255,255,255,0.95);border-color:rgba(5,150,105,0.4);color:#059669;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Already Applied Badge */
+.college-applied-badge{
+  display:flex;align-items:center;gap:6px;
+  padding:10px 14px;background:rgba(5,150,105,0.08);
+  border:1.5px solid rgba(5,150,105,0.25);border-radius:10px;
+  font-size:.85rem;font-weight:600;color:#059669;
+  word-break;break-word;
+}
+.college-applied-badge .ph-check-circle{font-size:1.1rem;flex-shrink:0}
+.college-applied-appno{
+  font-weight:400;font-size:.75rem;
+  color:rgba(5,150,105,0.6);
+  display:block;
+}
 
 /* Buttons */
 .college-btn-outline,.college-btn-primary{
@@ -249,7 +275,7 @@ body.bg-light{background:var(--cp-bg)}
 }
 .college-btn-outline:hover{background:rgba(255,255,255,.22);transform:translateY(-1px)}
 .college-btn-primary{
-  background:linear-gradient(135deg,#f97316,#ef4444);color:#fff;
+  background:linear-gradient(135deg,#19376D,#0F172A);color:#fff;
   box-shadow:0 4px 12px rgba(249,115,22,.35);
 }
 .college-btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(249,115,22,.4)}
@@ -274,7 +300,7 @@ body.bg-light{background:var(--cp-bg)}
 /* Rating row */
 .college-rating-row{
   display:flex;flex-wrap:wrap;gap:12px;margin-bottom:28px;
-  padding:20px;background:linear-gradient(135deg,#eff6ff,#f5f3ff);
+  padding:20px;background:linear-gradient(135deg,rgba(11,36,71,0.06),rgba(11,36,71,0.04));
   border-radius:var(--cp-radius);border:1px solid rgba(37,99,235,.1);
 }
 .college-rating-pill{
@@ -304,23 +330,53 @@ body.bg-light{background:var(--cp-bg)}
   background:linear-gradient(180deg,var(--cp-blue),var(--cp-indigo));flex-shrink:0;
 }
 .college-section h3{font-size:1rem;font-weight:700;color:var(--cp-text);margin-bottom:12px}
-.college-prose{color:#475569;line-height:1.8;font-size:.93rem}
+.college-prose{color:rgba(15,23,42,0.65);line-height:1.8;font-size:.93rem}
 
-/* Highlight list */
-.college-highlight-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px}
-.college-highlight-list li{
-  display:flex;gap:10px;align-items:flex-start;
-  padding:10px 14px;background:var(--cp-light);border-radius:10px;
-  border:1px solid var(--cp-border);font-size:.88rem;color:#475569;
-  transition:background var(--cp-trans);
+/* Highlight card */
+.college-highlights-card{
+  background:linear-gradient(135deg,#f8fafc 0%,#eef2ff 100%);
+  border:1.5px solid var(--cp-border);border-radius:16px;
+  padding:24px;box-shadow:var(--cp-shadow);
 }
-.college-highlight-list li:hover{background:#eff6ff}
-.college-highlight-list i{color:var(--cp-green);flex-shrink:0;margin-top:1px;font-size:1rem}
+.college-highlights-header{
+  display:flex;align-items:center;gap:14px;margin-bottom:20px;
+  padding-bottom:16px;border-bottom:1.5px solid var(--cp-border);
+}
+.college-highlights-header h2{margin:0;font-size:1.15rem;font-weight:700;color:var(--cp-text)}
+.college-highlights-sub{margin:2px 0 0;font-size:.82rem;color:var(--cp-text-muted)}
+.college-highlights-logo{
+  width:52px;height:52px;border-radius:12px;object-fit:cover;
+  border:2px solid var(--cp-border);background:#fff;flex-shrink:0;
+}
+.college-highlights-logo-placeholder{
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;color:var(--cp-primary);
+}
+.college-highlight-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;
+}
+.college-highlight-chip{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;background:#fff;border-radius:12px;
+  border:1px solid rgba(15,23,42,0.06);
+  font-size:.88rem;color:var(--cp-text);font-weight:500;
+  transition:all var(--cp-trans);
+}
+.college-highlight-chip:hover{
+  border-color:var(--cp-primary);transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(11,36,71,0.08);
+}
+.college-highlight-chip i{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--cp-primary);font-size:1.05rem;flex-shrink:0;
+}
 
 /* Tags */
 .college-tag-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .college-tag{
-  background:#eff6ff;color:var(--cp-blue);padding:5px 14px;
+  background:rgba(11,36,71,0.06);color:var(--cp-blue);padding:5px 14px;
   border-radius:20px;font-size:.78rem;font-weight:600;
   border:1px solid rgba(37,99,235,.15);transition:all var(--cp-trans);
 }
@@ -331,7 +387,7 @@ body.bg-light{background:var(--cp-bg)}
 .college-contact-grid p{
   display:flex;gap:10px;align-items:center;padding:12px 16px;
   background:var(--cp-light);border-radius:10px;
-  font-size:.88rem;color:#475569;border:1px solid var(--cp-border);margin:0;
+  font-size:.88rem;color:rgba(15,23,42,0.65);border:1px solid var(--cp-border);margin:0;
 }
 .college-contact-grid i{color:var(--cp-blue);font-size:1rem;flex-shrink:0}
 .college-contact-grid a{color:var(--cp-blue);text-decoration:none;font-weight:500}
@@ -342,16 +398,16 @@ body.bg-light{background:var(--cp-bg)}
   width:100%;border-collapse:collapse;font-size:.87rem;min-width:500px;
 }
 .college-data-table th{
-  background:linear-gradient(135deg,#f8fafc,#f1f5f9);
+  background:linear-gradient(135deg,#f8fafc,#F8FAFC);
   padding:13px 16px;text-align:left;font-weight:700;
   color:var(--cp-muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;
   border-bottom:2px solid var(--cp-border);
 }
 .college-data-table td{
-  padding:13px 16px;border-bottom:1px solid #f1f5f9;color:#475569;
+  padding:13px 16px;border-bottom:1px solid #F8FAFC;color:rgba(15,23,42,0.65);
 }
 .college-data-table tr:last-child td{border-bottom:none}
-.college-data-table tr:hover td{background:#f8faff}
+.college-data-table tr:hover td{background:#F8FAFC}
 
 /* Empty state */
 .college-empty{
@@ -378,8 +434,8 @@ body.bg-light{background:var(--cp-bg)}
 /* Rankings badge */
 .college-nirf-badge{
   display:inline-flex;align-items:center;gap:10px;
-  background:linear-gradient(135deg,#fef3c7,#fde68a);
-  border:1px solid #fbbf24;color:#92400e;
+  background:linear-gradient(135deg,rgba(11,36,71,0.06),rgba(11,36,71,0.08));
+  border:1px solid #19376D;color:#0F172A;
   padding:12px 20px;border-radius:12px;margin-bottom:16px;font-weight:600;
 }
 
@@ -401,6 +457,108 @@ body.bg-light{background:var(--cp-bg)}
   color:#fff;font-size:.75rem;padding:16px 10px 8px;
 }
 
+/* Gallery Filter Tabs */
+.gallery-filter-tabs{
+  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;
+}
+.g-tab{
+  padding:8px 18px;border-radius:20px;border:1.5px solid var(--cp-border);
+  background:var(--cp-light);cursor:pointer;font-size:.85rem;font-weight:500;
+  transition:all var(--cp-trans);color:var(--cp-text);
+}
+.g-tab:hover{border-color:var(--cp-primary);color:var(--cp-primary)}
+.g-tab.active{background:var(--cp-primary);color:#fff;border-color:var(--cp-primary)}
+
+/* Gallery Sections */
+.gallery-section{margin-bottom:28px}
+.gallery-section-title{
+  font-size:1.1rem;font-weight:700;color:var(--cp-text);
+  display:flex;align-items:center;gap:8px;margin-bottom:14px;
+  padding-bottom:8px;border-bottom:2px solid var(--cp-primary);
+}
+.gallery-sub-title{
+  font-size:.88rem;font-weight:600;color:var(--cp-text-muted);
+  margin:12px 0 10px;text-transform:uppercase;letter-spacing:.5px;
+}
+
+/* Video Cards */
+.gallery-video-card{
+  background:var(--cp-light);border:1.5px solid var(--cp-border);
+  border-radius:14px;overflow:hidden;margin-bottom:16px;
+  transition:all var(--cp-trans);
+}
+.gallery-video-card:hover{box-shadow:var(--cp-shadow-lg)}
+.gallery-video-badge{
+  display:inline-block;padding:5px 14px;font-size:.75rem;font-weight:600;
+  background:var(--cp-primary);color:#fff;border-radius:0 0 8px 0;
+}
+.gallery-video-wrap{
+  position:relative;padding-top:56.25%;background:#000;
+}
+.gallery-video-wrap iframe{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+}
+.gallery-video-link{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 20px;text-decoration:none;color:var(--cp-text);
+}
+.gallery-video-thumb{
+  width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#1e293b,#334155);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+}
+.gallery-video-link span{
+  margin-top:12px;font-weight:600;color:var(--cp-primary);
+}
+.gallery-video-caption{
+  padding:12px 16px;font-size:.85rem;color:var(--cp-text-muted);
+}
+
+/* Document Cards */
+.gallery-doc-list{display:flex;flex-direction:column;gap:10px}
+.gallery-doc-card{
+  display:flex;align-items:center;gap:16px;
+  padding:14px 18px;background:var(--cp-light);border:1.5px solid var(--cp-border);
+  border-radius:12px;text-decoration:none;color:var(--cp-text);
+  transition:all var(--cp-trans);
+}
+.gallery-doc-card:hover{
+  border-color:var(--cp-primary);transform:translateX(4px);
+  box-shadow:var(--cp-shadow);
+}
+.gallery-doc-icon{
+  width:48px;height:48px;border-radius:10px;
+  background:linear-gradient(135deg,#fee2e2,#fecaca);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;color:#dc2626;flex-shrink:0;
+}
+.gallery-doc-info{flex:1;min-width:0}
+.gallery-doc-name{
+  display:block;font-weight:600;font-size:.9rem;
+}
+.gallery-doc-cap{
+  display:block;font-size:.8rem;color:var(--cp-text-muted);margin-top:2px;
+}
+.gallery-doc-dl{
+  display:flex;align-items:center;gap:5px;
+  padding:8px 14px;background:var(--cp-primary);color:#fff;
+  border-radius:8px;font-size:.8rem;font-weight:600;white-space:nowrap;
+  transition:all var(--cp-trans);flex-shrink:0;
+}
+.gallery-doc-card:hover .gallery-doc-dl{background:var(--cp-primary-dark,#1d4ed8)}
+
+/* 360 Tour */
+.gallery-360-wrap{
+  position:relative;padding-top:56.25%;background:#0f172a;border-radius:14px;
+  overflow:hidden;border:2px solid var(--cp-border);
+}
+.gallery-360-wrap iframe{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+}
+.gallery-360-hint{
+  text-align:center;font-size:.8rem;color:var(--cp-text-muted);
+  margin-top:8px;font-style:italic;
+}
+
 /* Facilities */
 .college-facility-grid{
   display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;
@@ -411,10 +569,55 @@ body.bg-light{background:var(--cp-bg)}
   border:1.5px solid var(--cp-border);transition:all var(--cp-trans);font-size:.88rem;
 }
 .college-facility-item:hover{
-  background:#eff6ff;border-color:rgba(37,99,235,.25);
+  background:rgba(11,36,71,0.06);border-color:rgba(37,99,235,.25);
   transform:translateY(-2px);
 }
 .college-facility-item i{font-size:1.35rem;color:var(--cp-blue)}
+
+/* Infrastructure section cards (Sports, Labs) */
+.infra-section-card{
+  margin-top:24px;background:#fff;border-radius:16px;
+  border:1.5px solid var(--cp-border);overflow:hidden;
+  box-shadow:var(--cp-shadow);position:relative;
+}
+.infra-section-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:80px;
+  background:linear-gradient(135deg,#1e3a5f 0%,#19376D 50%,#0f2440 100%);
+  border-radius:16px 16px 0 0;z-index:0;
+}
+.infra-section-header{
+  display:flex;align-items:center;gap:12px;padding:20px 22px 16px;
+  position:relative;z-index:1;
+}
+.infra-section-header h3{margin:0;font-size:1.05rem;font-weight:700;color:#fff}
+.infra-section-icon{
+  width:44px;height:44px;border-radius:12px;
+  background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);
+  border:1.5px solid rgba(255,255,255,0.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;color:#fff;flex-shrink:0;
+}
+.infra-chip-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:10px;padding:18px 22px 22px;position:relative;z-index:1;
+}
+.infra-chip{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;background:var(--cp-light);border-radius:12px;
+  border:1px solid var(--cp-border);
+  font-size:.88rem;color:var(--cp-text);font-weight:500;
+  transition:all var(--cp-trans);
+}
+.infra-chip:hover{
+  background:#fff;border-color:var(--cp-primary);
+  transform:translateY(-2px);box-shadow:0 4px 12px rgba(11,36,71,0.08);
+}
+.infra-chip i{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--cp-primary);font-size:1rem;flex-shrink:0;
+}
 
 /* Faculty */
 .college-faculty-grid{
@@ -430,7 +633,7 @@ body.bg-light{background:var(--cp-bg)}
   width:54px;height:54px;border-radius:50%;object-fit:cover;flex-shrink:0;
 }
 .cf-avatar{
-  background:linear-gradient(135deg,#eff6ff,#e0e7ff);
+  background:linear-gradient(135deg,rgba(11,36,71,0.06),rgba(11,36,71,0.06));
   display:flex;align-items:center;justify-content:center;
   color:var(--cp-blue);font-size:1.5rem;border:2px solid rgba(37,99,235,.15);
 }
@@ -456,7 +659,7 @@ body.bg-light{background:var(--cp-bg)}
 }
 .college-faq-item[open] summary::after{content:'−'}
 .college-faq-item p{
-  padding:0 20px 16px;color:#475569;line-height:1.7;font-size:.9rem;
+  padding:0 20px 16px;color:rgba(15,23,42,0.65);line-height:1.7;font-size:.9rem;
   border-top:1px solid var(--cp-border);margin:0;padding-top:14px;
 }
 
@@ -465,11 +668,17 @@ body.bg-light{background:var(--cp-bg)}
 .college-news-item{
   padding:18px 20px;border:1.5px solid var(--cp-border);
   border-radius:14px;background:#fff;transition:all var(--cp-trans);
+  display:flex;gap:16px;align-items:flex-start;
 }
 .college-news-item:hover{border-color:rgba(37,99,235,.2);box-shadow:var(--cp-shadow-md)}
-.college-news-item h4{margin:8px 0 6px;color:var(--cp-text);font-size:.95rem;font-weight:700}
-.college-news-item p{margin:0;color:#475569;font-size:.87rem;line-height:1.6}
-.college-news-item a{
+.cn-thumb{flex:0 0 120px;width:120px;height:90px;border-radius:10px;overflow:hidden}
+.cn-thumb img{width:100%;height:100%;object-fit:cover}
+.cn-body{flex:1;min-width:0}
+.cn-body h4{margin:6px 0 4px;color:var(--cp-text);font-size:.95rem;font-weight:700}
+.cn-body h4 a{color:inherit;text-decoration:none}
+.cn-body h4 a:hover{color:var(--cp-blue)}
+.cn-body p{margin:0;color:rgba(15,23,42,0.65);font-size:.87rem;line-height:1.5}
+.cn-body a{
   display:inline-flex;align-items:center;gap:4px;margin-top:8px;
   color:var(--cp-blue);font-size:.82rem;font-weight:600;text-decoration:none;
 }
@@ -488,12 +697,12 @@ body.bg-light{background:var(--cp-bg)}
 .cr-head strong{font-size:.95rem;color:var(--cp-text)}
 .cr-rating{
   display:flex;align-items:center;gap:4px;
-  background:#fef3c7;color:#92400e;font-weight:700;
+  background:rgba(11,36,71,0.06);color:#0F172A;font-weight:700;
   padding:4px 10px;border-radius:20px;font-size:.82rem;
 }
 .cr-batch{font-size:.78rem;color:var(--cp-muted);background:var(--cp-light);padding:3px 10px;border-radius:20px}
 .college-review-card h4{font-size:.93rem;color:var(--cp-text);margin-bottom:8px}
-.college-review-card p{color:#475569;font-size:.87rem;line-height:1.7;margin:0}
+.college-review-card p{color:rgba(15,23,42,0.65);font-size:.87rem;line-height:1.7;margin:0}
 .cr-pros{color:var(--cp-green)!important;font-size:.85rem!important;margin-top:8px!important}
 .cr-cons{color:var(--cp-red)!important;font-size:.85rem!important;margin-top:4px!important}
 
@@ -504,7 +713,7 @@ body.bg-light{background:var(--cp-bg)}
 .college-notify-widget{border-top:4px solid var(--cp-orange)!important}
 .college-notify-widget .shiksha-widget-title{color:var(--cp-text)}
 .college-notify-list{list-style:none;padding:0;margin:0 0 14px;display:flex;flex-direction:column;gap:6px}
-.college-notify-list li{padding:8px 0;border-bottom:1px solid #f1f5f9}
+.college-notify-list li{padding:8px 0;border-bottom:1px solid #F8FAFC}
 .college-notify-list li:last-child{border-bottom:none}
 .college-notify-list a{
   color:var(--cp-blue);font-size:.85rem;text-decoration:none;line-height:1.5;
@@ -514,7 +723,7 @@ body.bg-light{background:var(--cp-bg)}
 .college-notify-widget p{color:var(--cp-muted);font-size:.87rem;margin-bottom:12px}
 .college-widget-btn{
   display:block;text-align:center;margin-top:10px;
-  background:linear-gradient(135deg,var(--cp-orange),#ef4444)!important;
+  background:linear-gradient(135deg,var(--cp-orange),#0F172A)!important;
 }
 .college-widget-btn:hover{transform:translateY(-2px)!important}
 
@@ -528,7 +737,7 @@ body.bg-light{background:var(--cp-bg)}
   .clc-img{width:100%;height:180px}
   .college-hero-title{font-size:1.35rem}
   .college-hero-card{flex-direction:column;align-items:stretch}
-  .college-hero-actions{justify-content:flex-start}
+  .college-hero-actions{justify-content:flex-start;border-top:none;padding-top:0;margin-top:12px}
   .college-detail-tabs{gap:0}
   .college-detail-tabs a{padding:12px 12px;font-size:.8rem}
   .college-tab-content{padding:18px}
@@ -540,4 +749,6 @@ body.bg-light{background:var(--cp-bg)}
   .college-faculty-grid{grid-template-columns:1fr}
   .college-info-grid{grid-template-columns:1fr 1fr}
   .college-gallery-grid{grid-template-columns:repeat(2,1fr)}
+  .college-news-item{flex-direction:column}
+  .cn-thumb{flex:none;width:100%;height:160px}
 }

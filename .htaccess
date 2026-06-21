@@ -11,7 +11,7 @@ Options +FollowSymLinks
 # -------------------------------------------------
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /ADMISSION/ADMISSION/
+    RewriteBase /ADMISSION/
 
     # Force HTTPS (skip on local XAMPP)
     RewriteCond %{HTTPS} off
@@ -58,11 +58,11 @@ Options +FollowSymLinks
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^college/([a-zA-Z0-9-]+)/([a-zA-Z0-9-]+)/?$ college.php?slug=$1&tab=$2 [QSA,L]
+    RewriteRule ^college/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/?$ college.php?slug=$1&tab=$2 [QSA,L]
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^college/([a-zA-Z0-9-]+)/?$ college.php?slug=$1 [QSA,L]
+    RewriteRule ^college/([a-zA-Z0-9_-]+)/?$ college.php?slug=$1 [QSA,L]
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
@@ -70,11 +70,11 @@ Options +FollowSymLinks
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^exam/([a-zA-Z0-9-]+)/([a-zA-Z0-9-]+)/?$ exam.php?slug=$1&tab=$2 [QSA,L]
+    RewriteRule ^exam/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/?$ exam.php?slug=$1&tab=$2 [QSA,L]
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^exam/([a-zA-Z0-9-]+)/?$ exam.php?slug=$1 [QSA,L]
+    RewriteRule ^exam/([a-zA-Z0-9_-]+)/?$ exam.php?slug=$1 [QSA,L]
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
@@ -82,11 +82,11 @@ Options +FollowSymLinks
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^course/([a-zA-Z0-9-]+)/([a-zA-Z0-9-]+)/?$ course.php?slug=$1&tab=$2 [QSA,L]
+    RewriteRule ^course/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/?$ course.php?slug=$1&tab=$2 [QSA,L]
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^course/([a-zA-Z0-9-]+)/?$ course.php?slug=$1 [QSA,L]
+    RewriteRule ^course/([a-zA-Z0-9_-]+)/?$ course.php?slug=$1 [QSA,L]
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d

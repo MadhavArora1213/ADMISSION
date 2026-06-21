@@ -50,9 +50,9 @@ $recentLogs = $pdo->query("SELECT * FROM notification_logs ORDER BY sent_at DESC
 
             <div class="stats-grid">
                 <div class="stat-card"><div class="num"><?php echo number_format($totalCampaigns); ?></div><div class="label">Total Campaigns</div></div>
-                <div class="stat-card"><div class="num" style="color:#0284c7;"><?php echo number_format($totalSent); ?></div><div class="label">Total Sent</div></div>
-                <div class="stat-card"><div class="num" style="color:#16a34a;"><?php echo number_format($totalDelivered); ?></div><div class="label">Total Delivered</div></div>
-                <div class="stat-card"><div class="num" style="color:#7c3aed;"><?php echo number_format($totalOpened); ?></div><div class="label">Total Opened</div></div>
+                <div class="stat-card"><div class="num" style="color:#19376D;"><?php echo number_format($totalSent); ?></div><div class="label">Total Sent</div></div>
+                <div class="stat-card"><div class="num" style="color:#0B2447;"><?php echo number_format($totalDelivered); ?></div><div class="label">Total Delivered</div></div>
+                <div class="stat-card"><div class="num" style="color:#0B2447;"><?php echo number_format($totalOpened); ?></div><div class="label">Total Opened</div></div>
             </div>
 
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
@@ -64,13 +64,13 @@ $recentLogs = $pdo->query("SELECT * FROM notification_logs ORDER BY sent_at DESC
                             <tbody>
                                 <?php foreach($recentLogs as $log): ?>
                                 <tr>
-                                    <td style="font-family:monospace; font-size:0.8rem; color:#64748b;"><?php echo substr($log['user_id'], 0, 8).'...'; ?></td>
-                                    <td><span class="badge" style="background:#e0e7ff;color:#3730a3;"><?php echo ucfirst($log['channel']); ?></span></td>
+                                    <td style="font-family:monospace; font-size:0.8rem; color:rgba(15,23,42,0.45);"><?php echo substr($log['user_id'], 0, 8).'...'; ?></td>
+                                    <td><span class="badge" style="background:rgba(11,36,71,0.06);color:#19376D;"><?php echo ucfirst($log['channel']); ?></span></td>
                                     <td>
                                         <?php if($log['status'] == 'sent' || $log['status'] == 'delivered' || $log['status'] == 'opened'): ?>
-                                        <span class="badge" style="background:#dcfce7;color:#166534;"><?php echo ucfirst($log['status']); ?></span>
+                                        <span class="badge" style="background:rgba(11,36,71,0.04);color:#0B2447;"><?php echo ucfirst($log['status']); ?></span>
                                         <?php else: ?>
-                                        <span class="badge" style="background:#fee2e2;color:#dc2626;"><?php echo ucfirst($log['status']); ?></span>
+                                        <span class="badge" style="background:rgba(15,23,42,0.06);color:#0F172A;"><?php echo ucfirst($log['status']); ?></span>
                                         <?php endif; ?>
                                     </td>
                                     <td style="font-size:0.8rem; color:var(--text-muted);"><?php echo date('d M, H:i', strtotime($log['sent_at'])); ?></td>
@@ -96,7 +96,7 @@ $recentLogs = $pdo->query("SELECT * FROM notification_logs ORDER BY sent_at DESC
                         <a href="notification_campaigns.php" class="btn btn-primary" style="display:flex; align-items:center; gap:8px; justify-content:center; padding:12px; border-radius:8px; text-decoration:none; background:#0f172a; color:#fff;">
                             <i class="ph ph-paper-plane-tilt"></i> Schedule Campaign
                         </a>
-                        <a href="audience_segments.php" class="btn" style="display:flex; align-items:center; gap:8px; justify-content:center; padding:12px; border-radius:8px; text-decoration:none; background:#f1f5f9; color:var(--text-color); border:1px solid var(--border-color);">
+                        <a href="audience_segments.php" class="btn" style="display:flex; align-items:center; gap:8px; justify-content:center; padding:12px; border-radius:8px; text-decoration:none; background:#F8FAFC; color:var(--text-color); border:1px solid var(--border-color);">
                             <i class="ph ph-users"></i> Manage Audience
                         </a>
                     </div>

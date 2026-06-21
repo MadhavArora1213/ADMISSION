@@ -96,26 +96,26 @@ $total = array_sum($counts);
         .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; padding-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: top; }
-        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #f1f5f9; }
+        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #F8FAFC; }
         tr:hover { background-color: rgba(0,0,0,0.015); }
         
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; white-space: nowrap; }
         
         /* Priorities */
-        .p-critical { background:#fef2f2; color:#dc2626; border: 1px solid #fca5a5; }
-        .p-high { background:#fff7ed; color:#ea580c; border: 1px solid #fdba74; }
-        .p-medium { background:#fefce8; color:#ca8a04; border: 1px solid #fde047; }
-        .p-low { background:#f0fdf4; color:#16a34a; border: 1px solid #86efac; }
+        .p-critical { background:rgba(15,23,42,0.04); color:#0F172A; border: 1px solid rgba(15,23,42,0.06); }
+        .p-high { background:rgba(11,36,71,0.04); color:#19376D; border: 1px solid rgba(11,36,71,0.06); }
+        .p-medium { background:rgba(11,36,71,0.04); color:#19376D; border: 1px solid #19376D; }
+        .p-low { background:rgba(11,36,71,0.04); color:#0B2447; border: 1px solid rgba(11,36,71,0.06); }
         
         /* Statuses */
-        .s-pending { background:#f1f5f9; color:#475569; }
-        .s-in_progress { background:#dbeafe; color:#1e40af; }
-        .s-resolved { background:#dcfce7; color:#166534; }
-        .s-dismissed { background:#f1f5f9; color:#94a3b8; text-decoration: line-through;}
+        .s-pending { background:#F8FAFC; color:rgba(15,23,42,0.65); }
+        .s-in_progress { background:rgba(11,36,71,0.06); color:#19376D; }
+        .s-resolved { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .s-dismissed { background:#F8FAFC; color:rgba(15,23,42,0.4); text-decoration: line-through;}
         
         .search-box { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 14px; }
         .search-box input { border: none; outline: none; font-size: 0.9rem; width: 220px; }
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); }
         
         /* Action form */
         .action-form { display: flex; flex-direction: column; gap: 8px; }
@@ -147,9 +147,9 @@ $total = array_sum($counts);
 
             <div class="stats-grid">
                 <div class="stat-card"><div class="num"><?php echo $total; ?></div><div class="label">Total Tickets</div></div>
-                <div class="stat-card"><div class="num" style="color:#dc2626;"><?php echo $counts['pending']; ?></div><div class="label">Pending</div></div>
-                <div class="stat-card"><div class="num" style="color:#1e40af;"><?php echo $counts['in_progress']; ?></div><div class="label">In Progress</div></div>
-                <div class="stat-card"><div class="num" style="color:#166534;"><?php echo $counts['resolved']; ?></div><div class="label">Resolved</div></div>
+                <div class="stat-card"><div class="num" style="color:#0F172A;"><?php echo $counts['pending']; ?></div><div class="label">Pending</div></div>
+                <div class="stat-card"><div class="num" style="color:#19376D;"><?php echo $counts['in_progress']; ?></div><div class="label">In Progress</div></div>
+                <div class="stat-card"><div class="num" style="color:#0B2447;"><?php echo $counts['resolved']; ?></div><div class="label">Resolved</div></div>
             </div>
 
             <div class="filter-bar">
@@ -198,13 +198,13 @@ $total = array_sum($counts);
                             <tr>
                                 <td>
                                     <div style="font-weight:700; margin-bottom:4px; text-transform: capitalize;">
-                                        <i class="ph ph-flag" style="color: #ea580c;"></i> <?php echo htmlspecialchars(str_replace('_',' ',$t['flagged_reason'])); ?>
+                                        <i class="ph ph-flag" style="color: #19376D;"></i> <?php echo htmlspecialchars(str_replace('_',' ',$t['flagged_reason'])); ?>
                                     </div>
                                     <div style="font-size: 0.8rem; color: var(--text-muted);">Created: <?php echo date('M d, g:i A', strtotime($t['created_at'])); ?></div>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top:2px;">SLA: <span style="<?php echo (strtotime($t['sla_due_at']) < time() && $t['status'] !== 'resolved' && $t['status'] !== 'dismissed') ? 'color: #dc2626; font-weight:700;' : ''; ?>"><?php echo date('M d, g:i A', strtotime($t['sla_due_at'])); ?></span></div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top:2px;">SLA: <span style="<?php echo (strtotime($t['sla_due_at']) < time() && $t['status'] !== 'resolved' && $t['status'] !== 'dismissed') ? 'color: #0F172A; font-weight:700;' : ''; ?>"><?php echo date('M d, g:i A', strtotime($t['sla_due_at'])); ?></span></div>
                                 </td>
                                 <td>
-                                    <span class="badge" style="background:#e2e8f0; color:#0f172a; margin-bottom: 6px;"><?php echo strtoupper($t['entity_type']); ?></span>
+                                    <span class="badge" style="background:rgba(15,23,42,0.08); color:#0f172a; margin-bottom: 6px;"><?php echo strtoupper($t['entity_type']); ?></span>
                                     <div style="font-size: 0.75rem; font-family: monospace; color: var(--text-muted); word-break: break-all; max-width: 200px;"><?php echo htmlspecialchars($t['entity_id']); ?></div>
                                     <a href="#" style="font-size: 0.8rem; color: var(--primary); text-decoration: none; display:inline-block; margin-top:4px;">View Content &rarr;</a>
                                 </td>

@@ -80,10 +80,10 @@ if (isset($_GET['edit_id'])) {
         th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
         .action-links { display: flex; gap: 8px; }
-        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color); }
+        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #F8FAFC; color: var(--text-dark); border: 1px solid var(--border-color); }
         .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .action-btn.delete:hover { background: #dc2626; color: white; border-color: #dc2626; }
-        .msg-alert { padding: 16px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 24px; border: 1px solid #bbf7d0; }
+        .action-btn.delete:hover { background: #0F172A; color: white; border-color: #0F172A; }
+        .msg-alert { padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 24px; border: 1px solid rgba(11,36,71,0.04); }
     </style>
 </head>
 <body>

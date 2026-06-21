@@ -91,13 +91,13 @@ if ($tab === 'analytics') {
         
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; white-space: nowrap; text-transform: uppercase;}
         
-        .p-dream { background:#fce7f3; color:#be185d; }
-        .p-target { background:#dbeafe; color:#1e40af; }
-        .p-safe { background:#dcfce7; color:#166534; }
+        .p-dream { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .p-target { background:rgba(11,36,71,0.06); color:#19376D; }
+        .p-safe { background:rgba(11,36,71,0.04); color:#0B2447; }
         
-        .s-active { background:#f1f5f9; color:#475569; }
-        .s-applied { background:#dcfce7; color:#166534; }
-        .s-removed { background:#fee2e2; color:#dc2626; text-decoration: line-through; }
+        .s-active { background:#F8FAFC; color:rgba(15,23,42,0.65); }
+        .s-applied { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .s-removed { background:rgba(15,23,42,0.06); color:#0F172A; text-decoration: line-through; }
         
         .search-box { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 14px; width: 250px;}
         .search-box input { border: none; outline: none; font-size: 0.9rem; width: 100%; }
@@ -106,7 +106,7 @@ if ($tab === 'analytics') {
         .stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); }
         .stat-card h3 { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
         .stat-card .val { font-size: 1.8rem; font-weight: 800; color: var(--text-dark); }
-        .stat-card .trend { font-size: 0.8rem; color: #166534; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+        .stat-card .trend { font-size: 0.8rem; color: #0B2447; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
     </style>
 </head>
 <body>
@@ -121,7 +121,7 @@ if ($tab === 'analytics') {
         <div class="content-area">
             <div class="page-header">
                 <div>
-                    <h2><i class="ph ph-heart" style="color:#be185d;"></i> Student Shortlists</h2>
+                    <h2><i class="ph ph-heart" style="color:#0B2447;"></i> Student Shortlists</h2>
                     <p style="color:var(--text-muted);">Monitor student wishlists, ambitions, and college popularity.</p>
                 </div>
             </div>
@@ -139,14 +139,14 @@ if ($tab === 'analytics') {
                     </div>
                     <div class="stat-card">
                         <h3>Converted to Apply</h3>
-                        <div class="val" style="color:#166534;"><?php echo number_format($total_applied); ?></div>
+                        <div class="val" style="color:#0B2447;"><?php echo number_format($total_applied); ?></div>
                         <?php if($total_shortlists > 0): ?>
                             <div class="trend"><?php echo number_format(($total_applied / $total_shortlists)*100, 1); ?>% Conversion Rate</div>
                         <?php endif; ?>
                     </div>
                     <div class="stat-card">
                         <h3>Dream Colleges</h3>
-                        <div class="val" style="color:#be185d;"><?php echo number_format($dream_count); ?></div>
+                        <div class="val" style="color:#0B2447;"><?php echo number_format($dream_count); ?></div>
                     </div>
                     <div class="stat-card">
                         <h3>Top College All-Time</h3>
@@ -243,7 +243,7 @@ if ($tab === 'analytics') {
                                     <td>
                                         <div style="font-weight:700;"><?php echo htmlspecialchars($s['college_name']); ?></div>
                                         <?php if($s['notification_pref']): ?>
-                                            <div style="font-size:0.75rem; color:#ca8a04; margin-top:4px;"><i class="ph-fill ph-bell-ringing"></i> Alerts On</div>
+                                            <div style="font-size:0.75rem; color:#19376D; margin-top:4px;"><i class="ph-fill ph-bell-ringing"></i> Alerts On</div>
                                         <?php endif; ?>
                                     </td>
                                     <td>
@@ -253,7 +253,7 @@ if ($tab === 'analytics') {
                                     <td>
                                         <div style="font-size:0.85rem;"><?php echo date('M d, Y', strtotime($s['added_at'])); ?></div>
                                         <?php if($s['status'] == 'applied'): ?>
-                                            <div style="font-size:0.75rem; color:#166534; margin-top:4px;">Applied: <?php echo date('M d, Y', strtotime($s['updated_at'])); ?></div>
+                                            <div style="font-size:0.75rem; color:#0B2447; margin-top:4px;">Applied: <?php echo date('M d, Y', strtotime($s['updated_at'])); ?></div>
                                         <?php endif; ?>
                                     </td>
                                     <td>

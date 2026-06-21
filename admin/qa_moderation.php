@@ -55,7 +55,7 @@ $resolved = $pdo->query("SELECT r.*, q.question_text, a.answer_text
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h2{font-size:2rem;font-weight:800}.panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}.panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}tr:hover{background:rgba(0,0,0,.015)}.badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700}.sub-links{display:flex;gap:8px;margin-bottom:20px}.sub-link{font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .2s}.sub-link:hover,.sub-link.active{background:rgba(0,0,0,.05);color:var(--primary)}.form-control{padding:8px 12px;border:1px solid var(--border-color);border-radius:6px;font-family:inherit;font-size:.85rem;box-sizing:border-box}.msg-alert{padding:14px 20px;border-radius:8px;background:#dcfce7;color:#166534;border:1px solid #bbf7d0;margin-bottom:20px}
+        body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h2{font-size:2rem;font-weight:800}.panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}.panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}tr:hover{background:rgba(0,0,0,.015)}.badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700}.sub-links{display:flex;gap:8px;margin-bottom:20px}.sub-link{font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .2s}.sub-link:hover,.sub-link.active{background:rgba(0,0,0,.05);color:var(--primary)}.form-control{padding:8px 12px;border:1px solid var(--border-color);border-radius:6px;font-family:inherit;font-size:.85rem;box-sizing:border-box}.msg-alert{padding:14px 20px;border-radius:8px;background:rgba(11,36,71,0.04);color:#0B2447;border:1px solid rgba(11,36,71,0.04);margin-bottom:20px}
         .content-box {background:#f8fafc; padding:12px; border-radius:8px; font-size:0.85rem; border:1px solid var(--border-color); margin-top:8px;}
         .mod-form {display:flex; gap:8px;}
     </style>
@@ -99,19 +99,19 @@ $resolved = $pdo->query("SELECT r.*, q.question_text, a.answer_text
                             <?php foreach($pending as $p): ?>
                             <tr>
                                 <td>
-                                    <span class="badge" style="background:#fee2e2;color:#dc2626; font-size:0.8rem;"><i class="ph ph-warning-circle"></i> <?php echo ucfirst($p['report_reason']); ?></span>
+                                    <span class="badge" style="background:rgba(15,23,42,0.06);color:#0F172A; font-size:0.8rem;"><i class="ph ph-warning-circle"></i> <?php echo ucfirst($p['report_reason']); ?></span>
                                     <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;"><?php echo date('d M, H:i', strtotime($p['created_at'])); ?></div>
                                 </td>
                                 <td style="width:50%;">
                                     <?php if($p['question_id']): ?>
-                                    <span class="badge" style="background:#f1f5f9;color:#475569;">Question</span>
+                                    <span class="badge" style="background:#F8FAFC;color:rgba(15,23,42,0.65);">Question</span>
                                     <div class="content-box"><?php echo htmlspecialchars($p['question_text'] ?? '[Content Deleted]'); ?></div>
                                     <?php elseif($p['answer_id']): ?>
-                                    <span class="badge" style="background:#f1f5f9;color:#475569;">Answer</span>
+                                    <span class="badge" style="background:#F8FAFC;color:rgba(15,23,42,0.65);">Answer</span>
                                     <div class="content-box"><?php echo htmlspecialchars(strip_tags($p['answer_text'] ?? '[Content Deleted]')); ?></div>
                                     <?php endif; ?>
                                 </td>
-                                <td style="font-family:monospace; font-size:0.8rem; color:#64748b;"><?php echo substr($p['reported_by'], 0, 12).'...'; ?></td>
+                                <td style="font-family:monospace; font-size:0.8rem; color:rgba(15,23,42,0.45);"><?php echo substr($p['reported_by'], 0, 12).'...'; ?></td>
                                 <td>
                                     <form method="POST" action="qa_moderation.php" class="mod-form">
                                         <input type="hidden" name="action" value="moderate">
@@ -128,7 +128,7 @@ $resolved = $pdo->query("SELECT r.*, q.question_text, a.answer_text
                             </tr>
                             <?php endforeach; ?>
                             <?php if(empty($pending)): ?>
-                            <tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:40px 0;"><i class="ph ph-check-circle" style="font-size:2rem; color:#16a34a; margin-bottom:10px; display:block;"></i>All caught up! No pending reports.</td></tr>
+                            <tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:40px 0;"><i class="ph ph-check-circle" style="font-size:2rem; color:#0B2447; margin-bottom:10px; display:block;"></i>All caught up! No pending reports.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -136,14 +136,14 @@ $resolved = $pdo->query("SELECT r.*, q.question_text, a.answer_text
             </div>
 
             <div class="panel" style="margin-top:24px;">
-                <h3 style="color:#64748b;"><i class="ph ph-archive"></i> Recently Resolved</h3>
+                <h3 style="color:rgba(15,23,42,0.45);"><i class="ph ph-archive"></i> Recently Resolved</h3>
                 <div style="overflow-x:auto;">
                     <table>
                         <thead><tr><th>Report Reason</th><th>Content Snapshot</th><th>Decision</th><th>Resolved At</th></tr></thead>
                         <tbody>
                             <?php foreach($resolved as $r): ?>
                             <tr>
-                                <td><span class="badge" style="background:#f1f5f9;color:#475569;"><?php echo ucfirst($r['report_reason']); ?></span></td>
+                                <td><span class="badge" style="background:#F8FAFC;color:rgba(15,23,42,0.65);"><?php echo ucfirst($r['report_reason']); ?></span></td>
                                 <td style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:0.85rem; color:var(--text-muted);">
                                     <?php 
                                         if($r['question_id']) echo htmlspecialchars($r['question_text'] ?? '[Deleted]');
@@ -152,10 +152,10 @@ $resolved = $pdo->query("SELECT r.*, q.question_text, a.answer_text
                                 </td>
                                 <td>
                                     <?php 
-                                        $color = '#475569'; $bg = '#f1f5f9';
-                                        if($r['moderation_action'] == 'remove') { $color = '#dc2626'; $bg = '#fee2e2'; }
-                                        if($r['moderation_action'] == 'reject') { $color = '#166534'; $bg = '#dcfce7'; }
-                                        if($r['moderation_action'] == 'warn_user') { $color = '#b45309'; $bg = '#fef3c7'; }
+                                        $color = 'rgba(15,23,42,0.65)'; $bg = '#F8FAFC';
+                                        if($r['moderation_action'] == 'remove') { $color = '#0F172A'; $bg = 'rgba(15,23,42,0.06)'; }
+                                        if($r['moderation_action'] == 'reject') { $color = '#0B2447'; $bg = 'rgba(11,36,71,0.04)'; }
+                                        if($r['moderation_action'] == 'warn_user') { $color = '#19376D'; $bg = 'rgba(11,36,71,0.06)'; }
                                     ?>
                                     <span class="badge" style="background:<?php echo $bg; ?>;color:<?php echo $color; ?>;"><?php echo ucfirst(str_replace('_', ' ', $r['moderation_action'])); ?></span>
                                 </td>

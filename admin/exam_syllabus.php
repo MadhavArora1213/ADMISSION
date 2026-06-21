@@ -73,7 +73,7 @@ $list = $syl->fetchAll();
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
-        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: rgba(15,23,42,0.06); color: #0B2447; border: 1px solid rgba(15,23,42,0.06); }
         .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding-bottom: 12px; }
         .tab-link { padding: 8px 16px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
         .tab-link:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
@@ -115,10 +115,10 @@ $list = $syl->fetchAll();
                             <div id="subtopics_container" style="margin-bottom:10px;">
                                 <div style="display:flex; gap:10px; margin-bottom:8px;">
                                     <input type="text" class="form-control subtopic-input" placeholder="Subtopic Name">
-                                    <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+                                    <button type="button" onclick="this.parentElement.remove()" style="background:rgba(15,23,42,0.06); color:#0B2447; border:1px solid rgba(15,23,42,0.06); padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-sm" onclick="addSubtopic()" style="background:#e2e8f0; border:1px solid #cbd5e1; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add Subtopic</button>
+                            <button type="button" class="btn btn-sm" onclick="addSubtopic()" style="background:rgba(15,23,42,0.08); border:1px solid rgba(15,23,42,0.15); padding: 5px 10px; border-radius: 4px; cursor: pointer;">+ Add Subtopic</button>
                             <input type="hidden" name="subtopics" id="subtopics_json">
                         </div>
                         <div class="form-group">
@@ -164,7 +164,7 @@ $list = $syl->fetchAll();
             div.style.cssText = 'display:flex; gap:10px; margin-bottom:8px;';
             div.innerHTML = `
                 <input type="text" class="form-control subtopic-input" placeholder="Subtopic Name">
-                <button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
+                <button type="button" onclick="this.parentElement.remove()" style="background:rgba(15,23,42,0.06); color:#0B2447; border:1px solid rgba(15,23,42,0.06); padding:10px; border-radius:4px; cursor:pointer;" title="Remove"><i class="ph ph-trash"></i></button>
             `;
             container.appendChild(div);
         }

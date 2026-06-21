@@ -88,8 +88,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .form-control { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.95rem; outline: none; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .msg-alert { padding: 14px 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid transparent; font-weight:500; }
-        .alert-success { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
-        .alert-error { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+        .alert-success { background: rgba(11,36,71,0.04); color: #0B2447; border-color: rgba(11,36,71,0.04); }
+        .alert-error { background: rgba(15,23,42,0.06); color: #0B2447; border-color: rgba(15,23,42,0.06); }
         textarea.form-control { min-height: 100px; font-family: monospace; font-size: 0.85rem; }
         .section-title { font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin: 30px 0 20px 0; font-weight: 700; color: var(--text-dark); display:flex; justify-content:space-between;}
     </style>

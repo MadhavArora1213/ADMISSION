@@ -4,10 +4,11 @@ declare(strict_types=1);
 /** Course Tabs */
 function courseTabs(): array {
     return [
-        'info'            => 'Overview & Info',
+        'basic'           => 'Basic Info',
+        'scope'           => 'Descriptions & Scope',
+        'salary'          => 'Salary & Recruiters',
         'specializations' => 'Specializations',
-        'careers'         => 'Career & Jobs',
-        'colleges'        => 'Top Colleges'
+        'careers'         => 'Career Paths'
     ];
 }
 

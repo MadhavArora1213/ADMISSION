@@ -73,7 +73,7 @@ $list = $cutoffsQ->fetchAll();
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
-        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .action-btn { width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: rgba(15,23,42,0.06); color: #0B2447; border: 1px solid rgba(15,23,42,0.06); }
         .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding-bottom: 12px; }
         .tab-link { padding: 8px 16px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
         .tab-link:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
@@ -166,8 +166,8 @@ $list = $cutoffsQ->fetchAll();
                             <?php foreach($list as $d): ?>
                             <tr>
                                 <td><?php echo $d['year']; ?></td>
-                                <td><?php echo $d['college_name'] ? htmlspecialchars($d['college_name']) : '<span style="color:#94a3b8; font-style:italic;">General Exam</span>'; ?></td>
-                                <td><?php echo $d['course_name'] ? htmlspecialchars($d['course_name']) : '<span style="color:#94a3b8; font-style:italic;">Any / All</span>'; ?></td>
+                                <td><?php echo $d['college_name'] ? htmlspecialchars($d['college_name']) : '<span style="color:rgba(15,23,42,0.4); font-style:italic;">General Exam</span>'; ?></td>
+                                <td><?php echo $d['course_name'] ? htmlspecialchars($d['course_name']) : '<span style="color:rgba(15,23,42,0.4); font-style:italic;">Any / All</span>'; ?></td>
                                 <td><?php echo $d['category']; ?> <?php if($d['round']) echo "(R{$d['round']})"; ?></td>
                                 <td><?php echo $d['opening_rank'].' - '.$d['closing_rank']; ?></td>
                                 <td><a href="?exam_id=<?php echo $exam_id; ?>&action=delete&id=<?php echo $d['id']; ?>" class="action-btn"><i class="ph ph-trash"></i></a></td>

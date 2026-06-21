@@ -197,13 +197,13 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
         textarea.form-control { resize: vertical; min-height: 120px; }
         .char-count { font-size: 0.75rem; color: var(--text-muted); text-align: right; margin-top: 4px; }
         .form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
-        .error-alert { padding: 14px 18px; border-radius: 8px; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; margin-bottom: 20px; }
-        .msg-alert { padding: 14px 18px; border-radius: 8px; background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; margin-bottom: 20px; }
+        .error-alert { padding: 14px 18px; border-radius: 8px; background: rgba(15,23,42,0.06); color: #0B2447; border: 1px solid rgba(15,23,42,0.06); margin-bottom: 20px; }
+        .msg-alert { padding: 14px 18px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; border: 1px solid rgba(11,36,71,0.04); margin-bottom: 20px; }
         .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-        .tag-check { display: flex; align-items: center; gap: 5px; background: #f1f5f9; border: 1px solid var(--border-color); border-radius: 6px; padding: 5px 10px; cursor: pointer; transition: all 0.2s; }
+        .tag-check { display: flex; align-items: center; gap: 5px; background: #F8FAFC; border: 1px solid var(--border-color); border-radius: 6px; padding: 5px 10px; cursor: pointer; transition: all 0.2s; }
         .tag-check:has(input:checked) { background: var(--primary); color: white; border-color: var(--primary); }
         .tag-check input { display: none; }
-        .seo-meter { height: 6px; border-radius: 3px; background: #e2e8f0; margin-top: 5px; overflow: hidden; }
+        .seo-meter { height: 6px; border-radius: 3px; background: rgba(15,23,42,0.08); margin-top: 5px; overflow: hidden; }
         .seo-meter-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
         .revision-item { background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .badge { padding: 3px 10px; border-radius: 5px; font-size: 0.72rem; font-weight: 700; }
@@ -306,9 +306,11 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                 <div class="form-section">
                     <h3><i class="ph ph-text-align-left"></i> Content Body</h3>
                     <div class="form-group">
-                        <label>Content</label>
+                        <label>Content <small style="color:var(--text-muted); font-weight:400;">— use the toolbar to insert <strong>tables</strong>, <strong>images</strong> and <strong>file attachments</strong></small></label>
                         <textarea name="content_body" id="content_body" class="form-control" rows="16" style="font-family: 'Courier New', monospace; font-size:0.88rem;"><?php echo v($article,'content_body'); ?></textarea>
                     </div>
+                    <!-- Hidden file picker used by the editor's "Upload" toolbar button -->
+                    <input type="file" id="editorFilePicker" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z,.mp4,.webm,.mp3,.wav" style="display:none;">
                 </div>
 
                 <div class="form-section">
@@ -339,7 +341,7 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                 </div>
 
                 <div class="form-actions">
-                    <a href="articles.php" class="btn" style="background:#f1f5f9; color:#475569;">Cancel</a>
+                    <a href="articles.php" class="btn" style="background:#F8FAFC; color:rgba(15,23,42,0.65);">Cancel</a>
                     <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Save Article</button>
                 </div>
             </form>
@@ -352,13 +354,13 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                     <div class="form-group">
                         <label>Meta Title <small style="color:var(--text-muted);">(max 70 chars)</small></label>
                         <input type="text" name="meta_title" class="form-control" maxlength="70" id="meta_title" value="<?php echo v($seo,'meta_title'); ?>">
-                        <div class="seo-meter"><div class="seo-meter-fill" id="mt_fill" style="background:#22c55e; width:0%;"></div></div>
+                        <div class="seo-meter"><div class="seo-meter-fill" id="mt_fill" style="background:#0B2447; width:0%;"></div></div>
                         <div class="char-count"><span id="mtc">0</span>/70</div>
                     </div>
                     <div class="form-group">
                         <label>Meta Description <small style="color:var(--text-muted);">(max 160 chars)</small></label>
                         <textarea name="meta_description" class="form-control" maxlength="160" rows="3" id="meta_desc"><?php echo v($seo,'meta_description'); ?></textarea>
-                        <div class="seo-meter"><div class="seo-meter-fill" id="md_fill" style="background:#22c55e; width:0%;"></div></div>
+                        <div class="seo-meter"><div class="seo-meter-fill" id="md_fill" style="background:#0B2447; width:0%;"></div></div>
                         <div class="char-count"><span id="mdc">0</span>/160</div>
                     </div>
                     <div class="form-grid">
@@ -402,7 +404,7 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                         <div class="form-group"><label>Scheduled Publish At</label><input type="datetime-local" name="scheduled_at" class="form-control" value="<?php echo !empty($article['scheduled_at']) ? date('Y-m-d\TH:i', strtotime($article['scheduled_at'])) : ''; ?>"></div>
                         <div class="form-group"><label>Auto Unpublish At</label><input type="datetime-local" name="unpublish_at" class="form-control" value="<?php echo !empty($article['unpublish_at']) ? date('Y-m-d\TH:i', strtotime($article['unpublish_at'])) : ''; ?>"></div>
                     </div>
-                    <div style="background:#f1f5f9; border-radius:10px; padding:16px; margin-top:8px;">
+                    <div style="background:#F8FAFC; border-radius:10px; padding:16px; margin-top:8px;">
                         <div style="display:flex; gap:24px; font-size:0.88rem;">
                             <div><span style="color:var(--text-muted);">Auto-save version:</span> <strong><?php echo v($article,'auto_save_version','1'); ?></strong></div>
                             <div><span style="color:var(--text-muted);">Last draft saved:</span> <strong><?php echo !empty($article['draft_saved_at']) ? date('d M Y H:i', strtotime($article['draft_saved_at'])) : 'Never'; ?></strong></div>
@@ -425,7 +427,7 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
                         <div style="font-weight:700;">Version <?php echo $rev['version']; ?></div>
                         <div style="font-size:0.82rem; color:var(--text-muted);">By <?php echo htmlspecialchars($rev['user_name'] ?: 'Admin'); ?> on <?php echo date('d M Y H:i', strtotime($rev['saved_at'])); ?></div>
                     </div>
-                    <span class="badge" style="background:#e0e7ff; color:#3730a3;">v<?php echo $rev['version']; ?></span>
+                    <span class="badge" style="background:rgba(11,36,71,0.06); color:#19376D;">v<?php echo $rev['version']; ?></span>
                 </div>
                 <?php endforeach; endif; ?>
             </div>
@@ -437,7 +439,15 @@ function v($arr, $key, $def = '') { return isset($arr[$key]) ? htmlspecialchars(
 <!-- jQuery and Trumbowyg -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/ui/trumbowyg.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/plugins/table/ui/trumbowyg.table.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/plugins/colors/ui/trumbowyg.colors.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/trumbowyg.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/plugins/table/trumbowyg.table.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/plugins/colors/trumbowyg.colors.min.js"></script>
+<style>
+    /* Make the Trumbowyg editor fit the admin panel visually */
+    .trumbowyg-editor { min-height: 300px; }
+</style>
 <script>
 // Char counters
 function setupCounter(inputId, countId, max, fillId) {
@@ -451,7 +461,7 @@ function setupCounter(inputId, countId, max, fillId) {
         if(fill) {
             const pct = Math.min((len/max)*100, 100);
             fill.style.width = pct + '%';
-            fill.style.background = pct < 50 ? '#f59e0b' : pct <= 90 ? '#22c55e' : '#ef4444';
+            fill.style.background = pct < 50 ? '#19376D' : pct <= 90 ? '#0B2447' : '#0F172A';
         }
     }
     el.addEventListener('input', update);
@@ -463,10 +473,108 @@ setupCounter('meta_desc','mdc',160,'md_fill');
 
 $(document).ready(function() {
     if ($('#content_body').length) {
-        $('#content_body').trumbowyg({
-            semantic: true,
-            removeformatPasted: true,
-            resetCss: true
+            try {
+            if (!$.fn.trumbowyg || !$.trumbowyg) {
+                throw new Error('Trumbowyg not loaded');
+            }
+            if (!$.trumbowyg.plugins || !$.trumbowyg.plugins.table) {
+                console.warn('[Trumbowyg] table plugin not registered');
+            }
+            $('#content_body').trumbowyg({
+                semantic: true,
+                removeformatPasted: true,
+                resetCss: true,
+                autogrow: true,
+                btnsDef: {
+                    // Custom "Upload" button — handles images AND files (PDF/doc/zip/etc).
+                    // We can't use the upload plugin's built-in button because its modal
+                    // hardcodes accept="image/*". Our button opens a native file picker
+                    // (see #editorFilePicker) that accepts any allowed type.
+                    uploadFile: {
+                        title: 'Upload image or file',
+                        ico: 'insert-image',
+                        fn: function () {
+                            var picker = document.getElementById('editorFilePicker');
+                            if (picker) { picker.value = ''; picker.click(); }
+                        }
+                    }
+                },
+                btns: [
+                    ['viewHTML'],
+                    ['undo', 'redo'],
+                    ['formatting'],
+                    ['strong', 'em', 'del', 'underline'],
+                    ['foreColor', 'backColor'],
+                    ['link'],
+                    ['insertImage'],
+                    ['justifyLeft', 'justifyCenter', 'justifyRight'],
+                    ['unorderedList', 'orderedList'],
+                    ['horizontalRule'],
+                    ['table'],                       // insert/edit tables
+                    ['uploadFile'],                  // upload image OR file
+                    ['removeformat'],
+                    ['fullscreen']
+                ],
+                plugins: {
+                    // Table plugin (v3.0) — insert + add/remove rows & cols + merge + resize
+                    table: { rows: 5, columns: 5 }
+                }
+            });
+            console.log('[Trumbowyg] editor initialized OK');
+            console.log('[Trumbowyg] editor html before upload:', $('#content_body').trumbowyg('html').slice(0,200));
+        } catch (err) {
+            console.error('[Trumbowyg] init FAILED:', err);
+            alert('Editor failed to load: ' + err.message + '\n\nCheck the browser console (F12) for details.');
+        }
+
+        // Handle the hidden file picker selection
+        $(document).off('change', '#editorFilePicker').on('change', '#editorFilePicker', function () {
+            console.log('[Trumbowyg] file picked:', this.files && this.files.length ? this.files[0].name : null);
+            var f = this.files && this.files[0];
+            if (!f) { return; }
+            var editor = $('#content_body');
+
+            // Remember cursor position so the inserted media lands at the caret
+            editor.trumbowyg('saveRange');
+
+            var formData = new FormData();
+            formData.append('fileToUpload', f);
+            var placeholderId = 'trb-uploading-' + Date.now();
+            var placeholderHtml = '<p id="' + placeholderId + '"><em>Uploading ' + $('<div>').text(f.name).html() + '…</em></p>';
+            editor.trumbowyg('execCmd', 'insertHtml', placeholderHtml);
+
+
+            $.ajax({
+                url: 'editor_upload.php',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json'
+            }).done(function (resp) {
+                console.log('[Trumbowyg] upload resp:', resp);
+                // Remove placeholder by id selector (robust against Trumbowyg html normalization)
+                $('#' + placeholderId).remove();
+
+                if (resp && resp.success && resp.url) {
+                    // Important: restore cursor BEFORE setting html / execCmd
+                    editor.trumbowyg('restoreRange');
+                    var insert;
+                    if (resp.isImage) {
+                        insert = '<img src="' + resp.url + '" alt="' + (resp.name || '') + '" style="max-width:100%;height:auto;display:block;">';
+                    } else {
+                        insert = '<a href="' + resp.url + '" download="' + (resp.name || '') + '">📄 ' + (resp.name || 'Download file') + '</a>';
+                    }
+                    editor.trumbowyg('execCmd', 'insertHtml', insert);
+                    console.log('[Trumbowyg] editor html after insert:', $('#content_body').trumbowyg('html').slice(0,250));
+                } else {
+                    console.log('[Trumbowyg] Upload response:', resp);
+
+                    alert('Upload failed: ' + (resp && resp.message ? resp.message : 'unknown error'));
+                }
+            }).fail(function (xhr) {
+                alert('Upload failed: server error.\n' + (xhr.responseText || '').slice(0, 200));
+            });
         });
     }
 

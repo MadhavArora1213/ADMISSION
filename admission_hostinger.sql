@@ -65,9 +65,7 @@ CREATE TABLE `activity_log` (
 -- Dumping data for table `activity_log`
 --
 
-INSERT INTO `activity_log` (`id`, `activity_type`, `actor_id`, `entity_type`, `entity_id`, `meta_json`, `created_at`) VALUES
-(1, 'create', 'user-uuid-1', 'lead', '1bde368e-5a5c-11f1-a611-c8f7507a8de6', '{\"name\": \"Rohan Sharma\", \"course\": \"B.Tech\"}', '2026-05-28 06:11:42'),
-(2, 'update', 'user-uuid-1', 'college', '1bde6172-5a5c-11f1-a611-c8f7507a8de6', '{\"field\": \"status\", \"old\": \"pending\", \"new\": \"published\"}', '2026-05-28 06:11:42');
+-- Seed data removed to avoid FK violation — user-uuid-1 does not exist in users table
 
 -- --------------------------------------------------------
 

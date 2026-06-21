@@ -11,8 +11,8 @@ if (!isset($navColleges)) {
     $navColleges = cAll($pdo, "SELECT name,slug FROM colleges WHERE status='active' ORDER BY is_featured DESC, overall_rating_avg DESC, ranking_nirf ASC LIMIT 50");
     $navStates = cAll($pdo, "SELECT s.id, s.name, COUNT(c.id) as college_count FROM states s LEFT JOIN colleges c ON c.state_id = s.id AND c.status = 'active' GROUP BY s.id, s.name ORDER BY college_count DESC, s.name ASC LIMIT 50");
     $navPopularCourses = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE status='active' ORDER BY is_popular DESC, total_colleges_offering DESC LIMIT 50");
-    $navExamsUg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams LIMIT 50");
-    $navExamsPg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams LIMIT 50");
+    $navExamsUg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams WHERE status='active' AND (exam_name LIKE '%JEE%' OR exam_name LIKE '%NEET%' OR exam_name LIKE '%CLAT%' OR exam_name LIKE '%CUET%') ORDER BY applicants_last_year DESC LIMIT 10");
+    $navExamsPg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams WHERE status='active' AND (exam_name LIKE '%GATE%' OR exam_name LIKE '%CAT%' OR exam_name LIKE '%GMAT%' OR exam_name LIKE '%XAT%' OR exam_name LIKE '%MAT%') ORDER BY applicants_last_year DESC LIMIT 10");
     $navCoursesUg = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE course_level='UG' ORDER BY total_colleges_offering DESC LIMIT 50");
     $navCoursesPg = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE course_level='PG' ORDER BY total_colleges_offering DESC LIMIT 50");
     $navCountries = cAll($pdo, "SELECT name FROM countries LIMIT 50");
@@ -51,11 +51,11 @@ if (!isset($navColleges)) {
               <div class="pro-user-menu-header"><?= htmlspecialchars($_SESSION['user_name']) ?></div>
               <a href="profile.php" class="pro-user-menu-item"><i class="ph ph-user"></i> My Profile</a>
               <div class="pro-user-menu-divider"></div>
-              <a href="logout.php" class="pro-user-menu-item logout"><i class="ph ph-sign-out"></i> Logout</a>
+              <a href="/ADMISSION/logout.php?redirect=<?= urlencode($_SERVER['REQUEST_URI'] ?? '/') ?>" class="pro-user-menu-item logout"><i class="ph ph-sign-out"></i> Logout</a>
             </div>
           </div>
         <?php else: ?>
-          <a href="login.php" class="pro-user-btn" title="Login"><i class="ph-fill ph-user-plus"></i></a>
+          <a href="/ADMISSION/login.php" class="pro-user-btn" title="Login"><i class="ph-fill ph-user-plus"></i></a>
         <?php endif; ?>
       </div>
     </div>
@@ -99,7 +99,7 @@ if (!isset($navColleges)) {
           <a href="<?= examsUrl() ?>">Exams <i class="ph ph-caret-down"></i></a>
           <div class="pro-mega-menu">
             <div class="mega-col">
-              <h4>Top UG Exams</h4>
+              <h4>UG Exams</h4>
               <ul>
                 <?php foreach($navExamsUg ?? [] as $ex): ?>
                 <li><a href="<?= examUrl($ex['exam_slug']) ?>"><?=htmlspecialchars($ex['exam_name'])?></a></li>
@@ -107,20 +107,11 @@ if (!isset($navColleges)) {
               </ul>
             </div>
             <div class="mega-col">
-              <h4>Top PG Exams</h4>
+              <h4>PG Exams</h4>
               <ul>
                 <?php foreach($navExamsPg ?? [] as $ex): ?>
                 <li><a href="<?= examUrl($ex['exam_slug']) ?>"><?=htmlspecialchars($ex['exam_name'])?></a></li>
                 <?php endforeach; ?>
-              </ul>
-            </div>
-            <div class="mega-col">
-              <h4>Quick Links</h4>
-              <ul>
-                <li><a href="#">Exam Calendar 2026</a></li>
-                <li><a href="#">Application Deadlines</a></li>
-                <li><a href="#">Syllabus & Pattern</a></li>
-                <li><a href="#">Result Dates</a></li>
               </ul>
             </div>
           </div>
@@ -130,7 +121,7 @@ if (!isset($navColleges)) {
           <a href="<?= coursesUrl() ?>">Courses <i class="ph ph-caret-down"></i></a>
           <div class="pro-mega-menu">
             <div class="mega-col">
-              <h4>Top UG Courses</h4>
+              <h4>UG Courses</h4>
               <ul>
                 <?php foreach($navCoursesUg ?? [] as $co): ?>
                 <li><a href="<?= courseUrl($co['course_slug']) ?>"><?=htmlspecialchars($co['course_name'])?></a></li>
@@ -138,7 +129,7 @@ if (!isset($navColleges)) {
               </ul>
             </div>
             <div class="mega-col">
-              <h4>Top PG Courses</h4>
+              <h4>PG Courses</h4>
               <ul>
                 <?php foreach($navCoursesPg ?? [] as $co): ?>
                 <li><a href="<?= courseUrl($co['course_slug']) ?>"><?=htmlspecialchars($co['course_name'])?></a></li>
@@ -148,10 +139,9 @@ if (!isset($navColleges)) {
             <div class="mega-col">
               <h4>Explore More</h4>
               <ul>
-                <li><a href="#">Diploma Courses</a></li>
-                <li><a href="#">PhD Programs</a></li>
-                <li><a href="#">Online Certifications</a></li>
-                <li><a href="#">Highest Paying Courses</a></li>
+                <li><a href="<?= coursesUrl(['level' => 'Diploma']) ?>">Diploma Courses</a></li>
+                <li><a href="<?= coursesUrl(['level' => 'PhD']) ?>">PhD Programs</a></li>
+                <li><a href="<?= coursesUrl() ?>">All Courses</a></li>
               </ul>
             </div>
           </div>

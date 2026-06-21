@@ -46,52 +46,52 @@ $paid_apps = $pdo->query("SELECT count(*) FROM applications WHERE payment_status
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body { background-color: var(--bg-light); }
+        body { background-color: #F8FAFC; margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
         .admin-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; }
-        .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-header .logo { font-size: 1.3rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
-        .sidebar-nav { padding: 24px 0; flex: 1; }
-        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; text-decoration: none;}
-        .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
-        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; }
-        .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
-        .content-area { padding: 32px; }
+        .sidebar { width: 260px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 50; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-header .logo { font-size: 1.2rem; color: #f8fafc; display:flex; align-items:center; gap:8px; font-weight:700; }
+        .sidebar-nav { padding: 16px 0; flex: 1; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: rgba(255,255,255,0.6); transition: all 0.2s; font-size:0.95rem; text-decoration:none; }
+        .sidebar-nav a:hover, .sidebar-nav a.active { color: #fff; background: rgba(255,255,255,0.05); border-left: 3px solid #19376D; }
+        .sidebar-nav a i { font-size: 1.2rem; }
+        .main-content { flex: 1; margin-left: 260px; display: flex; flex-direction: column; }
+        .topbar { height: 64px; background: #fff; border-bottom: 1px solid rgba(15,23,42,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: sticky; top: 0; z-index: 40; }
+        .content-area { padding: 24px; }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .page-header h2 { font-size: 2rem; font-weight: 800; display:flex; align-items:center; gap:10px; }
+        .page-header h2 { font-size: 1.1rem; font-weight: 700; display:flex; align-items:center; gap:10px; color:#0f172a; }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-        .stat-card { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; box-shadow: var(--shadow-sm); }
-        .stat-card .num { font-size: 2rem; font-weight: 800; color: var(--primary); }
-        .stat-card .label { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-top: 4px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px; }
+        .stat-card { background: #fff; border-radius: 12px; border: 1px solid rgba(15,23,42,0.08); padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .stat-card .num { font-size: 1.8rem; font-weight: 800; color: #0B2447; }
+        .stat-card .label { font-size: 0.8rem; color: rgba(15,23,42,0.45); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
         
-        .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: #fff; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); }
-        .filter-select { padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.85rem; outline: none; }
-        .search-box { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border-color); border-radius: 6px; padding: 7px 12px; margin-left: auto; }
+        .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: #fff; padding: 12px; border-radius: 12px; border: 1px solid rgba(15,23,42,0.08); }
+        .filter-select { padding: 8px 12px; border: 1px solid rgba(15,23,42,0.1); border-radius: 8px; font-size: 0.85rem; outline: none; background: #fff; }
+        .search-box { display: flex; align-items: center; gap: 8px; border: 1px solid rgba(15,23,42,0.1); border-radius: 8px; padding: 7px 12px; margin-left: auto; }
         .search-box input { border: none; outline: none; font-size: 0.85rem; width: 220px; }
-        .btn-primary { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
         
-        .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; }
+        .panel { background: #fff; border-radius: 12px; border: 1px solid rgba(15,23,42,0.08); box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
-        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em; background: #f8fafc; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid rgba(15,23,42,0.08); }
+        th { font-weight: 700; color: rgba(15,23,42,0.45); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em; background: #f8fafc; }
         tr:hover { background-color: #f8fafc; }
         
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; text-transform: capitalize; }
-        .s-draft { background: #f1f5f9; color: #475569; }
-        .s-submitted { background: #dbeafe; color: #1e40af; }
-        .s-under_review { background: #fef9c3; color: #854d0e; }
-        .s-waitlisted { background: #ffedd5; color: #c2410c; }
-        .s-admitted { background: #dcfce7; color: #166534; }
-        .s-rejected { background: #fee2e2; color: #b91c1c; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; display: inline-block; text-transform: capitalize; }
+        .s-draft { background: #F8FAFC; color: rgba(15,23,42,0.65); }
+        .s-submitted { background: rgba(11,36,71,0.06); color: #19376D; }
+        .s-under_review { background: rgba(11,36,71,0.04); color: #0F172A; }
+        .s-waitlisted { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .s-admitted { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .s-rejected { background: rgba(15,23,42,0.06); color: #0B2447; }
         
-        .p-pending { background: #fef9c3; color: #854d0e; }
-        .p-paid { background: #dcfce7; color: #166534; }
-        .p-refunded { background: #f3f4f6; color: #374151; }
-        .p-waived { background: #e0e7ff; color: #4338ca; }
+        .p-pending { background: rgba(11,36,71,0.04); color: #0F172A; }
+        .p-paid { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .p-refunded { background: rgba(15,23,42,0.06); color: rgba(15,23,42,0.8); }
+        .p-waived { background: rgba(11,36,71,0.06); color: #19376D; }
         
-        .action-btn { background: #f1f5f9; color: var(--text-dark); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; text-decoration: none; border: 1px solid var(--border-color); transition: all 0.2s; }
-        .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .action-btn { background: #F8FAFC; color: #0f172a; padding: 6px 14px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; text-decoration: none; border: 1px solid rgba(15,23,42,0.1); transition: all 0.2s; }
+        .action-btn:hover { background: #0B2447; color: white; border-color: #0B2447; }
     </style>
 </head>
 <body>
@@ -99,9 +99,9 @@ $paid_apps = $pdo->query("SELECT count(*) FROM applications WHERE payment_status
     <?php include 'sidebar.php'; ?>
     <main class="main-content">
         <header class="topbar">
-            <div class="user-profile">
-                <span><?php echo isset($_SESSION['admin_username']) ? htmlspecialchars($_SESSION['admin_username']) : 'Admin'; ?></span>
-                <a href="logout.php" style="margin-left:16px; color:var(--text-dark);"><i class="ph ph-sign-out" style="font-size:1.5rem;"></i></a>
+            <div style="font-weight:700; color:#0f172a;">Applications Management</div>
+            <div class="header-right" style="display:flex; align-items:center; gap:16px;">
+                <div class="avatar" style="width:32px; height:32px; border-radius:50%; background:#0f172a; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; cursor:pointer;">A</div>
             </div>
         </header>
         <div class="content-area">
@@ -118,11 +118,11 @@ $paid_apps = $pdo->query("SELECT count(*) FROM applications WHERE payment_status
                     <div class="label">Total Applications</div>
                 </div>
                 <div class="stat-card">
-                    <div class="num" style="color:#854d0e;"><?php echo $pending_apps; ?></div>
+                    <div class="num" style="color:#0F172A;"><?php echo $pending_apps; ?></div>
                     <div class="label">Pending Review</div>
                 </div>
                 <div class="stat-card">
-                    <div class="num" style="color:#166534;"><?php echo $paid_apps; ?></div>
+                    <div class="num" style="color:#0B2447;"><?php echo $paid_apps; ?></div>
                     <div class="label">Fees Paid</div>
                 </div>
             </div>

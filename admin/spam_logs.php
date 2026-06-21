@@ -70,14 +70,14 @@ if ($tab === 'bans') {
         .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 24px;}
         table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: top;}
-        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #f1f5f9; }
+        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #F8FAFC; }
         tr:hover { background-color: rgba(0,0,0,0.015); }
         
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; white-space: nowrap; }
-        .s-active { background:#dcfce7; color:#166534; }
-        .s-inactive { background:#f1f5f9; color:#94a3b8; }
+        .s-active { background:rgba(11,36,71,0.04); color:#0B2447; }
+        .s-inactive { background:#F8FAFC; color:rgba(15,23,42,0.4); }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); }
         
         /* Forms */
         .form-grid { display: grid; grid-template-columns: 1fr 2fr 1fr 1fr auto; gap: 16px; padding: 20px; align-items: end; background: #fff;}
@@ -88,7 +88,7 @@ if ($tab === 'bans') {
         .btn-primary:hover { opacity: 0.9; }
         
         .btn-action { padding: 4px 8px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; color: var(--text-dark); text-decoration: none;}
-        .btn-action:hover { background: #f1f5f9; }
+        .btn-action:hover { background: #F8FAFC; }
     </style>
 </head>
 <body>
@@ -185,7 +185,7 @@ if ($tab === 'bans') {
                                     <td>
                                         <div style="font-size:0.8rem; color:var(--text-muted);">Added: <?php echo date('M d, Y', strtotime($b['created_at'])); ?></div>
                                         <?php if($b['expires_at']): ?>
-                                            <div style="font-size:0.8rem; color:#ea580c;">Expires: <?php echo date('M d, Y', strtotime($b['expires_at'])); ?></div>
+                                            <div style="font-size:0.8rem; color:#19376D;">Expires: <?php echo date('M d, Y', strtotime($b['expires_at'])); ?></div>
                                         <?php else: ?>
                                             <div style="font-size:0.8rem; color:var(--text-muted);">Expires: Never</div>
                                         <?php endif; ?>
@@ -233,16 +233,16 @@ if ($tab === 'bans') {
                                     </td>
                                     <td><?php echo $l['user_id'] ? htmlspecialchars($l['user_name'] ?? $l['user_id']) : '<span style="color:var(--text-muted);">Guest</span>'; ?></td>
                                     <td>
-                                        <?php if($l['velocity_flag']): ?><span class="badge" style="background:#fee2e2; color:#991b1b; margin-right:4px;">Velocity</span><?php endif; ?>
-                                        <?php if($l['vpn_detected']): ?><span class="badge" style="background:#ffedd5; color:#9a3412; margin-right:4px;">VPN</span><?php endif; ?>
-                                        <?php if($l['proxy_detected']): ?><span class="badge" style="background:#fef3c7; color:#92400e;">Proxy</span><?php endif; ?>
+                                        <?php if($l['velocity_flag']): ?><span class="badge" style="background:rgba(15,23,42,0.06); color:#0B2447; margin-right:4px;">Velocity</span><?php endif; ?>
+                                        <?php if($l['vpn_detected']): ?><span class="badge" style="background:rgba(11,36,71,0.04); color:#0B2447; margin-right:4px;">VPN</span><?php endif; ?>
+                                        <?php if($l['proxy_detected']): ?><span class="badge" style="background:rgba(11,36,71,0.06); color:#0F172A;">Proxy</span><?php endif; ?>
                                         <?php if(!$l['velocity_flag'] && !$l['vpn_detected'] && !$l['proxy_detected']): ?>
                                             <span style="color:var(--text-muted); font-size:0.85rem;">None</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <div style="width: 100px; background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden;">
-                                            <div style="height: 100%; background: <?php echo $l['duplicate_content_score'] > 0.8 ? '#dc2626' : 'var(--primary)'; ?>; width: <?php echo ($l['duplicate_content_score']*100); ?>%;"></div>
+                                        <div style="width: 100px; background: rgba(15,23,42,0.08); height: 8px; border-radius: 4px; overflow: hidden;">
+                                            <div style="height: 100%; background: <?php echo $l['duplicate_content_score'] > 0.8 ? '#0F172A' : 'var(--primary)'; ?>; width: <?php echo ($l['duplicate_content_score']*100); ?>%;"></div>
                                         </div>
                                         <div style="font-size:0.75rem; margin-top:4px; color:var(--text-muted);"><?php echo number_format($l['duplicate_content_score'], 2); ?></div>
                                     </td>

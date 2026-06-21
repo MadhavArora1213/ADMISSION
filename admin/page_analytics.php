@@ -28,7 +28,7 @@ if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
         
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: #fff; padding: 24px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
-        .stat-card .icon { width: 48px; height: 48px; border-radius: 12px; background: #f1f5f9; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 16px; }
+        .stat-card .icon { width: 48px; height: 48px; border-radius: 12px; background: #F8FAFC; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 16px; }
         .stat-card .value { font-size: 1.8rem; font-weight: 800; color: var(--text-dark); margin-bottom: 4px; }
         .stat-card .label { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; }
         
@@ -97,7 +97,7 @@ if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
             datasets: [{
                 label: 'Page Views',
                 data: [12000, 19000, 15000, 22000, 18000, 25000, 30000],
-                borderColor: '#2563eb',
+                borderColor: '#19376D',
                 backgroundColor: 'rgba(37, 99, 235, 0.1)',
                 borderWidth: 2,
                 fill: true,

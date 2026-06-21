@@ -102,16 +102,16 @@ $roles = $stmt->fetchAll();
         .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 24px;}
         table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: top;}
-        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #f1f5f9; }
+        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #F8FAFC; }
         tr:hover { background-color: rgba(0,0,0,0.015); }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); }
         
         .btn-primary { padding: 10px 20px; font-size: 0.9rem; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;}
         .btn-primary:hover { opacity: 0.9; }
         .btn-action { padding: 6px 10px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; color: var(--text-dark); text-decoration: none;}
-        .btn-action:hover { background: #f1f5f9; }
-        .btn-danger:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+        .btn-action:hover { background: #F8FAFC; }
+        .btn-danger:hover { background: rgba(15,23,42,0.06); color: #0F172A; border-color: rgba(15,23,42,0.06); }
         
         /* Modal */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
@@ -180,7 +180,7 @@ $roles = $stmt->fetchAll();
                                 <td style="font-size:0.8rem; color:var(--text-muted); line-height:1.5;">
                                     <?php 
                                     if (isset($perms['all'])) {
-                                        echo '<span style="color:#166534; font-weight:700;">Full Access (Super Admin)</span>';
+                                        echo '<span style="color:#0B2447; font-weight:700;">Full Access (Super Admin)</span>';
                                     } else {
                                         echo implode(', ', $mod_names) ?: 'None'; 
                                     }

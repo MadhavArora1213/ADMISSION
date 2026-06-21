@@ -36,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
 
             $stmt = $pdo->prepare("
-                INSERT INTO college_faculty (id, college_id, faculty_name, designation, department, qualification, experience_years, photo_url, research_papers) 
-                VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO college_faculty (id, college_id, faculty_name, designation, department, qualification, experience_years, photo_url, research_papers, linkedin_url, specialization, phd_from) 
+                VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $college_id,
@@ -47,7 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_POST['qualification'] ?: null,
                 $_POST['experience_years'] ?: null,
                 $photo_url,
-                $_POST['research_papers'] ?: 0
+                $_POST['research_papers'] ?: 0,
+                $_POST['linkedin_url'] ?: null,
+                $_POST['specialization'] ?: null,
+                $_POST['phd_from'] ?: null
             ]);
             header("Location: college_faculty.php?college_id=$college_id&msg=added");
             exit;
@@ -99,7 +102,7 @@ $faculty = $stmt->fetchAll();
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
         .form-group { margin-bottom: 16px; }
         .form-group.full { grid-column: 1 / -1; }
-        .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; box-sizing: border-box; }
+        .form-control { width: 100%; padding: 10px 14px; border: 1px solid rgba(15,23,42,0.15); border-radius: 8px; font-family: inherit; box-sizing: border-box; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 16px; min-width: 600px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
@@ -158,10 +161,10 @@ $faculty = $stmt->fetchAll();
                 </div>
 
                 <?php if(isset($_GET['msg'])): ?>
-                    <div style="padding: 16px; background: #dcfce7; color: #166534; border-radius: 8px; margin-bottom: 24px; border: 1px solid #bbf7d0;">Action completed successfully!</div>
+                    <div style="padding: 16px; background: rgba(11,36,71,0.04); color: #0B2447; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(11,36,71,0.04);">Action completed successfully!</div>
                 <?php endif; ?>
                 <?php if($error): ?>
-                    <div style="padding: 16px; background: #fee2e2; color: #991b1b; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fecaca;"><?php echo htmlspecialchars($error); ?></div>
+                    <div style="padding: 16px; background: rgba(15,23,42,0.06); color: #0B2447; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(15,23,42,0.06);"><?php echo htmlspecialchars($error); ?></div>
                 <?php endif; ?>
 
                 <div class="panel">
@@ -175,6 +178,9 @@ $faculty = $stmt->fetchAll();
                             <div class="form-group"><label>Qualification</label><input type="text" name="qualification" class="form-control" placeholder="e.g. Ph.D"></div>
                             <div class="form-group"><label>Experience (Years)</label><input type="number" name="experience_years" class="form-control"></div>
                             <div class="form-group"><label>Research Papers</label><input type="number" name="research_papers" class="form-control" value="0"></div>
+                            <div class="form-group"><label>Specialization</label><input type="text" name="specialization" class="form-control" placeholder="e.g. Machine Learning"></div>
+                            <div class="form-group"><label>PhD From</label><input type="text" name="phd_from" class="form-control" placeholder="e.g. IIT Bombay"></div>
+                            <div class="form-group"><label>LinkedIn URL</label><input type="url" name="linkedin_url" class="form-control" placeholder="https://linkedin.com/in/..."></div>
                             <div class="form-group"><label>Upload Photo</label><input type="file" name="photo_file" class="form-control" accept="image/*"></div>
                             <div class="form-group"><label>OR Photo URL</label><input type="url" name="photo_url" class="form-control"></div>
                         </div>
@@ -201,7 +207,7 @@ $faculty = $stmt->fetchAll();
                                         <td>
                                             <form action="" method="POST" style="display:inline;" onsubmit="return confirm('Delete?');">
                                                 <input type="hidden" name="action" value="delete"><input type="hidden" name="f_id" value="<?php echo $f['id']; ?>">
-                                                <button type="submit" style="background:none; border:none; color:#dc2626; cursor:pointer;"><i class="ph ph-trash" style="font-size:1.2rem;"></i></button>
+                                                <button type="submit" style="background:none; border:none; color:#0F172A; cursor:pointer;"><i class="ph ph-trash" style="font-size:1.2rem;"></i></button>
                                             </form>
                                         </td>
                                     </tr>

@@ -262,7 +262,7 @@ $other_courses = [
     }
     
     body {
-      background-color: #EBF1FA;
+      background-color: rgba(11,36,71,0.04);
       background-image: 
         radial-gradient(at 0% 0%, rgba(219, 234, 254, 0.6) 0px, transparent 45%),
         radial-gradient(at 100% 100%, rgba(248, 250, 252, 0.8) 0px, transparent 50%),
@@ -481,7 +481,7 @@ $other_courses = [
     .pulse-dot {
       width: 6px;
       height: 6px;
-      background: #10b981;
+      background: #19376D;
       border-radius: 50%;
       display: inline-block;
       box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
@@ -502,9 +502,9 @@ $other_courses = [
       animation: pulseBlob 4s ease-in-out infinite alternate;
     }
     
-    .nb-orange { width: 45px; height: 45px; background: #FF9F43; bottom: 12px; left: 20px; }
-    .nb-yellow { width: 55px; height: 55px; background: #FFD200; top: 12px; right: 40px; animation-delay: -1.5s; }
-    .nb-blue { width: 38px; height: 38px; background: #54A0FF; top: 10px; left: 110px; animation-delay: -3s; }
+    .nb-orange { width: 45px; height: 45px; background: #19376D; bottom: 12px; left: 20px; }
+    .nb-yellow { width: 55px; height: 55px; background: #19376D; top: 12px; right: 40px; animation-delay: -1.5s; }
+    .nb-blue { width: 38px; height: 38px; background: #19376D; top: 10px; left: 110px; animation-delay: -3s; }
     
     @keyframes pulseBlob {
       0% { transform: scale(0.95); opacity: 0.25; }
@@ -591,7 +591,7 @@ $other_courses = [
     
     .visual-footer .footer-secured i {
       font-size: 0.95rem;
-      color: #10b981;
+      color: #19376D;
     }
     
     /* Right Forms Panel - Glass minimalism */
@@ -660,37 +660,6 @@ $other_courses = [
     @keyframes slideIn {
       from { transform: scaleX(0); }
       to { transform: scaleX(1); }
-    }
-    
-    .google-btn {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 18px;
-      border: 1px solid var(--border-glass);
-      border-radius: 100px;
-      background: rgba(255, 255, 255, 0.65);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      color: var(--ink-black);
-      font-size: 0.85rem;
-      font-weight: 700;
-      text-decoration: none;
-      cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 2px 8px rgba(11, 36, 71, 0.03);
-    }
-    
-    .google-btn:hover {
-      background: rgba(255, 255, 255, 0.95);
-      border-color: rgba(11, 36, 71, 0.15);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(11, 36, 71, 0.08);
-    }
-    
-    .google-btn img {
-      width: 18px;
-      height: 18px;
     }
     
     .form-grid-2 {
@@ -847,13 +816,13 @@ $other_courses = [
     
     .alert-danger {
       background: rgba(244, 63, 94, 0.08);
-      color: #f43f5e;
+      color: #0B2447;
       border: 1px solid rgba(244, 63, 94, 0.15);
     }
     
     .alert-success {
       background: rgba(16, 185, 129, 0.08);
-      color: #10b981;
+      color: #19376D;
       border: 1px solid rgba(16, 185, 129, 0.15);
     }
     
@@ -942,7 +911,7 @@ $other_courses = [
     }
     
     .city-item:hover::before {
-      color: #FF9F43; /* orange map-pin icon on hover */
+      color: #19376D; /* orange map-pin icon on hover */
       opacity: 1;
     }
     
@@ -1006,11 +975,6 @@ $other_courses = [
           <button class="tab-btn <?= ($action_type === 'login') ? 'active' : '' ?>" onclick="switchFormMode('login')">Login</button>
         </div>
         
-        <!-- Continue with Google button -->
-        <a href="#" class="google-btn">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G">
-          <span>Continue with Google</span>
-        </a>
       </div>
       
       <!-- Unified POST Form -->
@@ -1099,7 +1063,7 @@ $other_courses = [
         
         <!-- LOGIN CARD FIELDS -->
         <div id="login_fields_group" style="display: <?= ($action_type === 'login') ? 'block' : 'none' ?>;">
-          <p style="text-align:center; font-size:0.92rem; color:#64748b; margin-bottom:8px;">Click the button below to sign in with your phone number via Phone.Email.</p>
+          <p style="text-align:center; font-size:0.92rem; color:rgba(15,23,42,0.45); margin-bottom:8px;">Click the button below to sign in with your phone number via Phone.Email.</p>
         </div>
         
         

@@ -20,7 +20,7 @@ $suggestions = $pdo->query("SELECT * FROM search_suggestions ORDER BY frequency 
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h2{font-size:2rem;font-weight:800}.panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}.panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}tr:hover{background:rgba(0,0,0,.015)}.badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700}.sub-links{display:flex;gap:8px;margin-bottom:20px}.sub-link{font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .2s}.sub-link:hover,.sub-link.active{background:rgba(0,0,0,.05);color:var(--primary)}.tag-pill{display:inline-block;background:#f1f5f9;border:1px solid var(--border-color);padding:2px 8px;border-radius:4px;font-size:.75rem;margin:2px}.json-block{background:#f8fafc;padding:12px;border-radius:8px;font-family:monospace;font-size:.8rem;color:#475569;border:1px solid var(--border-color);overflow-x:auto}
+        body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h2{font-size:2rem;font-weight:800}.panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}.panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}tr:hover{background:rgba(0,0,0,.015)}.badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700}.sub-links{display:flex;gap:8px;margin-bottom:20px}.sub-link{font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .2s}.sub-link:hover,.sub-link.active{background:rgba(0,0,0,.05);color:var(--primary)}.tag-pill{display:inline-block;background:#F8FAFC;border:1px solid var(--border-color);padding:2px 8px;border-radius:4px;font-size:.75rem;margin:2px}.json-block{background:#f8fafc;padding:12px;border-radius:8px;font-family:monospace;font-size:.8rem;color:rgba(15,23,42,0.65);border:1px solid var(--border-color);overflow-x:auto}
     </style>
 </head>
 <body>
@@ -69,7 +69,7 @@ $suggestions = $pdo->query("SELECT * FROM search_suggestions ORDER BY frequency 
                             <?php foreach($indices as $idx): ?>
                             <tr>
                                 <td style="font-weight:600;"><?php echo htmlspecialchars($idx['index_name']); ?></td>
-                                <td><span class="badge" style="background:#e0e7ff;color:#3730a3;"><?php echo ucfirst($idx['entity_type']); ?></span></td>
+                                <td><span class="badge" style="background:rgba(11,36,71,0.06);color:#19376D;"><?php echo ucfirst($idx['entity_type']); ?></span></td>
                                 <td><?php echo number_format($idx['document_count']); ?></td>
                                 <td><?php echo strtoupper($idx['language']); ?></td>
                                 <td><div class="json-block"><?php echo htmlspecialchars($idx['search_weight_config']); ?></div></td>
@@ -90,7 +90,7 @@ $suggestions = $pdo->query("SELECT * FROM search_suggestions ORDER BY frequency 
                 <div class="panel">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <h3 style="border:none; margin:0;"><i class="ph ph-books"></i> Synonyms Dictionary</h3>
-                        <button class="btn" style="padding:4px 8px; font-size:0.8rem; background:#f1f5f9; border:1px solid var(--border-color);"><i class="ph ph-plus"></i> Add</button>
+                        <button class="btn" style="padding:4px 8px; font-size:0.8rem; background:#F8FAFC; border:1px solid var(--border-color);"><i class="ph ph-plus"></i> Add</button>
                     </div>
                     <div style="margin-top:20px; overflow-x:auto;">
                         <table>
@@ -119,7 +119,7 @@ $suggestions = $pdo->query("SELECT * FROM search_suggestions ORDER BY frequency 
                 <div class="panel">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <h3 style="border:none; margin:0;"><i class="ph ph-lightning"></i> Autocomplete Suggestions</h3>
-                        <button class="btn" style="padding:4px 8px; font-size:0.8rem; background:#f1f5f9; border:1px solid var(--border-color);"><i class="ph ph-plus"></i> Add</button>
+                        <button class="btn" style="padding:4px 8px; font-size:0.8rem; background:#F8FAFC; border:1px solid var(--border-color);"><i class="ph ph-plus"></i> Add</button>
                     </div>
                     <div style="margin-top:20px; overflow-x:auto;">
                         <table>
@@ -128,13 +128,13 @@ $suggestions = $pdo->query("SELECT * FROM search_suggestions ORDER BY frequency 
                                 <?php foreach($suggestions as $sug): ?>
                                 <tr>
                                     <td style="font-weight:600;"><?php echo htmlspecialchars($sug['suggestion_text']); ?></td>
-                                    <td><span class="badge" style="background:#f1f5f9;color:#475569;"><?php echo ucfirst($sug['suggestion_type']); ?></span></td>
+                                    <td><span class="badge" style="background:#F8FAFC;color:rgba(15,23,42,0.65);"><?php echo ucfirst($sug['suggestion_type']); ?></span></td>
                                     <td><?php echo number_format($sug['frequency']); ?></td>
                                     <td>
                                         <?php if($sug['is_active']): ?>
-                                            <i class="ph-fill ph-check-circle" style="color:#166534;"></i> Active
+                                            <i class="ph-fill ph-check-circle" style="color:#0B2447;"></i> Active
                                         <?php else: ?>
-                                            <i class="ph-fill ph-minus-circle" style="color:#dc2626;"></i> Inactive
+                                            <i class="ph-fill ph-minus-circle" style="color:#0F172A;"></i> Inactive
                                         <?php endif; ?>
                                     </td>
                                 </tr>

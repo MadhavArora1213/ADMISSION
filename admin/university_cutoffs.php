@@ -102,7 +102,7 @@ $cutoffs = $stmt->fetchAll();
         .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
         .form-group { margin-bottom: 16px; }
-        .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; }
+        .form-control { width: 100%; padding: 10px 14px; border: 1px solid rgba(15,23,42,0.15); border-radius: 8px; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
@@ -140,10 +140,10 @@ $cutoffs = $stmt->fetchAll();
                 </div>
 
                 <?php if(isset($_GET['msg'])): ?>
-                    <div style="padding: 16px; background: #dcfce7; color: #166534; border-radius: 8px; margin-bottom: 24px; border: 1px solid #bbf7d0;">Action completed successfully!</div>
+                    <div style="padding: 16px; background: rgba(11,36,71,0.04); color: #0B2447; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(11,36,71,0.04);">Action completed successfully!</div>
                 <?php endif; ?>
                 <?php if($error): ?>
-                    <div style="padding: 16px; background: #fee2e2; color: #991b1b; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fecaca;"><?php echo htmlspecialchars($error); ?></div>
+                    <div style="padding: 16px; background: rgba(15,23,42,0.06); color: #0B2447; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(15,23,42,0.06);"><?php echo htmlspecialchars($error); ?></div>
                 <?php endif; ?>
 
                 <div class="panel">
@@ -206,7 +206,7 @@ $cutoffs = $stmt->fetchAll();
                                         <td>
                                             <form action="" method="POST" style="display:inline;" onsubmit="return confirm('Delete?');">
                                                 <input type="hidden" name="action" value="delete"><input type="hidden" name="c_id" value="<?php echo $c['id']; ?>">
-                                                <button type="submit" style="background:none; border:none; color:#dc2626; cursor:pointer;"><i class="ph ph-trash" style="font-size:1.2rem;"></i></button>
+                                                <button type="submit" style="background:none; border:none; color:#0F172A; cursor:pointer;"><i class="ph ph-trash" style="font-size:1.2rem;"></i></button>
                                             </form>
                                         </td>
                                     </tr>

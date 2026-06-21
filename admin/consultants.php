@@ -73,7 +73,7 @@ $verified_c = $pdo->query("SELECT count(*) FROM consultants WHERE verified_consu
         .search-box { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border-color); border-radius: 6px; padding: 7px 12px; margin-left: auto; }
         .search-box input { border: none; outline: none; font-size: 0.85rem; width: 220px; }
         .btn-primary { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items:center; gap:6px; }
-        .btn-primary:hover { background: #1d4ed8; }
+        .btn-primary:hover { background: #19376D; }
         
         .panel { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -82,14 +82,14 @@ $verified_c = $pdo->query("SELECT count(*) FROM consultants WHERE verified_consu
         tr:hover { background-color: #f8fafc; }
         
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; text-transform: capitalize; }
-        .s-verified { background: #dcfce7; color: #166534; }
-        .s-unverified { background: #f1f5f9; color: #475569; }
+        .s-verified { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .s-unverified { background: #F8FAFC; color: rgba(15,23,42,0.65); }
         
-        .action-btn { width: 30px; height: 30px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color); text-decoration: none; transition: all 0.2s; }
+        .action-btn { width: 30px; height: 30px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; background: #F8FAFC; color: var(--text-dark); border: 1px solid var(--border-color); text-decoration: none; transition: all 0.2s; }
         .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .action-btn.delete:hover { background: #ef4444; color: white; border-color: #ef4444; }
+        .action-btn.delete:hover { background: #0F172A; color: white; border-color: #0F172A; }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #dcfce7; color: #166534; margin-bottom: 20px; border: 1px solid #bbf7d0; font-weight:500; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); font-weight:500; }
     </style>
 </head>
 <body>
@@ -120,7 +120,7 @@ $verified_c = $pdo->query("SELECT count(*) FROM consultants WHERE verified_consu
                     <div class="label">Total Consultants</div>
                 </div>
                 <div class="stat-card">
-                    <div class="num" style="color:#166534;"><?php echo $verified_c; ?></div>
+                    <div class="num" style="color:#0B2447;"><?php echo $verified_c; ?></div>
                     <div class="label">Verified Consultants</div>
                 </div>
             </div>
@@ -163,7 +163,7 @@ $verified_c = $pdo->query("SELECT count(*) FROM consultants WHERE verified_consu
                                         <?php if(!empty($c['profile_picture'])): ?>
                                             <img src="../<?php echo htmlspecialchars($c['profile_picture']); ?>" alt="" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
                                         <?php else: ?>
-                                            <div style="width:40px; height:40px; border-radius:50%; background:#e2e8f0; display:flex; align-items:center; justify-content:center; color:#64748b; font-weight:700;">
+                                            <div style="width:40px; height:40px; border-radius:50%; background:rgba(15,23,42,0.08); display:flex; align-items:center; justify-content:center; color:rgba(15,23,42,0.45); font-weight:700;">
                                                 <?php echo substr($c['consultant_name'], 0, 1); ?>
                                             </div>
                                         <?php endif; ?>
@@ -171,7 +171,7 @@ $verified_c = $pdo->query("SELECT count(*) FROM consultants WHERE verified_consu
                                             <div style="font-weight:600; color:var(--text-dark);">
                                                 <?php echo htmlspecialchars($c['consultant_name']); ?>
                                             </div>
-                                            <div style="font-size:0.75rem; color:var(--text-muted);"><i class="ph ph-star-fill" style="color:#eab308"></i> <?php echo $c['consultant_rating'] ?: 'N/A'; ?></div>
+                                            <div style="font-size:0.75rem; color:var(--text-muted);"><i class="ph ph-star-fill" style="color:#19376D"></i> <?php echo $c['consultant_rating'] ?: 'N/A'; ?></div>
                                         </div>
                                     </div>
                                 </td>

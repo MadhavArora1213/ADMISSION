@@ -96,17 +96,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_report'])) {
 
         .report-list { display: flex; flex-direction: column; gap: 16px; }
         .report-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--border-color); border-radius: 8px; background: #f8fafc; transition: all 0.2s; }
-        .report-item:hover { border-color: var(--primary); background: #f0f9ff; }
+        .report-item:hover { border-color: var(--primary); background: rgba(11,36,71,0.04); }
         .report-info { display: flex; align-items: center; gap: 16px; }
-        .report-icon { width: 44px; height: 44px; background: #e0f2fe; color: var(--primary); display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 1.6rem; }
-        .report-icon.csv { background: #dcfce7; color: #16a34a; }
+        .report-icon { width: 44px; height: 44px; background: rgba(11,36,71,0.04); color: var(--primary); display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 1.6rem; }
+        .report-icon.csv { background: rgba(11,36,71,0.04); color: #0B2447; }
         .report-title { font-weight: 700; color: var(--text-dark); margin-bottom: 4px; font-size: 1.05rem; }
         .report-meta { font-size: 0.85rem; color: var(--text-muted); }
         
         .btn-download { background: #fff; color: var(--text-dark); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; cursor:pointer;}
         .btn-download:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
         
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: #fee2e2; color: #b91c1c; margin-bottom: 20px; border: 1px solid #fecaca; font-weight:500; }
+        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(15,23,42,0.06); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(15,23,42,0.06); font-weight:500; }
     </style>
 </head>
 <body>

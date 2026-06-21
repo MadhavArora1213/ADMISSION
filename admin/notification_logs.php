@@ -64,7 +64,7 @@ $logs = $pdo->query("SELECT l.*, c.campaign_name
                         <tbody>
                             <?php foreach($logs as $l): ?>
                             <tr>
-                                <td style="font-family:monospace; font-size:0.8rem; color:#64748b;" title="<?php echo htmlspecialchars($l['user_id']); ?>">
+                                <td style="font-family:monospace; font-size:0.8rem; color:rgba(15,23,42,0.45);" title="<?php echo htmlspecialchars($l['user_id']); ?>">
                                     <?php echo substr($l['user_id'], 0, 12).'...'; ?>
                                 </td>
                                 <td>
@@ -74,16 +74,16 @@ $logs = $pdo->query("SELECT l.*, c.campaign_name
                                     <span style="color:var(--text-muted); font-style:italic;">Manual / System</span>
                                     <?php endif; ?>
                                 </td>
-                                <td><span class="badge" style="background:#e0e7ff;color:#3730a3;"><?php echo ucfirst($l['channel']); ?></span></td>
+                                <td><span class="badge" style="background:rgba(11,36,71,0.06);color:#19376D;"><?php echo ucfirst($l['channel']); ?></span></td>
                                 <td>
                                     <?php 
-                                        $color = '#475569'; $bg = '#f1f5f9';
-                                        if(in_array($l['status'], ['sent','delivered','opened'])) { $color = '#166534'; $bg = '#dcfce7'; }
-                                        if(in_array($l['status'], ['failed','bounced'])) { $color = '#dc2626'; $bg = '#fee2e2'; }
+                                        $color = 'rgba(15,23,42,0.65)'; $bg = '#F8FAFC';
+                                        if(in_array($l['status'], ['sent','delivered','opened'])) { $color = '#0B2447'; $bg = 'rgba(11,36,71,0.04)'; }
+                                        if(in_array($l['status'], ['failed','bounced'])) { $color = '#0F172A'; $bg = 'rgba(15,23,42,0.06)'; }
                                     ?>
                                     <span class="badge" style="background:<?php echo $bg; ?>;color:<?php echo $color; ?>;"><?php echo ucfirst($l['status']); ?></span>
                                 </td>
-                                <td style="color:#dc2626; font-size:0.8rem; max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                <td style="color:#0F172A; font-size:0.8rem; max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                     <?php echo htmlspecialchars($l['error_message']); ?>
                                 </td>
                                 <td style="font-size:0.8rem; color:var(--text-muted);"><?php echo date('M d, Y H:i:s', strtotime($l['sent_at'])); ?></td>
