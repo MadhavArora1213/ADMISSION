@@ -560,6 +560,54 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
     .portal-section-content.active {
       display: block;
     }
+
+    /* Responsive Media Queries */
+    @media (max-width: 992px) {
+      .abroad-hero {
+        padding: 50px 20px;
+      }
+      
+      .abroad-hero h1 {
+        font-size: 2.2rem;
+      }
+      
+      .abroad-portal-container {
+        padding: 40px 20px 80px 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .portal-tabs {
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding-bottom: 8px;
+        white-space: nowrap;
+        gap: 8px;
+      }
+      
+      .portal-tab-btn {
+        font-size: 1rem;
+        padding: 8px 16px;
+      }
+      
+      .uni-grid, .cons-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .visa-head-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .portal-cta-banner {
+        padding: 30px 20px;
+      }
+      
+      .portal-cta-banner h2 {
+        font-size: 1.65rem;
+      }
+    }
   </style>
 </head>
 <body>
