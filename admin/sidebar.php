@@ -35,6 +35,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </a>
         <a href="exams.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'exams.php' || basename($_SERVER['PHP_SELF']) == 'exam_form.php' ? 'active' : ''; ?>"><i class="ph ph-exam"></i> Exams</a>
         <a href="courses.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['courses.php', 'course_form.php', 'course_specializations.php', 'course_career_paths.php']) ? 'active' : ''; ?>"><i class="ph ph-books"></i> Courses</a>
+        <a href="careers.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['careers.php', 'career_form.php']) ? 'active' : ''; ?>"><i class="ph ph-compass"></i> Careers</a>
         <a href="course_categories.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'course_categories.php' ? 'active' : ''; ?>"><i class="ph ph-folders"></i> Course Categories</a>
         <a href="applications.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['applications.php', 'application_details.php']) ? 'active' : ''; ?>"><i class="ph ph-file-text"></i> Applications</a>
         <a href="scholarships.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['scholarships.php', 'scholarship_form.php']) ? 'active' : ''; ?>"><i class="ph ph-graduation-cap"></i> Scholarships</a>

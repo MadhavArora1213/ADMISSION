@@ -14,7 +14,8 @@ if ($status_filter !== 'all') {
     $params[] = $status_filter;
 }
 if ($search !== '') {
-    $where[] = "(l.phone LIKE ? OR l.email LIKE ? OR l.city LIKE ?)";
+    $where[] = "(l.name LIKE ? OR l.phone LIKE ? OR l.email LIKE ? OR l.city LIKE ?)";
+    $params[] = "%$search%";
     $params[] = "%$search%";
     $params[] = "%$search%";
     $params[] = "%$search%";
@@ -143,7 +144,7 @@ $counsellors = $counselStmt->fetchAll();
                     <input type="hidden" name="status" value="<?php echo htmlspecialchars($status_filter); ?>">
                     <div class="search-box">
                         <i class="ph ph-magnifying-glass" style="color:var(--text-muted);"></i>
-                        <input type="text" name="q" placeholder="Search phone, email, city..." value="<?php echo htmlspecialchars($search); ?>">
+                        <input type="text" name="q" placeholder="Search name, phone, email, city..." value="<?php echo htmlspecialchars($search); ?>">
                     </div>
                     <button type="submit" class="btn btn-primary" style="padding:9px 16px;">Search</button>
                 </form>
@@ -174,6 +175,9 @@ $counsellors = $counselStmt->fetchAll();
                             <tr>
                                 <td style="white-space:nowrap;"><?php echo date('d M y', strtotime($l['created_at'])); ?></td>
                                 <td>
+                                    <?php if(!empty($l['name'])): ?>
+                                        <div style="font-weight:700; color:var(--text-dark); margin-bottom: 2px;"><?php echo htmlspecialchars($l['name']); ?></div>
+                                    <?php endif; ?>
                                     <div style="font-weight:600;"><?php echo htmlspecialchars($l['phone']); ?></div>
                                     <div style="font-size:0.8rem; color:var(--text-muted);"><?php echo htmlspecialchars($l['email']); ?></div>
                                     <?php if($l['city']): ?><div style="font-size:0.75rem; color:var(--text-muted);"><?php echo htmlspecialchars($l['city'].', '.$l['state']); ?></div><?php endif; ?>

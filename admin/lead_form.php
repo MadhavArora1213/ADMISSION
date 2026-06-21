@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff));
 
             $data = [
+                'name'            => $_POST['name'] ?: null,
                 'lead_type'       => $_POST['lead_type'] ?: null,
                 'phone'           => $_POST['phone'],
                 'email'           => $_POST['email'],
@@ -192,6 +193,7 @@ function v($arr, $key, $def='') { return isset($arr[$key]) ? htmlspecialchars($a
                 <div class="form-section">
                     <h3><i class="ph ph-user-circle"></i> Contact Details</h3>
                     <div class="form-grid">
+                        <div class="form-group"><label>Full Name</label><input type="text" name="name" class="form-control" value="<?php echo v($lead,'name'); ?>"></div>
                         <div class="form-group"><label>Phone *</label><input type="text" name="phone" class="form-control" required value="<?php echo v($lead,'phone'); ?>"></div>
                         <div class="form-group"><label>Email *</label><input type="email" name="email" class="form-control" required value="<?php echo v($lead,'email'); ?>"></div>
                         <div class="form-group"><label>City</label><input type="text" name="city" class="form-control" value="<?php echo v($lead,'city'); ?>"></div>
