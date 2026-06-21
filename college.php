@@ -40,7 +40,7 @@ $courses = $placements = $cutoffs = $rankings = $gallery = $faculty = $faqs = $q
 
 try { $s=$pdo->prepare("SELECT * FROM college_courses WHERE college_id=? ORDER BY course_name ASC"); $s->execute([$cid]); $courses=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 try { $s=$pdo->prepare("SELECT * FROM college_placements WHERE college_id=? ORDER BY placement_year DESC"); $s->execute([$cid]); $placements=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
-try { $s=$pdo->prepare("SELECT cc.*,e.exam_name,co.course_name FROM college_cutoffs cc LEFT JOIN exams e ON e.id=cc.exam_id LEFT JOIN courses co ON co.id=cc.course_id WHERE cc.college_id=? ORDER BY cc.cutoff_year DESC,e.exam_name ASC"); $s->execute([$cid]); $cutoffs=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
+try { $s=$pdo->prepare("SELECT cc.*, cc.year AS cutoff_year, e.exam_name, cc2.course_name FROM college_cutoffs cc LEFT JOIN exams e ON e.id=cc.exam_id LEFT JOIN college_courses cc2 ON cc2.id=cc.course_id WHERE cc.college_id=? ORDER BY cc.year DESC, e.exam_name ASC"); $s->execute([$cid]); $cutoffs=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 try { $s=$pdo->prepare("SELECT * FROM rankings WHERE college_id=? ORDER BY ranking_year DESC,rank_position ASC"); $s->execute([$cid]); $rankings=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 try { $s=$pdo->prepare("SELECT id,college_id,image_url,video_url,video_type,caption,image_type,document_url,document_type,logo_url,cover_image_url,`360_tour_url`,virtual_tour_enabled FROM college_media WHERE college_id=? ORDER BY sort_order ASC"); $s->execute([$cid]); $gallery=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 try { $s=$pdo->prepare("SELECT * FROM college_faculty WHERE college_id=? ORDER BY faculty_name ASC"); $s->execute([$cid]); $faculty=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
@@ -415,7 +415,18 @@ if (isset($_SESSION['user_id'])) {
                 <tr>
                   <td>
                     <strong><?= htmlspecialchars($co['course_name'] ?? '—') ?></strong>
-                    <?php if (!empty($co['specializations'])): ?><br><small style="color:rgba(15,23,42,0.4)"><?= htmlspecialchars(is_string($co['specializations']) ? $co['specializations'] : implode(', ', json_decode($co['specializations'],true) ?: [])) ?></small><?php endif; ?>
+                    <?php if (!empty($co['specializations'])): ?>
+                      <br><small style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px"><?php
+                        $specs = is_string($co['specializations']) ? json_decode($co['specializations'], true) : $co['specializations'];
+                        if (is_array($specs)) {
+                          foreach ($specs as $sp) {
+                            echo '<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:rgba(37,99,235,0.08);color:#2563eb;font-size:11px;white-space:nowrap">' . htmlspecialchars($sp) . '</span>';
+                          }
+                        } else {
+                          echo '<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:rgba(37,99,235,0.08);color:#2563eb;font-size:11px;white-space:nowrap">' . htmlspecialchars($co['specializations']) . '</span>';
+                        }
+                      ?></small>
+                    <?php endif; ?>
                     <?php if (!empty($co['eligibility_criteria'])): ?><br><small style="color:rgba(15,23,42,0.4)">Eligibility: <?= htmlspecialchars($co['eligibility_criteria']) ?></small><?php endif; ?>
                   </td>
                   <td><span class="course-level-badge <?= $levelClass ?>"><?= htmlspecialchars($co['course_level'] ?? '—') ?></span></td>

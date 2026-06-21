@@ -119,6 +119,10 @@ Options +FollowSymLinks
 # -------------------------------------------------
 # MIME Types & Compression
 # -------------------------------------------------
+<IfModule mod_mime.c>
+    AddType image/svg+xml .svg
+    AddType image/svg+xml .svgz
+</IfModule>
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/css application/javascript text/javascript application/json
 </IfModule>

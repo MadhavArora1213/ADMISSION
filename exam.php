@@ -59,7 +59,7 @@ $tabIcons = [
     .exam-hero-inner { display: flex; gap: 32px; align-items: flex-start; }
     .exam-hero-logo { width: 120px; height: 120px; border-radius: 20px; background: #fff; padding: 10px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
     .exam-hero-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.4rem; font-weight: 800; margin: 0 0 8px 0; }
-    .exam-hero-sub { font-size: 1.1rem; color: rgba(15,23,42,0.15); margin-bottom: 16px; }
+    .exam-hero-sub { font-size: 1.1rem; color: rgba(255,255,255,0.85); margin-bottom: 16px; }
     .exam-hero-chips { display: flex; flex-wrap: wrap; gap: 12px; }
     .exam-hero-chips span { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; font-size: 0.85rem; font-weight: 600; backdrop-filter: blur(4px); }
     .exam-hero-actions { margin-left: auto; display: flex; flex-direction: column; gap: 12px; }
@@ -111,7 +111,7 @@ $tabIcons = [
         Apply Now <i class="ph-bold ph-arrow-up-right"></i>
       </a>
       <?php endif; ?>
-      <?php if ($exam['official_website']): ?>
+      <?php if ($exam['official_website'] && ($exam['official_website'] !== ($exam['application_url'] ?? ''))): ?>
       <a href="<?= htmlspecialchars($exam['official_website']) ?>" target="_blank" style="color:#fff;text-align:center;text-decoration:underline;font-weight:500;font-size:0.9rem">
         Official Website
       </a>
@@ -285,7 +285,20 @@ $tabIcons = [
               <?php foreach($topics as $t): ?>
               <tr style="border-bottom:1px solid var(--cp-border)">
                 <td style="padding:16px 12px;font-weight:600"><?= htmlspecialchars($t['topic']) ?>
-                  <?php if($t['subtopics']): ?><div style="font-size:0.85rem;color:rgba(15,23,42,0.45);font-weight:400;margin-top:4px"><?= htmlspecialchars($t['subtopics']) ?></div><?php endif; ?>
+                  <?php if($t['subtopics']): ?>
+                    <?php
+                      $subtopics = json_decode($t['subtopics'], true);
+                      if (is_array($subtopics)):
+                    ?>
+                    <div style="font-size:0.85rem;color:rgba(15,23,42,0.6);font-weight:400;margin-top:6px;line-height:1.7">
+                      <?php foreach($subtopics as $st): ?>
+                        <span style="display:inline-block;background:var(--cp-light);border:1px solid var(--cp-border);padding:2px 10px;border-radius:12px;margin:2px 4px 2px 0;font-size:0.8rem"><?= htmlspecialchars($st) ?></span>
+                      <?php endforeach; ?>
+                    </div>
+                    <?php else: ?>
+                      <div style="font-size:0.85rem;color:rgba(15,23,42,0.6);font-weight:400;margin-top:4px"><?= htmlspecialchars($t['subtopics']) ?></div>
+                    <?php endif; ?>
+                  <?php endif; ?>
                 </td>
                 <td style="padding:16px 12px;color:var(--cp-blue);font-weight:700"><?= $t['weightage_pct'] ?>%</td>
               </tr>
@@ -330,21 +343,21 @@ $tabIcons = [
         <table style="width:100%;border-collapse:collapse;margin-top:16px">
           <thead>
             <tr style="border-bottom:2px solid var(--cp-border);text-align:left;background:var(--cp-light)">
-              <th style="padding:12px">College</th>
-              <th style="padding:12px">Course</th>
+              <th style="padding:12px">Year</th>
               <th style="padding:12px">Category</th>
               <th style="padding:12px">Opening Rank</th>
               <th style="padding:12px">Closing Rank</th>
+              <th style="padding:12px">Round</th>
             </tr>
           </thead>
           <tbody>
             <?php foreach($cutoffs as $c): ?>
             <tr style="border-bottom:1px solid var(--cp-border)">
-              <td style="padding:16px 12px;font-weight:600"><a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/college/<?= $c['college_slug'] ?>" style="color:var(--cp-blue);text-decoration:none"><?= htmlspecialchars($c['college_name']) ?></a></td>
-              <td style="padding:16px 12px"><?= htmlspecialchars($c['course_name'] ?? '-') ?></td>
-              <td style="padding:16px 12px"><?= htmlspecialchars($c['category']) ?></td>
-              <td style="padding:16px 12px"><?= $c['opening_rank'] ?></td>
-              <td style="padding:16px 12px;font-weight:700;color:#0F172A"><?= $c['closing_rank'] ?></td>
+              <td style="padding:16px 12px;font-weight:600"><?= (int)$c['year'] ?></td>
+              <td style="padding:16px 12px"><span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.8rem;font-weight:600;background:<?= $c['category']==='General' ? '#e0f2fe' : ($c['category']==='OBC' ? '#fef3c7' : ($c['category']==='SC' ? '#ede9fe' : ($c['category']==='ST' ? '#fce7f3' : '#d1fae5'))) ?>;color:<?= $c['category']==='General' ? '#0369a1' : ($c['category']==='OBC' ? '#92400e' : ($c['category']==='SC' ? '#6b21a8' : ($c['category']==='ST' ? '#9d174d' : '#065f46'))) ?>"><?= htmlspecialchars($c['category']) ?></span></td>
+              <td style="padding:16px 12px"><?= number_format((int)$c['opening_rank']) ?></td>
+              <td style="padding:16px 12px;font-weight:700;color:#0F172A"><?= number_format((int)$c['closing_rank']) ?></td>
+              <td style="padding:16px 12px"><?= $c['round'] == 0 ? 'Prelims' : 'Final' ?></td>
             </tr>
             <?php endforeach; ?>
           </tbody>
