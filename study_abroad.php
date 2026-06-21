@@ -60,7 +60,7 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
     .abroad-hero {
       background: linear-gradient(135deg, var(--oxford-navy) 0%, var(--yale-blue) 100%);
       color: #fff;
-      padding: 80px 0;
+      padding: 60px 0 50px 0;
       position: relative;
       overflow: hidden;
       text-align: center;
@@ -124,145 +124,115 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
       transform: translateY(-2px);
     }
 
-    /* Search & Tab Container Section */
-    .abroad-portal-container {
-      padding: 60px 0 100px 0;
-    }
-
-    /* Navigation Tabs */
-    .portal-tabs {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-bottom: 40px;
-      border-bottom: 1.5px solid var(--border-color-alt);
-      padding-bottom: 12px;
-    }
-
-    .portal-tab-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted-alt);
-      font-size: 1.1rem;
-      font-weight: 700;
-      padding: 10px 24px;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.3s;
-      font-family: 'Space Grotesk', sans-serif;
-    }
-
-    .portal-tab-btn:hover {
-      color: var(--yale-blue);
-    }
-
-    .portal-tab-btn.active {
-      color: var(--oxford-navy);
-    }
-
-    .portal-tab-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: -14px;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: var(--oxford-navy);
-      border-radius: 4px;
-    }
-
     /* Universities List Grid */
     .uni-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 30px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 1100px) {
+      .uni-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 700px) {
+      .uni-grid { grid-template-columns: 1fr; }
     }
 
     .uni-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color-alt);
-      border-radius: 20px;
-      padding: 24px;
+      border-radius: 16px;
+      padding: 0;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
       transition: all 0.3s ease;
       position: relative;
+      overflow: hidden;
     }
 
     .uni-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 30px rgba(11, 36, 71, 0.06);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(11, 36, 71, 0.08);
       border-color: rgba(25, 55, 109, 0.2);
+    }
+
+    .uni-card-top {
+      padding: 20px 20px 16px 20px;
+      flex: 1;
     }
 
     .uni-badge-qs {
       position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(25, 55, 109, 0.08);
-      color: var(--yale-blue);
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.78rem;
+      top: 0;
+      right: 0;
+      background: var(--yale-blue);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 0 16px 0 10px;
+      font-size: 0.72rem;
       font-weight: 700;
+      letter-spacing: 0.3px;
     }
 
     .uni-header {
       display: flex;
-      gap: 16px;
+      gap: 14px;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
 
     .uni-logo {
-      width: 60px;
-      height: 60px;
+      width: 56px;
+      height: 56px;
       border-radius: 12px;
       object-fit: cover;
       border: 1px solid var(--border-color-alt);
+      flex-shrink: 0;
+      background: var(--snow-pearl);
     }
 
     .uni-meta h3 {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.25rem;
+      font-size: 1.05rem;
       font-weight: 700;
       color: var(--oxford-navy);
-      margin-bottom: 4px;
+      margin-bottom: 3px;
+      line-height: 1.25;
     }
 
     .uni-loc {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: var(--text-muted-alt);
       display: flex;
       align-items: center;
       gap: 4px;
-      font-weight: 550;
+      font-weight: 500;
     }
 
     .uni-desc {
-      font-size: 0.9rem;
-      color: #475569;
+      font-size: 0.83rem;
+      color: #64748b;
       line-height: 1.5;
-      margin-bottom: 20px;
-      flex-grow: 1;
+      margin-bottom: 0;
+    }
+
+    .uni-card-bottom {
+      padding: 0 20px 20px 20px;
     }
 
     .uni-details-list {
       border-top: 1px solid var(--border-color-alt);
-      border-bottom: 1px solid var(--border-color-alt);
       padding: 14px 0;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      font-size: 0.82rem;
+      gap: 10px;
     }
 
     .detail-item span {
       display: block;
       color: var(--text-muted-alt);
-      font-size: 0.75rem;
+      font-size: 0.68rem;
       margin-bottom: 2px;
       text-transform: uppercase;
       font-weight: 600;
@@ -271,7 +241,7 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
 
     .detail-item strong {
       color: var(--oxford-navy);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 700;
     }
 
@@ -281,11 +251,11 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
       background: var(--oxford-navy);
       color: #fff;
       text-decoration: none;
-      padding: 12px;
+      padding: 11px;
       border-radius: 10px;
       font-weight: 700;
       transition: all 0.3s;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
     .uni-cta:hover {
@@ -417,21 +387,27 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
     /* Consultants style */
     .cons-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 30px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 1100px) {
+      .cons-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 700px) {
+      .cons-grid { grid-template-columns: 1fr; }
     }
 
     .cons-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color-alt);
-      border-radius: 20px;
-      padding: 24px;
+      border-radius: 16px;
+      padding: 22px;
       transition: all 0.3s;
     }
 
     .cons-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.04);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.06);
       border-color: rgba(25, 55, 109, 0.15);
     }
 
@@ -554,11 +530,65 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
 
     /* JS Controlled displays */
     .portal-section-content {
-      display: none;
+      display: none !important;
     }
 
     .portal-section-content.active {
-      display: block;
+      display: block !important;
+    }
+
+    /* Portal Tabs */
+    .portal-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 40px;
+      border-bottom: 1.5px solid var(--border-color-alt);
+      padding-bottom: 0;
+      flex-wrap: wrap;
+    }
+
+    .portal-tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted-alt);
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 12px 28px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .portal-tab-btn:hover {
+      color: var(--yale-blue);
+    }
+
+    .portal-tab-btn.active {
+      color: var(--oxford-navy);
+    }
+
+    .portal-tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--oxford-navy);
+      border-radius: 3px 3px 0 0;
+    }
+
+    .abroad-portal-container {
+      padding: 40px 0 80px 0;
+    }
+
+    @media (max-width: 768px) {
+      .abroad-hero h1 { font-size: 2rem; }
+      .abroad-hero p { font-size: 1rem; }
+      .portal-tab-btn { font-size: 0.88rem; padding: 10px 16px; }
+      .visa-doc-list { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -604,7 +634,7 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
     </div>
 
     <!-- 1. UNIVERSITIES TAB -->
-    <div id="section-universities" class="portal-section-content <?= $activeTab === 'universities' ? 'active' : '' ?>">
+    <div id="section-universities" class="portal-section-content <?= $activeTab === 'universities' ? 'active' : '' ?>" style="<?= $activeTab === 'universities' ? 'display:block !important' : '' ?>">
       <?php if (empty($universities)): ?>
         <div style="text-align:center; padding: 60px 0; color: var(--text-muted-alt);">
           <i class="ph ph-folder-open" style="font-size:3rem; margin-bottom:12px;"></i>
@@ -614,8 +644,8 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
         <div class="uni-grid">
           <?php foreach ($universities as $uni): ?>
             <div class="uni-card" data-country="<?= htmlspecialchars($uni['country']) ?>">
-              <div>
-                <span class="uni-badge-qs">QS Rank: #<?= htmlspecialchars((string)$uni['qs_rank']) ?></span>
+              <span class="uni-badge-qs">QS #<?= htmlspecialchars((string)$uni['qs_rank']) ?></span>
+              <div class="uni-card-top">
                 <div class="uni-header">
                   <img src="<?= htmlspecialchars($uni['logo_url'] ?: 'https://images.unsplash.com/photo-1592280771190-3e2e4d571952?w=100&h=100&fit=crop') ?>" alt="logo" class="uni-logo">
                   <div class="uni-meta">
@@ -623,13 +653,12 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
                     <div class="uni-loc"><i class="ph ph-map-pin"></i> <?= htmlspecialchars($uni['city']) ? htmlspecialchars($uni['city']) . ', ' : '' ?><?= htmlspecialchars($uni['country']) ?></div>
                   </div>
                 </div>
-                <p class="uni-desc"><?= htmlspecialchars(substr(strip_tags($uni['description']), 0, 140)) ?>...</p>
+                <p class="uni-desc"><?= htmlspecialchars(substr(strip_tags($uni['description']), 0, 120)) ?></p>
               </div>
-
-              <div>
+              <div class="uni-card-bottom">
                 <div class="uni-details-list">
                   <div class="detail-item">
-                    <span>Intake Months</span>
+                    <span>Intake</span>
                     <strong>
                       <?php 
                         $months = json_decode($uni['intake_months'] ?? '[]', true);
@@ -638,19 +667,19 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
                     </strong>
                   </div>
                   <div class="detail-item">
-                    <span>Est. Tuition (Annual)</span>
-                    <strong><?= $uni['tuition_usd_annual'] > 0 ? '$' . number_format($uni['tuition_usd_annual'], 0) : 'Free/Varies' ?></strong>
+                    <span>Tuition/Year</span>
+                    <strong><?= $uni['tuition_usd_annual'] > 0 ? '$' . number_format($uni['tuition_usd_annual'], 0) : 'Free' ?></strong>
                   </div>
                   <div class="detail-item">
-                    <span>Min IELTS</span>
+                    <span>IELTS</span>
                     <strong><?= $uni['min_ielts'] ?: '6.5' ?></strong>
                   </div>
                   <div class="detail-item">
-                    <span>Min TOEFL / GRE</span>
+                    <span>TOEFL / GRE</span>
                     <strong><?= $uni['min_toefl'] ?: '90' ?> / <?= $uni['min_gre'] ?: 'N/A' ?></strong>
                   </div>
                 </div>
-                <a href="counselling" class="uni-cta">Apply & Get Counselling</a>
+                <a href="counselling" class="uni-cta">Apply Now</a>
               </div>
             </div>
           <?php endforeach; ?>
@@ -659,7 +688,7 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
     </div>
 
     <!-- 2. VISA GUIDES TAB -->
-    <div id="section-visas" class="portal-section-content <?= $activeTab === 'visas' ? 'active' : '' ?>">
+    <div id="section-visas" class="portal-section-content <?= $activeTab === 'visas' ? 'active' : '' ?>" style="<?= $activeTab === 'visas' ? 'display:block !important' : '' ?>">
       <?php if (empty($visas)): ?>
         <div style="text-align:center; padding: 60px 0; color: var(--text-muted-alt);">
           <i class="ph ph-folder-open" style="font-size:3rem; margin-bottom:12px;"></i>
@@ -723,7 +752,7 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
     </div>
 
     <!-- 3. CONSULTANTS TAB -->
-    <div id="section-consultants" class="portal-section-content <?= $activeTab === 'consultants' ? 'active' : '' ?>">
+    <div id="section-consultants" class="portal-section-content <?= $activeTab === 'consultants' ? 'active' : '' ?>" style="<?= $activeTab === 'consultants' ? 'display:block !important' : '' ?>">
       <?php if (empty($consultants)): ?>
         <div style="text-align:center; padding: 60px 0; color: var(--text-muted-alt);">
           <i class="ph ph-folder-open" style="font-size:3rem; margin-bottom:12px;"></i>
@@ -807,14 +836,19 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
   function switchSection(sectionId, btn) {
     // Hide all section content
     const sections = document.querySelectorAll('.portal-section-content');
-    sections.forEach(sec => sec.classList.remove('active'));
+    sections.forEach(sec => {
+      sec.classList.remove('active');
+      sec.style.display = 'none';
+    });
 
     // Remove active state from all tab buttons
     const buttons = document.querySelectorAll('.portal-tab-btn');
     buttons.forEach(b => b.classList.remove('active'));
 
     // Show selected section and activate current button
-    document.getElementById('section-' + sectionId).classList.add('active');
+    const target = document.getElementById('section-' + sectionId);
+    target.classList.add('active');
+    target.style.display = 'block';
     btn.classList.add('active');
   }
 

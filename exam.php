@@ -32,7 +32,7 @@ $dates = getExamDates($pdo, $exam_id);
 $syllabus = getExamSyllabus($pdo, $exam_id);
 $cutoffs = getExamCutoffs($pdo, $exam_id);
 
-$pageTitle = $exam['exam_abbreviation'] . ' 2026: Dates, Syllabus, Pattern, Registration';
+$pageTitle = ($exam['exam_abbreviation'] ?: $exam['exam_name']) . ': Dates, Syllabus, Pattern, Registration';
 $metaDesc = 'Complete details for ' . $exam['exam_name'] . ' including exam dates, syllabus, exam pattern, eligibility, and cutoffs.';
 
 $tabIcons = [
@@ -90,15 +90,19 @@ $tabIcons = [
 <!-- HERO -->
 <div class="exam-hero">
   <div class="container exam-hero-inner">
-    <img src="<?= cImg($exam['conducting_body_logo']) ?>" class="exam-hero-logo" alt="<?= htmlspecialchars($exam['exam_abbreviation']) ?>">
+    <img src="<?= cImg($exam['conducting_body_logo']) ?>" class="exam-hero-logo" alt="<?= htmlspecialchars($exam['exam_abbreviation'] ?? $exam['exam_name'] ?? '') ?>">
     <div>
-      <h1 class="exam-hero-title"><?= htmlspecialchars($exam['exam_name']) ?> (<?= htmlspecialchars($exam['exam_abbreviation']) ?>)</h1>
-      <p class="exam-hero-sub">Conducted by <?= htmlspecialchars($exam['conducting_body']) ?></p>
+      <h1 class="exam-hero-title"><?= htmlspecialchars($exam['exam_name']) ?><?= !empty($exam['exam_abbreviation']) ? ' (' . htmlspecialchars($exam['exam_abbreviation']) . ')' : '' ?></h1>
+      <p class="exam-hero-sub">Conducted by <?= htmlspecialchars($exam['conducting_body'] ?: 'TBA') ?></p>
       <div class="exam-hero-chips">
-        <span><i class="ph ph-bank"></i> <?= ucfirst($exam['exam_level']) ?> Level</span>
-        <span><i class="ph ph-laptop"></i> <?= ucfirst($exam['exam_mode']) ?></span>
-        <span><i class="ph ph-timer"></i> <?= $exam['duration_minutes'] ?> Mins</span>
-        <span><i class="ph ph-users"></i> <?= number_format($exam['applicants_last_year']/100000, 1) ?>L+ Applicants</span>
+        <span><i class="ph ph-bank"></i> <?= ucfirst($exam['exam_level'] ?? 'National') ?> Level</span>
+        <span><i class="ph ph-laptop"></i> <?= ucfirst($exam['exam_mode'] ?? 'Online') ?></span>
+        <?php if ($exam['duration_minutes']): ?>
+        <span><i class="ph ph-timer"></i> <?= (int)$exam['duration_minutes'] ?> Mins</span>
+        <?php endif; ?>
+        <?php if ($exam['applicants_last_year']): ?>
+        <span><i class="ph ph-users"></i> <?= number_format((int)$exam['applicants_last_year']/100000, 1) ?>L+ Applicants</span>
+        <?php endif; ?>
       </div>
     </div>
     <div class="exam-hero-actions">
@@ -136,8 +140,8 @@ $tabIcons = [
   <div class="college-card" style="padding:32px;">
     
     <?php if ($tab === 'info'): ?>
-      <h2 style="font-size:1.5rem;font-weight:800;color:var(--cp-blue);margin-bottom:24px">About <?= htmlspecialchars($exam['exam_abbreviation']) ?></h2>
-      <p style="font-size:1.05rem;line-height:1.7;color:rgba(15,23,42,0.8)"><?= nl2br(htmlspecialchars($exam['normalisation_method'] ?: $exam['exam_name'] . ' is a ' . $exam['exam_level'] . ' level ' . $exam['exam_mode'] . ' examination conducted by ' . $exam['conducting_body'] . '. It is held ' . $exam['exam_frequency'] . ' and attracts ' . number_format($exam['applicants_last_year']) . '+ applicants every year.')) ?></p>
+      <h2 style="font-size:1.5rem;font-weight:800;color:var(--cp-blue);margin-bottom:24px">About <?= htmlspecialchars($exam['exam_abbreviation'] ?? $exam['exam_name']) ?></h2>
+      <p style="font-size:1.05rem;line-height:1.7;color:rgba(15,23,42,0.8)"><?= nl2br(htmlspecialchars($exam['normalisation_method'] ?: $exam['exam_name'] . ' is a ' . ($exam['exam_level'] ?? 'national') . ' level ' . ($exam['exam_mode'] ?? 'online') . ' examination conducted by ' . ($exam['conducting_body'] ?: 'the relevant authority') . '. It is held ' . ($exam['exam_frequency'] ?: 'annually') . ' and attracts ' . number_format((int)($exam['applicants_last_year'] ?? 0)) . '+ applicants every year.')) ?></p>
       
       <h3 style="margin-top:40px;font-size:1.3rem;font-weight:700">Exam Highlights</h3>
       <div class="info-grid">
@@ -147,15 +151,15 @@ $tabIcons = [
         </div>
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-bank"></i></div>
-          <div class="info-body"><h4>Conducting Body</h4><p><?= htmlspecialchars($exam['conducting_body']) ?></p></div>
+          <div class="info-body"><h4>Conducting Body</h4><p><?= htmlspecialchars($exam['conducting_body'] ?: 'TBA') ?></p></div>
         </div>
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-calendar"></i></div>
-          <div class="info-body"><h4>Frequency</h4><p><?= ucfirst($exam['exam_frequency']) ?></p></div>
+          <div class="info-body"><h4>Frequency</h4><p><?= ucfirst($exam['exam_frequency'] ?? 'Annual') ?></p></div>
         </div>
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-globe"></i></div>
-          <div class="info-body"><h4>Level</h4><p><?= ucfirst($exam['exam_level']) ?></p></div>
+          <div class="info-body"><h4>Level</h4><p><?= ucfirst($exam['exam_level'] ?? 'National') ?></p></div>
         </div>
       </div>
 
@@ -163,19 +167,19 @@ $tabIcons = [
       <div class="info-grid">
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-user"></i></div>
-          <div class="info-body"><h4>Age Limit</h4><p><?= $exam['age_min'] ?> - <?= $exam['age_max'] ?: 'No limit' ?> Years</p></div>
+          <div class="info-body"><h4>Age Limit</h4><p><?= $exam['age_min'] ? $exam['age_min'] . ' - ' . ($exam['age_max'] ?: 'No limit') . ' Years' : 'Check official website' ?></p></div>
         </div>
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-percent"></i></div>
-          <div class="info-body"><h4>Min Percentage</h4><p><?= $exam['min_percentage_required'] ?>% in qualifying exam</p></div>
+          <div class="info-body"><h4>Min Percentage</h4><p><?= $exam['min_percentage_required'] ? $exam['min_percentage_required'] . '% in qualifying exam' : 'Check official notification' ?></p></div>
         </div>
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-graduation-cap"></i></div>
-          <div class="info-body"><h4>Qualifying Exam</h4><p><?= htmlspecialchars($exam['qualifying_exam']) ?></p></div>
+          <div class="info-body"><h4>Qualifying Exam</h4><p><?= htmlspecialchars($exam['qualifying_exam'] ?: 'Check official notification') ?></p></div>
         </div>
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-flag"></i></div>
-          <div class="info-body"><h4>Nationality</h4><p><?= ucfirst($exam['nationality']) ?></p></div>
+          <div class="info-body"><h4>Nationality</h4><p><?= ucfirst($exam['nationality'] ?: 'Indian') ?></p></div>
         </div>
       </div>
 
@@ -199,25 +203,25 @@ $tabIcons = [
       <div class="info-grid" style="margin-bottom:40px">
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-laptop"></i></div>
-          <div class="info-body"><h4>Mode of Exam</h4><p><?= ucfirst($exam['exam_mode']) ?></p></div>
+          <div class="info-body"><h4>Mode of Exam</h4><p><?= ucfirst($exam['exam_mode'] ?? 'Online') ?></p></div>
         </div>
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-timer"></i></div>
-          <div class="info-body"><h4>Duration</h4><p><?= $exam['duration_minutes'] ?> Minutes</p></div>
+          <div class="info-body"><h4>Duration</h4><p><?= $exam['duration_minutes'] ? $exam['duration_minutes'] . ' Minutes' : 'TBA' ?></p></div>
         </div>
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-list-numbers"></i></div>
-          <div class="info-body"><h4>Total Questions</h4><p><?= $exam['total_questions'] ?></p></div>
+          <div class="info-body"><h4>Total Questions</h4><p><?= $exam['total_questions'] ?: 'TBA' ?></p></div>
         </div>
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-target"></i></div>
-          <div class="info-body"><h4>Total Marks</h4><p><?= $exam['total_marks'] ?></p></div>
+          <div class="info-body"><h4>Total Marks</h4><p><?= $exam['total_marks'] ?: 'TBA' ?></p></div>
         </div>
       </div>
 
       <h3 style="font-size:1.3rem;font-weight:700;margin-bottom:16px">Marking Scheme</h3>
       <?php
-        $msData = json_decode($exam['marking_scheme'], true);
+        $msData = json_decode($exam['marking_scheme'] ?? '', true);
         if (is_array($msData)):
       ?>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:32px">
@@ -241,11 +245,11 @@ $tabIcons = [
         <?php endforeach; ?>
       </div>
       <?php else: ?>
-      <p style="font-size:1.05rem;line-height:1.7;color:rgba(15,23,42,0.8);margin-bottom:32px"><?= nl2br(htmlspecialchars($exam['marking_scheme'])) ?></p>
+      <p style="font-size:1.05rem;line-height:1.7;color:rgba(15,23,42,0.8);margin-bottom:32px"><?= nl2br(htmlspecialchars($exam['marking_scheme'] ?: 'Marking scheme details will be updated soon.')) ?></p>
       <?php endif; ?>
 
       <?php
-        $sections = json_decode($exam['sections'], true);
+        $sections = json_decode($exam['sections'] ?? '', true);
         if (is_array($sections) && count($sections) > 0):
       ?>
       <h3 style="font-size:1.3rem;font-weight:700;margin-bottom:16px">Sections</h3>
@@ -296,24 +300,24 @@ $tabIcons = [
       <div class="info-grid">
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-currency-inr"></i></div>
-          <div class="info-body"><h4>General Category</h4><p>₹<?= number_format((float)$exam['application_fee_general']) ?></p></div>
+          <div class="info-body"><h4>General Category</h4><p>₹<?= number_format((float)($exam['application_fee_general'] ?? 0)) ?></p></div>
         </div>
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-currency-inr"></i></div>
-          <div class="info-body"><h4>OBC Category</h4><p>₹<?= number_format((float)$exam['application_fee_obc']) ?></p></div>
+          <div class="info-body"><h4>OBC Category</h4><p>₹<?= number_format((float)($exam['application_fee_obc'] ?? 0)) ?></p></div>
         </div>
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-currency-inr"></i></div>
-          <div class="info-body"><h4>SC/ST Category</h4><p>₹<?= number_format((float)$exam['application_fee_sc_st']) ?></p></div>
+          <div class="info-body"><h4>SC/ST Category</h4><p>₹<?= number_format((float)($exam['application_fee_sc_st'] ?? 0)) ?></p></div>
         </div>
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-currency-inr"></i></div>
-          <div class="info-body"><h4>Female Candidates</h4><p>₹<?= number_format((float)$exam['application_fee_female']) ?></p></div>
+          <div class="info-body"><h4>Female Candidates</h4><p>₹<?= number_format((float)($exam['application_fee_female'] ?? 0)) ?></p></div>
         </div>
-        <?php if ($exam['application_fee_pwd']): ?>
+        <?php if (!empty($exam['application_fee_pwd'])): ?>
         <div class="info-card">
           <div class="info-icon"><i class="ph ph-currency-inr"></i></div>
-          <div class="info-body"><h4>PwD Category</h4><p>₹<?= number_format((float)$exam['application_fee_pwd']) ?></p></div>
+          <div class="info-body"><h4>PwD Category</h4><p>₹<?= number_format((float)($exam['application_fee_pwd'] ?? 0)) ?></p></div>
         </div>
         <?php endif; ?>
       </div>

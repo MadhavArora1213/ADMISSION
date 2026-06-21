@@ -220,10 +220,10 @@ $levelLabels = ['national'=>'National Level','state'=>'State Level','university'
         <?php foreach ($exams as $ex): ?>
         <div class="exam-card">
           <div class="exam-card-top">
-            <img src="<?= cImg($ex['conducting_body_logo']) ?>" class="exam-logo" alt="<?= htmlspecialchars($ex['exam_abbreviation']) ?>">
+            <img src="<?= cImg($ex['conducting_body_logo']) ?>" class="exam-logo" alt="<?= htmlspecialchars($ex['exam_abbreviation'] ?? $ex['exam_name'] ?? '') ?>">
             <div class="exam-info">
               <h3 class="exam-name"><a href="<?= examUrl($ex['exam_slug']) ?>"><?= htmlspecialchars($ex['exam_name']) ?></a></h3>
-              <span class="exam-abbr-tag"><?= htmlspecialchars($ex['exam_abbreviation']) ?></span>
+              <span class="exam-abbr-tag"><?= htmlspecialchars($ex['exam_abbreviation'] ?? '') ?></span>
             </div>
           </div>
           <div class="exam-meta">
@@ -237,7 +237,7 @@ $levelLabels = ['national'=>'National Level','state'=>'State Level','university'
             <?php endif; ?>
           </div>
           <div class="exam-footer">
-            <span class="exam-by">By <?= htmlspecialchars($ex['conducting_body'] ?: 'N/A') ?></span>
+            <span class="exam-by">By <?= htmlspecialchars($ex['conducting_body'] ?? 'N/A') ?></span>
             <a href="<?= examUrl($ex['exam_slug']) ?>" class="exam-detail-btn">View Details <i class="ph ph-arrow-right"></i></a>
           </div>
         </div>

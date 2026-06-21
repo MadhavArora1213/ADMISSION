@@ -53,8 +53,8 @@ $sqlC = "SELECT c.id,c.name,c.slug,c.college_type,c.naac_grade,c.ranking_nirf,c.
                 (SELECT MAX(avg_package_lpa) FROM college_placements cp WHERE cp.college_id=c.id) AS avg_package,
                 (SELECT MIN(annual_fee) FROM college_courses cc WHERE cc.college_id=c.id) AS min_fee
          FROM colleges c LEFT JOIN states s ON c.state_id=s.id LEFT JOIN cities ct ON c.city_id=ct.id
-         LEFT JOIN college_media cm ON cm.college_id=c.id
-         WHERE c.status='active' AND c.is_featured=1 ORDER BY c.featured_order ASC,c.ranking_nirf ASC LIMIT 8";
+         LEFT JOIN college_media cm ON cm.college_id=c.id AND (cm.image_type IS NULL OR cm.image_type='cover' OR cm.image_type='campus')
+         WHERE c.status='active' AND c.is_featured=1 GROUP BY c.id ORDER BY c.featured_order ASC,c.ranking_nirf ASC LIMIT 8";
 $featuredColleges = cAll($pdo, $sqlC);
 if (empty($featuredColleges)) $featuredColleges = cAll($pdo, str_replace("AND c.is_featured=1","AND c.overall_rating_avg>0",$sqlC));
 
