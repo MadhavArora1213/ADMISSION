@@ -3,13 +3,13 @@
   <div class="container">
     <div class="section-hdr-flex">
       <div><h2>Elite Rankings 2026</h2><p>The pinnacle of academic excellence curated for you</p></div>
-      <a href="#" class="section-link">View Full Leaderboard <i class="ph ph-arrow-right"></i></a>
+      <a href="<?=collegesUrl()?>" class="section-link">View Full Leaderboard <i class="ph ph-arrow-right"></i></a>
     </div>
     
     <div class="rank-list">
       <?php if (!empty($featuredColleges)): $rk=1; ?>
         <?php foreach (array_slice($featuredColleges,0,5) as $cl): ?>
-        <a href="#" class="rank-item">
+        <a href="<?=collegeUrl($cl['slug'] ?? '')?>" class="rank-item">
           <div class="r-rank">#<?=sprintf("%02d", $rk++)?></div>
           <div class="r-col">
             <strong><?=htmlspecialchars($cl['name'])?></strong>
@@ -30,7 +30,7 @@
         </a>
         <?php endforeach; ?>
       <?php else: $rk=1; foreach (array_slice($fColleges,0,5) as $cl): ?>
-        <a href="#" class="rank-item">
+        <a href="<?=collegesUrl()?>" class="rank-item">
           <div class="r-rank">#<?=sprintf("%02d", $rk++)?></div>
           <div class="r-col">
             <strong><?=$cl['name']?></strong>

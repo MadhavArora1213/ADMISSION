@@ -19,15 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 }
 
 // Fetch Review Data
-$stmt = $pdo->prepare("SELECT r.*, u.full_name as user_name, u.email as user_email, c.name as college_name, m.name as moderator_name FROM reviews r LEFT JOIN users u ON r.user_id = u.id LEFT JOIN colleges c ON r.college_id = c.id LEFT JOIN admin_users m ON r.moderated_by = m.id WHERE r.id = ?");
+$stmt = $pdo->prepare("SELECT r.*, u.full_name as user_name, u.email as user_email, c.name as college_name, m.full_name as moderator_name FROM reviews r LEFT JOIN users u ON r.user_id = u.id LEFT JOIN colleges c ON r.college_id = c.id LEFT JOIN users m ON r.moderated_by = m.id WHERE r.id = ?");
 $stmt->execute([$id]);
 $review = $stmt->fetch();
 if (!$review) { header('Location: reviews.php'); exit; }
-
-// Since admin_users might not be the correct table for admin users depending on setup, we might need a fallback. If m.name is null, it's fine. Wait, `users` is used for both admin and regular? Let's check session. It's `$_SESSION['admin_id']` so probably `users`. Let me fix the query.
-$stmt = $pdo->prepare("SELECT r.*, u.full_name as user_name, u.email as user_email, c.name as college_name, m.name as moderator_name FROM reviews r LEFT JOIN users u ON r.user_id = u.id LEFT JOIN colleges c ON r.college_id = c.id LEFT JOIN users m ON r.moderated_by = m.id WHERE r.id = ?");
-$stmt->execute([$id]);
-$review = $stmt->fetch();
 
 // Fetch Meta
 $stmtMeta = $pdo->prepare("SELECT * FROM review_meta WHERE review_id = ?");

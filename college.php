@@ -50,7 +50,7 @@ try { $s=$pdo->prepare("SELECT * FROM college_updates WHERE college_id=? AND sta
 try { $cn=$college['name']; $sl=$slug; $s=$pdo->prepare("SELECT *, article_title AS title, excerpt AS description, featured_image_url AS image_url, publish_at AS event_date, article_type AS update_type FROM articles WHERE status='published' AND (article_title LIKE ? OR article_title LIKE ? OR tags LIKE ? OR tags LIKE ?) ORDER BY publish_at DESC LIMIT 10"); $s->execute(["%$cn%","%$sl%","%$cn%","%$sl%"]); $articles=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 $updates = array_merge($updates, $articles);
 usort($updates, function($a,$b){ return strtotime($b['event_date']??'0') - strtotime($a['event_date']??'0'); });
-try { $s=$pdo->prepare("SELECT r.*,u.full_name AS user_name FROM reviews r LEFT JOIN users u ON u.id=r.user_id WHERE r.college_id=? AND r.moderation_status='approved' ORDER BY r.created_at DESC LIMIT 30"); $s->execute([$cid]); $reviews=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
+try { $s=$pdo->prepare("SELECT r.*,u.full_name AS user_name FROM reviews r LEFT JOIN users u ON u.id=r.user_id WHERE r.college_id=? AND (r.moderation_status='approved' OR (r.moderation_status='pending' AND r.user_id=?)) ORDER BY FIELD(r.moderation_status,'pending','approved'), r.created_at DESC LIMIT 30"); $s->execute([$cid, $_SESSION['user_id'] ?? '']); $reviews=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 $seatMatrix = [];
 try { $s=$pdo->prepare("SELECT sm.*, cc.course_name FROM seat_matrix sm JOIN college_courses cc ON cc.id = sm.course_id WHERE sm.college_id = ? ORDER BY cc.course_name, FIELD(sm.category, 'General','OBC','SC','ST','EWS','PwD','NRI','Mgmt')"); $s->execute([$cid]); $seatMatrix=$s->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 
@@ -487,10 +487,11 @@ if (isset($_SESSION['user_id'])) {
             <?php else: ?>
             <div class="college-reviews-list">
               <?php foreach ($reviews as $rev): ?>
-              <article class="college-review-card">
+              <article class="college-review-card" style="<?= ($rev['moderation_status'] ?? '') === 'pending' ? 'opacity:.65;border:1px dashed rgba(251,191,36,.5)' : '' ?>">
                 <div class="cr-head">
                   <strong><?= htmlspecialchars($rev['user_name'] ?? 'Student') ?></strong>
                   <span class="cr-rating"><i class="ph ph-star-fill"></i> <?= number_format((float)$rev['overall_rating'], 1) ?></span>
+                  <?php if (($rev['moderation_status'] ?? '') === 'pending'): ?><span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:rgba(251,191,36,.12);color:#B45309;border-radius:6px;font-size:.72rem;font-weight:700"><i class="ph ph-clock"></i> Pending</span><?php endif; ?>
                   <?php if ($rev['batch_year']): ?><span class="cr-batch">Batch <?= htmlspecialchars((string)$rev['batch_year']) ?></span><?php endif; ?>
                 </div>
                 <?php if ($rev['review_title']): ?><h4><?= htmlspecialchars($rev['review_title']) ?></h4><?php endif; ?>
@@ -1746,9 +1747,10 @@ function submitReview() {
     course_id: document.getElementById('reviewCourse').value
   };
 
-  fetch('<?= rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/") ?>/api/submit_review.php', {
+  fetch('/ADMISSION/api/submit_review.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
     body: JSON.stringify(payload)
   })
   .then(function(r) { return r.text().then(function(t) { try { return { ok: r.ok, status: r.status, data: JSON.parse(t) }; } catch(e) { return { ok: false, status: r.status, data: { error: 'Server returned invalid response', raw: t.substring(0, 500) } }; } }); })
@@ -1882,6 +1884,42 @@ function submitReview() {
 @media(max-width:479px){
   #courseListModalInner{max-height:90vh;}
 }
+
+/* Floating Write Review button - mobile only */
+.cl-mobile-review-btn {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  left: 20px;
+  z-index: 500;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #0B2447, #19376D);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 8px 30px rgba(11, 36, 71, 0.35);
+  font-family: var(--font2);
+  transition: transform 0.2s;
+}
+.cl-mobile-review-btn:active { transform: scale(0.97); }
+@media(max-width: 768px) {
+  .cl-mobile-review-btn { display: flex; }
+  .college-tab-content { padding-bottom: 80px !important; }
+}
 </style>
+<?php if ($tab === 'reviews'): ?>
+<?php if ($isLoggedIn): ?>
+<button type="button" class="cl-mobile-review-btn" onclick="openReviewModal()"><i class="ph ph-pencil-simple"></i> Write a Review</button>
+<?php else: ?>
+<button type="button" class="cl-mobile-review-btn" onclick="openLoginPrompt()"><i class="ph ph-pencil-simple"></i> Write a Review</button>
+<?php endif; ?>
+<?php endif; ?>
 </body>
 </html>

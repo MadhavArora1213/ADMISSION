@@ -9,6 +9,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/includes/college_helpers.php';
+require_once __DIR__ . '/includes/exam_helpers.php';
+require_once __DIR__ . '/includes/course_helpers.php';
 
 // ─── SIMPLE ROUTER ───
 $route = trim($_GET['url'] ?? '/', '/');
@@ -33,7 +35,10 @@ $totalReviews  = cCol($pdo, "SELECT COUNT(*) FROM reviews WHERE moderation_statu
 $totalExams    = cCol($pdo, "SELECT COUNT(*) FROM exams", 500);
 $totalCourses  = cCol($pdo, "SELECT COUNT(*) FROM courses WHERE status='active'", 1000);
 
-$categories = cAll($pdo, "SELECT id,category_name,category_slug,icon_url FROM course_categories WHERE is_featured=1 ORDER BY sort_order ASC LIMIT 6");
+$categories = cAll($pdo, "SELECT id,category_name,category_slug,icon_url FROM course_categories ORDER BY sort_order ASC, category_name ASC LIMIT 6");
+if (empty($categories)) {
+  $categories = cAll($pdo, "SELECT DISTINCT course_level AS category_name, LOWER(course_level) AS category_slug FROM courses WHERE status='active' LIMIT 6");
+}
 $catFallback = [
     ['name'=>'Engineering','slug'=>'engineering','icon'=>'ph-laptop','count'=>'6,000+'],
     ['name'=>'Management','slug'=>'management','icon'=>'ph-briefcase','count'=>'4,500+'],
@@ -63,38 +68,37 @@ $reviews = cAll($pdo, "SELECT r.overall_rating,r.review_title,r.review_body,r.ba
 
 $states = cAll($pdo, "SELECT id,name FROM states ORDER BY name ASC");
 
+// Featured exams from DB
+$examsFeatured = cAll($pdo, "SELECT e.exam_name AS name,e.exam_slug AS slug,e.exam_level AS level,e.exam_mode,ed.exam_date,ed.application_start,ed.application_end,em.image_url AS img FROM exams e LEFT JOIN exam_dates ed ON ed.exam_id=e.id LEFT JOIN exam_media em ON em.exam_id=e.id AND em.type='thumbnail' WHERE e.status='active' GROUP BY e.id ORDER BY e.applicants_last_year DESC LIMIT 4");
+if (empty($examsFeatured)) {
+    $examsFeatured = [
+        ['name'=>'JEE Main','level'=>'National','date'=>'02 Apr 2026','type'=>'Online','img'=>'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&q=80'],
+        ['name'=>'NEET','level'=>'National','date'=>'03 May 2026','type'=>'Offline','img'=>'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&q=80'],
+        ['name'=>'CUET','level'=>'National','date'=>'11 May 2026','type'=>'Offline','img'=>'https://images.unsplash.com/photo-1452860606245-08a5d1cb3b9e?w=400&q=80'],
+        ['name'=>'CAT','level'=>'National','date'=>'30 Nov 2025','type'=>'Online','img'=>'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&q=80'],
+    ];
+}
 
+// Marquee data: top colleges by rating
+$marqueeColleges = cAll($pdo, "SELECT name,overall_rating_avg FROM colleges WHERE status='active' ORDER BY overall_rating_avg DESC,ranking_nirf ASC LIMIT 10");
 
+// Courses with level counts for streams fallback
+$courseCounts = cAll($pdo, "SELECT course_level, COUNT(*) AS cnt FROM courses WHERE status='active' GROUP BY course_level");
+
+// Minimal fallback arrays (used only if DB returns empty)
 $fColleges = [
-    ['name'=>'IIT Delhi','loc'=>'New Delhi, Delhi NCR','type'=>'Public','rating'=>'4.8','fee'=>'₹2.5L','pkg'=>'₹21.5L','img'=>'https://images.unsplash.com/photo-1562774053-701939374585?w=800&q=80'],
-    ['name'=>'IIM Ahmedabad','loc'=>'Ahmedabad, Gujarat','type'=>'Public','rating'=>'4.7','fee'=>'₹27.5L','pkg'=>'₹33.8L','img'=>'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80'],
-    ['name'=>'BITS Pilani','loc'=>'Pilani, Rajasthan','type'=>'Private','rating'=>'4.5','fee'=>'₹5.4L','pkg'=>'₹18.2L','img'=>'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80'],
-    ['name'=>'AIIMS Delhi','loc'=>'New Delhi, Delhi NCR','type'=>'Government','rating'=>'4.9','fee'=>'₹39K','pkg'=>'₹15L+','img'=>'https://images.unsplash.com/photo-1551076805-e1869033e561?w=800&q=80'],
+    ['name'=>'IIT Delhi','loc'=>'New Delhi','type'=>'Public','rating'=>'4.8','fee'=>'₹2.5L','pkg'=>'₹21.5L','img'=>'https://images.unsplash.com/photo-1562774053-701939374585?w=800&q=80'],
+    ['name'=>'IIM Ahmedabad','loc'=>'Ahmedabad','type'=>'Public','rating'=>'4.7','fee'=>'₹27.5L','pkg'=>'₹33.8L','img'=>'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80'],
 ];
 $fCourses = [
     ['icon'=>'ph-laptop','level'=>'UG','name'=>'B.Tech','dur'=>'4 yrs','cols'=>'4,500+'],
     ['icon'=>'ph-briefcase','level'=>'PG','name'=>'MBA','dur'=>'2 yrs','cols'=>'3,200+'],
-    ['icon'=>'ph-stethoscope','level'=>'UG','name'=>'MBBS','dur'=>'5.5 yrs','cols'=>'650+'],
-    ['icon'=>'ph-scales','level'=>'UG','name'=>'LLB','dur'=>'3 yrs','cols'=>'1,800+'],
-    ['icon'=>'ph-chart-line','level'=>'UG','name'=>'B.Com','dur'=>'3 yrs','cols'=>'3,000+'],
-    ['icon'=>'ph-flask','level'=>'UG','name'=>'B.Sc','dur'=>'3 yrs','cols'=>'2,800+'],
-    ['icon'=>'ph-pen-nib','level'=>'UG','name'=>'BA','dur'=>'3 yrs','cols'=>'4,200+'],
-    ['icon'=>'ph-buildings','level'=>'UG','name'=>'BCA','dur'=>'3 yrs','cols'=>'1,900+'],
 ];
 $fExams = [
     ['name'=>'JEE Main','level'=>'National','date'=>'24 Jan 2026','last'=>'15 Dec 2025','cols'=>'2,046'],
     ['name'=>'NEET','level'=>'National','date'=>'04 May 2026','last'=>'15 Mar 2026','cols'=>'1,374'],
-    ['name'=>'CAT','level'=>'National','date'=>'30 Nov 2025','last'=>'20 Sep 2025','cols'=>'1,781'],
-    ['name'=>'GATE','level'=>'National','date'=>'02 Feb 2026','last'=>'10 Oct 2025','cols'=>'895'],
-    ['name'=>'CUET','level'=>'National','date'=>'11 May 2026','last'=>'30 Mar 2026','cols'=>'583'],
-    ['name'=>'CLAT','level'=>'National','date'=>'03 Dec 2025','last'=>'15 Nov 2025','cols'=>'412'],
 ];
-$examsFeatured = [
-    ['name'=>'JEE Main','level'=>'National','date'=>'02 Apr 2026','type'=>'Online','img'=>'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&q=80'],
-    ['name'=>'NEET','level'=>'National','date'=>'03 May 2026','type'=>'Offline','img'=>'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&q=80'],
-    ['name'=>'CUET','level'=>'National','date'=>'11 May 2026','type'=>'Offline','img'=>'https://images.unsplash.com/photo-1452860606245-08a5d1cb3b9e?w=400&q=80'],
-    ['name'=>'CAT','level'=>'National','date'=>'30 Nov 2025','type'=>'Online','img'=>'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&q=80'],
-];
+
 $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.featured_image_url as img, a.publish_at as date, c.category_name as cat FROM articles a LEFT JOIN article_categories c ON a.category_id=c.id WHERE a.status='published' ORDER BY a.publish_at DESC LIMIT 4");
 ?>
 <!DOCTYPE html>

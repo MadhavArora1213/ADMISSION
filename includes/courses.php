@@ -3,12 +3,12 @@
   <div class="container">
     <div class="section-hdr-flex reveal">
       <div><h2>Popular Courses</h2><p>Explore in-demand programs with top career prospects</p></div>
-      <a href="#" class="section-link">View All <i class="ph ph-arrow-right"></i></a>
+      <a href="<?=coursesUrl()?>" class="section-link">View All <i class="ph ph-arrow-right"></i></a>
     </div>
     <div class="courses-grid">
     <?php if (!empty($popularCourses)): ?>
       <?php foreach ($popularCourses as $co): ?>
-      <a href="#" class="course-sm reveal">
+      <a href="<?=courseUrl($co['course_slug'] ?? '')?>" class="course-sm reveal">
         <div class="course-sm-icon"><i class="ph ph-book-open"></i></div>
         <h3><?=htmlspecialchars($co['course_name'])?></h3>
         <span class="ctag"><?=htmlspecialchars($co['course_level'])?></span>
@@ -20,7 +20,7 @@
       <?php endforeach; ?>
     <?php else: ?>
       <?php foreach ($fCourses as $co): ?>
-      <a href="#" class="course-sm reveal">
+      <a href="<?=coursesUrl()?>" class="course-sm reveal">
         <div class="course-sm-icon"><i class="ph <?=$co['icon']?>"></i></div>
         <h3><?=$co['name']?></h3>
         <span class="ctag"><?=$co['level']?></span>

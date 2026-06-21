@@ -32,14 +32,13 @@ if (!isset($navColleges)) {
           <span>AdmissionSeason</span>
         </a>
       </div>
-      
+
       <div class="pro-nav-search">
         <i class="ph ph-magnifying-glass"></i>
         <input type="text" placeholder="Search for Colleges, Exams, Courses and More..">
       </div>
-      
+
       <div class="pro-nav-right">
-        <a href="#" class="pro-nav-link"><i class="ph ph-pencil-simple"></i> Write a Review</a>
         <a href="#" class="pro-icon-btn" title="Saved"><i class="ph ph-heart"></i></a>
         <a href="#" class="pro-icon-btn" title="Notifications"><i class="ph ph-bell"></i></a>
         <?php if (isset($_SESSION['user_id'])): ?>
@@ -57,14 +56,18 @@ if (!isset($navColleges)) {
         <?php else: ?>
           <a href="/ADMISSION/login.php" class="pro-user-btn" title="Login"><i class="ph-fill ph-user-plus"></i></a>
         <?php endif; ?>
+
+        <button class="pro-hamburger" id="proHamburger" onclick="toggleMobileNav()" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
   </div>
-  
-  <div class="pro-nav-sub">
+
+  <!-- Desktop sub-nav -->
+  <div class="pro-nav-sub pro-nav-sub-desktop">
     <div class="container pro-nav-flex">
       <ul class="pro-sub-links">
-        
         <li class="pro-has-mega">
           <a href="colleges.php">Colleges <i class="ph ph-caret-down"></i></a>
           <div class="pro-mega-menu">
@@ -183,25 +186,14 @@ if (!isset($navColleges)) {
         <li class="pro-has-mega">
           <a href="counselling">Counseling <i class="ph ph-caret-down"></i></a>
           <div class="pro-mega-menu cns-dropdown-menu">
-            <!-- Left Side vertical tabs -->
             <div class="cns-nav-list">
               <div class="cns-nav-item">
                 <a href="#"><i class="ph ph-chat-circle-dots"></i> Get Expert Guidance <i class="ph ph-caret-right" style="margin-left:auto; font-size:0.75rem;"></i></a>
                 <div class="cns-sub-panel">
                   <h4>Get Expert Guidance</h4>
                   <ul>
-                    <li>
-                      <a href="ask-question">
-                        <span><i class="ph-bold ph-question"></i> Ask a Question</span>
-                        <span class="cns-sub-desc">Get quick responses from expert counsellors</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="discussions">
-                        <span><i class="ph-bold ph-chats"></i> Discussions</span>
-                        <span class="cns-sub-desc">Participate in career discussion groups</span>
-                      </a>
-                    </li>
+                    <li><a href="ask-question"><span><i class="ph-bold ph-question"></i> Ask a Question</span><span class="cns-sub-desc">Get quick responses from expert counsellors</span></a></li>
+                    <li><a href="discussions"><span><i class="ph-bold ph-chats"></i> Discussions</span><span class="cns-sub-desc">Participate in career discussion groups</span></a></li>
                   </ul>
                 </div>
               </div>
@@ -281,7 +273,6 @@ if (!isset($navColleges)) {
                 <a href="counselling" style="color: #fff !important;"><i class="ph-fill ph-headset"></i> Get Free Counselling</a>
               </div>
             </div>
-            <!-- Right side default panel -->
             <div class="cns-default-panel">
               <div>
                 <i class="ph ph-hand-pointing" style="font-size: 2.2rem; color: var(--text-muted-alt); margin-bottom: 12px;"></i>
@@ -293,7 +284,6 @@ if (!isset($navColleges)) {
         </li>
 
         <li><a href="#">Admissions 2026 <span class="nav-badge-hot">LIVE</span></a></li>
-        <li><a href="#">Reviews</a></li>
         <li><a href="news.php">News</a></li>
       </ul>
       <ul class="pro-sub-links-right">
@@ -301,11 +291,110 @@ if (!isset($navColleges)) {
       </ul>
     </div>
   </div>
+</header>
+
+<!-- ═══ MOBILE NAV DRAWER ═══ -->
+<div class="pro-mobile-overlay" id="proMobileOverlay" onclick="toggleMobileNav()"></div>
+<nav class="pro-mobile-drawer" id="proMobileDrawer">
+  <div class="pro-mobile-drawer-header">
+    <a href="index.php" class="pro-logo" style="font-size:1.2rem">
+      <i class="ph-fill ph-student"></i>
+      <span>AdmissionSeason</span>
+    </a>
+    <button class="pro-hamburger active" onclick="toggleMobileNav()" aria-label="Close">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <div class="pro-mobile-search">
+    <i class="ph ph-magnifying-glass"></i>
+    <input type="text" placeholder="Search colleges, exams, courses..." onfocus="window.location='search.php'">
+  </div>
+
+  <?php if (isset($_SESSION['user_id'])): ?>
+  <div class="pro-mobile-user">
+    <div class="pro-user-avatar" style="width:36px;height:36px;font-size:.85rem">
+      <?= strtoupper(substr($_SESSION['user_name'], 0, 1)) ?>
+    </div>
+    <div>
+      <div style="font-weight:700;font-size:.9rem;color:#0B2447"><?= htmlspecialchars($_SESSION['user_name']) ?></div>
+      <a href="profile.php" style="font-size:.75rem;color:#64748b;text-decoration:none">View Profile</a>
+    </div>
+  </div>
+  <?php else: ?>
+  <div class="pro-mobile-user">
+    <a href="/ADMISSION/login.php" class="pro-mobile-login-btn"><i class="ph-fill ph-user-plus"></i> Login / Sign Up</a>
+  </div>
+  <?php endif; ?>
+
+  <div class="pro-mobile-nav-links">
+    <div class="pro-mobile-section-title">Quick Links</div>
+    <a href="colleges.php" class="pro-mobile-link pro-has-sub"><i class="ph ph-buildings"></i> Colleges <i class="ph ph-caret-right pro-mobile-arrow"></i></a>
+    <div class="pro-mobile-sub" id="mobileSubColleges">
+      <a href="colleges.php">All Colleges</a>
+      <?php foreach($navStates ?? [] as $st): ?>
+      <a href="colleges.php?state=<?= (int)$st['id'] ?>"><?=htmlspecialchars($st['name'])?></a>
+      <?php endforeach; ?>
+    </div>
+
+    <a href="<?= examsUrl() ?>" class="pro-mobile-link pro-has-sub"><i class="ph ph-file-text"></i> Exams <i class="ph ph-caret-right pro-mobile-arrow"></i></a>
+    <div class="pro-mobile-sub" id="mobileSubExams">
+      <div class="pro-mobile-sub-title">UG Exams</div>
+      <?php foreach($navExamsUg ?? [] as $ex): ?>
+      <a href="<?= examUrl($ex['exam_slug']) ?>"><?=htmlspecialchars($ex['exam_name'])?></a>
+      <?php endforeach; ?>
+      <div class="pro-mobile-sub-title" style="margin-top:10px">PG Exams</div>
+      <?php foreach($navExamsPg ?? [] as $ex): ?>
+      <a href="<?= examUrl($ex['exam_slug']) ?>"><?=htmlspecialchars($ex['exam_name'])?></a>
+      <?php endforeach; ?>
+    </div>
+
+    <a href="<?= coursesUrl() ?>" class="pro-mobile-link pro-has-sub"><i class="ph ph-book-open"></i> Courses <i class="ph ph-caret-right pro-mobile-arrow"></i></a>
+    <div class="pro-mobile-sub" id="mobileSubCourses">
+      <div class="pro-mobile-sub-title">UG Courses</div>
+      <?php foreach($navCoursesUg ?? [] as $co): ?>
+      <a href="<?= courseUrl($co['course_slug']) ?>"><?=htmlspecialchars($co['course_name'])?></a>
+      <?php endforeach; ?>
+      <div class="pro-mobile-sub-title" style="margin-top:10px">PG Courses</div>
+      <?php foreach($navCoursesPg ?? [] as $co): ?>
+      <a href="<?= courseUrl($co['course_slug']) ?>"><?=htmlspecialchars($co['course_name'])?></a>
+      <?php endforeach; ?>
+    </div>
+
+    <a href="study-abroad" class="pro-mobile-link"><i class="ph ph-globe"></i> Study Abroad</a>
+    <a href="counselling" class="pro-mobile-link"><i class="ph ph-headset"></i> Counseling</a>
+    <a href="#" class="pro-mobile-link"><i class="ph ph-newspaper"></i> Admissions 2026 <span class="nav-badge-hot" style="margin-left:6px">LIVE</span></a>
+    <a href="news.php" class="pro-mobile-link"><i class="ph ph-newspaper"></i> News</a>
+
+    <div class="pro-mobile-section-title" style="margin-top:16px">Actions</div>
+    <a href="counselling" class="pro-mobile-link"><i class="ph-fill ph-headset"></i> Free Counselling</a>
+    <a href="#" class="pro-mobile-link"><i class="ph ph-heart"></i> Saved Colleges</a>
+    <?php if (isset($_SESSION['user_id'])): ?>
+    <a href="/ADMISSION/logout.php?redirect=<?= urlencode($_SERVER['REQUEST_URI'] ?? '/') ?>" class="pro-mobile-link" style="color:#DC2626"><i class="ph ph-sign-out"></i> Logout</a>
+    <?php endif; ?>
+  </div>
+</nav>
 <script>
 function toggleUserMenu() {
   const menu = document.getElementById('userMenu');
-  if (menu) {
-    menu.classList.toggle('open');
+  if (menu) menu.classList.toggle('open');
+}
+
+function toggleMobileNav() {
+  const drawer = document.getElementById('proMobileDrawer');
+  const overlay = document.getElementById('proMobileOverlay');
+  const burger = document.getElementById('proHamburger');
+  const isOpen = drawer.classList.contains('open');
+  if (isOpen) {
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+    burger.classList.remove('active');
+    document.body.style.overflow = '';
+  } else {
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+    burger.classList.add('active');
+    document.body.style.overflow = 'hidden';
   }
 }
 
@@ -320,7 +409,30 @@ document.addEventListener('click', function(e) {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     document.getElementById('userMenu')?.classList.remove('open');
+    if (document.getElementById('proMobileDrawer')?.classList.contains('open')) toggleMobileNav();
   }
+});
+
+document.querySelectorAll('.pro-mobile-link[data-toggle]').forEach(function(link) {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    this.classList.toggle('open');
+    var sub = this.nextElementSibling;
+    if (sub && sub.classList.contains('pro-mobile-sub')) {
+      sub.classList.toggle('open');
+    }
+  });
+});
+
+document.querySelectorAll('.pro-mobile-link.pro-has-sub').forEach(function(link) {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    this.classList.toggle('open');
+    var sub = this.nextElementSibling;
+    if (sub && sub.classList.contains('pro-mobile-sub')) {
+      sub.classList.toggle('open');
+    }
+  });
 });
 </script>
 <style>

@@ -3,7 +3,7 @@
   <div class="container">
     <div class="section-hdr-flex reveal">
       <div><h2>Top Entrance Exams</h2><p>Dates, application deadlines & participating colleges</p></div>
-      <a href="#" class="section-link">View All <i class="ph ph-arrow-right"></i></a>
+      <a href="<?=examsUrl()?>" class="section-link">View All <i class="ph ph-arrow-right"></i></a>
     </div>
     <div class="exams-grid">
     <?php if (!empty($upcomingExams)): ?>
@@ -17,7 +17,7 @@
           <?php if(!empty($ex['exam_date'])):?><div><i class="ph ph-calendar-blank"></i><strong>Exam:</strong> <?=date('d M Y',strtotime($ex['exam_date']))?></div><?php endif;?>
           <?php if(!empty($ex['application_end'])):?><div><i class="ph ph-clock-countdown"></i><strong>Last Date:</strong> <?=date('d M Y',strtotime($ex['application_end']))?></div><?php endif;?>
         </div>
-        <a href="#" class="exam-link">Details <i class="ph ph-arrow-right"></i></a>
+        <a href="<?=examUrl($ex['slug'] ?? '')?>" class="exam-link">Details <i class="ph ph-arrow-right"></i></a>
       </div>
       <?php endforeach; ?>
     <?php else: ?>
@@ -32,7 +32,7 @@
           <div><i class="ph ph-clock-countdown"></i><strong>Last Date:</strong> <?=$ex['last']?></div>
           <div><i class="ph ph-buildings"></i><strong>Colleges:</strong> <?=$ex['cols']?></div>
         </div>
-        <a href="#" class="exam-link">Details <i class="ph ph-arrow-right"></i></a>
+        <a href="<?=examsUrl()?>" class="exam-link">Details <i class="ph ph-arrow-right"></i></a>
       </div>
       <?php endforeach; ?>
     <?php endif; ?>
