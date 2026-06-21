@@ -457,6 +457,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       .benefit-item {
         text-align: left;
       }
+      .cns-title {
+        font-size: 2.25rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .cns-stats {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        text-align: center;
+      }
+      
+      .cns-form-card {
+        padding: 24px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .form-grid-2 {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
     }
   </style>
 </head>

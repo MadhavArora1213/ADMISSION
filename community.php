@@ -982,6 +982,66 @@ function getCategoryIcon($cat) {
       transform: translateY(0);
       opacity: 1;
     }
+
+    /* Responsive Media Queries */
+    @media (max-width: 992px) {
+      .qna-container {
+        grid-template-columns: 1fr;
+        padding: 40px 20px;
+        gap: 30px;
+      }
+      
+      .qna-hero {
+        padding: 50px 20px;
+      }
+      
+      .qna-hero h1 {
+        font-size: 2.2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .community-stats {
+        flex-direction: column;
+        gap: 20px;
+        padding-top: 20px;
+      }
+      
+      .qna-tabs-container {
+        overflow-x: auto;
+      }
+      
+      .q-card {
+        padding: 18px;
+      }
+      
+      .q-text {
+        font-size: 1.1rem;
+      }
+      
+      .q-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+      }
+      
+      .q-footer-right {
+        width: 100%;
+        justify-content: space-between;
+        border-top: 1px solid var(--border-color-alt);
+        padding-top: 10px;
+      }
+      
+      .inline-ans-form {
+        flex-direction: column;
+      }
+      
+      .inline-ans-submit {
+        align-self: stretch;
+        justify-content: center;
+        margin-top: 10px;
+      }
+    }
   </style>
 </head>
 <body>

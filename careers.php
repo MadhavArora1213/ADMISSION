@@ -574,6 +574,63 @@ if ($stream === 'Science') {
     .explore-link:hover {
       color: var(--oxford-navy);
     }
+
+    /* Responsive Media Queries */
+    @media (max-width: 992px) {
+      .wizard-container {
+        grid-template-columns: 1fr;
+        padding: 40px 20px;
+        gap: 30px;
+      }
+      
+      .wizard-sidebar {
+        position: static;
+        margin-top: 20px;
+      }
+      
+      .results-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .stream-landing-container {
+        grid-template-columns: 1fr;
+        padding: 40px 20px;
+        gap: 24px;
+      }
+      
+      .wizard-hero h1 {
+        font-size: 2rem;
+      }
+      
+      .wizard-main {
+        padding: 24px;
+      }
+      
+      .interest-card {
+        padding: 16px;
+        gap: 12px;
+      }
+      
+      .interest-icon {
+        font-size: 1.8rem;
+      }
+      
+      .results-section {
+        padding: 24px;
+      }
+      
+      .results-section h2 {
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>

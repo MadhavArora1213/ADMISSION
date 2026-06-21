@@ -495,6 +495,48 @@ $skills = array_filter(array_map('trim', explode(',', $career['skills_required']
       background: var(--snow-pearl);
       transform: translateY(-1px);
     }
+
+    /* Responsive Media Queries */
+    @media (max-width: 992px) {
+      .career-layout {
+        grid-template-columns: 1fr;
+        padding: 40px 20px;
+        gap: 30px;
+      }
+      
+      .career-hero {
+        padding: 60px 20px;
+      }
+      
+      .career-hero h1 {
+        font-size: 2.25rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .career-section-card {
+        padding: 24px;
+      }
+      
+      .career-section-card h2 {
+        font-size: 1.4rem;
+      }
+      
+      .career-hero h1 {
+        font-size: 1.85rem;
+      }
+      
+      .step-path {
+        padding-left: 24px;
+      }
+      
+      .step-circle {
+        left: -24px;
+        width: 24px;
+        height: 24px;
+        font-size: 0.75rem;
+      }
+    }
   </style>
 </head>
 <body>
