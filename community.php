@@ -165,6 +165,18 @@ try {
 
     // Fetch Expert Panelists
     $experts = $pdo->query("SELECT * FROM experts ORDER BY answer_count DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+
+    // Track which questions current user follows
+    $userId = $_SESSION['user_id'] ?? 'user-1234-uuid';
+    if (!empty($questions)) {
+        $qIds = array_column($questions, 'id');
+        $placeholders = implode(',', array_fill(0, count($qIds), '?'));
+        $followStmt = $pdo->prepare("SELECT followable_id FROM follows WHERE user_id = ? AND followable_type = 'question' AND followable_id IN ($placeholders)");
+        $followStmt->execute(array_merge([$userId], $qIds));
+        $_SESSION['followed_questions'] = $followStmt->fetchAll(PDO::FETCH_COLUMN);
+    } else {
+        $_SESSION['followed_questions'] = [];
+    }
 } catch (Exception $e) {
     $questions = [];
     $answers = [];
@@ -198,6 +210,7 @@ function getCategoryIcon($cat) {
   <meta name="description" content="Join India's largest educational community. Ask career questions, get verified expert responses, and participate in admissions discussions.">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/trumbowyg/dist/ui/trumbowyg.min.css">
   <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=9">
 
   <style>
@@ -549,19 +562,25 @@ function getCategoryIcon($cat) {
     }
 
     .q-action-btn.answer-btn {
-      background: #e65100;
+      background: var(--yale-blue);
       color: #fff;
-      border-color: #e65100;
+      border-color: var(--yale-blue);
       padding: 7px 18px;
     }
 
     .q-action-btn.answer-btn:hover {
-      background: #bf360c;
-      border-color: #bf360c;
+      background: var(--oxford-navy);
+      border-color: var(--oxford-navy);
     }
 
     .q-action-btn.follow-btn {
       color: var(--yale-blue);
+      border-color: var(--yale-blue);
+    }
+
+    .q-action-btn.follow-btn.active {
+      background: var(--yale-blue);
+      color: #fff;
       border-color: var(--yale-blue);
     }
 
@@ -570,7 +589,56 @@ function getCategoryIcon($cat) {
       color: #fff;
     }
 
+    .follow-count-badge {
+      font-size: 0.75rem;
+      opacity: 0.8;
+    }
+
     .q-action-spacer { flex: 1; }
+
+    /* Share Dropdown */
+    .share-dropdown-wrap { position: relative; display: inline-block; }
+    .share-dropdown {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      border: 1px solid var(--border-color-alt);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(11,36,71,0.1);
+      min-width: 160px;
+      z-index: 100;
+      overflow: hidden;
+    }
+    .share-dropdown::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 7px solid transparent;
+      border-top-color: #fff;
+    }
+    .share-dropdown-wrap.open .share-dropdown { display: block; }
+    .share-opt {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--ink-black);
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .share-opt:hover { background: rgba(25,55,109,0.04); }
+    .share-opt i { font-size: 1.15rem; }
+    .share-opt:nth-child(1) i { color: #1877f2; }
+    .share-opt:nth-child(2) i { color: #1da1f2; }
+    .share-opt:nth-child(3) i { color: #0a66c2; }
+    .share-opt:nth-child(4) i { color: #db4437; }
 
     /* Answer Preview inside card */
     .q-answer-preview {
@@ -1179,6 +1247,139 @@ function getCategoryIcon($cat) {
         margin-top: 10px;
       }
     }
+
+    /* Answer Modal */
+    .ans-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      backdrop-filter: blur(2px);
+    }
+    .ans-modal-overlay.open { display: flex; }
+
+    .ans-modal {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 640px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: modalSlideUp 0.25s ease;
+    }
+    @keyframes modalSlideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .ans-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-color-alt);
+    }
+    .ans-modal-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--oxford-navy);
+      margin: 0;
+    }
+    .ans-modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted-alt);
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .ans-modal-close:hover { background: rgba(0,0,0,0.05); color: var(--ink-black); }
+
+    .ans-modal-question {
+      padding: 16px 24px;
+      font-size: 0.95rem;
+      color: var(--ink-black);
+      line-height: 1.5;
+      border-bottom: 1px solid var(--border-color-alt);
+      background: rgba(25,55,109,0.02);
+    }
+
+    .ans-modal-body { padding: 16px 24px; }
+    .ans-modal-body #ansModalEditor {
+      border: 1.5px solid var(--border-color-alt);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .ans-modal-body .trumbowyg-box {
+      border: none;
+      border-radius: 12px;
+      min-height: 180px;
+    }
+    .ans-modal-body .trumbowyg-editor {
+      min-height: 180px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      color: var(--ink-black);
+      line-height: 1.6;
+      padding: 14px 16px;
+    }
+    .ans-modal-body .trumbowyg-editor:empty::before {
+      content: attr(data-placeholder);
+      color: var(--text-muted-alt);
+    }
+    .ans-modal-body .trumbowyg-button-pane {
+      border-radius: 0 0 12px 12px;
+      background: #f8fafc;
+    }
+    .ans-modal-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted-alt);
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ans-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 14px 24px;
+      border-top: 1px solid var(--border-color-alt);
+    }
+    .ans-modal-btn {
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .ans-modal-btn.cancel {
+      background: transparent;
+      color: var(--yale-blue);
+      border: 1px solid var(--border-color-alt);
+    }
+    .ans-modal-btn.cancel:hover { background: rgba(0,0,0,0.03); }
+    .ans-modal-btn.post {
+      background: var(--yale-blue);
+      color: #fff;
+    }
+    .ans-modal-btn.post:hover { background: var(--oxford-navy); }
+
+    @media (max-width: 600px) {
+      .ans-modal { max-width: 100%; margin: 0; border-radius: 16px 16px 0 0; }
+      .ans-modal-overlay { align-items: flex-end; }
+    }
   </style>
 </head>
 <body>
@@ -1299,22 +1500,41 @@ function getCategoryIcon($cat) {
               <div class="q-stats-row">
                 <span class="q-stat views-stat"><i class="ph ph-eye"></i> <?= number_format((int)$q['views']) ?> Views</span>
                 <span class="q-stat"><i class="ph ph-chat-text"></i> <?= number_format((int)$q['answer_count']) ?> Answers</span>
+                <?php if ((int)($q['follow_count'] ?? 0) > 0): ?>
+                  <span class="q-stat"><i class="ph ph-bell"></i> <?= number_format((int)$q['follow_count']) ?> Followers</span>
+                <?php endif; ?>
                 <span class="q-stat">Asked <?= date('d M', strtotime($q['created_at'])) ?></span>
               </div>
               <div class="q-actions-row">
-                <button class="q-action-btn follow-btn" onclick="event.stopPropagation()" title="Follow">
-                  <i class="ph ph-bell"></i> Follow
+                <button class="q-action-btn follow-btn <?= isset($_SESSION['followed_questions']) && in_array($q['id'], $_SESSION['followed_questions']) ? 'active' : '' ?>" onclick="toggleFollow('question', '<?= $q['id'] ?>', this, event)" title="Follow">
+                  <i class="<?= isset($_SESSION['followed_questions']) && in_array($q['id'], $_SESSION['followed_questions']) ? 'ph-fill' : 'ph' ?> ph-bell"></i> <span class="follow-label"><?= isset($_SESSION['followed_questions']) && in_array($q['id'], $_SESSION['followed_questions']) ? 'Following' : 'Follow' ?></span> <span class="follow-count-badge"><?= (int)($q['follow_count'] ?? 0) > 0 ? '(' . number_format((int)$q['follow_count']) . ')' : '' ?></span>
                 </button>
-                <button class="q-action-btn" onclick="shareQuestion('<?= $q['id'] ?>', event)" title="Share">
-                  <i class="ph ph-share-network"></i> Share
-                </button>
+                <div class="share-dropdown-wrap">
+                  <button class="q-action-btn" onclick="toggleShareDropdown(this, event)" title="Share">
+                    <i class="ph ph-share-network"></i> Share
+                  </button>
+                  <div class="share-dropdown">
+                    <a class="share-opt" href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode('https://localhost/ADMISSION/community?tab=qna&q=' . $q['id']) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                      <i class="ph-fill ph-facebook-logo"></i> Facebook
+                    </a>
+                    <a class="share-opt" href="https://twitter.com/intent/tweet?url=<?= urlencode('https://localhost/ADMISSION/community?tab=qna&q=' . $q['id']) ?>&text=<?= urlencode($q['question_text']) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                      <i class="ph-fill ph-twitter-logo"></i> Twitter
+                    </a>
+                    <a class="share-opt" href="https://www.linkedin.com/sharing/share-offsite/?url=<?= urlencode('https://localhost/ADMISSION/community?tab=qna&q=' . $q['id']) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                      <i class="ph-fill ph-linkedin-logo"></i> LinkedIn
+                    </a>
+                    <a class="share-opt" href="https://plus.google.com/share?url=<?= urlencode('https://localhost/ADMISSION/community?tab=qna&q=' . $q['id']) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                      <i class="ph-fill ph-google-logo"></i> Google
+                    </a>
+                  </div>
+                </div>
                 <span class="q-action-spacer"></span>
                 <?php if ($firstAns): ?>
-                  <button class="q-action-btn answer-btn" onclick="toggleCard(this.closest('.q-card'), event)">
+                  <button class="q-action-btn answer-btn" onclick="openAnsModal('<?= $q['id'] ?>', '<?= htmlspecialchars(addslashes($q['question_text'])) ?>', event)">
                     <i class="ph ph-pencil-simple"></i> Answer
                   </button>
                 <?php else: ?>
-                  <button class="q-action-btn answer-btn" onclick="toggleCard(this.closest('.q-card'), event)">
+                  <button class="q-action-btn answer-btn" onclick="openAnsModal('<?= $q['id'] ?>', '<?= htmlspecialchars(addslashes($q['question_text'])) ?>', event)">
                     <i class="ph ph-plus"></i> Answer
                   </button>
                 <?php endif; ?>
@@ -1349,7 +1569,7 @@ function getCategoryIcon($cat) {
               <?php endif; ?>
 
               <?php if ((int)$q['answer_count'] > 1): ?>
-                <a class="q-view-all-link" href="javascript:void(0)" onclick="toggleCard(this.closest('.q-card'), event)">
+                <a class="q-view-all-link" href="/ADMISSION/question/<?= urlencode($q['id']) ?>" onclick="event.stopPropagation()">
                   View All <?= number_format((int)$q['answer_count']) ?> Answers
                 </a>
               <?php endif; ?>
@@ -1475,6 +1695,9 @@ function getCategoryIcon($cat) {
           </div>
         <?php endforeach; ?>
       <?php endif; ?>
+      <a href="/ADMISSION/experts" style="display:block; text-align:center; padding:12px; background:rgba(25,55,109,0.04); border-radius:10px; color:var(--yale-blue); font-size:0.85rem; font-weight:700; margin-top:12px; text-decoration:none; border:1px solid rgba(25,55,109,0.1); transition:all 0.2s;">
+        <i class="ph ph-arrow-right"></i> View All Experts
+      </a>
     </div>
 
     <!-- Review CTA box -->
@@ -1490,7 +1713,34 @@ function getCategoryIcon($cat) {
 <!-- Toast notification element -->
 <div id="toast" class="toast-notif">Link copied to clipboard!</div>
 
+<!-- Answer Modal -->
+<div id="ansModal" class="ans-modal-overlay" onclick="if(event.target===this)closeAnsModal()">
+  <div class="ans-modal">
+    <div class="ans-modal-header">
+      <h3>Write your answer</h3>
+      <button class="ans-modal-close" onclick="closeAnsModal()"><i class="ph ph-x"></i></button>
+    </div>
+    <div class="ans-modal-question" id="ansModalQuestion"></div>
+    <form method="POST" action="community" id="ansModalForm">
+      <input type="hidden" name="action" value="submit_answer">
+      <input type="hidden" name="question_id" id="ansModalQid">
+      <div class="ans-modal-body">
+        <div id="ansModalEditor"></div>
+        <input type="hidden" name="answer_text" id="ansModalHiddenText">
+        <div class="ans-modal-hint"><i class="ph ph-info"></i> Minimum 10 characters. Be helpful and respectful.</div>
+      </div>
+      <div class="ans-modal-footer">
+        <button type="button" class="ans-modal-btn cancel" onclick="closeAnsModal()">Cancel</button>
+        <button type="submit" class="ans-modal-btn post">Post</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <?php include __DIR__ . '/includes/footer.php'; ?>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/trumbowyg/dist/trumbowyg.min.js"></script>
 
 <script>
   // Expand/Collapse Question Cards & Increment Views via AJAX
@@ -1583,14 +1833,47 @@ function getCategoryIcon($cat) {
   }
 
   // Copy Link Helper
-  function shareQuestion(qId, event) {
+  function toggleShareDropdown(btn, event) {
     event.stopPropagation();
-    const shareUrl = window.location.origin + window.location.pathname + '?tab=qna&q=' + qId;
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      showToast("Question thread link copied!");
-    }).catch(err => {
-      console.error("Failed to copy link:", err);
-    });
+    const wrap = btn.closest('.share-dropdown-wrap');
+    const wasOpen = wrap.classList.contains('open');
+    document.querySelectorAll('.share-dropdown-wrap.open').forEach(w => w.classList.remove('open'));
+    if (!wasOpen) wrap.classList.add('open');
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.share-dropdown-wrap')) {
+      document.querySelectorAll('.share-dropdown-wrap.open').forEach(w => w.classList.remove('open'));
+    }
+  });
+
+  // ═══ FOLLOW / UNFOLLOW ═══
+  async function toggleFollow(type, id, btn, event) {
+    event.stopPropagation();
+    try {
+      const res = await fetch('api/community_actions.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'toggle_follow', type: type, id: id })
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        const isActive = data.action === 'followed';
+        btn.classList.toggle('active', isActive);
+        const icon = btn.querySelector('i');
+        icon.className = isActive ? 'ph-fill ph-bell' : 'ph ph-bell';
+        const label = btn.querySelector('.follow-label');
+        if (label) label.textContent = isActive ? 'Following' : 'Follow';
+        const badge = btn.querySelector('.follow-count-badge');
+        if (badge && data.count > 0) {
+          badge.textContent = '(' + data.count + ')';
+        } else if (badge) {
+          badge.textContent = '';
+        }
+      }
+    } catch (err) {
+      console.error('Follow error:', err);
+    }
   }
 
   // Toast notification alert helper
@@ -1656,6 +1939,58 @@ function getCategoryIcon($cat) {
     qValidation.style.display = 'none';
     return true;
   }
+
+  // ═══ ANSWER MODAL ═══
+  let trumbowygInited = false;
+
+  function openAnsModal(qId, qText, event) {
+    event.stopPropagation();
+    document.getElementById('ansModalQid').value = qId;
+    document.getElementById('ansModalQuestion').textContent = qText;
+    document.getElementById('ansModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    if (!trumbowygInited) {
+      $('#ansModalEditor').trumbowyg({
+        btns: [
+          ['bold', 'italic', 'underline'],
+          ['unorderedList', 'orderedList'],
+          ['link'],
+          ['justifyLeft', 'justifyCenter', 'justifyRight'],
+          ['horizontalRule'],
+          ['removeformat'],
+          ['fullscreen']
+        ],
+        placeholder: 'Share your knowledge and insights...',
+        autogrow: true,
+        autogrowOnEnter: true
+      });
+      trumbowygInited = true;
+    }
+
+    $('#ansModalEditor').trumbowyg('empty');
+    $('#ansModalEditor').trumbowyg('focus');
+  }
+
+  function closeAnsModal() {
+    document.getElementById('ansModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // Sync Trumbowyg content to hidden input before submit
+  document.getElementById('ansModalForm').addEventListener('submit', function(e) {
+    var content = $('#ansModalEditor').trumbowyg('html');
+    document.getElementById('ansModalHiddenText').value = content;
+    if (!content || content.replace(/<[^>]*>/g, '').trim().length < 10) {
+      e.preventDefault();
+      alert('Answer must be at least 10 characters.');
+      return false;
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeAnsModal();
+  });
 </script>
 
 </body>

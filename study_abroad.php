@@ -26,6 +26,11 @@ $activeTab = $_GET['tab'] ?? 'universities';
 if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
     $activeTab = 'universities';
 }
+
+$activeCountry = trim($_GET['country'] ?? '');
+if ($activeCountry !== '' && !in_array($activeCountry, $countries, true)) {
+    $activeCountry = '';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -722,11 +727,11 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
     
     <!-- Filter Badges -->
     <div class="country-filter-wrap">
-      <button class="country-tab-btn active" onclick="filterCountry('all')">
+      <button class="country-tab-btn <?= $activeCountry === '' ? 'active' : '' ?>" onclick="filterCountry('all')">
         <i class="ph ph-globe"></i> All Countries
       </button>
       <?php foreach ($countries as $c): ?>
-        <button class="country-tab-btn" onclick="filterCountry('<?= htmlspecialchars($c) ?>')">
+        <button class="country-tab-btn <?= $activeCountry === $c ? 'active' : '' ?>" onclick="filterCountry('<?= htmlspecialchars($c) ?>')">
           <i class="ph ph-map-pin"></i> <?= htmlspecialchars($c) ?>
         </button>
       <?php endforeach; ?>
@@ -1001,6 +1006,13 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
       }
     });
   }
+
+  // Auto-filter by country if URL has ?country=X
+  <?php if ($activeCountry !== ''): ?>
+  document.addEventListener('DOMContentLoaded', function() {
+    filterCountry('<?= htmlspecialchars($activeCountry) ?>');
+  });
+  <?php endif; ?>
 </script>
 
 </body>

@@ -223,7 +223,7 @@ if (!isset($navColleges)) {
                       <h5>Popular Careers</h5>
                       <ul style="max-height: 250px; overflow-y: visible; display: grid; grid-template-columns: 1fr; gap: 8px;">
                         <?php foreach($navPopularCareersList ?? [] as $popCar): ?>
-                          <li><a href="<?= $navBase ?>/career_details.php?slug=<?= htmlspecialchars($popCar['slug']) ?>"><span><i class="ph ph-briefcase"></i> <?= htmlspecialchars($popCar['name']) ?></span></a></li>
+                          <li><a href="<?= $navBase ?>/career/<?= htmlspecialchars($popCar['slug']) ?>"><span><i class="ph ph-briefcase"></i> <?= htmlspecialchars($popCar['name']) ?></span></a></li>
                         <?php endforeach; ?>
                         <li><a href="<?= $navBase ?>/careers.php" style="background: none !important; border: none !important; padding: 2px 0 !important; color: var(--yale-blue) !important; font-weight: 700 !important;"><span style="color: var(--yale-blue);">&gt; All other careers</span></a></li>
                       </ul>

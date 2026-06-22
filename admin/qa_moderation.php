@@ -19,9 +19,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     // If the action is 'remove', actually delete the content
     if ($mod_action == 'remove') {
         if ($r['question_id']) {
-            $pdo->prepare("DELETE FROM questions WHERE id = ?")->execute([$r['question_id']]);
+            // Soft-delete: set status to 'removed' instead of hard delete (FK constraints)
+            $pdo->prepare("UPDATE questions SET status = 'removed' WHERE id = ?")->execute([$r['question_id']]);
+            // Also remove all answers for this question
+            $pdo->prepare("DELETE FROM answers WHERE question_id = ?")->execute([$r['question_id']]);
         } elseif ($r['answer_id']) {
+            // Hard delete the answer
+            $ansRow = $pdo->prepare("SELECT question_id FROM answers WHERE id = ?");
+            $ansRow->execute([$r['answer_id']]);
+            $ansInfo = $ansRow->fetch();
             $pdo->prepare("DELETE FROM answers WHERE id = ?")->execute([$r['answer_id']]);
+            // Update answer_count on parent question
+            if ($ansInfo) {
+                $pdo->prepare("UPDATE questions SET answer_count = GREATEST(0, answer_count - 1) WHERE id = ?")->execute([$ansInfo['question_id']]);
+            }
         }
     }
     
@@ -30,10 +41,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     header("Location: qa_moderation.php?msg=moderated"); exit;
 }
 
-// Fetch Pending Reports
+// Fetch Pending Reports (skip removed content)
 $pending = $pdo->query("SELECT r.*, q.question_text, a.answer_text 
     FROM qa_reports r 
-    LEFT JOIN questions q ON r.question_id = q.id 
+    LEFT JOIN questions q ON r.question_id = q.id AND q.status != 'removed'
     LEFT JOIN answers a ON r.answer_id = a.id 
     WHERE r.moderation_action IS NULL 
     ORDER BY r.created_at ASC")->fetchAll();
