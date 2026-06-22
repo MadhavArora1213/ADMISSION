@@ -42,6 +42,14 @@ Options +FollowSymLinks
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^foreign-university/([a-zA-Z0-9_-]+)/?$ foreign-university.php?slug=$1 [QSA,L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^visa-guide/([a-zA-Z0-9_-]+)/?$ visa-guide.php?slug=$1 [QSA,L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^community/?$ community.php [QSA,L]
 
     RewriteCond %{REQUEST_FILENAME} !-f

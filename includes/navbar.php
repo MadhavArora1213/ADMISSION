@@ -166,7 +166,7 @@ if (!isset($navColleges)) {
               <h4>Universities Abroad</h4>
               <ul>
                 <?php foreach($navUnis ?? [] as $nu): ?>
-                <li><a href="<?= $navBase ?>/study-abroad?tab=universities"><?=htmlspecialchars($nu['university_name'])?></a></li>
+                <li><a href="<?= $navBase ?>/foreign-university/<?= htmlspecialchars($nu['university_slug'] ?? $nu['id']) ?>"><?=htmlspecialchars($nu['university_name'])?></a></li>
                 <?php endforeach; ?>
                 <li><a href="<?= $navBase ?>/study-abroad?tab=universities" style="color: var(--yale-blue); font-weight: 700; margin-top: 10px; display: inline-block;">View All Universities &rarr;</a></li>
               </ul>
@@ -175,7 +175,7 @@ if (!isset($navColleges)) {
               <h4>Visa Guides</h4>
               <ul>
                 <?php foreach($navVisas ?? [] as $nv): ?>
-                <li><a href="<?= $navBase ?>/study-abroad?tab=visas"><?=htmlspecialchars($nv['country'])?> Visa Guide</a></li>
+                <li><a href="<?= $navBase ?>/visa-guide/<?= strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $nv['country']), '-')) ?>"><?=htmlspecialchars($nv['country'])?> Visa Guide</a></li>
                 <?php endforeach; ?>
                 <li><a href="<?= $navBase ?>/study-abroad?tab=visas" style="color: var(--yale-blue); font-weight: 700; margin-top: 10px; display: inline-block;">View All Visa Guides &rarr;</a></li>
               </ul>

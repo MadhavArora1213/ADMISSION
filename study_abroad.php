@@ -36,7 +36,7 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
   <meta name="description" content="Explore world-class universities in US, UK, Canada, Australia, and Germany. View visa requirements, fees, and consult top verify overseas advisors.">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=8">
+  <link rel="stylesheet" href="/ADMISSION/assets/css/style.css?v=8">
   
   <style>
     :root {
@@ -141,13 +141,16 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
     .uni-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color-alt);
-      border-radius: 16px;
-      padding: 0;
+      border-radius: 14px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
     }
 
     .uni-card:hover {
@@ -156,35 +159,30 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
       border-color: rgba(25, 55, 109, 0.2);
     }
 
-    .uni-card-top {
-      padding: 20px 20px 16px 20px;
-      flex: 1;
-    }
-
     .uni-badge-qs {
       position: absolute;
       top: 0;
       right: 0;
       background: var(--yale-blue);
       color: #fff;
-      padding: 4px 12px;
-      border-radius: 0 16px 0 10px;
-      font-size: 0.72rem;
+      padding: 3px 10px;
+      border-radius: 0 14px 0 10px;
+      font-size: 0.68rem;
       font-weight: 700;
       letter-spacing: 0.3px;
     }
 
     .uni-header {
       display: flex;
-      gap: 14px;
+      gap: 12px;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     .uni-logo {
-      width: 56px;
-      height: 56px;
-      border-radius: 12px;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
       object-fit: cover;
       border: 1px solid var(--border-color-alt);
       flex-shrink: 0;
@@ -193,15 +191,15 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
 
     .uni-meta h3 {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.05rem;
+      font-size: 0.92rem;
       font-weight: 700;
       color: var(--oxford-navy);
-      margin-bottom: 3px;
-      line-height: 1.25;
+      margin-bottom: 2px;
+      line-height: 1.2;
     }
 
     .uni-loc {
-      font-size: 0.8rem;
+      font-size: 0.73rem;
       color: var(--text-muted-alt);
       display: flex;
       align-items: center;
@@ -209,179 +207,193 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
       font-weight: 500;
     }
 
-    .uni-desc {
-      font-size: 0.83rem;
-      color: #64748b;
-      line-height: 1.5;
-      margin-bottom: 0;
-    }
-
-    .uni-card-bottom {
-      padding: 0 20px 20px 20px;
-    }
-
-    .uni-details-list {
+    .uni-quick-stats {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 10px;
       border-top: 1px solid var(--border-color-alt);
-      padding: 14px 0;
-      margin-bottom: 16px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
     }
 
-    .detail-item span {
+    .uni-quick-stat {
+      flex: 1;
+      text-align: center;
+    }
+
+    .uni-quick-stat span {
       display: block;
+      font-size: 0.62rem;
       color: var(--text-muted-alt);
-      font-size: 0.68rem;
-      margin-bottom: 2px;
       text-transform: uppercase;
       font-weight: 600;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
+      margin-bottom: 2px;
     }
 
-    .detail-item strong {
+    .uni-quick-stat strong {
       color: var(--oxford-navy);
-      font-size: 0.88rem;
-      font-weight: 700;
-    }
-
-    .uni-cta {
-      display: block;
-      text-align: center;
-      background: var(--oxford-navy);
-      color: #fff;
-      text-decoration: none;
-      padding: 11px;
-      border-radius: 10px;
-      font-weight: 700;
-      transition: all 0.3s;
-      font-size: 0.85rem;
-    }
-
-    .uni-cta:hover {
-      background: var(--yale-blue);
-      box-shadow: 0 4px 12px rgba(25, 55, 109, 0.2);
-    }
-
-    /* Visa Cards styling */
-    .visa-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color-alt);
-      border-radius: 20px;
-      padding: 30px;
-      margin-bottom: 30px;
-      transition: all 0.3s;
-    }
-
-    .visa-card:hover {
-      box-shadow: 0 10px 25px rgba(0,0,0,0.03);
-    }
-
-    .visa-head-wrap {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1.5px solid var(--border-color-alt);
-      padding-bottom: 18px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .visa-country-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: var(--oxford-navy);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .visa-type-badge {
-      background: rgba(25, 55, 109, 0.08);
-      color: var(--yale-blue);
-      padding: 6px 14px;
-      border-radius: 30px;
       font-size: 0.82rem;
       font-weight: 700;
     }
 
-    .visa-metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 20px;
-      margin-bottom: 24px;
-    }
-
-    .visa-metric-box {
-      background: var(--snow-pearl);
-      border: 1px solid var(--border-color-alt);
-      border-radius: 12px;
-      padding: 14px;
-      text-align: center;
-    }
-
-    .visa-metric-box span {
+    .uni-view-link {
       display: block;
-      color: var(--text-muted-alt);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      margin-bottom: 4px;
-    }
-
-    .visa-metric-box strong {
+      text-align: center;
+      margin-top: 10px;
       color: var(--yale-blue);
-      font-size: 1.15rem;
-      font-weight: 800;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-decoration: none;
     }
 
-    .visa-doc-section h4 {
-      font-size: 1rem;
-      font-weight: 750;
-      color: var(--oxford-navy);
-      margin-bottom: 12px;
+    .uni-view-link:hover { text-decoration: underline; }
+
+    /* Visa Cards - Compact Grid */
+    .visa-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 1100px) { .visa-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 700px) { .visa-grid { grid-template-columns: 1fr; } }
+
+    .visa-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color-alt);
+      border-radius: 16px;
+      padding: 0;
+      transition: all 0.3s ease;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
       display: flex;
-      align-items: center;
-      gap: 6px;
+      flex-direction: column;
+      cursor: pointer;
     }
 
-    .visa-doc-list {
+    .visa-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(11, 36, 71, 0.08);
+      border-color: rgba(25, 55, 109, 0.2);
+    }
+
+    .visa-card-top {
+      background: linear-gradient(135deg, var(--oxford-navy) 0%, var(--yale-blue) 100%);
+      padding: 20px 20px 16px;
+      color: #fff;
+      position: relative;
+    }
+
+    .visa-card-top::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 80px; height: 80px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .visa-flag-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .visa-card-country {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .visa-card-type {
+      font-size: 0.75rem;
+      font-weight: 600;
+      opacity: 0.85;
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-top: 4px;
+    }
+
+    .visa-card-body {
+      padding: 18px 20px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .visa-card-stats {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 24px;
+      gap: 12px;
+      margin-bottom: 16px;
     }
 
-    @media (max-width: 768px) {
-      .visa-doc-list {
-        grid-template-columns: 1fr;
-      }
+    .visa-stat {
+      text-align: center;
+      padding: 8px 0;
     }
 
-    .doc-item {
+    .visa-stat span {
+      display: block;
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      color: var(--text-muted-alt);
+      margin-bottom: 2px;
+    }
+
+    .visa-stat strong {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--oxford-navy);
+    }
+
+    .visa-card-tags {
       display: flex;
-      gap: 8px;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color-alt);
+    }
+
+    .visa-tag {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(25, 55, 109, 0.06);
+      color: var(--yale-blue);
+    }
+
+    .visa-tag.interview { background: rgba(234, 88, 12, 0.08); color: #c2410c; }
+    .visa-tag.work { background: rgba(22, 101, 52, 0.08); color: #166534; }
+
+    .visa-card-link {
+      display: flex;
       align-items: center;
-      font-size: 0.88rem;
-      color: #475569;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      padding: 10px;
+      border-radius: 10px;
+      background: var(--snow-pearl);
+      border: 1px solid var(--border-color-alt);
+      color: var(--yale-blue);
+      font-size: 0.78rem;
+      font-weight: 700;
+      transition: all 0.2s;
     }
 
-    .doc-item i {
-      color: #166534;
-      font-size: 1.05rem;
-    }
-
-    .tips-box {
-      background: rgba(22, 101, 52, 0.03);
-      border: 1px dashed rgba(22, 101, 52, 0.2);
-      border-radius: 12px;
-      padding: 16px 20px;
-      font-size: 0.88rem;
-      color: #166534;
-      line-height: 1.5;
+    .visa-card:hover .visa-card-link {
+      background: var(--oxford-navy);
+      color: #fff;
+      border-color: var(--oxford-navy);
     }
 
     /* Consultants style */
@@ -584,59 +596,40 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
       padding: 40px 0 80px 0;
     }
 
-    @media (max-width: 768px) {
-      .abroad-hero h1 { font-size: 2rem; }
-      .abroad-hero p { font-size: 1rem; }
-      .portal-tab-btn { font-size: 0.88rem; padding: 10px 16px; }
-      .visa-doc-list { grid-template-columns: 1fr; }
-    }
-
-    /* Responsive Media Queries */
     @media (max-width: 992px) {
-      .abroad-hero {
-        padding: 50px 20px;
-      }
-      
-      .abroad-hero h1 {
-        font-size: 2.2rem;
-      }
-      
-      .abroad-portal-container {
-        padding: 40px 20px 80px 20px;
-      }
+      .abroad-hero { padding: 50px 20px; }
+      .abroad-hero h1 { font-size: 2.2rem; }
+      .abroad-portal-container { padding: 40px 20px 80px 20px; }
+      .uni-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
     @media (max-width: 768px) {
-      .portal-tabs {
-        overflow-x: auto;
-        justify-content: flex-start;
-        padding-bottom: 8px;
-        white-space: nowrap;
-        gap: 8px;
-      }
-      
-      .portal-tab-btn {
-        font-size: 1rem;
-        padding: 8px 16px;
-      }
-      
-      .uni-grid, .cons-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-      }
-      
-      .visa-head-wrap {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      
-      .portal-cta-banner {
-        padding: 30px 20px;
-      }
-      
-      .portal-cta-banner h2 {
-        font-size: 1.65rem;
-      }
+      .abroad-hero { padding: 40px 16px; }
+      .abroad-hero h1 { font-size: 1.7rem; margin-bottom: 10px; }
+      .abroad-hero p { font-size: 0.9rem; margin-bottom: 20px; }
+      .country-filter-wrap { gap: 8px; flex-wrap: wrap; justify-content: center; }
+      .country-tab-btn { padding: 7px 14px; font-size: 0.78rem; }
+      .portal-tabs { overflow-x: auto; justify-content: flex-start; padding-bottom: 8px; white-space: nowrap; gap: 6px; -webkit-overflow-scrolling: touch; }
+      .portal-tab-btn { font-size: 0.85rem; padding: 8px 14px; flex-shrink: 0; }
+      .uni-grid, .cons-grid { grid-template-columns: 1fr; gap: 16px; }
+      .uni-card { padding: 14px; }
+      .uni-logo { width: 38px; height: 38px; }
+      .uni-meta h3 { font-size: 0.85rem; }
+      .visa-grid { grid-template-columns: 1fr; }
+      .portal-cta-banner { padding: 28px 16px; margin-top: 40px; }
+      .portal-cta-banner h2 { font-size: 1.4rem; }
+      .portal-cta-banner p { font-size: 0.9rem; }
+      .cons-card { padding: 16px; }
+    }
+
+    @media (max-width: 480px) {
+      .abroad-hero h1 { font-size: 1.45rem; }
+      .abroad-hero p { font-size: 0.82rem; }
+      .country-tab-btn { padding: 6px 10px; font-size: 0.72rem; }
+      .uni-grid { gap: 12px; }
+      .uni-quick-stats { gap: 4px; }
+      .uni-quick-stat span { font-size: 0.58rem; }
+      .uni-quick-stat strong { font-size: 0.75rem; }
     }
   </style>
 </head>
@@ -691,45 +684,31 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
       <?php else: ?>
         <div class="uni-grid">
           <?php foreach ($universities as $uni): ?>
-            <div class="uni-card" data-country="<?= htmlspecialchars($uni['country']) ?>">
+            <a href="/ADMISSION/foreign-university/<?= htmlspecialchars($uni['university_slug'] ?? $uni['id']) ?>" class="uni-card" data-country="<?= htmlspecialchars($uni['country']) ?>">
               <span class="uni-badge-qs">QS #<?= htmlspecialchars((string)$uni['qs_rank']) ?></span>
-              <div class="uni-card-top">
-                <div class="uni-header">
-                  <img src="<?= htmlspecialchars($uni['logo_url'] ?: 'https://images.unsplash.com/photo-1592280771190-3e2e4d571952?w=100&h=100&fit=crop') ?>" alt="logo" class="uni-logo">
-                  <div class="uni-meta">
-                    <h3><?= htmlspecialchars($uni['university_name']) ?></h3>
-                    <div class="uni-loc"><i class="ph ph-map-pin"></i> <?= htmlspecialchars($uni['city']) ? htmlspecialchars($uni['city']) . ', ' : '' ?><?= htmlspecialchars($uni['country']) ?></div>
-                  </div>
+              <div class="uni-header">
+                <img src="<?= htmlspecialchars($uni['logo_url'] ?: 'https://images.unsplash.com/photo-1592280771190-3e2e4d571952?w=100&h=100&fit=crop') ?>" alt="logo" class="uni-logo">
+                <div class="uni-meta">
+                  <h3><?= htmlspecialchars($uni['university_name']) ?></h3>
+                  <div class="uni-loc"><i class="ph ph-map-pin"></i> <?= htmlspecialchars($uni['city'] ? $uni['city'] . ', ' : '') ?><?= htmlspecialchars($uni['country']) ?></div>
                 </div>
-                <p class="uni-desc"><?= htmlspecialchars(substr(strip_tags($uni['description']), 0, 120)) ?></p>
               </div>
-              <div class="uni-card-bottom">
-                <div class="uni-details-list">
-                  <div class="detail-item">
-                    <span>Intake</span>
-                    <strong>
-                      <?php 
-                        $months = json_decode($uni['intake_months'] ?? '[]', true);
-                        echo !empty($months) ? implode(', ', $months) : 'Sept/Jan';
-                      ?>
-                    </strong>
-                  </div>
-                  <div class="detail-item">
-                    <span>Tuition/Year</span>
-                    <strong><?= $uni['tuition_usd_annual'] > 0 ? '$' . number_format($uni['tuition_usd_annual'], 0) : 'Free' ?></strong>
-                  </div>
-                  <div class="detail-item">
-                    <span>IELTS</span>
-                    <strong><?= $uni['min_ielts'] ?: '6.5' ?></strong>
-                  </div>
-                  <div class="detail-item">
-                    <span>TOEFL / GRE</span>
-                    <strong><?= $uni['min_toefl'] ?: '90' ?> / <?= $uni['min_gre'] ?: 'N/A' ?></strong>
-                  </div>
+              <div class="uni-quick-stats">
+                <div class="uni-quick-stat">
+                  <span>Tuition/yr</span>
+                  <strong><?= (float)$uni['tuition_usd_annual'] > 0 ? '$' . number_format((float)$uni['tuition_usd_annual'], 0) : 'Free' ?></strong>
                 </div>
-                <a href="counselling" class="uni-cta">Apply Now</a>
+                <div class="uni-quick-stat">
+                  <span>IELTS</span>
+                  <strong><?= htmlspecialchars((string)($uni['min_ielts'] ?: '6.5')) ?></strong>
+                </div>
+                <div class="uni-quick-stat">
+                  <span>Accept.</span>
+                  <strong><?= htmlspecialchars((string)$uni['acceptance_rate']) ?>%</strong>
+                </div>
               </div>
-            </div>
+              <div class="uni-view-link">View Details <i class="ph ph-arrow-right"></i></div>
+            </a>
           <?php endforeach; ?>
         </div>
       <?php endif; ?>
@@ -743,57 +722,57 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
           <p>No visa guides found in the database.</p>
         </div>
       <?php else: ?>
-        <div>
-          <?php foreach ($visas as $visa): ?>
-            <div class="visa-card" data-country="<?= htmlspecialchars($visa['country']) ?>">
-              <div class="visa-head-wrap">
-                <h3 class="visa-country-title">
-                  <i class="ph ph-flag"></i> <?= htmlspecialchars($visa['country']) ?> Study Visa
-                </h3>
-                <span class="visa-type-badge"><?= htmlspecialchars($visa['visa_type']) ?></span>
+        <div class="visa-grid">
+          <?php 
+          $countryFlags = [
+            'United States' => '🇺🇸', 'United Kingdom' => '🇬🇧', 'Canada' => '🇨🇦',
+            'Australia' => '🇦🇺', 'Germany' => '🇩🇪', 'Singapore' => '🇸🇬',
+            'Ireland' => '🇮🇪', 'New Zealand' => '🇳🇿',
+          ];
+          foreach ($visas as $visa): 
+            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $visa['country']), '-'));
+            $flag = $countryFlags[$visa['country']] ?? '🌍';
+            $docs = json_decode($visa['documents_required'] ?? '[]', true);
+          ?>
+            <a href="/ADMISSION/visa-guide/<?= htmlspecialchars($slug) ?>" class="visa-card" data-country="<?= htmlspecialchars($visa['country']) ?>">
+              <div class="visa-card-top">
+                <span class="visa-flag-icon"><?= $flag ?></span>
+                <div class="visa-card-country"><?= htmlspecialchars($visa['country']) ?></div>
+                <span class="visa-card-type"><?= htmlspecialchars($visa['visa_type']) ?></span>
               </div>
-              
-              <div class="visa-metrics-grid">
-                <div class="visa-metric-box">
-                  <span>Processing Time</span>
-                  <strong><?= htmlspecialchars((string)$visa['processing_time_days']) ?> Days</strong>
-                </div>
-                <div class="visa-metric-box">
-                  <span>Visa Fee</span>
-                  <strong>$<?= number_format($visa['visa_fee_usd'], 2) ?></strong>
-                </div>
-                <div class="visa-metric-box">
-                  <span>Post-Study Work Visa</span>
-                  <strong><?= htmlspecialchars((string)$visa['pswv_duration_months']) ?> Months</strong>
-                </div>
-                <div class="visa-metric-box">
-                  <span>Proof of Funds Req.</span>
-                  <strong>$<?= number_format($visa['proof_of_funds_usd'], 0) ?></strong>
-                </div>
-              </div>
-
-              <div class="visa-doc-section">
-                <h4><i class="ph ph-check-square"></i> Mandatory Documents Required</h4>
-                <div class="visa-doc-list">
-                  <?php 
-                    $docs = json_decode($visa['documents_required'] ?? '[]', true);
-                    foreach($docs as $doc):
-                  ?>
-                    <div class="doc-item">
-                      <i class="ph-bold ph-check-circle"></i>
-                      <span><?= htmlspecialchars($doc) ?></span>
-                    </div>
-                  <?php endforeach; ?>
-                </div>
-
-                <?php if(!empty($visa['success_tips'])): ?>
-                  <div class="tips-box">
-                    <strong><i class="ph ph-lightbulb"></i> Expert Success Tips:</strong><br>
-                    <?= htmlspecialchars($visa['success_tips']) ?>
+              <div class="visa-card-body">
+                <div class="visa-card-stats">
+                  <div class="visa-stat">
+                    <span>Processing</span>
+                    <strong><?= htmlspecialchars((string)$visa['processing_time_days']) ?>d</strong>
                   </div>
-                <?php endif; ?>
+                  <div class="visa-stat">
+                    <span>Visa Fee</span>
+                    <strong>$<?= number_format((float)$visa['visa_fee_usd'], 0) ?></strong>
+                  </div>
+                  <div class="visa-stat">
+                    <span>Work Visa</span>
+                    <strong><?= htmlspecialchars((string)$visa['pswv_duration_months']) ?>mo</strong>
+                  </div>
+                  <div class="visa-stat">
+                    <span>Funds Req.</span>
+                    <strong>$<?= number_format((float)$visa['proof_of_funds_usd'], 0) ?></strong>
+                  </div>
+                </div>
+                <div class="visa-card-tags">
+                  <?php if ($visa['interview_required']): ?>
+                    <span class="visa-tag interview">Interview Required</span>
+                  <?php endif; ?>
+                  <?php if ($visa['part_time_work_hours']): ?>
+                    <span class="visa-tag work"><?= htmlspecialchars((string)$visa['part_time_work_hours']) ?>hrs/wk Work</span>
+                  <?php endif; ?>
+                  <span class="visa-tag"><?= count($docs) ?> Docs</span>
+                </div>
+                <div class="visa-card-link">
+                  View Full Guide <i class="ph ph-arrow-right"></i>
+                </div>
               </div>
-            </div>
+            </a>
           <?php endforeach; ?>
         </div>
       <?php endif; ?>
@@ -822,7 +801,7 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
                     <?php endif; ?>
                   </h3>
                   <div class="cons-rating">
-                    <i class="ph-fill ph-star"></i> <?= number_format($con['consultant_rating'], 1) ?> / 5.0
+                    <i class="ph-fill ph-star"></i> <?= number_format((float)$con['consultant_rating'], 1) ?> / 5.0
                   </div>
                 </div>
               </div>
@@ -830,7 +809,7 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
               <div class="cons-meta-list">
                 <div class="cons-meta-row">
                   <span>Success Rate</span>
-                  <strong><?= number_format($con['success_rate_percent'], 1) ?>%</strong>
+                  <strong><?= number_format((float)$con['success_rate_percent'], 1) ?>%</strong>
                 </div>
                 <div class="cons-meta-row">
                   <span>Experience</span>
@@ -850,7 +829,7 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
                 </div>
                 <div class="cons-meta-row">
                   <span>Address</span>
-                  <strong style="text-align:right; font-size:0.78rem; max-width:65%;"><?= htmlspecialchars($con['address'] . ', ' . $con['city']) ?></strong>
+                  <strong style="text-align:right; font-size:0.78rem; max-width:65%;"><?= htmlspecialchars(trim(($con['address'] ?? '') . ', ' . ($con['city'] ?? ''), ', ')) ?></strong>
                 </div>
               </div>
 
