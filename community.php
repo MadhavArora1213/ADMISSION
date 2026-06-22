@@ -17,11 +17,21 @@ $user_id = $_SESSION['user_id'] ?? 'user-1234-uuid';
 // Handle Question Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'ask_question') {
     $question_text = trim($_POST['question_text'] ?? '');
+    $question_details = trim($_POST['question_details'] ?? '');
     $category = $_POST['question_category'] ?? 'general';
 
     if (empty($question_text)) {
         $error_msg = 'Question text cannot be empty.';
+    } elseif (strlen($question_text) < 20) {
+        $error_msg = 'Question must contain at least 20 characters.';
+    } elseif (strlen($question_text) > 140) {
+        $error_msg = 'Question must not exceed 140 characters.';
     } else {
+        // Combine question + details if provided
+        $fullText = $question_text;
+        if (!empty($question_details)) {
+            $fullText .= "\n\n---\n" . $question_details;
+        }
         try {
             $qId = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
                 mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff),
@@ -29,12 +39,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff));
 
             $stmt = $pdo->prepare("
-                INSERT INTO questions (id, question_text, question_category, asked_by, views, upvotes, answer_count, status) 
-                VALUES (?, ?, ?, ?, 0, 0, 0, 'open')
+                INSERT INTO questions (id, question_text, question_category, asked_by, views, answer_count, status) 
+                VALUES (?, ?, ?, ?, 0, 0, 'open')
             ");
-            $stmt->execute([$qId, $question_text, $category, $user_id]);
+            $stmt->execute([$qId, $fullText, $category, $user_id]);
             
-            // Redirect to home tab to see the question
             header("Location: community?tab=qna&msg=posted");
             exit;
         } catch (Exception $e) {
@@ -431,158 +440,223 @@ function getCategoryIcon($cat) {
     .q-card {
       background: #fff;
       border: 1px solid var(--border-color-alt);
-      border-radius: 20px;
-      padding: 26px;
-      margin-bottom: 24px;
+      border-radius: 16px;
+      padding: 0;
+      margin-bottom: 20px;
       transition: all 0.3s ease;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(11, 36, 71, 0.02);
+      box-shadow: 0 2px 8px rgba(11, 36, 71, 0.02);
+      overflow: hidden;
     }
 
     .q-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 15px 30px rgba(11, 36, 71, 0.06);
-      border-color: rgba(25, 55, 109, 0.2);
+      box-shadow: 0 8px 24px rgba(11, 36, 71, 0.06);
+      border-color: rgba(25, 55, 109, 0.15);
     }
 
-    .q-header {
+    .q-top-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted-alt);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 22px 0;
+    }
+
+    .q-tags-row {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-      gap: 15px;
+      gap: 8px;
+      padding: 10px 22px 0;
+      flex-wrap: wrap;
     }
 
-    .q-asker-profile {
+    .q-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 6px;
+      background: rgba(25, 55, 109, 0.06);
+      color: var(--yale-blue);
+      border: 1px solid rgba(25, 55, 109, 0.1);
+    }
+
+    .q-tag.tag-cat {
+      background: rgba(16, 185, 129, 0.06);
+      color: #059669;
+      border-color: rgba(16, 185, 129, 0.12);
+    }
+
+    .q-body {
+      padding: 14px 22px 0;
+    }
+
+    .q-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--oxford-navy);
+      line-height: 1.4;
+      margin: 0 0 12px 0;
+      text-align: left;
+    }
+
+    .q-stats-row {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
+      padding: 0 22px;
+      margin-bottom: 12px;
     }
 
-    .asker-avatar {
-      width: 40px;
-      height: 40px;
+    .q-stat {
+      font-size: 0.78rem;
+      color: var(--text-muted-alt);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .q-stat.views-stat { color: var(--yale-blue); }
+
+    .q-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 22px;
+      border-top: 1px solid var(--border-color-alt);
+    }
+
+    .q-action-btn {
+      background: none;
+      border: 1px solid var(--border-color-alt);
+      color: var(--text-muted-alt);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .q-action-btn:hover {
+      background: rgba(25, 55, 109, 0.04);
+      color: var(--yale-blue);
+      border-color: var(--yale-blue);
+    }
+
+    .q-action-btn.answer-btn {
+      background: #e65100;
+      color: #fff;
+      border-color: #e65100;
+      padding: 7px 18px;
+    }
+
+    .q-action-btn.answer-btn:hover {
+      background: #bf360c;
+      border-color: #bf360c;
+    }
+
+    .q-action-btn.follow-btn {
+      color: var(--yale-blue);
+      border-color: var(--yale-blue);
+    }
+
+    .q-action-btn.follow-btn:hover {
+      background: var(--yale-blue);
+      color: #fff;
+    }
+
+    .q-action-spacer { flex: 1; }
+
+    /* Answer Preview inside card */
+    .q-answer-preview {
+      padding: 14px 22px;
+      border-top: 1px solid var(--border-color-alt);
+      background: #fafbfc;
+    }
+
+    .ans-preview-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .ans-preview-avatar {
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #fff;
       font-weight: 700;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.05rem;
+      font-size: 0.82rem;
+      flex-shrink: 0;
     }
 
-    .asker-meta {
-      display: flex;
-      flex-direction: column;
-      text-align: left;
-    }
-
-    .asker-name {
-      font-size: 0.9rem;
+    .ans-preview-name {
+      font-size: 0.82rem;
       font-weight: 700;
-      color: var(--oxford-navy);
+      color: var(--ink-black);
     }
 
-    .asker-date {
-      font-size: 0.76rem;
+    .ans-preview-level {
+      font-size: 0.68rem;
       color: var(--text-muted-alt);
-      margin-top: 1px;
+      font-weight: 500;
     }
 
-    .q-category {
-      font-size: 0.72rem;
-      font-weight: 800;
-      padding: 6px 14px;
-      border-radius: 100px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .q-category.cat-general { background: rgba(25, 55, 109, 0.08); color: var(--yale-blue); }
-    .q-category.cat-placements { background: rgba(16, 185, 129, 0.08); color: #10b981; }
-    .q-category.cat-admission { background: rgba(217, 119, 6, 0.08); color: #d97706; }
-    .q-category.cat-exams { background: rgba(219, 39, 119, 0.08); color: #db2777; }
-    .q-category.cat-fees { background: rgba(79, 70, 229, 0.08); color: #4f46e5; }
-    .q-category.cat-hostel { background: rgba(13, 148, 136, 0.08); color: #0d9488; }
-
-    .q-text {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--oxford-navy);
-      line-height: 1.45;
-      margin-bottom: 20px;
-      text-align: left;
-    }
-
-    .q-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid var(--border-color-alt);
-      padding-top: 18px;
-      margin-top: 18px;
-    }
-
-    .q-footer-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .q-footer-right {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .action-btn {
-      background: var(--snow-pearl);
-      border: 1px solid var(--border-color-alt);
-      color: var(--text-muted-alt);
-      padding: 8px 16px;
-      border-radius: 100px;
+    .ans-preview-text {
       font-size: 0.85rem;
+      color: #475569;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .ans-preview-footer {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    .ans-vote-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted-alt);
+      font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .action-btn:hover {
-      background: rgba(25, 55, 109, 0.05);
-      color: var(--yale-blue);
-      border-color: rgba(25, 55, 109, 0.2);
-    }
-
-    .upvote-q-btn.upvoted {
-      background: rgba(25, 55, 109, 0.08);
-      color: var(--yale-blue);
-      border-color: var(--yale-blue);
-    }
-
-    .q-view-indicator {
-      font-size: 0.82rem;
-      color: var(--text-muted-alt);
-      display: inline-flex;
-      align-items: center;
       gap: 4px;
-      font-weight: 650;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all 0.2s;
     }
 
-    .read-ans-trigger {
+    .ans-vote-btn:hover { background: rgba(0,0,0,0.04); }
+    .ans-vote-btn.upvoted { color: var(--yale-blue); }
+
+    .q-view-all-link {
+      display: block;
+      text-align: center;
+      padding: 12px;
       color: var(--yale-blue);
       font-size: 0.85rem;
       font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
+      text-decoration: none;
+      border-top: 1px solid var(--border-color-alt);
+      transition: background 0.2s;
+    }
+
+    .q-view-all-link:hover {
+      background: rgba(25, 55, 109, 0.03);
     }
 
     /* Expanded Details Thread */
@@ -757,44 +831,44 @@ function getCategoryIcon($cat) {
     .ask-form-panel {
       background: #fff;
       border: 1px solid var(--border-color-alt);
-      border-radius: 24px;
-      padding: 40px;
-      box-shadow: 0 15px 30px rgba(11, 36, 71, 0.03);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 8px 24px rgba(11, 36, 71, 0.03);
       text-align: left;
     }
 
     .ask-form-panel h3 {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.65rem;
+      font-size: 1.4rem;
       font-weight: 800;
       color: var(--oxford-navy);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       border-bottom: 1.5px solid var(--border-color-alt);
-      padding-bottom: 12px;
+      padding-bottom: 14px;
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
     .form-group {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .form-group label {
       display: block;
       font-weight: 700;
-      margin-bottom: 8px;
-      font-size: 0.92rem;
+      margin-bottom: 6px;
+      font-size: 0.88rem;
       color: var(--oxford-navy);
     }
 
     .form-control {
       width: 100%;
-      padding: 14px 18px;
+      padding: 12px 14px;
       border: 1.5px solid var(--border-color-alt);
-      border-radius: 12px;
+      border-radius: 10px;
       background: #fff;
-      font-size: 0.96rem;
+      font-size: 0.88rem;
       font-family: inherit;
       color: var(--ink-black);
       box-sizing: border-box;
@@ -804,7 +878,7 @@ function getCategoryIcon($cat) {
     }
 
     textarea.form-control {
-      min-height: 130px;
+      min-height: 100px;
       resize: vertical;
       line-height: 1.5;
     }
@@ -812,37 +886,100 @@ function getCategoryIcon($cat) {
     select.form-control {
       background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 18px center;
-      background-size: 16px;
-      padding-right: 45px;
+      background-position: right 14px center;
+      background-size: 14px;
+      padding-right: 40px;
       cursor: pointer;
     }
 
     .form-control:focus {
       border-color: var(--yale-blue);
-      box-shadow: 0 0 0 4px rgba(25, 55, 109, 0.08);
+      box-shadow: 0 0 0 3px rgba(25, 55, 109, 0.08);
+    }
+
+    .char-counter {
+      font-size: 0.78rem;
+      color: var(--text-muted-alt);
+      text-align: right;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+    .char-counter.over { color: #dc2626; font-weight: 700; }
+    .char-counter.near { color: #f59e0b; }
+
+    .char-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted-alt);
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .validation-msg {
+      font-size: 0.78rem;
+      margin-top: 6px;
+      display: none;
+      font-weight: 600;
+    }
+    .validation-msg.error { color: #dc2626; }
+    .validation-msg.success { color: #16a34a; }
+
+    .add-details-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1.5px solid var(--border-color-alt);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--oxford-navy);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 12px;
+    }
+    .add-details-toggle:hover { border-color: var(--yale-blue); color: var(--yale-blue); }
+    .add-details-toggle i { font-size: 1rem; }
+
+    .details-section {
+      display: none;
+      margin-top: 0;
+    }
+    .details-section.show { display: block; }
+
+    .details-section textarea {
+      min-height: 80px;
     }
 
     .submit-q-btn {
       background: var(--oxford-navy);
       color: #fff;
       border: none;
-      padding: 14px 30px;
-      border-radius: 12px;
+      padding: 12px 28px;
+      border-radius: 10px;
       font-weight: 700;
-      font-size: 0.96rem;
+      font-size: 0.88rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 8px;
       box-shadow: 0 4px 12px rgba(11, 36, 71, 0.15);
       transition: all 0.3s;
+      margin-top: 8px;
     }
 
     .submit-q-btn:hover {
       background: var(--yale-blue);
       box-shadow: 0 8px 24px rgba(25, 55, 109, 0.25);
-      transform: translateY(-2px);
+      transform: translateY(-1px);
+    }
+
+    .submit-q-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
     }
 
     /* Sidebar Panels */
@@ -1128,62 +1265,102 @@ function getCategoryIcon($cat) {
     <!-- Render List of Questions -->
     <?php if ($tab !== 'ask'): ?>
       <?php if (empty($questions)): ?>
-        <div style="text-align:center; padding:60px 0; color:var(--text-muted-alt); background:#fff; border-radius:20px; border:1px solid var(--border-color-alt);">
-          <i class="ph ph-chat-slash" style="font-size:3.5rem; margin-bottom:14px; color: #cbd5e1;"></i>
-          <p style="font-weight: 600; font-size: 1.05rem;">No questions found in this tab.</p>
-          <p style="font-size: 0.88rem; color: #94a3b8; margin-top: 4px;">Be the first one to raise a query or start a discussion!</p>
+        <div style="text-align:center; padding:60px 0; color:var(--text-muted-alt); background:#fff; border-radius:16px; border:1px solid var(--border-color-alt);">
+          <i class="ph ph-chat-slash" style="font-size:3rem; margin-bottom:14px; color: #cbd5e1;"></i>
+          <p style="font-weight: 600; font-size: 1rem;">No questions found in this tab.</p>
+          <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">Be the first one to raise a query or start a discussion!</p>
         </div>
       <?php else: ?>
         <div>
           <?php foreach ($questions as $q): ?>
+            <?php
+              $qCats = [
+                'admission' => 'Admissions', 'fees' => 'Fees', 'placements' => 'Placements',
+                'hostel' => 'Campus Life', 'exams' => 'Entrance Exams', 'general' => 'General'
+              ];
+              $qCatLabel = $qCats[$q['question_category']] ?? ucfirst($q['question_category']);
+              $qAnswers = $answers[$q['id']] ?? [];
+              $firstAns = $qAnswers[0] ?? null;
+            ?>
             <div class="q-card" data-qid="<?= $q['id'] ?>" onclick="toggleCard(this, event)">
-              <div class="q-header">
-                <div class="q-asker-profile">
-                  <div class="asker-avatar" style="background-color: <?= getAvatarColor($q['asker_name'] ?: 'Guest') ?>;">
-                    <?= strtoupper(substr($q['asker_name'] ?: 'G', 0, 1)) ?>
-                  </div>
-                  <div class="asker-meta">
-                    <span class="asker-name"><?= htmlspecialchars($q['asker_name'] ?: 'Guest Student') ?></span>
-                    <span class="asker-date">Asked on <?= date('d M Y', strtotime($q['created_at'])) ?></span>
-                  </div>
-                </div>
-                <span class="q-category cat-<?= htmlspecialchars($q['question_category']) ?>">
-                  <i class="<?= getCategoryIcon($q['question_category']) ?>"></i> <?= htmlspecialchars($q['question_category']) ?>
-                </span>
+              <div class="q-top-label">Top Content</div>
+              <div class="q-tags-row">
+                <span class="q-tag tag-cat"><?= htmlspecialchars($qCatLabel) ?></span>
+                <?php if (!empty($q['related_college_id'])): ?>
+                  <span class="q-tag">College</span>
+                <?php endif; ?>
+                <?php if (!empty($q['related_course_id'])): ?>
+                  <span class="q-tag">Course</span>
+                <?php endif; ?>
               </div>
-              
-              <h3 class="q-text"><?= htmlspecialchars($q['question_text']) ?></h3>
-              
-              <div class="q-footer">
-                <div class="q-footer-left">
-                  <!-- AJAX Upvote Button -->
-                  <button class="action-btn upvote-q-btn <?= isset($_SESSION['upvoted_questions']) && in_array($q['id'], $_SESSION['upvoted_questions']) ? 'upvoted' : '' ?>" onclick="upvoteQuestion('<?= $q['id'] ?>', this, event)">
-                    <i class="<?= isset($_SESSION['upvoted_questions']) && in_array($q['id'], $_SESSION['upvoted_questions']) ? 'ph-fill' : 'ph' ?> ph-thumbs-up"></i>
-                    <span class="upvote-count"><?= number_format((int)($q['upvotes'] ?? 0)) ?></span>
+              <div class="q-body">
+                <h3 class="q-text"><?= htmlspecialchars($q['question_text']) ?></h3>
+              </div>
+              <div class="q-stats-row">
+                <span class="q-stat views-stat"><i class="ph ph-eye"></i> <?= number_format((int)$q['views']) ?> Views</span>
+                <span class="q-stat"><i class="ph ph-chat-text"></i> <?= number_format((int)$q['answer_count']) ?> Answers</span>
+                <span class="q-stat">Asked <?= date('d M', strtotime($q['created_at'])) ?></span>
+              </div>
+              <div class="q-actions-row">
+                <button class="q-action-btn follow-btn" onclick="event.stopPropagation()" title="Follow">
+                  <i class="ph ph-bell"></i> Follow
+                </button>
+                <button class="q-action-btn" onclick="shareQuestion('<?= $q['id'] ?>', event)" title="Share">
+                  <i class="ph ph-share-network"></i> Share
+                </button>
+                <span class="q-action-spacer"></span>
+                <?php if ($firstAns): ?>
+                  <button class="q-action-btn answer-btn" onclick="toggleCard(this.closest('.q-card'), event)">
+                    <i class="ph ph-pencil-simple"></i> Answer
                   </button>
-
-                  <div class="q-view-indicator"><i class="ph ph-chat-text" style="font-size: 1.1rem;"></i> <?= number_format((int)$q['answer_count']) ?> Answers</div>
-                  <div class="q-view-indicator"><i class="ph ph-eye" style="font-size: 1.1rem;"></i> <span class="views-count"><?= number_format((int)$q['views']) ?></span> Views</div>
-                </div>
-
-                <div class="q-footer-right">
-                  <!-- Share Link Button -->
-                  <button class="action-btn share-q-btn" onclick="shareQuestion('<?= $q['id'] ?>', event)" title="Copy Question Link">
-                    <i class="ph ph-share-network"></i>
+                <?php else: ?>
+                  <button class="q-action-btn answer-btn" onclick="toggleCard(this.closest('.q-card'), event)">
+                    <i class="ph ph-plus"></i> Answer
                   </button>
-                  <span class="read-ans-trigger"><i class="ph ph-caret-down-bold"></i> View Thread</span>
-                </div>
+                <?php endif; ?>
               </div>
 
-              <!-- Expanded Thread -->
+              <?php if ($firstAns): ?>
+              <div class="q-answer-preview" onclick="event.stopPropagation()">
+                <div class="ans-preview-header">
+                  <div class="ans-preview-avatar" style="background-color: <?= getAvatarColor($firstAns['replier_name'] ?: 'User') ?>;">
+                    <?= strtoupper(substr($firstAns['replier_name'] ?: 'U', 0, 1)) ?>
+                  </div>
+                  <div>
+                    <div class="ans-preview-name"><?= htmlspecialchars($firstAns['replier_name'] ?: 'Community User') ?></div>
+                    <div class="ans-preview-level">
+                      <?php if ($firstAns['is_expert_answer']): ?>
+                        <i class="ph-fill ph-seal-check" style="color:var(--expert-badge-color);"></i> Verified Expert
+                      <?php elseif ($firstAns['is_verified_alumnus']): ?>
+                        <i class="ph-fill ph-graduation-cap"></i> Verified Alumnus
+                      <?php else: ?>
+                        Beginner - Level 1
+                      <?php endif; ?>
+                    </div>
+                  </div>
+                </div>
+                <p class="ans-preview-text"><?= htmlspecialchars(mb_strimwidth($firstAns['answer_text'], 0, 200, '...')) ?></p>
+                <div class="ans-preview-footer">
+                  <button class="ans-vote-btn <?= isset($_SESSION['upvoted_answers']) && in_array($firstAns['id'], $_SESSION['upvoted_answers']) ? 'upvoted' : '' ?>" onclick="upvoteAnswer('<?= $firstAns['id'] ?>', this, event)">
+                    <i class="<?= isset($_SESSION['upvoted_answers']) && in_array($firstAns['id'], $_SESSION['upvoted_answers']) ? 'ph-fill' : 'ph' ?> ph-thumbs-up"></i> <?= number_format((int)($firstAns['upvotes'] ?? 0)) ?>
+                  </button>
+                </div>
+              </div>
+              <?php endif; ?>
+
+              <?php if ((int)$q['answer_count'] > 1): ?>
+                <a class="q-view-all-link" href="javascript:void(0)" onclick="toggleCard(this.closest('.q-card'), event)">
+                  View All <?= number_format((int)$q['answer_count']) ?> Answers
+                </a>
+              <?php endif; ?>
+
               <div class="q-expanded" onclick="event.stopPropagation()">
-                <h4 class="ans-title"><i class="ph ph-chat-centered-text"></i> Discussions Thread</h4>
-                
+                <h4 class="ans-title"><i class="ph ph-chat-centered-text"></i> All Answers</h4>
                 <div class="answers-list">
-                  <?php if (empty($answers[$q['id']])): ?>
-                    <p style="font-size:0.9rem; color:var(--text-muted-alt); padding: 10px 0;">No answers posted yet. Be the first to help this student!</p>
+                  <?php if (empty($qAnswers)): ?>
+                    <p style="font-size:0.85rem; color:var(--text-muted-alt); padding: 10px 0;">No answers posted yet. Be the first to help this student!</p>
                   <?php else: ?>
-                    <?php foreach ($answers[$q['id']] as $ans): ?>
+                    <?php foreach ($qAnswers as $ans): ?>
                       <div class="ans-item <?= $ans['is_expert_answer'] ? 'expert-ans-item' : '' ?>">
                         <div class="ans-header">
                           <div class="ans-replier-profile">
@@ -1204,9 +1381,7 @@ function getCategoryIcon($cat) {
                           <span class="ans-time"><?= date('d M Y, H:i', strtotime($ans['created_at'])) ?></span>
                         </div>
                         <p class="ans-body"><?= htmlspecialchars($ans['answer_text']) ?></p>
-
                         <div class="ans-footer">
-                          <!-- AJAX Upvote Answer Button -->
                           <button class="action-btn upvote-ans-btn <?= isset($_SESSION['upvoted_answers']) && in_array($ans['id'], $_SESSION['upvoted_answers']) ? 'upvoted' : '' ?>" onclick="upvoteAnswer('<?= $ans['id'] ?>', this, event)">
                             <i class="<?= isset($_SESSION['upvoted_answers']) && in_array($ans['id'], $_SESSION['upvoted_answers']) ? 'ph-fill' : 'ph' ?> ph-thumbs-up"></i>
                             <span class="upvote-count"><?= number_format((int)($ans['upvotes'] ?? 0)) ?></span>
@@ -1216,8 +1391,6 @@ function getCategoryIcon($cat) {
                     <?php endforeach; ?>
                   <?php endif; ?>
                 </div>
-
-                <!-- Answer Form inside the card -->
                 <form method="POST" action="community" class="inline-ans-form">
                   <input type="hidden" name="action" value="submit_answer">
                   <input type="hidden" name="question_id" value="<?= htmlspecialchars($q['id']) ?>">
@@ -1227,7 +1400,6 @@ function getCategoryIcon($cat) {
                   </button>
                 </form>
               </div>
-
             </div>
           <?php endforeach; ?>
         </div>
@@ -1237,30 +1409,45 @@ function getCategoryIcon($cat) {
     <?php else: ?>
       <div class="ask-form-panel">
         <h3><i class="ph ph-question"></i> Ask Your Question to Experts</h3>
-        <form method="POST" action="community">
+        <form method="POST" action="community" id="askForm" onsubmit="return validateAskForm()">
           <input type="hidden" name="action" value="ask_question">
           
           <div class="form-group">
             <label>What is your question? *</label>
-            <textarea name="question_text" class="form-control" placeholder="Type your question here (e.g. What is the average package for MBA at FMS Delhi?)..." required></textarea>
-            <span style="font-size:0.8rem; color:var(--text-muted-alt); margin-top:6px; display:block;">Keep it concise, clear, and specific for high-quality answers.</span>
+            <textarea name="question_text" id="questionText" class="form-control" placeholder="e.g. What is the average package for MBA at FMS Delhi?" maxlength="140" oninput="updateCounter('questionText', 'qCounter', 140, 20)" required></textarea>
+            <div class="char-counter" id="qCounter">Characters 0/140</div>
+            <div class="validation-msg error" id="qValidation"></div>
           </div>
 
-          <div class="form-group" style="max-width:320px;">
+          <button type="button" class="add-details-toggle" id="detailsToggle" onclick="toggleDetails()">
+            <i class="ph ph-plus-circle"></i> Add more details
+          </button>
+
+          <div class="details-section" id="detailsSection">
+            <div class="form-group" style="margin-bottom:0;">
+              <textarea name="question_details" id="questionDetails" class="form-control" placeholder="Give information like score, education background etc." maxlength="300" oninput="updateCounter('questionDetails', 'dCounter', 300, 0)"></textarea>
+              <div class="char-counter" id="dCounter">Characters 0/300</div>
+            </div>
+          </div>
+
+          <div class="form-group" style="max-width:280px;">
             <label>Question Category *</label>
             <select name="question_category" class="form-control" required>
               <option value="general">General Guidance</option>
               <option value="admission">Admissions</option>
               <option value="fees">Fees Structure</option>
               <option value="placements">Placements & Salary</option>
-              <option value="hostel">Hostel & Campus life</option>
+              <option value="hostel">Hostel & Campus Life</option>
               <option value="exams">Entrance Exams</option>
             </select>
           </div>
 
-          <button type="submit" class="submit-q-btn">
-            <i class="ph ph-paper-plane-right"></i> Submit Question
-          </button>
+          <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+            <button type="submit" class="submit-q-btn" id="submitBtn">
+              <i class="ph ph-paper-plane-right"></i> Submit Question
+            </button>
+            <span class="char-hint"><i class="ph ph-info"></i> Keep it short & simple. Type complete words. Avoid abusive language.</span>
+          </div>
         </form>
       </div>
     <?php endif; ?>
@@ -1414,6 +1601,60 @@ function getCategoryIcon($cat) {
     setTimeout(() => {
       toast.classList.remove('show');
     }, 2500);
+  }
+
+  // ═══ ASK QUESTION FORM: Character Counters & Validation ═══════════════════
+
+  function updateCounter(textareaId, counterId, max, min) {
+    const textarea = document.getElementById(textareaId);
+    const counter = document.getElementById(counterId);
+    if (!textarea || !counter) return;
+    const len = textarea.value.length;
+    counter.textContent = 'Characters ' + len + '/' + max;
+    counter.classList.remove('over', 'near');
+    if (len > max) {
+      counter.classList.add('over');
+    } else if (len >= max * 0.85) {
+      counter.classList.add('near');
+    }
+  }
+
+  function toggleDetails() {
+    const section = document.getElementById('detailsSection');
+    const toggle = document.getElementById('detailsToggle');
+    const icon = toggle.querySelector('i');
+    if (section.classList.contains('show')) {
+      section.classList.remove('show');
+      icon.className = 'ph ph-plus-circle';
+      toggle.innerHTML = '<i class="ph ph-plus-circle"></i> Add more details';
+      document.getElementById('questionDetails').value = '';
+      updateCounter('questionDetails', 'dCounter', 300, 0);
+    } else {
+      section.classList.add('show');
+      icon.className = 'ph ph-minus-circle';
+      toggle.innerHTML = '<i class="ph ph-minus-circle"></i> Remove details';
+    }
+  }
+
+  function validateAskForm() {
+    const question = document.getElementById('questionText').value.trim();
+    const qValidation = document.getElementById('qValidation');
+    qValidation.style.display = 'block';
+
+    if (question.length < 20) {
+      qValidation.textContent = 'The Question must contain at least 20 characters.';
+      qValidation.className = 'validation-msg error';
+      return false;
+    }
+    if (question.length > 140) {
+      qValidation.textContent = 'The Question must not exceed 140 characters.';
+      qValidation.className = 'validation-msg error';
+      return false;
+    }
+
+    qValidation.textContent = '';
+    qValidation.style.display = 'none';
+    return true;
   }
 </script>
 

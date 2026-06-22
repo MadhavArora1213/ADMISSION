@@ -20,7 +20,7 @@ if (!isset($navColleges)) {
     $navCountries = cAll($pdo, "SELECT name FROM countries LIMIT 50");
     $navUnis = cAll($pdo, "SELECT university_name, university_slug FROM foreign_universities ORDER BY qs_rank ASC LIMIT 8");
     $navVisas = cAll($pdo, "SELECT country, visa_type FROM visa_guides ORDER BY country ASC LIMIT 8");
-    $navCons = cAll($pdo, "SELECT consultant_name FROM consultants ORDER BY consultant_rating DESC LIMIT 8");
+    $navCons = cAll($pdo, "SELECT id, consultant_name FROM consultants ORDER BY consultant_rating DESC LIMIT 8");
     $navPopularCareersList = cAll($pdo, "SELECT name, slug FROM careers WHERE is_popular = 1 ORDER BY name ASC LIMIT 8");
 
     // --- MORE MEGA MENU DATA ---
@@ -184,7 +184,7 @@ if (!isset($navColleges)) {
               <h4>Consultants</h4>
               <ul>
                 <?php foreach($navCons ?? [] as $nc): ?>
-                <li><a href="<?= $navBase ?>/study-abroad?tab=consultants"><?=htmlspecialchars($nc['consultant_name'])?></a></li>
+                <li><a href="<?= $navBase ?>/consultant/<?= (int)$nc['id'] ?>"><?=htmlspecialchars($nc['consultant_name'])?></a></li>
                 <?php endforeach; ?>
                 <li><a href="<?= $navBase ?>/study-abroad?tab=consultants" style="color: var(--yale-blue); font-weight: 700; margin-top: 10px; display: inline-block;">View All Consultants &rarr;</a></li>
               </ul>
@@ -193,7 +193,7 @@ if (!isset($navColleges)) {
         </li>
 
         <li class="pro-has-mega">
-          <a href="counselling">Counseling <i class="ph ph-caret-down"></i></a>
+          <a href="<?= $navBase ?>/counselling">Counseling <i class="ph ph-caret-down"></i></a>
           <div class="pro-mega-menu cns-dropdown-menu">
             <div class="cns-nav-list">
               <div class="cns-nav-item">
@@ -201,8 +201,8 @@ if (!isset($navColleges)) {
                 <div class="cns-sub-panel">
                   <h4>Get Expert Guidance</h4>
                   <ul>
-                    <li><a href="ask-question"><span><i class="ph-bold ph-question"></i> Ask a Question</span><span class="cns-sub-desc">Get quick responses from expert counsellors</span></a></li>
-                    <li><a href="discussions"><span><i class="ph-bold ph-chats"></i> Discussions</span><span class="cns-sub-desc">Participate in career discussion groups</span></a></li>
+                    <li><a href="<?= $navBase ?>/ask-question"><span><i class="ph-bold ph-question"></i> Ask a Question</span><span class="cns-sub-desc">Get quick responses from expert counsellors</span></a></li>
+                    <li><a href="<?= $navBase ?>/discussions"><span><i class="ph-bold ph-chats"></i> Discussions</span><span class="cns-sub-desc">Participate in career discussion groups</span></a></li>
                   </ul>
                 </div>
               </div>
@@ -223,7 +223,7 @@ if (!isset($navColleges)) {
                       <h5>Popular Careers</h5>
                       <ul style="max-height: 250px; overflow-y: visible; display: grid; grid-template-columns: 1fr; gap: 8px;">
                         <?php foreach($navPopularCareersList ?? [] as $popCar): ?>
-                          <li><a href="career_details.php?slug=<?= htmlspecialchars($popCar['slug']) ?>"><span><i class="ph ph-briefcase"></i> <?= htmlspecialchars($popCar['name']) ?></span></a></li>
+                          <li><a href="<?= $navBase ?>/career_details.php?slug=<?= htmlspecialchars($popCar['slug']) ?>"><span><i class="ph ph-briefcase"></i> <?= htmlspecialchars($popCar['name']) ?></span></a></li>
                         <?php endforeach; ?>
                         <li><a href="<?= $navBase ?>/careers.php" style="background: none !important; border: none !important; padding: 2px 0 !important; color: var(--yale-blue) !important; font-weight: 700 !important;"><span style="color: var(--yale-blue);">&gt; All other careers</span></a></li>
                       </ul>
@@ -236,9 +236,9 @@ if (!isset($navColleges)) {
                 <div class="cns-sub-panel">
                   <h4>Courses After 12th</h4>
                   <ul>
-                    <li><a href="courses?level=UG"><span><i class="ph ph-book-open"></i> Undergraduate (UG) Courses</span></a></li>
-                    <li><a href="courses?level=PG"><span><i class="ph ph-books"></i> Postgraduate (PG) Courses</span></a></li>
-                    <li><a href="courses"><span><i class="ph ph-certificate"></i> Diploma & Certifications</span></a></li>
+                    <li><a href="<?= $navBase ?>/courses?level=UG"><span><i class="ph ph-book-open"></i> Undergraduate (UG) Courses</span></a></li>
+                    <li><a href="<?= $navBase ?>/courses?level=PG"><span><i class="ph ph-books"></i> Postgraduate (PG) Courses</span></a></li>
+                    <li><a href="<?= $navBase ?>/courses"><span><i class="ph ph-certificate"></i> Diploma & Certifications</span></a></li>
                   </ul>
                 </div>
               </div>
@@ -247,8 +247,8 @@ if (!isset($navColleges)) {
                 <div class="cns-sub-panel">
                   <h4>Free Prep Material</h4>
                   <ul>
-                    <li><a href="exams"><span><i class="ph ph-calendar"></i> Entrance Exams Pattern</span></a></li>
-                    <li><a href="exams"><span><i class="ph ph-file-pdf"></i> Syllabus & Question Papers</span></a></li>
+                    <li><a href="<?= $navBase ?>/exams"><span><i class="ph ph-calendar"></i> Entrance Exams Pattern</span></a></li>
+                    <li><a href="<?= $navBase ?>/exams"><span><i class="ph ph-file-pdf"></i> Syllabus & Question Papers</span></a></li>
                   </ul>
                 </div>
               </div>
@@ -279,7 +279,7 @@ if (!isset($navColleges)) {
                 <a href="<?= $navBase ?>/colleges.php?recommend=1"><i class="ph ph-sparkles"></i> Recommendations <span class="cns-badge-new" style="margin-left:5px;">NEW</span></a>
               </div>
               <div class="cns-nav-item highlight-item" style="border-top:1px solid #e2e8f0; margin-top:8px; padding: 12px 16px;">
-                <a href="counselling" style="color: #fff !important;"><i class="ph-fill ph-headset"></i> Get Free Counselling</a>
+                <a href="<?= $navBase ?>/counselling" style="color: #fff !important;"><i class="ph-fill ph-headset"></i> Get Free Counselling</a>
               </div>
             </div>
             <div class="cns-default-panel">
@@ -430,7 +430,7 @@ if (!isset($navColleges)) {
         <li><a href="<?= $navBase ?>/news.php">News</a></li>
       </ul>
       <ul class="pro-sub-links-right">
-        <li><a href="counselling" class="counselling-btn"><i class="ph-fill ph-headset"></i> Free Counselling <span class="pulse-dot"></span></a></li>
+        <li><a href="<?= $navBase ?>/counselling" class="counselling-btn"><i class="ph-fill ph-headset"></i> Free Counselling <span class="pulse-dot"></span></a></li>
       </ul>
     </div>
   </div>
@@ -505,7 +505,7 @@ if (!isset($navColleges)) {
     </div>
 
     <a href="<?= $navBase ?>/study-abroad" class="pro-mobile-link"><i class="ph ph-globe"></i> Study Abroad</a>
-    <a href="counselling" class="pro-mobile-link"><i class="ph ph-headset"></i> Counseling</a>
+    <a href="<?= $navBase ?>/counselling" class="pro-mobile-link"><i class="ph ph-headset"></i> Counseling</a>
     <a href="#" class="pro-mobile-link pro-has-sub"><i class="ph ph-grid-four"></i> More <i class="ph ph-caret-right pro-mobile-arrow"></i></a>
     <div class="pro-mobile-sub" id="mobileSubMore">
       <?php foreach($navMoreCategories ?? [] as $cat): ?>
@@ -518,7 +518,7 @@ if (!isset($navColleges)) {
     <a href="<?= $navBase ?>/news.php" class="pro-mobile-link"><i class="ph ph-newspaper"></i> News</a>
 
     <div class="pro-mobile-section-title" style="margin-top:16px">Actions</div>
-    <a href="counselling" class="pro-mobile-link"><i class="ph-fill ph-headset"></i> Free Counselling</a>
+    <a href="<?= $navBase ?>/counselling" class="pro-mobile-link"><i class="ph-fill ph-headset"></i> Free Counselling</a>
     <a href="#" class="pro-mobile-link"><i class="ph ph-heart"></i> Saved Colleges</a>
     <?php if (isset($_SESSION['user_id'])): ?>
     <a href="/ADMISSION/logout.php?redirect=<?= urlencode($_SERVER['REQUEST_URI'] ?? '/') ?>" class="pro-mobile-link" style="color:#DC2626"><i class="ph ph-sign-out"></i> Logout</a>

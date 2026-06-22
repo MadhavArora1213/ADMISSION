@@ -396,101 +396,178 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
       border-color: var(--oxford-navy);
     }
 
-    /* Consultants style */
+    /* Consultants - Compact Card Grid */
     .cons-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
+      gap: 20px;
     }
-    @media (max-width: 1100px) {
-      .cons-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 700px) {
-      .cons-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 1100px) { .cons-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 700px) { .cons-grid { grid-template-columns: 1fr; } }
 
     .cons-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color-alt);
       border-radius: 16px;
-      padding: 22px;
-      transition: all 0.3s;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
     }
 
     .cons-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.06);
-      border-color: rgba(25, 55, 109, 0.15);
+      box-shadow: 0 12px 32px rgba(11, 36, 71, 0.08);
+      border-color: rgba(25, 55, 109, 0.2);
     }
 
-    .cons-head {
+    .cons-card-top {
       display: flex;
-      justify-content: space-between;
-      align-items: start;
-      margin-bottom: 18px;
+      align-items: center;
+      gap: 14px;
+      padding: 20px 20px 0;
     }
 
-    .cons-info-title h3 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--oxford-navy);
+    .cons-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      object-fit: cover;
+      border: 2px solid var(--border-color-alt);
+      background: var(--snow-pearl);
+      flex-shrink: 0;
+    }
+
+    .cons-name-wrap {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .cons-name-row {
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
-    .cons-badge-verified {
+    .cons-name-row h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--oxford-navy);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cons-verified-icon {
       color: var(--yale-blue);
-      font-size: 1.25rem;
+      font-size: 1rem;
+      flex-shrink: 0;
     }
 
-    .cons-rating {
+    .cons-rating-pill {
       background: #fef9c3;
       color: #854d0e;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .cons-card-body {
+      padding: 16px 20px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cons-stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .cons-stat {
+      text-align: center;
+      padding: 8px 4px;
+      background: var(--snow-pearl);
+      border-radius: 8px;
+    }
+
+    .cons-stat span {
+      display: block;
+      font-size: 0.58rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      color: var(--text-muted-alt);
+      margin-bottom: 2px;
+    }
+
+    .cons-stat strong {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--oxford-navy);
+    }
+
+    .cons-countries-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 14px;
+    }
+
+    .cons-country-tag {
+      background: rgba(25, 55, 109, 0.06);
+      color: var(--yale-blue);
       padding: 3px 8px;
       border-radius: 6px;
-      font-size: 0.78rem;
-      font-weight: 700;
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+
+    .cons-mode-tag {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-top: auto;
       display: inline-flex;
       align-items: center;
       gap: 4px;
     }
+    .cons-mode-tag.online { background: rgba(22, 101, 52, 0.08); color: #166534; }
+    .cons-mode-tag.offline { background: rgba(234, 88, 12, 0.08); color: #c2410c; }
+    .cons-mode-tag.both { background: rgba(25, 55, 109, 0.08); color: var(--yale-blue); }
 
-    .cons-meta-list {
-      border-top: 1px solid var(--border-color-alt);
-      padding-top: 16px;
-      margin-top: 16px;
-      font-size: 0.85rem;
-      color: #475569;
-    }
-
-    .cons-meta-row {
+    .cons-card-link {
       display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-
-    .cons-meta-row span {
-      color: var(--text-muted-alt);
-    }
-
-    .cons-countries {
-      display: flex;
-      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
       gap: 6px;
       margin-top: 14px;
-    }
-
-    .cons-country-badge {
+      padding: 10px;
+      border-radius: 10px;
       background: var(--snow-pearl);
       border: 1px solid var(--border-color-alt);
-      border-radius: 6px;
-      padding: 4px 10px;
-      font-size: 0.75rem;
-      font-weight: 600;
       color: var(--yale-blue);
+      font-size: 0.78rem;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+
+    .cons-card:hover .cons-card-link {
+      background: var(--oxford-navy);
+      color: #fff;
+      border-color: var(--oxford-navy);
     }
 
     /* Portal CTA block */
@@ -790,55 +867,55 @@ if (!in_array($activeTab, ['universities', 'visas', 'consultants'], true)) {
           <?php foreach ($consultants as $con): ?>
             <?php 
               $conCountries = json_decode($con['specialization_countries'] ?? '[]', true);
+              $mode = strtolower($con['consultation_mode'] ?? 'both');
             ?>
-            <div class="cons-card" data-countries='<?= htmlspecialchars(json_encode($conCountries)) ?>'>
-              <div class="cons-head">
-                <div class="cons-info-title">
-                  <h3>
-                    <?= htmlspecialchars($con['consultant_name']) ?>
+            <a href="/ADMISSION/consultant/<?= (int)$con['id'] ?>" class="cons-card" data-countries='<?= htmlspecialchars(json_encode($conCountries)) ?>'>
+              <div class="cons-card-top">
+                <img src="<?= htmlspecialchars($con['logo_url'] ?: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=100&h=100&fit=crop') ?>" alt="logo" class="cons-avatar">
+                <div class="cons-name-wrap">
+                  <div class="cons-name-row">
+                    <h3><?= htmlspecialchars($con['consultant_name']) ?></h3>
                     <?php if($con['verified_consultant']): ?>
-                      <i class="ph-fill ph-seal-check cons-badge-verified" title="Verified Consultant"></i>
+                      <i class="ph-fill ph-seal-check cons-verified-icon" title="Verified"></i>
                     <?php endif; ?>
-                  </h3>
-                  <div class="cons-rating">
-                    <i class="ph-fill ph-star"></i> <?= number_format((float)$con['consultant_rating'], 1) ?> / 5.0
+                  </div>
+                  <span class="cons-rating-pill">
+                    <i class="ph-fill ph-star"></i> <?= number_format((float)$con['consultant_rating'], 1) ?>/5
+                  </span>
+                </div>
+              </div>
+              <div class="cons-card-body">
+                <div class="cons-stats-row">
+                  <div class="cons-stat">
+                    <span>Success</span>
+                    <strong><?= number_format((float)$con['success_rate_percent'], 0) ?>%</strong>
+                  </div>
+                  <div class="cons-stat">
+                    <span>Experience</span>
+                    <strong><?= htmlspecialchars((string)$con['experience_years']) ?>+yr</strong>
+                  </div>
+                  <div class="cons-stat">
+                    <span>Rating</span>
+                    <strong><?= number_format((float)$con['consultant_rating'], 1) ?>/5</strong>
                   </div>
                 </div>
-              </div>
-
-              <div class="cons-meta-list">
-                <div class="cons-meta-row">
-                  <span>Success Rate</span>
-                  <strong><?= number_format((float)$con['success_rate_percent'], 1) ?>%</strong>
+                <div class="cons-countries-row">
+                  <?php foreach(array_slice($conCountries, 0, 4) as $cc): ?>
+                    <span class="cons-country-tag"><?= htmlspecialchars($cc) ?></span>
+                  <?php endforeach; ?>
+                  <?php if(count($conCountries) > 4): ?>
+                    <span class="cons-country-tag">+<?= count($conCountries) - 4 ?> more</span>
+                  <?php endif; ?>
                 </div>
-                <div class="cons-meta-row">
-                  <span>Experience</span>
-                  <strong><?= htmlspecialchars((string)$con['experience_years']) ?>+ Years</strong>
-                </div>
-                <div class="cons-meta-row">
-                  <span>Fees Range</span>
-                  <strong><?= htmlspecialchars($con['fee_range']) ?></strong>
-                </div>
-                <div class="cons-meta-row">
-                  <span>Email</span>
-                  <strong><?= htmlspecialchars($con['contact_email']) ?></strong>
-                </div>
-                <div class="cons-meta-row">
-                  <span>Phone</span>
-                  <strong><?= htmlspecialchars($con['contact_phone']) ?></strong>
-                </div>
-                <div class="cons-meta-row">
-                  <span>Address</span>
-                  <strong style="text-align:right; font-size:0.78rem; max-width:65%;"><?= htmlspecialchars(trim(($con['address'] ?? '') . ', ' . ($con['city'] ?? ''), ', ')) ?></strong>
+                <span class="cons-mode-tag <?= $mode ?>">
+                  <i class="ph ph-<?= $mode === 'online' ? 'monitor' : ($mode === 'offline' ? 'buildings' : 'arrows-clockwise') ?>"></i>
+                  <?= htmlspecialchars($con['consultation_mode'] ?? 'Both') ?>
+                </span>
+                <div class="cons-card-link">
+                  View Profile <i class="ph ph-arrow-right"></i>
                 </div>
               </div>
-
-              <div class="cons-countries">
-                <?php foreach($conCountries as $cc): ?>
-                  <span class="cons-country-badge"><?= htmlspecialchars($cc) ?></span>
-                <?php endforeach; ?>
-              </div>
-            </div>
+            </a>
           <?php endforeach; ?>
         </div>
       <?php endif; ?>
