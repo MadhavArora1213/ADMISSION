@@ -1,44 +1,58 @@
-<!-- ═══ STREAMS — Premium Bento Grid ═══ -->
+<!-- ═══ STREAMS — Color-Coded Cards ═══ -->
 <section class="section">
   <div class="container">
     <div class="section-hdr reveal">
       <div class="nh-badge" style="margin:0 auto 16px"><i class="ph-fill ph-compass"></i> Explore By Stream</div>
       <h2>Discover Disciplines</h2>
-      <p>Immersive exploration of India's top academic fields</p>
+      <p>Explore top academic fields with curated programs & colleges</p>
     </div>
-    <div class="bento-grid">
+    <div class="stream-grid">
     <?php
-    $streamIcons = ['engineering'=>'ph-laptop','management'=>'ph-briefcase','medical'=>'ph-stethoscope','commerce'=>'ph-chart-line','law'=>'ph-scales','arts'=>'ph-palette','design'=>'ph-palette','science'=>'ph-flask','humanities'=>'ph-books','ug'=>'ph-graduation-cap','pg'=>'phbooks','diploma'=>'ph-certificate','phd'=>'ph-flask'];
-    $streamCounts = ['Engineering'=>6000,'Management'=>4500,'Medical'=>1200,'Commerce'=>3100,'Law'=>1100,'Arts & Design'=>2000,'Science'=>2500,'UG'=>8000,'PG'=>3500,'Diploma'=>1500,'PhD'=>800];
-    $streamGradients = ['#0B2447,#19376D','#19376D,#1e40af','#0B2447,#0e7490','#19376D,#7c3aed','#0B2447,#be123c','#19376D,#059669'];
+    $streamData = [
+      'engineering' => ['icon'=>'ph-laptop','color'=>'#2563eb','bg'=>'#eff6ff','count'=>'6,000+'],
+      'management'  => ['icon'=>'ph-briefcase','color'=>'#7c3aed','bg'=>'#f5f3ff','count'=>'4,500+'],
+      'medical'     => ['icon'=>'ph-stethoscope','color'=>'#059669','bg'=>'#ecfdf5','count'=>'1,200+'],
+      'commerce'    => ['icon'=>'ph-chart-line','color'=>'#d97706','bg'=>'#fffbeb','count'=>'3,100+'],
+      'law'         => ['icon'=>'ph-scales','color'=>'#dc2626','bg'=>'#fef2f2','count'=>'1,100+'],
+      'arts'        => ['icon'=>'ph-palette','color'=>'#e11d48','bg'=>'#fff1f2','count'=>'2,000+'],
+      'science'     => ['icon'=>'ph-flask','color'=>'#0891b2','bg'=>'#ecfeff','count'=>'2,500+'],
+      'design'      => ['icon'=>'ph-magic-wand','color'=>'#9333ea','bg'=>'#faf5ff','count'=>'1,800+'],
+    ];
+    $streamFallback = [
+      ['name'=>'Engineering','slug'=>'engineering','icon'=>'ph-laptop'],
+      ['name'=>'Management','slug'=>'management','icon'=>'ph-briefcase'],
+      ['name'=>'Medical','slug'=>'medical','icon'=>'ph-stethoscope'],
+      ['name'=>'Commerce','slug'=>'commerce','icon'=>'ph-chart-line'],
+      ['name'=>'Law','slug'=>'law','icon'=>'ph-scales'],
+      ['name'=>'Arts & Design','slug'=>'arts','icon'=>'ph-palette'],
+      ['name'=>'Science','slug'=>'science','icon'=>'ph-flask'],
+    ];
     if (!empty($categories)): ?>
       <?php foreach ($categories as $i=>$cat):
         $name = $cat['category_name'] ?? $cat['name'] ?? '';
-        $slug = $cat['category_slug'] ?? $cat['slug'] ?? '';
-        $icon = $streamIcons[strtolower($slug)] ?? 'ph-graduation-cap';
-        $cnt = $streamCounts[$name] ?? $streamCounts[$slug] ?? rand(500,5000);
-        $grad = $streamGradients[$i % count($streamGradients)];
-        $bClass = 'bento-item reveal reveal-delay-'.$i;
-        if($i===0) $bClass .= ' bento-large';
-        elseif($i===1 || $i===4) $bClass .= ' bento-wide';
+        $slug = strtolower($cat['category_slug'] ?? $cat['slug'] ?? '');
+        $sd = $streamData[$slug] ?? ['icon'=>'ph-graduation-cap','color'=>'#0B2447','bg'=>'#f0f4ff','count'=>rand(500,5000).'+'];
       ?>
-      <a href="<?=coursesUrl(['level'=>$name])?>" class="<?=$bClass?>" style="--bento-grad:linear-gradient(135deg,<?=$grad?>)">
-        <div class="stream-icon"><i class="ph <?=$icon?>"></i></div>
-        <h3><?=htmlspecialchars($name)?></h3>
-        <span><?=number_format($cnt)?>+ Programs <i class="ph ph-arrow-right" style="font-size:0.75rem"></i></span>
+      <a href="<?=coursesUrl(['level'=>$name])?>" class="stream-card reveal reveal-delay-<?=$i?>" style="--sc-color:<?=$sd['color']?>;--sc-bg:<?=$sd['bg']?>">
+        <div class="sc-icon"><i class="ph <?=$sd['icon']?>"></i></div>
+        <div class="sc-info">
+          <h3><?=htmlspecialchars($name)?></h3>
+          <span><?=$sd['count']?> Programs</span>
+        </div>
+        <div class="sc-arrow"><i class="ph ph-arrow-right"></i></div>
       </a>
       <?php endforeach; ?>
     <?php else: ?>
-      <?php foreach ($catFallback as $i=>$c):
-        $grad = $streamGradients[$i % count($streamGradients)];
-        $bClass = 'bento-item reveal reveal-delay-'.$i;
-        if($i===0) $bClass .= ' bento-large';
-        elseif($i===1 || $i===4) $bClass .= ' bento-wide';
+      <?php foreach ($streamFallback as $i=>$c):
+        $sd = $streamData[$c['slug']] ?? ['icon'=>$c['icon'],'color'=>'#0B2447','bg'=>'#f0f4ff','count'=>rand(500,5000).'+'];
       ?>
-      <a href="<?=coursesUrl(['level'=>$c['name']])?>" class="<?=$bClass?>" style="--bento-grad:linear-gradient(135deg,<?=$grad?>)">
-        <div class="stream-icon"><i class="ph <?=$c['icon']?>"></i></div>
-        <h3><?=$c['name']?></h3>
-        <span><?=$c['count']?> Programs <i class="ph ph-arrow-right" style="font-size:0.75rem"></i></span>
+      <a href="<?=coursesUrl(['level'=>$c['name']])?>" class="stream-card reveal reveal-delay-<?=$i?>" style="--sc-color:<?=$sd['color']?>;--sc-bg:<?=$sd['bg']?>">
+        <div class="sc-icon"><i class="ph <?=$sd['icon']?>"></i></div>
+        <div class="sc-info">
+          <h3><?=$c['name']?></h3>
+          <span><?=$sd['count']?> Programs</span>
+        </div>
+        <div class="sc-arrow"><i class="ph ph-arrow-right"></i></div>
       </a>
       <?php endforeach; ?>
     <?php endif; ?>

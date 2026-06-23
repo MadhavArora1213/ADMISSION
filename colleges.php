@@ -37,7 +37,7 @@ if ($course !== '') {
     $params['course'] = '%' . $course . '%';
 }
 if ($search !== '') {
-    $where[] = '(c.name LIKE :q OR ci.name LIKE :q OR s.name LIKE :q)';
+    $where[] = '(c.name LIKE :q OR c.slug LIKE :q OR ci.name LIKE :q OR s.name LIKE :q)';
     $params['q'] = '%' . $search . '%';
 }
 

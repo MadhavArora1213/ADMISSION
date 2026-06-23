@@ -2438,6 +2438,93 @@ select {
   grid-column: span 2
 }
 
+/* ═══════════════════════════════════════════
+   STREAM CARDS — Color-Coded Grid
+   ═══════════════════════════════════════════ */
+.stream-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px
+}
+
+.stream-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 20px;
+  background: var(--sc-bg);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius);
+  transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer
+}
+
+.stream-card:hover {
+  border-color: var(--sc-color);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06)
+}
+
+.sc-icon {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  border-radius: 14px;
+  background: var(--sc-color);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  transition: all .3s
+}
+
+.stream-card:hover .sc-icon {
+  transform: scale(1.08) rotate(-4deg)
+}
+
+.sc-info {
+  flex: 1;
+  min-width: 0
+}
+
+.sc-info h3 {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis
+}
+
+.sc-info span {
+  font-size: .78rem;
+  color: var(--text2);
+  font-weight: 500
+}
+
+.sc-arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--sc-color);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .9rem;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: all .3s;
+  flex-shrink: 0
+}
+
+.stream-card:hover .sc-arrow {
+  opacity: 1;
+  transform: translateX(0)
+}
+
 /* Dark Section Contrast */
 .section-dark {
   background: var(--primary);
@@ -5501,6 +5588,12 @@ select {
     height: 360px;
   }
 
+  /* Stream Cards */
+  .stream-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px
+  }
+
   /* Tools */
   .tools-grid {
     gap: 10px
@@ -5610,6 +5703,25 @@ select {
   }
   .bento-large h3 {
     font-size: 1.4rem;
+  }
+
+  /* Stream Cards */
+  .stream-grid {
+    grid-template-columns: 1fr;
+    gap: 10px
+  }
+  .sc-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    font-size: 1.2rem
+  }
+  .sc-info h3 {
+    font-size: .88rem
+  }
+  .sc-arrow {
+    opacity: 1;
+    transform: none
   }
 
   /* Rankings */
@@ -5885,6 +5997,12 @@ select {
     width: 44px;
     height: 44px;
     font-size: 1.2rem;
+  }
+
+  /* Stream Cards */
+  .stream-card {
+    padding: 16px 14px;
+    gap: 12px
   }
 
   /* Rankings */

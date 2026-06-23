@@ -10,7 +10,9 @@
   <div class="container nh-layout">
     <!-- LEFT: Text + Search -->
     <div class="nh-left">
-      <div class="nh-badge"><i class="ph-fill ph-shield-check"></i> Trusted by 5 Lakh+ Students</div>
+      <?php if (!empty($totalStudents)): ?>
+      <div class="nh-badge"><i class="ph-fill ph-shield-check"></i> Trusted by <?=number_format($totalStudents)?>+ Students</div>
+      <?php endif; ?>
       <h1 class="nh-title">Find Your <span class="nh-gradient">Dream College</span> in India</h1>
       <p class="nh-sub">Explore <?=number_format($totalColleges)?>+ colleges, <?=number_format($totalCourses)?>+ courses & <?=number_format($totalExams)?>+ entrance exams — all in one place.</p>
 
@@ -34,7 +36,7 @@
         <a href="<?=collegesUrl(['q'=>'IIT'])?>" class="nh-quick-link">IIT Colleges</a>
         <a href="<?=collegesUrl(['q'=>'Medical'])?>" class="nh-quick-link">Medical Colleges</a>
         <a href="<?=examsUrl()?>" class="nh-quick-link">Entrance Exams</a>
-        <a href="<?=coursesUrl(['level'=>'MBA'])?>" class="nh-quick-link">MBA Courses</a>
+        <a href="<?=coursesUrl(['q'=>'MBA'])?>" class="nh-quick-link">MBA Courses</a>
       </div>
     </div>
 
