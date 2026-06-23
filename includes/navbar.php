@@ -44,7 +44,8 @@ if (!isset($navColleges)) {
 
       <div class="pro-nav-search">
         <i class="ph ph-magnifying-glass"></i>
-        <input type="text" placeholder="Search for Colleges, Exams, Courses and More..">
+        <input type="text" placeholder="Search for Colleges, Exams, Courses and More.." id="navSearchInput" autocomplete="off">
+        <div class="nav-search-dropdown" id="navSearchDropdown"></div>
       </div>
 
       <div class="pro-nav-right">
@@ -84,7 +85,7 @@ if (!isset($navColleges)) {
               <h4>Top Courses</h4>
               <ul>
                 <?php foreach($navPopularCourses ?? [] as $navCrs): ?>
-                <li><a href="#"><?=htmlspecialchars((string)($navCrs['course_name'] ?? ''))?></a></li>
+                <li><a href="<?= courseUrl($navCrs['course_slug'] ?? '') ?>"><?=htmlspecialchars((string)($navCrs['course_name'] ?? ''))?></a></li>
                 <?php endforeach; ?>
               </ul>
             </div>
@@ -310,11 +311,11 @@ if (!isset($navColleges)) {
                 </a>
               </div>
               <?php endforeach; ?>
-              <?php foreach($moreStreams as $stream): ?>
-              <div class="more-sidebar-item" data-cat="<?= $stream ?>">
-                <a href="<?= '/ADMISSION/careers.php?stream=' . urlencode($stream) ?>">
-                  <i class="ph <?= $streamIcons[$stream] ?? 'ph-compass' ?>"></i>
-                  <?= $stream ?> Careers
+              <?php foreach($moreStreams as $ns): ?>
+              <div class="more-sidebar-item" data-cat="<?= $ns ?>">
+                <a href="<?= '/ADMISSION/careers.php?stream=' . urlencode($ns) ?>">
+                  <i class="ph <?= $streamIcons[$ns] ?? 'ph-compass' ?>"></i>
+                  <?= $ns ?> Careers
                   <i class="ph ph-caret-right more-arrow"></i>
                 </a>
               </div>
@@ -372,8 +373,8 @@ if (!isset($navColleges)) {
                 </div>
               </div>
               <?php endforeach; ?>
-              <?php foreach($moreStreams as $stream): ?>
-              <div class="more-panel" data-panel="<?= $stream ?>">
+              <?php foreach($moreStreams as $ns): ?>
+              <div class="more-panel" data-panel="<?= $ns ?>">
                 <div class="more-panel-cols">
                   <div class="more-panel-col">
                     <h4>Top Colleges</h4>
@@ -385,20 +386,20 @@ if (!isset($navColleges)) {
                     </ul>
                   </div>
                   <div class="more-panel-col">
-                    <h4>Careers in <?= $stream ?></h4>
+                    <h4>Careers in <?= $ns ?></h4>
                     <ul>
-                      <li><a href="<?= '/ADMISSION/careers.php?stream=' . urlencode($stream) ?>"><?= $stream ?> Careers Overview</a></li>
-                      <li><a href="<?= '/ADMISSION/careers.php?stream=' . urlencode($stream) ?>" class="more-view-all">> Explore All <?= $stream ?> Careers</a></li>
+                      <li><a href="<?= '/ADMISSION/careers.php?stream=' . urlencode($ns) ?>"><?= $ns ?> Careers Overview</a></li>
+                      <li><a href="<?= '/ADMISSION/careers.php?stream=' . urlencode($ns) ?>" class="more-view-all">> Explore All <?= $ns ?> Careers</a></li>
                     </ul>
                   </div>
                   <div class="more-panel-col">
                     <h4>Popular Courses</h4>
                     <ul>
                       <?php
-                      $streamCourses = array_filter($navMoreCourses ?? [], function($c) use ($stream) {
-                          return ($stream === 'Science' && in_array($c['course_category'], ['Engineering','Medical','Computer Applications','Nursing'])) ||
-                                 ($stream === 'Commerce' && in_array($c['course_category'], ['Management'])) ||
-                                 ($stream === 'Humanities' && in_array($c['course_category'], ['Arts','Law']));
+                      $streamCourses = array_filter($navMoreCourses ?? [], function($c) use ($ns) {
+                          return ($ns === 'Science' && in_array($c['course_category'], ['Engineering','Medical','Computer Applications','Nursing'])) ||
+                                 ($ns === 'Commerce' && in_array($c['course_category'], ['Management'])) ||
+                                 ($ns === 'Humanities' && in_array($c['course_category'], ['Arts','Law']));
                       });
                       foreach(array_slice($streamCourses, 0, 6) as $co): ?>
                       <li><a href="<?= courseUrl($co['course_slug'] ?? '') ?>"><?= htmlspecialchars($co['course_name']) ?></a></li>
@@ -934,4 +935,61 @@ if (moreWrap) {
   display: inline-block !important;
 }
 </style>
+<script>
+(function(){
+  const input = document.getElementById('navSearchInput');
+  const dropdown = document.getElementById('navSearchDropdown');
+  if (!input || !dropdown) return;
+  let timer = null;
+
+  input.addEventListener('input', function(){
+    clearTimeout(timer);
+    const q = this.value.trim();
+    if (q.length < 2) { dropdown.style.display = 'none'; dropdown.innerHTML = ''; return; }
+    timer = setTimeout(() => {
+      fetch('/ADMISSION/api/search.php?q=' + encodeURIComponent(q))
+        .then(r => r.json())
+        .then(data => {
+          if (!data.results || data.results.length === 0) {
+            dropdown.innerHTML = '<div class="nav-search-empty">No results found</div>';
+            dropdown.style.display = 'block';
+            return;
+          }
+          const typeLabels = { college: 'Colleges', exam: 'Exams', course: 'Courses', career: 'Careers' };
+          const typeOrder = ['college', 'exam', 'course', 'career'];
+          let html = '';
+          for (const type of typeOrder) {
+            const items = data.results.filter(r => r.type === type);
+            if (!items.length) continue;
+            html += '<div class="nav-search-group"><div class="nav-search-group-title">' + (typeLabels[type] || type) + '</div>';
+            for (const item of items) {
+              html += '<a class="nav-search-item" href="' + item.url + '"><i class="ph ' + item.icon + '"></i> ' + item.label + '</a>';
+            }
+            html += '</div>';
+          }
+          dropdown.innerHTML = html;
+          dropdown.style.display = 'block';
+        })
+        .catch(() => { dropdown.style.display = 'none'; });
+    }, 300);
+  });
+
+  input.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const firstLink = dropdown.querySelector('.nav-search-item');
+      if (firstLink) window.location.href = firstLink.href;
+    }
+    if (e.key === 'Escape') { dropdown.style.display = 'none'; }
+  });
+
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.pro-nav-search')) { dropdown.style.display = 'none'; }
+  });
+
+  input.addEventListener('focus', function(){
+    if (dropdown.innerHTML.trim()) dropdown.style.display = 'block';
+  });
+})();
+</script>
 </header>

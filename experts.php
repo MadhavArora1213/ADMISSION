@@ -423,12 +423,12 @@ foreach ($experts as $e) {
                             <span class="lbl">Answers</span>
                         </div>
                         <div class="exp-card-stat">
-                            <span class="val"><?= (int)$exp['response_rate_pct'] ?>%</span>
-                            <span class="lbl">Response</span>
+                            <span class="val"><?= number_format((int)($exp['follow_count'] ?? 0)) ?></span>
+                            <span class="lbl">Followers</span>
                         </div>
                         <div class="exp-card-stat">
-                            <span class="val"><?= (int)$exp['avg_response_hours'] ?>h</span>
-                            <span class="lbl">Avg Reply</span>
+                            <span class="val"><?= (int)$exp['response_rate_pct'] ?>%</span>
+                            <span class="lbl">Response</span>
                         </div>
                     </div>
 
@@ -500,6 +500,10 @@ async function toggleExpertFollow(id, btn) {
                 count.textContent = '(' + data.count + ')';
             } else if (count) {
                 count.textContent = '';
+            }
+        } else if (data.message && data.message.includes('login')) {
+            if (confirm('Please login to follow experts. Click OK to go to login page.')) {
+                window.location.href = 'login.php?redirect=' + encodeURIComponent(window.location.href);
             }
         }
     } catch (err) {

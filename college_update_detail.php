@@ -15,17 +15,25 @@ if (!function_exists('cImg')) {
 $updateId = trim($_GET['id'] ?? '');
 if (empty($updateId)) { header('Location: news.php'); exit; }
 
-$stmt = $pdo->prepare("SELECT u.*, c.name AS college_name, c.slug AS college_slug, cm.logo_url, cm.cover_image_url FROM college_updates u LEFT JOIN colleges c ON c.id = u.college_id LEFT JOIN college_media cm ON cm.college_id = c.id WHERE u.id = ? AND u.status = 'published' LIMIT 1");
-$stmt->execute([$updateId]);
+// Support both slug and ID lookup
+$stmt = $pdo->prepare("SELECT u.*, c.name AS college_name, c.slug AS college_slug, cm.logo_url, cm.cover_image_url FROM college_updates u LEFT JOIN colleges c ON c.id = u.college_id LEFT JOIN college_media cm ON cm.college_id = c.id WHERE (u.id = ? OR u.slug = ?) AND u.status = 'published' LIMIT 1");
+$stmt->execute([$updateId, $updateId]);
 $update = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$update) { header('HTTP/1.0 404 Not Found'); header('Location: news.php'); exit; }
+
+// Use actual ID for operations
+$updateId = $update['id'];
+$updateSlug = $update['slug'] ?? '';
+
+// SEO-friendly URL
+$sharePath = !empty($updateSlug) ? 'news/' . $updateSlug : 'college_update_detail.php?id=' . $updateId;
 
 $collegeName = $update['college_name'] ?? 'College';
 $collegeSlug = $update['college_slug'] ?? '';
 $typeLabel = ucwords(str_replace('_', ' ', $update['update_type'] ?? 'news'));
 $eventDate = !empty($update['event_date']) ? date('F d, Y', strtotime($update['event_date'])) : '';
 
-$shareUrl   = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/college_update_detail.php?id=' . urlencode($updateId);
+$shareUrl   = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/' . $sharePath;
 $shareImage = cImg($update['cover_image_url'] ?? $update['logo_url'] ?? '');
 $shareDesc  = mb_strimwidth(strip_tags($update['description'] ?? $update['title']), 0, 160, '...');
 $siteName   = 'AdmissionSeason';
@@ -83,7 +91,7 @@ $siteName   = 'AdmissionSeason';
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
+  <link rel="stylesheet" href="/ADMISSION/assets/css/style.css?v=<?= time() ?>">
   <style>
     .upd-wrap{max-width:780px;margin:0 auto;padding:30px 20px 60px}
     .upd-breadcrumb{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:28px;font-size:.85rem;color:rgba(15,23,42,.5)}

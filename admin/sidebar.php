@@ -1,5 +1,14 @@
 <?php
 $current_page = basename($_SERVER['PHP_SELF']);
+// Dynamic counts for sidebar badges
+$sidebarLeadCount = 0;
+$sidebarReviewCount = 0;
+$sidebarAlertCount = 0;
+if (isset($pdo)) {
+    try { $sidebarLeadCount = (int)$pdo->query("SELECT COUNT(*) FROM leads")->fetchColumn(); } catch(Exception $e) {}
+    try { $sidebarReviewCount = (int)$pdo->query("SELECT COUNT(*) FROM reviews WHERE status='pending'")->fetchColumn(); } catch(Exception $e) {}
+    try { $sidebarAlertCount = (int)$pdo->query("SELECT COUNT(*) FROM alerts WHERE status='active'")->fetchColumn(); } catch(Exception $e) {}
+}
 ?>
 <aside class="sidebar">
     <div class="sidebar-header">
@@ -18,7 +27,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
         
         <a href="leads.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['leads.php','lead_form.php']) ? 'active' : ''; ?>" style="display:flex; justify-content:space-between; align-items:center;">
             <span style="display:flex; align-items:center; gap:12px;"><i class="ph ph-funnel"></i> Leads</span>
-            <span style="background: #0F172A; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: 700;">109</span>
+            <?php if ($sidebarLeadCount > 0): ?>
+            <span style="background: #0F172A; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: 700;"><?= $sidebarLeadCount ?></span>
+            <?php endif; ?>
         </a>
         
         <a href="colleges.php" class="<?php echo ($current_page == 'colleges.php' || $current_page == 'college_form.php') ? 'active' : ''; ?>">
@@ -44,7 +55,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
         
         <a href="reviews.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['reviews.php', 'review_moderation.php']) ? 'active' : ''; ?>" style="display:flex; justify-content:space-between; align-items:center;">
             <span style="display:flex; align-items:center; gap:12px;"><i class="ph ph-star"></i> Reviews</span>
-            <span style="background: rgba(255,255,255,0.1); color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px;">23</span>
+            <?php if ($sidebarReviewCount > 0): ?>
+            <span style="background: rgba(255,255,255,0.1); color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px;"><?= $sidebarReviewCount ?></span>
+            <?php endif; ?>
         </a>
         <a href="users.php"><i class="ph ph-users"></i> Users</a>
         <a href="user_reports.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['user_reports.php']) ? 'active' : ''; ?>"><i class="ph ph-flag"></i> User Reports</a>
@@ -106,7 +119,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="audit_logs.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['audit_logs.php']) ? 'active' : ''; ?>"><i class="ph ph-file-search"></i> Audit Logs</a>
         <a href="alerts.php" style="display:flex; justify-content:space-between; align-items:center;" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['alerts.php']) ? 'active' : ''; ?>">
             <span style="display:flex; align-items:center; gap:12px;"><i class="ph ph-bell-ringing"></i> Alerts</span>
-            <span style="background: #19376D; color: #0F172A; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: 700;">5</span>
+            <?php if ($sidebarAlertCount > 0): ?>
+            <span style="background: #19376D; color: #0F172A; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: 700;"><?= $sidebarAlertCount ?></span>
+            <?php endif; ?>
         </a>
         <a href="settings.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['settings.php']) ? 'active' : ''; ?>"><i class="ph ph-gear"></i> Settings</a>
     </nav>

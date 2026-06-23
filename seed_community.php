@@ -159,14 +159,21 @@ try {
 
     $qInsert = $pdo->prepare("
         INSERT INTO questions (
-            id, question_text, question_category, related_college_id, related_exam_id, 
+            id, slug, question_text, question_category, related_college_id, related_exam_id, 
             related_course_id, asked_by, views, answer_count, is_featured, status, trending_score
         ) VALUES (
-            :id, :question_text, :question_category, :related_college_id, :related_exam_id, 
+            :id, :slug, :question_text, :question_category, :related_college_id, :related_exam_id, 
             :related_course_id, :asked_by, :views, :answer_count, :is_featured, :status, :trending_score
         )
     ");
     foreach ($questions as $q) {
+        // Generate slug from question_text
+        $slug = strtolower(trim($q['question_text']));
+        $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
+        $slug = preg_replace('/[\s-]+/', '-', $slug);
+        $slug = trim($slug, '-');
+        $slug = mb_strimwidth($slug, 0, 80, '');
+        $q['slug'] = $slug;
         $qInsert->execute($q);
     }
 

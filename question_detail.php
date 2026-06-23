@@ -15,14 +15,14 @@ if ($questionId === '') {
     exit;
 }
 
-// Fetch question + asker
+// Fetch question + asker (supports both slug and ID)
 $stmt = $pdo->prepare("
     SELECT q.*, u.full_name AS asker_name, u.email AS asker_email
     FROM questions q
     LEFT JOIN users u ON q.asked_by = u.id
-    WHERE q.id = ?
+    WHERE q.id = ? OR q.slug = ?
 ");
-$stmt->execute([$questionId]);
+$stmt->execute([$questionId, $questionId]);
 $question = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$question) {
@@ -31,8 +31,13 @@ if (!$question) {
 }
 
 // Increment views
+$questionId = $question['id']; // Use actual ID for DB operations
+$questionSlug = $question['slug'] ?? '';
 $pdo->prepare("UPDATE questions SET views = views + 1 WHERE id = ?")->execute([$questionId]);
 $question['views'] = (int)$question['views'] + 1;
+
+// SEO-friendly URL
+$sharePath = !empty($questionSlug) ? 'question/' . $questionSlug : 'question/' . $questionId;
 
 // Fetch all answers
 $ansStmt = $pdo->prepare("
@@ -138,6 +143,8 @@ function timeAgo($datetime) {
 }
 
 $navBase = '/ADMISSION';
+$isLoggedIn = isset($_SESSION['user_id']);
+$shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/' . $sharePath;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -146,6 +153,12 @@ $navBase = '/ADMISSION';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($qTitle) ?> | AdmissionSeason Q&A</title>
     <meta name="description" content="<?= htmlspecialchars(mb_substr($qTitle, 0, 160)) ?>">
+    <link rel="canonical" href="<?= $shareUrl ?>">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="<?= $shareUrl ?>">
+    <meta property="og:title" content="<?= htmlspecialchars($qTitle) ?>">
+    <meta property="og:description" content="<?= htmlspecialchars(mb_substr($qTitle, 0, 160)) ?>">
+    <meta property="og:site_name" content="AdmissionSeason">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/trumbowyg/dist/ui/trumbowyg.min.css">
@@ -341,7 +354,7 @@ $navBase = '/ADMISSION';
                             <i class="<?= $isFollowing ? 'ph-fill' : 'ph' ?> ph-bell"></i>
                             <span id="qd-follow-label"><?= $isFollowing ? 'Following' : 'Follow' ?></span>
                         </button>
-                        <button class="qd-act-btn answer-btn" onclick="openModal('answerModal')"><i class="ph ph-pencil-simple"></i> Answer</button>
+                        <button class="qd-act-btn answer-btn" onclick="if(requireLogin('Please login to post an answer.'))openModal('answerModal')"><i class="ph ph-pencil-simple"></i> Answer</button>
                     </div>
                 </div>
 
@@ -535,9 +548,39 @@ $navBase = '/ADMISSION';
         </div>
     </div>
 
+    <!-- Login Required Modal -->
+    <div class="qd-modal-overlay" id="loginRequiredModal">
+        <div class="qd-modal" style="max-width:440px; text-align:center; padding:36px 32px;">
+            <div style="width:64px; height:64px; border-radius:50%; background:rgba(25,55,109,0.08); display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
+                <i class="ph ph-lock" style="font-size:2rem; color:var(--yale-blue);"></i>
+            </div>
+            <h3 style="justify-content:center; margin-bottom:8px;">Login Required</h3>
+            <p style="font-size:.9rem; color:var(--text-muted); margin-bottom:24px; line-height:1.5;" id="loginRequiredMsg">Please login to continue.</p>
+            <div class="qd-modal-actions" style="justify-content:center; gap:12px;">
+                <a href="/ADMISSION/login.php?redirect=<?= urlencode($sharePath) ?>" style="padding:10px 28px; border-radius:8px; background:var(--yale-blue); color:#fff; font-size:.9rem; font-weight:600; cursor:pointer; text-decoration:none; border:none; display:inline-block;">Login / Sign Up</a>
+                <button class="qd-modal-cancel" onclick="closeModal('loginRequiredModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/trumbowyg/dist/trumbowyg.min.js"></script>
     <script>
+    const LOGGED_IN = <?= $isLoggedIn ? 'true' : 'false' ?>;
+
+    function requireLogin(msg) {
+        if (!LOGGED_IN) {
+            document.getElementById('loginRequiredMsg').textContent = msg || 'Please login to continue.';
+            const loginLink = document.querySelector('#loginRequiredModal a[href*="login.php"]');
+            if (loginLink) {
+                loginLink.href = '/ADMISSION/login.php?redirect=' + encodeURIComponent(window.location.href);
+            }
+            openModal('loginRequiredModal');
+            return false;
+        }
+        return true;
+    }
+
     $(document).ready(function() {
         $('#answerEditor').trumbowyg({
             btns: [['bold','italic','underline','strikeThrough'],['unorderedList','orderedList'],['link'],['justifyLeft','justifyCenter','justifyRight'],['fullscreen']],
@@ -668,6 +711,7 @@ $navBase = '/ADMISSION';
 
     // Submit Comment
     async function submitComment(ansId) {
+        if (!requireLogin('Please login to post a comment.')) return;
         const input = document.getElementById('comment-input-' + ansId);
         const text = input.value.trim();
         if (text.length < 2) { alert('Comment must be at least 2 characters.'); return; }
@@ -731,6 +775,7 @@ $navBase = '/ADMISSION';
 
     // Report Abuse
     function openReportModal(type, id) {
+        if (!requireLogin('Please login to report content.')) return;
         document.getElementById('rpt-type').value = type;
         document.getElementById('rpt-id').value = id;
         document.querySelectorAll('.qd-report-options input[type="checkbox"]').forEach(c => c.checked = false);
@@ -765,6 +810,7 @@ $navBase = '/ADMISSION';
     // Submit Answer
     async function submitAnswer(e) {
         e.preventDefault();
+        if (!requireLogin('Please login to post an answer.')) return;
         const editor = $('#answerEditor');
         const text = editor.trumbowyg('html').replace(/<[^>]*>/g, '').trim();
         if (text.length < 10) { alert('Answer must be at least 10 characters.'); return; }

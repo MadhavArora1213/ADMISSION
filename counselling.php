@@ -4,8 +4,61 @@ error_reporting(E_ALL);
 ini_set('display_errors', '0');
 require_once __DIR__ . '/admin/db.php';
 
+// Load .env
+$envPath = __DIR__ . '/.env';
+if (file_exists($envPath)) {
+    $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) continue;
+        if (strpos($line, '=') === false) continue;
+        list($key, $value) = explode('=', $line, 2);
+        $key = trim($key);
+        $value = trim($value);
+        if (!empty($key) && !isset($_ENV[$key])) {
+            $_ENV[$key] = $value;
+        }
+    }
+}
+
+function sendCounsellingEmail($toEmail, $toName, $subject, $htmlContent) {
+    $apiKey = $_ENV['BREVO_API_KEY'] ?? '';
+    $senderEmail = $_ENV['BREVO_SENDER_EMAIL'] ?? '';
+    $senderName = $_ENV['BREVO_SENDER_NAME'] ?? 'AdmissionSeason';
+    if (empty($apiKey) || empty($senderEmail)) return false;
+
+    $payload = [
+        'sender'    => ['email' => $senderEmail, 'name' => $senderName],
+        'to'        => [['email' => $toEmail, 'name' => $toName]],
+        'subject'   => $subject,
+        'htmlContent'=> $htmlContent,
+    ];
+
+    $ch = curl_init('https://api.brevo.com/v3/smtp/email');
+    curl_setopt_array($ch, [
+        CURLOPT_POST           => true,
+        CURLOPT_HTTPHEADER     => [
+            'accept: application/json',
+            'content-type: application/json',
+            'api-key: ' . $apiKey,
+        ],
+        CURLOPT_POSTFIELDS     => json_encode($payload),
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 30,
+    ]);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    return ($response !== false && $httpCode >= 200 && $httpCode < 300);
+}
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+}
+
+// Require login
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /ADMISSION/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+    exit;
 }
 
 $success = false;
@@ -34,6 +87,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($name) || empty($phone) || empty($email)) {
         $error = 'Full Name, Phone Number, and Email are required.';
+    } elseif (!preg_match('/^[6-9][0-9]{9}$/', $phone)) {
+        $error = 'Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Please enter a valid email address.';
     } else {
         try {
             // Generate UUID
@@ -77,6 +134,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'preferred_budget' => $preferred_budget,
                 'source_page' => $source_page
             ]);
+
+            // Send thank-you email to user
+            $courseName = '';
+            if ($course_id) {
+                $cStmt = $pdo->prepare("SELECT course_name FROM courses WHERE id = ?");
+                $cStmt->execute([$course_id]);
+                $courseName = $cStmt->fetchColumn() ?: '';
+            }
+
+            $thankYouHtml = '
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; color:#1a1a2e;">
+                <h2 style="color:#19376D;">Thank You, ' . htmlspecialchars($name) . '!</h2>
+                <p>We have received your counselling request. Our expert team will reach out to you within <strong>24 hours</strong>.</p>
+                <div style="background:#f1f5f9; border-left:4px solid #19376D; padding:15px 20px; margin:20px 0; border-radius:4px;">
+                    <p style="margin:5px 0;"><strong>Name:</strong> ' . htmlspecialchars($name) . '</p>
+                    <p style="margin:5px 0;"><strong>Phone:</strong> +91 ' . htmlspecialchars($phone) . '</p>
+                    <p style="margin:5px 0;"><strong>Email:</strong> ' . htmlspecialchars($email) . '</p>
+                    ' . ($city ? '<p style="margin:5px 0;"><strong>City:</strong> ' . htmlspecialchars($city) . '</p>' : '') . '
+                    ' . ($stateName ? '<p style="margin:5px 0;"><strong>State:</strong> ' . htmlspecialchars($stateName) . '</p>' : '') . '
+                    ' . ($courseName ? '<p style="margin:5px 0;"><strong>Course Interest:</strong> ' . htmlspecialchars($courseName) . '</p>' : '') . '
+                    ' . ($target_year ? '<p style="margin:5px 0;"><strong>Target Year:</strong> ' . $target_year . '</p>' : '') . '
+                </div>
+                <p>If you have any urgent queries, feel free to reply to this email.</p>
+                <p style="color:#64748b; font-size:13px; margin-top:30px;">— Team AdmissionSeason</p>
+            </div>';
+
+            sendCounsellingEmail($email, $name, 'Thank You for Your Counselling Request – AdmissionSeason', $thankYouHtml);
 
             $success = true;
         } catch (Exception $e) {
@@ -562,6 +646,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <h3>Request Submitted!</h3>
             <p>Thank you for choosing AdmissionSeason. One of our senior admission advisors will call you shortly to assist you with your queries.</p>
+            <p style="font-size:0.9rem; color:#64748b;">A confirmation email has been sent to <strong><?= htmlspecialchars($email ?? '') ?></strong>.</p>
             <a href="index.php" class="back-home-btn"><i class="ph ph-house"></i> Return to Homepage</a>
           </div>
         <?php else: ?>
@@ -594,26 +679,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="form-grid-2">
               <div class="form-group">
                 <label>Mobile Number *</label>
-                <input type="tel" name="phone" class="form-control" placeholder="10-digit mobile number" required pattern="[0-9]{10,15}" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>">
+                <div style="display:flex; align-items:stretch;">
+                  <span style="display:flex; align-items:center; padding:0 12px; background:#f1f5f9; border:1.5px solid var(--glass-border); border-right:none; border-radius:10px 0 0 10px; font-size:0.95rem; font-weight:700; color:var(--ink-black); white-space:nowrap;">+91</span>
+                  <input type="tel" name="phone" class="form-control" placeholder="98765 43210" required pattern="[6-9][0-9]{9}" maxlength="10" title="Enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9" style="border-radius:0 10px 10px 0;" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>">
+                </div>
               </div>
               <div class="form-group">
                 <label>Email Address *</label>
-                <input type="email" name="email" class="form-control" placeholder="name@example.com" required value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
+                <input type="email" name="email" class="form-control" placeholder="name@example.com" required pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$" title="Enter a valid email address" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
               </div>
             </div>
             
             <div class="form-grid-2">
               <div class="form-group">
-                <label>Current City</label>
-                <input type="text" name="city" class="form-control" placeholder="e.g. Mumbai" value="<?= htmlspecialchars($_POST['city'] ?? '') ?>">
-              </div>
-              <div class="form-group">
                 <label>State</label>
-                <select name="state_id" class="form-control">
+                <select name="state_id" id="stateSelect" class="form-control" onchange="loadCities(this.value)">
                   <option value="">-- Select State --</option>
                   <?php foreach ($states as $st): ?>
                     <option value="<?= $st['id'] ?>" <?= (isset($_POST['state_id']) && (int)$_POST['state_id'] === $st['id']) ? 'selected' : '' ?>><?= htmlspecialchars($st['name']) ?></option>
                   <?php endforeach; ?>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>City</label>
+                <select name="city" id="citySelect" class="form-control" disabled>
+                  <option value="">-- Select State First --</option>
                 </select>
               </div>
             </div>
@@ -659,6 +749,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </section>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
+
+<script>
+async function loadCities(stateId) {
+  const citySelect = document.getElementById('citySelect');
+  citySelect.innerHTML = '<option value="">Loading cities...</option>';
+  citySelect.disabled = true;
+  if (!stateId) {
+    citySelect.innerHTML = '<option value="">-- Select State First --</option>';
+    return;
+  }
+  try {
+    const res = await fetch('/ADMISSION/api/cities.php?state_id=' + stateId);
+    const data = await res.json();
+    if (data.cities && data.cities.length > 0) {
+      citySelect.innerHTML = '<option value="">-- Select City --</option>' +
+        data.cities.map(c => '<option value="' + c.name + '">' + c.name + '</option>').join('');
+      citySelect.disabled = false;
+    } else {
+      citySelect.innerHTML = '<option value="">No cities found</option>';
+    }
+  } catch(e) {
+    citySelect.innerHTML = '<option value="">Error loading cities</option>';
+  }
+}
+
+// Load cities on page load if state already selected
+document.addEventListener('DOMContentLoaded', function() {
+  const stateSelect = document.getElementById('stateSelect');
+  if (stateSelect && stateSelect.value) {
+    loadCities(stateSelect.value);
+  }
+});
+</script>
 
 </body>
 </html>

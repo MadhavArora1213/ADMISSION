@@ -3,6 +3,59 @@ session_start();
 if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
 require_once 'db.php';
 
+// Load .env file
+$envPath = __DIR__ . '/../.env';
+if (file_exists($envPath)) {
+    $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) continue;
+        if (strpos($line, '=') === false) continue;
+        list($key, $value) = explode('=', $line, 2);
+        $key = trim($key);
+        $value = trim($value);
+        if (!empty($key) && !isset($_ENV[$key])) {
+            $_ENV[$key] = $value;
+        }
+    }
+}
+
+// Email helper function using Brevo API
+function sendModerationEmail($toEmail, $toName, $subject, $htmlContent) {
+    $apiKey = $_ENV['BREVO_API_KEY'] ?? '';
+    $senderEmail = $_ENV['BREVO_SENDER_EMAIL'] ?? '';
+    $senderName = $_ENV['BREVO_SENDER_NAME'] ?? 'AdmissionSeason';
+
+    if (empty($apiKey) || empty($senderEmail)) {
+        return false;
+    }
+
+    $payload = [
+        'sender' => ['email' => $senderEmail, 'name' => $senderName],
+        'to' => [['email' => $toEmail, 'name' => $toName]],
+        'subject' => $subject,
+        'htmlContent' => $htmlContent,
+    ];
+
+    $ch = curl_init('https://api.brevo.com/v3/smtp/email');
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => [
+            'accept: application/json',
+            'content-type: application/json',
+            'api-key: ' . $apiKey,
+        ],
+        CURLOPT_POSTFIELDS => json_encode($payload),
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 30,
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ($response !== false && $httpCode >= 200 && $httpCode < 300);
+}
+
 // Handle Moderation Action
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'moderate') {
     $report_id = $_POST['report_id'];
@@ -16,27 +69,118 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     $report->execute([$report_id]);
     $r = $report->fetch();
     
-    // If the action is 'remove', actually delete the content
+    // Get content author info for email
+    $authorEmail = null;
+    $authorName = null;
+    $contentSnippet = '';
+    $contentType = '';
+    
+    // Check answer_id FIRST (since answer reports also have question_id)
+    if ($r['answer_id']) {
+        $contentType = 'Answer';
+        $aStmt = $pdo->prepare("SELECT a.answer_text, u.full_name, u.email FROM answers a LEFT JOIN users u ON a.answered_by = u.id WHERE a.id = ?");
+        $aStmt->execute([$r['answer_id']]);
+        $aRow = $aStmt->fetch(PDO::FETCH_ASSOC);
+        if ($aRow) {
+            $authorEmail = $aRow['email'];
+            $authorName = $aRow['full_name'];
+            $contentSnippet = mb_strimwidth(strip_tags($aRow['answer_text'] ?? ''), 0, 80, '...');
+        }
+    } elseif ($r['question_id']) {
+        $contentType = 'Question';
+        $qStmt = $pdo->prepare("SELECT q.question_text, u.full_name, u.email FROM questions q LEFT JOIN users u ON q.asked_by = u.id WHERE q.id = ?");
+        $qStmt->execute([$r['question_id']]);
+        $qRow = $qStmt->fetch(PDO::FETCH_ASSOC);
+        if ($qRow) {
+            $authorEmail = $qRow['email'];
+            $authorName = $qRow['full_name'];
+            $contentSnippet = mb_strimwidth(strip_tags($qRow['question_text'] ?? ''), 0, 80, '...');
+        }
+    }
+    
+    // Get reporter info for email
+    $reporterEmail = null;
+    $reporterName = null;
+    if (!empty($r['reported_by']) && $r['reported_by'] !== 'user-1234-uuid') {
+        $rStmt = $pdo->prepare("SELECT full_name, email FROM users WHERE id = ?");
+        $rStmt->execute([$r['reported_by']]);
+        $rRow = $rStmt->fetch(PDO::FETCH_ASSOC);
+        if ($rRow) {
+            $reporterEmail = $rRow['email'];
+            $reporterName = $rRow['full_name'];
+        }
+    }
+    
+    $siteUrl = 'https://localhost/ADMISSION';
+    
+    // If the action is 'remove', delete the content
     if ($mod_action == 'remove') {
-        if ($r['question_id']) {
-            // Soft-delete: set status to 'removed' instead of hard delete (FK constraints)
-            $pdo->prepare("UPDATE questions SET status = 'removed' WHERE id = ?")->execute([$r['question_id']]);
-            // Also remove all answers for this question
-            $pdo->prepare("DELETE FROM answers WHERE question_id = ?")->execute([$r['question_id']]);
-        } elseif ($r['answer_id']) {
-            // Hard delete the answer
+        // Check answer_id FIRST (since answer reports also have question_id)
+        if ($r['answer_id']) {
             $ansRow = $pdo->prepare("SELECT question_id FROM answers WHERE id = ?");
             $ansRow->execute([$r['answer_id']]);
             $ansInfo = $ansRow->fetch();
             $pdo->prepare("DELETE FROM answers WHERE id = ?")->execute([$r['answer_id']]);
-            // Update answer_count on parent question
             if ($ansInfo) {
                 $pdo->prepare("UPDATE questions SET answer_count = GREATEST(0, answer_count - 1) WHERE id = ?")->execute([$ansInfo['question_id']]);
             }
+        } elseif ($r['question_id']) {
+            $pdo->prepare("UPDATE questions SET status = 'removed' WHERE id = ?")->execute([$r['question_id']]);
+            $pdo->prepare("DELETE FROM answers WHERE question_id = ?")->execute([$r['question_id']]);
+        }
+        
+        // Notify reporter that their report was accepted
+        if ($reporterEmail) {
+            $reporterNameSafe = htmlspecialchars($reporterName ?? 'User');
+            sendModerationEmail($reporterEmail, $reporterName ?? 'User',
+                'Your Report Has Been Reviewed - AdmissionSeason',
+                "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;'>
+                    <h2 style='color:#0B2447;'>Report Review Update</h2>
+                    <p>Hi {$reporterNameSafe},</p>
+                    <p>Thank you for helping us maintain a safe community. Your report regarding a <strong>{$contentType}</strong> has been reviewed and the content has been <strong>removed</strong>.</p>
+                    <p style='color:#64748b;font-size:0.9rem;'>Content: \"{$contentSnippet}\"</p>
+                    <hr style='border:none;border-top:1px solid #e2e8f0;margin:20px 0;'>
+                    <p style='color:#64748b;font-size:0.8rem;'>AdmissionSeason Moderation Team</p>
+                </div>"
+            );
         }
     }
     
-    // Note: 'warn_user' would ideally trigger a notification, keeping it simple for UI demo
+    // Warn Author & Keep Content - send warning email to author
+    if ($mod_action == 'warn_user' && $authorEmail) {
+        $authorNameSafe = htmlspecialchars($authorName ?? 'User');
+        sendModerationEmail($authorEmail, $authorName ?? 'User',
+            'Content Warning Notice - AdmissionSeason',
+            "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;'>
+                <h2 style='color:#0B2447;'>Content Warning</h2>
+                <p>Hi {$authorNameSafe},</p>
+                <p>Your {$contentType} on AdmissionSeason has been flagged by a community member for review.</p>
+                <p style='color:#64748b;font-size:0.9rem;'>Content: \"{$contentSnippet}\"</p>
+                <p>After review, we've decided to keep your content but wanted to give you a friendly reminder to follow our <a href='{$siteUrl}' style='color:#19376D;'>community guidelines</a>.</p>
+                <p>Repeated reports may result in content removal or account restrictions.</p>
+                <hr style='border:none;border-top:1px solid #e2e8f0;margin:20px 0;'>
+                <p style='color:#64748b;font-size:0.8rem;'>AdmissionSeason Moderation Team</p>
+            </div>"
+        );
+    }
+    
+    // Reject Report - notify reporter that report was rejected
+    if ($mod_action == 'reject' && $reporterEmail) {
+        $reporterNameSafe = htmlspecialchars($reporterName ?? 'User');
+        sendModerationEmail($reporterEmail, $reporterName ?? 'User',
+            'Your Report Has Been Reviewed - AdmissionSeason',
+            "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;'>
+                <h2 style='color:#0B2447;'>Report Review Update</h2>
+                <p>Hi {$reporterNameSafe},</p>
+                <p>Thank you for reporting content on AdmissionSeason. After reviewing your report regarding a <strong>{$contentType}</strong>, we've determined that the content does not violate our community guidelines.</p>
+                <p style='color:#64748b;font-size:0.9rem;'>Content: \"{$contentSnippet}\"</p>
+                <p>The report has been dismissed and the content will remain visible.</p>
+                <p>If you believe this content violates our guidelines, please feel free to report it again with additional details.</p>
+                <hr style='border:none;border-top:1px solid #e2e8f0;margin:20px 0;'>
+                <p style='color:#64748b;font-size:0.8rem;'>AdmissionSeason Moderation Team</p>
+            </div>"
+        );
+    }
     
     header("Location: qa_moderation.php?msg=moderated"); exit;
 }

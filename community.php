@@ -16,6 +16,10 @@ $user_id = $_SESSION['user_id'] ?? 'user-1234-uuid';
 
 // Handle Question Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'ask_question') {
+    if (!isset($_SESSION['user_id'])) {
+        header("Location: community?tab=ask&error=login_required");
+        exit;
+    }
     $question_text = trim($_POST['question_text'] ?? '');
     $question_details = trim($_POST['question_details'] ?? '');
     $category = $_POST['question_category'] ?? 'general';
@@ -38,11 +42,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 mt_rand(0,0x0fff)|0x4000,mt_rand(0,0x3fff)|0x8000,
                 mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff));
 
+            // Generate slug from question text
+            $slug = strtolower(trim($question_text));
+            $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
+            $slug = preg_replace('/[\s-]+/', '-', $slug);
+            $slug = trim($slug, '-');
+            $slug = mb_strimwidth($slug, 0, 80, '');
+            // Ensure unique slug
+            $original = $slug;
+            $counter = 1;
+            while (true) {
+                $checkStmt = $pdo->prepare("SELECT id FROM questions WHERE slug = ?");
+                $checkStmt->execute([$slug]);
+                if (!$checkStmt->fetch()) break;
+                $slug = $original . '-' . $counter;
+                $counter++;
+            }
+
             $stmt = $pdo->prepare("
-                INSERT INTO questions (id, question_text, question_category, asked_by, views, answer_count, status) 
-                VALUES (?, ?, ?, ?, 0, 0, 'open')
+                INSERT INTO questions (id, slug, question_text, question_category, asked_by, views, answer_count, status) 
+                VALUES (?, ?, ?, ?, ?, 0, 0, 'open')
             ");
-            $stmt->execute([$qId, $fullText, $category, $user_id]);
+            $stmt->execute([$qId, $slug, $fullText, $category, $user_id]);
             
             header("Location: community?tab=qna&msg=posted");
             exit;
@@ -54,6 +75,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // Handle Answer Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'submit_answer') {
+    if (!isset($_SESSION['user_id'])) {
+        header("Location: login.php?redirect=community");
+        exit;
+    }
     $question_id = $_POST['question_id'] ?? '';
     $answer_text = trim($_POST['answer_text'] ?? '');
 
@@ -102,12 +127,22 @@ if (isset($_GET['msg'])) {
     if ($_GET['msg'] === 'posted') $success_msg = 'Your question has been posted successfully!';
     if ($_GET['msg'] === 'answered') $success_msg = 'Your answer has been posted!';
 }
+if (isset($_GET['error']) && $_GET['error'] === 'login_required') {
+    $error_msg = 'Please login to continue.';
+}
 
 // Search & Tag Filter Query
 $search = trim($_GET['q'] ?? '');
 $searchParam = '%' . $search . '%';
 $tag = trim($_GET['tag'] ?? '');
 $tagParam = '%' . $tag . '%';
+
+// Community stats (real data)
+$statQueriesResolved = (int)$pdo->query("SELECT COUNT(*) FROM questions WHERE status IN ('answered','resolved')")->fetchColumn();
+$statExpertCounselors = (int)$pdo->query("SELECT COUNT(*) FROM experts")->fetchColumn();
+$statTotalAnswers = (int)$pdo->query("SELECT COUNT(*) FROM answers")->fetchColumn();
+$statTotalQuestions = (int)$pdo->query("SELECT COUNT(*) FROM questions")->fetchColumn();
+$statResponseRate = $statTotalQuestions > 0 ? round(($statTotalAnswers / $statTotalQuestions) * 100, 1) : 0;
 
 // Database queries based on selected Tab
 try {
@@ -1404,15 +1439,15 @@ function getCategoryIcon($cat) {
     <!-- Stats Ticker -->
     <div class="community-stats">
       <div class="stat-item">
-        <span class="stat-val">12,400+</span>
+        <span class="stat-val"><?= number_format($statQueriesResolved) ?>+</span>
         <span class="stat-lbl">Queries Resolved</span>
       </div>
       <div class="stat-item">
-        <span class="stat-val">50+</span>
+        <span class="stat-val"><?= number_format($statExpertCounselors) ?>+</span>
         <span class="stat-lbl">Expert Counselors</span>
       </div>
       <div class="stat-item">
-        <span class="stat-val">98.5%</span>
+        <span class="stat-val"><?= $statResponseRate ?>%</span>
         <span class="stat-lbl">Response Rate</span>
       </div>
     </div>
@@ -1514,27 +1549,27 @@ function getCategoryIcon($cat) {
                     <i class="ph ph-share-network"></i> Share
                   </button>
                   <div class="share-dropdown">
-                    <a class="share-opt" href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode('https://localhost/ADMISSION/community?tab=qna&q=' . $q['id']) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                    <a class="share-opt" href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode('https://localhost/ADMISSION/question/' . ($q['slug'] ?? $q['id'])) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
                       <i class="ph-fill ph-facebook-logo"></i> Facebook
                     </a>
-                    <a class="share-opt" href="https://twitter.com/intent/tweet?url=<?= urlencode('https://localhost/ADMISSION/community?tab=qna&q=' . $q['id']) ?>&text=<?= urlencode($q['question_text']) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                    <a class="share-opt" href="https://twitter.com/intent/tweet?url=<?= urlencode('https://localhost/ADMISSION/question/' . ($q['slug'] ?? $q['id'])) ?>&text=<?= urlencode($q['question_text']) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
                       <i class="ph-fill ph-twitter-logo"></i> Twitter
                     </a>
-                    <a class="share-opt" href="https://www.linkedin.com/sharing/share-offsite/?url=<?= urlencode('https://localhost/ADMISSION/community?tab=qna&q=' . $q['id']) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                    <a class="share-opt" href="https://www.linkedin.com/sharing/share-offsite/?url=<?= urlencode('https://localhost/ADMISSION/question/' . ($q['slug'] ?? $q['id'])) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
                       <i class="ph-fill ph-linkedin-logo"></i> LinkedIn
                     </a>
-                    <a class="share-opt" href="https://plus.google.com/share?url=<?= urlencode('https://localhost/ADMISSION/community?tab=qna&q=' . $q['id']) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                    <a class="share-opt" href="https://plus.google.com/share?url=<?= urlencode('https://localhost/ADMISSION/question/' . ($q['slug'] ?? $q['id'])) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
                       <i class="ph-fill ph-google-logo"></i> Google
                     </a>
                   </div>
                 </div>
                 <span class="q-action-spacer"></span>
                 <?php if ($firstAns): ?>
-                  <button class="q-action-btn answer-btn" onclick="openAnsModal('<?= $q['id'] ?>', '<?= htmlspecialchars(addslashes($q['question_text'])) ?>', event)">
+                  <button class="q-action-btn answer-btn" onclick="if(checkLogin())openAnsModal('<?= $q['id'] ?>', '<?= htmlspecialchars(addslashes($q['question_text'])) ?>', event)">
                     <i class="ph ph-pencil-simple"></i> Answer
                   </button>
                 <?php else: ?>
-                  <button class="q-action-btn answer-btn" onclick="openAnsModal('<?= $q['id'] ?>', '<?= htmlspecialchars(addslashes($q['question_text'])) ?>', event)">
+                  <button class="q-action-btn answer-btn" onclick="if(checkLogin())openAnsModal('<?= $q['id'] ?>', '<?= htmlspecialchars(addslashes($q['question_text'])) ?>', event)">
                     <i class="ph ph-plus"></i> Answer
                   </button>
                 <?php endif; ?>
@@ -1569,7 +1604,7 @@ function getCategoryIcon($cat) {
               <?php endif; ?>
 
               <?php if ((int)$q['answer_count'] > 1): ?>
-                <a class="q-view-all-link" href="/ADMISSION/question/<?= urlencode($q['id']) ?>" onclick="event.stopPropagation()">
+                <a class="q-view-all-link" href="/ADMISSION/question/<?= urlencode($q['slug'] ?? $q['id']) ?>" onclick="event.stopPropagation()">
                   View All <?= number_format((int)$q['answer_count']) ?> Answers
                 </a>
               <?php endif; ?>
@@ -1627,6 +1662,14 @@ function getCategoryIcon($cat) {
 
     <!-- Ask a Question Form Tab -->
     <?php else: ?>
+      <?php if (!isset($_SESSION['user_id'])): ?>
+      <div class="ask-form-panel" style="text-align:center; padding:50px 32px;">
+        <i class="ph ph-lock" style="font-size:3rem; color:var(--yale-blue); margin-bottom:16px; display:block;"></i>
+        <h3 style="justify-content:center; border:none; padding-bottom:0;"><i class="ph ph-question"></i> Login to Ask a Question</h3>
+        <p style="color:var(--text-muted-alt); margin-bottom:24px; font-size:0.95rem;">You need to be logged in to ask questions and participate in discussions.</p>
+        <a href="login.php?redirect=<?= urlencode('community.php?tab=ask') ?>" style="display:inline-block; background:var(--oxford-navy); color:#fff; padding:12px 32px; border-radius:10px; font-weight:700; font-size:0.95rem; text-decoration:none; transition:all 0.2s;">Login / Sign Up</a>
+      </div>
+      <?php else: ?>
       <div class="ask-form-panel">
         <h3><i class="ph ph-question"></i> Ask Your Question to Experts</h3>
         <form method="POST" action="community" id="askForm" onsubmit="return validateAskForm()">
@@ -1670,6 +1713,7 @@ function getCategoryIcon($cat) {
           </div>
         </form>
       </div>
+      <?php endif; ?>
     <?php endif; ?>
   </div>
 
@@ -1743,6 +1787,18 @@ function getCategoryIcon($cat) {
 <script src="https://cdn.jsdelivr.net/npm/trumbowyg/dist/trumbowyg.min.js"></script>
 
 <script>
+  const LOGGED_IN = <?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>;
+
+  function checkLogin() {
+    if (!LOGGED_IN) {
+      if (confirm('Please login to continue. Click OK to go to login page.')) {
+        window.location.href = 'login.php?redirect=' + encodeURIComponent(window.location.href);
+      }
+      return false;
+    }
+    return true;
+  }
+
   // Expand/Collapse Question Cards & Increment Views via AJAX
   async function toggleCard(card, event) {
     const target = event.target;

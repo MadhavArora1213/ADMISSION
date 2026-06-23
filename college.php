@@ -1150,8 +1150,10 @@ document.getElementById('facultyModal')?.addEventListener('click', function(e) {
                       <a href="/ADMISSION/news_details.php?slug=<?= urlencode($up['article_slug']) ?>"><?= htmlspecialchars($up['title']) ?></a>
                     <?php elseif (!empty($up['action_url'])): ?>
                       <a href="<?= htmlspecialchars($up['action_url']) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($up['title']) ?></a>
+                    <?php elseif (!empty($up['slug'])): ?>
+                      <a href="/ADMISSION/news/<?= urlencode($up['slug']) ?>"><?= htmlspecialchars($up['title']) ?></a>
                     <?php elseif (!empty($up['id'])): ?>
-                      <a href="/ADMISSION/college_update_detail.php?id=<?= urlencode($up['id']) ?>"><?= htmlspecialchars($up['title']) ?></a>
+                      <a href="/ADMISSION/news/<?= urlencode($up['id']) ?>"><?= htmlspecialchars($up['title']) ?></a>
                     <?php else: ?>
                       <?= htmlspecialchars($up['title']) ?>
                     <?php endif; ?>
@@ -1161,8 +1163,10 @@ document.getElementById('facultyModal')?.addEventListener('click', function(e) {
                     <a href="/ADMISSION/news_details.php?slug=<?= urlencode($up['article_slug']) ?>">Read more <i class="ph ph-arrow-right"></i></a>
                   <?php elseif (!empty($up['action_url'])): ?>
                     <a href="<?= htmlspecialchars($up['action_url']) ?>" target="_blank" rel="noopener">Read more <i class="ph ph-arrow-right"></i></a>
+                  <?php elseif (!empty($up['slug'])): ?>
+                    <a href="/ADMISSION/news/<?= urlencode($up['slug']) ?>">Read more <i class="ph ph-arrow-right"></i></a>
                   <?php elseif (!empty($up['id'])): ?>
-                    <a href="/ADMISSION/college_update_detail.php?id=<?= urlencode($up['id']) ?>">Read more <i class="ph ph-arrow-right"></i></a>
+                    <a href="/ADMISSION/news/<?= urlencode($up['id']) ?>">Read more <i class="ph ph-arrow-right"></i></a>
                   <?php endif; ?>
                 </div>
               </article>
@@ -1184,7 +1188,7 @@ document.getElementById('facultyModal')?.addEventListener('click', function(e) {
         <?php if (!empty($updates)): ?>
         <ul class="college-notify-list">
           <?php foreach (array_slice($updates, 0, 4) as $up): ?>
-          <li><a href="<?= !empty($up['article_slug']) ? '/ADMISSION/news_details.php?slug='.urlencode($up['article_slug']) : (!empty($up['id']) ? '/ADMISSION/college_update_detail.php?id='.urlencode($up['id']) : collegeUrl($slug, 'news')) ?>"><?= htmlspecialchars($up['title']) ?></a></li>
+          <li><a href="<?= !empty($up['article_slug']) ? '/ADMISSION/news_details.php?slug='.urlencode($up['article_slug']) : (!empty($up['slug']) ? '/ADMISSION/news/'.urlencode($up['slug']) : (!empty($up['id']) ? '/ADMISSION/news/'.urlencode($up['id']) : collegeUrl($slug, 'news'))) ?>"><?= htmlspecialchars($up['title']) ?></a></li>
           <?php endforeach; ?>
         </ul>
         <?php else: ?>

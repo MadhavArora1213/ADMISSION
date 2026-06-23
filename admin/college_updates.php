@@ -29,9 +29,26 @@ function genUuid(): string {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (($_POST['action'] ?? '') === 'add') {
         try {
-            $pdo->prepare("INSERT INTO college_updates (id, college_id, update_type, title, description, event_date, action_url, status) VALUES (?,?,?,?,?,?,?,?)")
+            // Generate slug from title
+            $slug = strtolower(trim($_POST['title']));
+            $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
+            $slug = preg_replace('/[\s-]+/', '-', $slug);
+            $slug = trim($slug, '-');
+            $slug = mb_strimwidth($slug, 0, 80, '');
+            // Ensure unique slug
+            $original = $slug;
+            $counter = 1;
+            while (true) {
+                $checkStmt = $pdo->prepare("SELECT id FROM college_updates WHERE slug = ?");
+                $checkStmt->execute([$slug]);
+                if (!$checkStmt->fetch()) break;
+                $slug = $original . '-' . $counter;
+                $counter++;
+            }
+
+            $pdo->prepare("INSERT INTO college_updates (id, slug, college_id, update_type, title, description, event_date, action_url, status) VALUES (?,?,?,?,?,?,?,?,?)")
                 ->execute([
-                    genUuid(), $college_id,
+                    genUuid(), $slug, $college_id,
                     $_POST['update_type'] ?? 'news',
                     $_POST['title'],
                     $_POST['description'] ?: null,

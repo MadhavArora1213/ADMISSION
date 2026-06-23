@@ -138,9 +138,12 @@ try {
             ];
         }
     } else if ($action === 'toggle_follow') {
+        if (!isset($_SESSION['user_id'])) {
+            throw new Exception('Please login to follow.');
+        }
         $type = $input['type'] ?? '';  // 'question' or 'expert'
         $targetId = $input['id'] ?? '';
-        $userId = $_SESSION['user_id'] ?? 'user-1234-uuid';
+        $userId = $_SESSION['user_id'];
 
         if (!in_array($type, ['question', 'expert'])) {
             throw new Exception('Invalid follow type.');
@@ -157,7 +160,10 @@ try {
             // Unfollow
             $pdo->prepare("DELETE FROM follows WHERE id = ?")->execute([$existing['id']]);
             $pdo->prepare("UPDATE $table SET follow_count = GREATEST(0, follow_count - 1) WHERE id = ?")->execute([$targetId]);
-            $response = ['status' => 'success', 'action' => 'unfollowed', 'count' => 0];
+            
+            $countStmt = $pdo->prepare("SELECT follow_count FROM $table WHERE id = ?");
+            $countStmt->execute([$targetId]);
+            $response = ['status' => 'success', 'action' => 'unfollowed', 'count' => (int)$countStmt->fetchColumn()];
         } else {
             // Follow
             $followId = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
@@ -173,9 +179,12 @@ try {
             $response = ['status' => 'success', 'action' => 'followed', 'count' => (int)$countStmt->fetchColumn()];
         }
     } else if ($action === 'submit_answer') {
+        if (!isset($_SESSION['user_id'])) {
+            throw new Exception('Please login to answer.');
+        }
         $questionId = $input['question_id'] ?? '';
         $answerText = $input['answer_text'] ?? '';
-        $userId = $_SESSION['user_id'] ?? 'user-1234-uuid';
+        $userId = $_SESSION['user_id'];
 
         if (empty($questionId) || empty($answerText)) {
             throw new Exception('Missing question ID or answer text.');
@@ -205,9 +214,12 @@ try {
 
         $response = ['status' => 'success', 'message' => 'Answer posted successfully.', 'answer_id' => $ansId];
     } else if ($action === 'submit_comment') {
+        if (!isset($_SESSION['user_id'])) {
+            throw new Exception('Please login to comment.');
+        }
         $answerId = $input['answer_id'] ?? '';
         $commentText = trim($input['comment_text'] ?? '');
-        $userId = $_SESSION['user_id'] ?? 'user-1234-uuid';
+        $userId = $_SESSION['user_id'];
 
         if (empty($answerId) || empty($commentText)) {
             throw new Exception('Missing answer ID or comment text.');
@@ -358,11 +370,14 @@ try {
         $response['dislike_count'] = (int)($c['dislike_count'] ?? 0);
 
     } else if ($action === 'report_abuse') {
+        if (!isset($_SESSION['user_id'])) {
+            throw new Exception('Please login to report content.');
+        }
         $reportType = $input['report_type'] ?? '';
         $reportId = $input['report_id'] ?? '';
         $reasons = $input['reasons'] ?? [];
         $otherText = $input['other_text'] ?? '';
-        $userId = $_SESSION['user_id'] ?? 'user-1234-uuid';
+        $userId = $_SESSION['user_id'];
 
         if (empty($reportType) || empty($reportId) || empty($reasons)) {
             throw new Exception('Missing report details.');

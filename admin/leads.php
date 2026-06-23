@@ -57,9 +57,9 @@ $counsellors = $counselStmt->fetchAll();
         .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; }
         .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
         .sidebar-nav a i { font-size: 1.25rem; }
-        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; }
+        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
         .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
-        .content-area { padding: 32px; }
+        .content-area { padding: 32px; overflow-x: auto; }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .page-header h2 { font-size: 2rem; font-weight: 800; }
         .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); padding: 24px; box-shadow: var(--shadow-sm); margin-bottom: 24px; }
@@ -150,12 +150,12 @@ $counsellors = $counselStmt->fetchAll();
                 </form>
             </div>
 
-            <div class="panel" style="padding:0; overflow:hidden;">
+            <div class="panel" style="padding:0;">
                 <?php if(empty($leads)): ?>
                     <p style="color:var(--text-muted); text-align:center; padding:40px;">No leads found.</p>
                 <?php else: ?>
-                <div style="overflow-x:auto;">
-                    <table>
+                <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+                    <table style="min-width:1400px; width:100%;">
                         <thead>
                             <tr>
                                 <th>Date</th>
