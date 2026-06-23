@@ -30,10 +30,11 @@ if ($routeBase === 'college' && !empty($routeParts[1])) {
     exit;
 }
 
-$totalColleges = cCol($pdo, "SELECT COUNT(*) FROM colleges WHERE status='active'", 25);
-$totalReviews  = cCol($pdo, "SELECT COUNT(*) FROM reviews WHERE moderation_status='approved'", 100);
-$totalExams    = cCol($pdo, "SELECT COUNT(*) FROM exams", 500);
-$totalCourses  = cCol($pdo, "SELECT COUNT(*) FROM courses WHERE status='active'", 1000);
+$totalColleges = cCol($pdo, "SELECT COUNT(*) FROM colleges WHERE status='active'");
+$totalReviews  = cCol($pdo, "SELECT COUNT(*) FROM reviews WHERE moderation_status='approved'");
+$totalExams    = cCol($pdo, "SELECT COUNT(*) FROM exams");
+$totalCourses  = cCol($pdo, "SELECT COUNT(*) FROM courses WHERE status='active'");
+$totalStudents = cCol($pdo, "SELECT COALESCE(SUM(total_students),0) FROM colleges WHERE status='active'");
 
 $categories = cAll($pdo, "SELECT id,category_name,category_slug,icon_url FROM course_categories ORDER BY sort_order ASC, category_name ASC LIMIT 6");
 if (empty($categories)) {
@@ -110,7 +111,7 @@ $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.feat
 <meta name="description" content="India's leading college discovery platform. Find top colleges, exams, courses, fees, rankings, and admission updates.">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=8">
+  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=11">
 </head>
 <body>
 
@@ -142,6 +143,6 @@ $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.feat
 <?php include 'includes/footer.php'; ?>
 
 <button class="scroll-top" id="scrollTop"><i class="ph ph-arrow-up"></i></button>
-<script src="assets/js/main.js?v=6"></script>
+<script src="assets/js/main.js?v=7"></script>
 </body>
 </html>

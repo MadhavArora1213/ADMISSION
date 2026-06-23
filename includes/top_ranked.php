@@ -5,7 +5,7 @@
       <div><h2>Elite Rankings 2026</h2><p>The pinnacle of academic excellence curated for you</p></div>
       <a href="<?=collegesUrl()?>" class="section-link">View Full Leaderboard <i class="ph ph-arrow-right"></i></a>
     </div>
-    
+
     <div class="rank-list">
       <?php if (!empty($featuredColleges)): $rk=1; ?>
         <?php foreach (array_slice($featuredColleges,0,5) as $cl): ?>
@@ -23,7 +23,7 @@
             <strong><?=!empty($cl['avg_package'])?'₹'.number_format((float)$cl['avg_package'],1).'L':'N/A'?></strong>
             <span>Avg Package</span>
           </div>
-          <div class="r-meta" style="align-items:flex-end">
+          <div class="r-meta">
             <strong><?php if(!empty($cl['overall_rating_avg'])):?><i class="ph-fill ph-star" style="color:#19376D"></i> <?=number_format((float)$cl['overall_rating_avg'],1)?><?php else:?>N/A<?php endif;?></strong>
             <span>Rating</span>
           </div>
@@ -44,7 +44,7 @@
             <strong><?=$cl['pkg']?></strong>
             <span>Avg Package</span>
           </div>
-          <div class="r-meta" style="align-items:flex-end">
+          <div class="r-meta">
             <strong><i class="ph-fill ph-star" style="color:#19376D"></i> <?=$cl['rating']?></strong>
             <span>Rating</span>
           </div>

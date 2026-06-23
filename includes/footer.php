@@ -24,7 +24,7 @@ try {
 function fSlug($text) {
     return strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $text), '-'));
 }
-function fName($text, $max = 25) {
+function fName($text, $max = 50) {
     $t = trim($text);
     return mb_strlen($t) > $max ? mb_substr($t, 0, $max) . '...' : $t;
 }

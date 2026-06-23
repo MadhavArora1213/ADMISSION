@@ -8,10 +8,11 @@ function initApp() {
   const mobileToggle = document.getElementById('mobileToggle');
   const navWrapper = document.getElementById('navWrapper');
 
-  /* ─── Sticky Header ─── */
+  /* ─── Sticky Header (legacy + pro) ─── */
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
-    header?.classList.toggle('scrolled', y > 10);
+    const hdr = document.querySelector('.header') || document.querySelector('.pro-header');
+    hdr?.classList.toggle('scrolled', y > 10);
     scrollTop?.classList.toggle('visible', y > 400);
   }, { passive: true });
   scrollTop?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
@@ -36,10 +37,10 @@ function initApp() {
     document.addEventListener('keydown', e => { if (e.key === 'Escape') { navWrapper.classList.contains('open') && toggle(false); document.querySelector('.search-overlay')?.classList.remove('open'); } });
   }
 
-  /* ─── Search Tabs ─── */
-  document.querySelectorAll('.search-tab').forEach(t => {
+  /* ─── Search Tabs (legacy + pro) ─── */
+  document.querySelectorAll('.search-tab, .pro-search-tabs button').forEach(t => {
     t.addEventListener('click', () => {
-      document.querySelectorAll('.search-tab').forEach(s => s.classList.remove('active'));
+      t.closest('.search-tabs, .pro-search-tabs')?.querySelectorAll('button, .search-tab').forEach(s => s.classList.remove('active'));
       t.classList.add('active');
     });
   });
@@ -109,7 +110,7 @@ function initApp() {
     const el = document.createElement('div');
     el.className = 'toast-msg';
     el.textContent = msg;
-    el.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg-elevated);color:#fff;padding:14px 28px;border-radius:12px;font-size:.88rem;font-weight:500;z-index:9999;opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.4);max-width:90vw;text-align:center;font-family:"Space Grotesk",sans-serif;border:1px solid rgba(79,140,255,.2)';
+    el.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#0B2447;color:#fff;padding:14px 28px;border-radius:12px;font-size:.88rem;font-weight:500;z-index:9999;opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.4);max-width:90vw;text-align:center;font-family:"Space Grotesk",sans-serif;border:1px solid rgba(79,140,255,.2)';
     document.body.appendChild(el);
     requestAnimationFrame(() => { el.style.opacity = '1'; el.style.transform = 'translateX(-50%) translateY(0)'; });
     setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(80px)'; setTimeout(() => el.remove(), 400); }, 3000);

@@ -1,8 +1,12 @@
-<!-- ═══ FEATURED COLLEGES ═══ -->
+<!-- ═══ FEATURED COLLEGES — Premium Cards ═══ -->
 <section class="section">
   <div class="container">
     <div class="section-hdr-flex reveal">
-      <div><h2>Curated Institutions</h2><p>Immersive profiles of top-tier colleges</p></div>
+      <div>
+        <div class="nh-badge" style="margin:0 0 16px"><i class="ph-fill ph-trophy"></i> Top Picks</div>
+        <h2>Curated Institutions</h2>
+        <p>Immersive profiles of top-tier colleges</p>
+      </div>
       <a href="colleges.php" class="section-link" style="border-color:var(--border);color:var(--text)">Explore All <i class="ph ph-arrow-right"></i></a>
     </div>
     
@@ -14,7 +18,7 @@
         <div class="ucp-overlay">
           <div class="ucp-tags">
             <span class="ucp-tag"><?=ucfirst(htmlspecialchars($cl['college_type']??'College'))?></span>
-            <?php if(!empty($cl['naac_grade'])):?><span class="ucp-tag">NAAC <?=htmlspecialchars($cl['naac_grade'])?></span><?php endif;?>
+            <?php if(!empty($cl['naac_grade'])):?><span class="ucp-tag ucp-tag-rank">NAAC <?=htmlspecialchars($cl['naac_grade'])?></span><?php endif;?>
           </div>
           <div class="ucp-content">
             <h3 class="ucp-title"><?=htmlspecialchars($cl['name'])?></h3>
@@ -24,6 +28,7 @@
               <div><strong><?=!empty($cl['avg_package'])?'₹'.number_format((float)$cl['avg_package'],1).'L':'—'?></strong><span>Avg Package</span></div>
             </div>
           </div>
+          <div class="ucp-arrow"><i class="ph ph-arrow-up-right"></i></div>
         </div>
       </a>
       <?php endforeach; ?>
@@ -40,6 +45,7 @@
               <div><strong><?=$cl['pkg']?></strong><span>Avg Package</span></div>
             </div>
           </div>
+          <div class="ucp-arrow"><i class="ph ph-arrow-up-right"></i></div>
         </div>
       </a>
     <?php endforeach; endif; ?>
