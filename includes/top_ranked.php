@@ -3,12 +3,43 @@
   <div class="container">
     <div class="section-hdr-flex">
       <div><h2>Elite Rankings 2026</h2><p>The pinnacle of academic excellence curated for you</p></div>
-      <a href="<?=collegesUrl()?>" class="section-link">View Full Leaderboard <i class="ph ph-arrow-right"></i></a>
+      <a href="/ADMISSION/rankings.php" class="section-link">View Full Leaderboard <i class="ph ph-arrow-right"></i></a>
     </div>
 
     <div class="rank-list">
-      <?php if (!empty($featuredColleges)): $rk=1; ?>
-        <?php foreach (array_slice($featuredColleges,0,5) as $cl): ?>
+      <?php
+      $rankSource = !empty($rankedColleges) ? $rankedColleges : $featuredColleges;
+      if (!empty($rankSource)): $rk=1; ?>
+        <?php foreach (array_slice($rankSource,0,5) as $cl):
+          // Smart fallbacks for package column
+          if (!empty($cl['avg_package'])) {
+              $pkgText = '₹'.number_format((float)$cl['avg_package'],1).'L';
+              $pkgSub = 'Avg Package';
+          } elseif (!empty($cl['highest_package'])) {
+              $pkgText = '₹'.number_format((float)$cl['highest_package'],1).'L';
+              $pkgSub = 'Highest Package';
+          } elseif (!empty($cl['established_year']) && $cl['established_year'] > 1900) {
+              $pkgText = 'Est. '.$cl['established_year'];
+              $pkgSub = 'Founded';
+          } else {
+              $pkgText = ucfirst($cl['college_type'] ?? 'Institute');
+              $pkgSub = 'Institute Type';
+          }
+          // Smart fallbacks for rating column
+          if (!empty($cl['overall_rating_avg'])) {
+              $ratingText = '<i class="ph-fill ph-star" style="color:#19376D"></i> '.number_format((float)$cl['overall_rating_avg'],1);
+              $ratingSub = 'Rating';
+          } elseif (!empty($cl['naac_grade'])) {
+              $ratingText = 'NAAC '.$cl['naac_grade'];
+              $ratingSub = 'Accreditation';
+          } elseif (!empty($cl['total_students'])) {
+              $ratingText = number_format((int)$cl['total_students']).'+';
+              $ratingSub = 'Students';
+          } else {
+              $ratingText = ucfirst($cl['college_type'] ?? '—');
+              $ratingSub = 'College Type';
+          }
+        ?>
         <a href="<?=collegeUrl($cl['slug'] ?? '')?>" class="rank-item">
           <div class="r-rank">#<?=sprintf("%02d", $rk++)?></div>
           <div class="r-col">
@@ -16,16 +47,16 @@
             <span><i class="ph ph-map-pin"></i> <?=htmlspecialchars($cl['city_name']??'')?><?=($cl['city_name']&&$cl['state_name'])?', ':''?><?=htmlspecialchars($cl['state_name']??'')?></span>
           </div>
           <div class="r-meta">
-            <strong><?=!empty($cl['ranking_nirf'])?'NIRF Rank '.$cl['ranking_nirf']:'Unranked'?></strong>
+            <strong><?=!empty($cl['ranking_nirf'])?'NIRF Rank '.$cl['ranking_nirf']:'<span style="opacity:.4">Unranked</span>'?></strong>
             <span>National Ranking</span>
           </div>
           <div class="r-meta">
-            <strong><?=!empty($cl['avg_package'])?'₹'.number_format((float)$cl['avg_package'],1).'L':'N/A'?></strong>
-            <span>Avg Package</span>
+            <strong><?=$pkgText?></strong>
+            <span><?=$pkgSub?></span>
           </div>
           <div class="r-meta">
-            <strong><?php if(!empty($cl['overall_rating_avg'])):?><i class="ph-fill ph-star" style="color:#19376D"></i> <?=number_format((float)$cl['overall_rating_avg'],1)?><?php else:?>N/A<?php endif;?></strong>
-            <span>Rating</span>
+            <strong><?=$ratingText?></strong>
+            <span><?=$ratingSub?></span>
           </div>
         </a>
         <?php endforeach; ?>

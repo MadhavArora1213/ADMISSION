@@ -2586,6 +2586,10 @@ select {
   background: rgba(255, 255, 255, 0.1);
 }
 
+.section-dark .section-hdr-flex {
+  margin-bottom: 32px;
+}
+
 /* Minimalist List for Dark Section */
 .rank-list {
   display: flex;
@@ -3791,7 +3795,6 @@ select {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 20px;
-  overflow: hidden;
   box-shadow: 0 20px 50px rgba(11, 36, 71, 0.08), 0 1px 3px rgba(11, 36, 71, 0.06);
   margin-bottom: 24px;
 }
@@ -3800,6 +3803,7 @@ select {
   display: flex;
   border-bottom: 1px solid var(--border);
   background: var(--background);
+  border-radius: 20px 20px 0 0;
 }
 
 .nh-search-tabs button {
@@ -3840,6 +3844,7 @@ select {
   align-items: center;
   padding: 6px 8px 6px 20px;
   gap: 12px;
+  border-radius: 0 0 20px 20px;
 }
 
 .nh-search-row i {
@@ -3889,6 +3894,142 @@ select {
 .nh-search-btn i {
   color: #fff;
   font-size: 1rem;
+}
+
+/* Hero Search Dropdown */
+.nh-search { position: relative; }
+.nh-search-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  min-width: 420px;
+  max-height: 440px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid rgba(15,23,42,0.08);
+  border-radius: 14px;
+  box-shadow: 0 16px 48px rgba(11,36,71,0.15);
+  z-index: 9998;
+  padding: 8px 0;
+}
+.nh-search-group { padding: 4px 0; }
+.nh-search-group-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(15,23,42,0.35);
+  padding: 8px 18px 4px;
+  font-family: var(--font2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nh-search-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  font-size: 0.88rem;
+  color: rgba(15,23,42,0.75);
+  text-decoration: none;
+  transition: all 0.15s;
+  font-weight: 500;
+}
+.nh-search-item:hover {
+  background: rgba(25,55,109,0.05);
+  color: var(--primary);
+}
+.nh-search-item.active {
+  background: rgba(25,55,109,0.08);
+  color: var(--primary);
+}
+.nh-search-item i { font-size: 1rem; opacity: 0.6; flex-shrink: 0; }
+.nhsi-title { font-weight: 600; line-height: 1.3; }
+.nhsi-title mark {
+  background: rgba(37,99,235,0.15);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+.nhsi-sub {
+  font-size: 0.75rem;
+  color: rgba(15,23,42,0.4);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nhsi-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.nh-search-empty {
+  padding: 24px;
+  text-align: center;
+  color: rgba(15,23,42,0.35);
+  font-size: 0.88rem;
+}
+.nh-search-empty i {
+  font-size: 1.5rem;
+  display: block;
+  margin-bottom: 8px;
+  opacity: 0.3;
+}
+.nh-search-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  color: rgba(15,23,42,0.45);
+  font-size: 0.85rem;
+  font-family: var(--font2);
+}
+.nh-search-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(25,55,109,0.12);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: nhSpin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes nhSpin { to { transform: rotate(360deg); } }
+.nh-search-footer {
+  border-top: 1px solid rgba(15,23,42,0.06);
+  padding: 6px 0 2px;
+  margin-top: 2px;
+}
+.nh-view-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  transition: all 0.15s;
+  font-family: var(--font2);
+}
+.nh-view-all:hover {
+  background: rgba(25,55,109,0.05);
+}
+.nh-view-all i {
+  font-size: 0.9rem;
+  transition: transform 0.2s;
+}
+.nh-view-all:hover i {
+  transform: translateX(3px);
 }
 
 /* Quick Links */
@@ -4116,6 +4257,12 @@ select {
     width: 100%;
     justify-content: center;
     padding: 14px;
+  }
+  .nh-search-dropdown {
+    min-width: 100%;
+    left: 0;
+    right: 0;
+    max-height: 360px;
   }
   .nh-trust-inner {
     flex-wrap: wrap;

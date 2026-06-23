@@ -24,7 +24,7 @@ try {
 function fSlug($text) {
     return strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $text), '-'));
 }
-function fName($text, $max = 50) {
+function fName($text, $max = 60) {
     $t = trim($text);
     return mb_strlen($t) > $max ? mb_substr($t, 0, $max) . '...' : $t;
 }
@@ -38,11 +38,11 @@ function fName($text, $max = 50) {
         <a href="<?= $navBase ?>/" class="flogo"><i class="ph-fill ph-graduation-cap"></i> Admission<span>Season</span></a>
         <p>India's leading college discovery platform. Find detailed info on colleges, courses, exams, and get personalised admission assistance.</p>
         <div class="fsocial">
-          <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><i class="ph ph-facebook-logo"></i></a>
-          <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="X"><i class="ph ph-twitter-logo"></i></a>
-          <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><i class="ph ph-instagram-logo"></i></a>
-          <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="ph ph-linkedin-logo"></i></a>
-          <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube"><i class="ph ph-youtube-logo"></i></a>
+          <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><i class="ph-fill ph-facebook-logo"></i></a>
+          <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="X"><i class="ph-fill ph-twitter-logo"></i></a>
+          <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><i class="ph-fill ph-instagram-logo"></i></a>
+          <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="ph-fill ph-linkedin-logo"></i></a>
+          <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube"><i class="ph-fill ph-youtube-logo"></i></a>
         </div>
       </div>
 
