@@ -81,6 +81,24 @@ $tabIcons = [
     .timeline-item::before { content: ''; position: absolute; left: -31px; top: 0; width: 14px; height: 14px; border-radius: 50%; background: var(--cp-blue); border: 3px solid #fff; box-shadow: 0 0 0 2px var(--cp-blue); }
     .timeline-date { font-weight: 700; color: var(--cp-blue); font-size: 0.9rem; margin-bottom: 4px; }
     .timeline-event { font-size: 1.1rem; font-weight: 600; color: var(--cp-text); margin: 0; }
+    @media(max-width:768px){
+      .exam-hero{padding:50px 0 30px}
+      .exam-hero-inner{flex-direction:column;gap:16px}
+      .exam-hero-title{font-size:1.5rem}
+      .exam-hero-logo{width:80px;height:80px}
+      .exam-hero-actions{margin-left:0;width:100%}
+      .exam-btn-primary{width:100%}
+      .exam-hero-chips{gap:8px}
+      .exam-hero-chips span{padding:5px 10px;font-size:.78rem}
+      .info-grid{grid-template-columns:1fr}
+      .shiksha-tabs-nav ul{gap:0}
+      .shiksha-tabs-nav li a{padding:14px 12px;font-size:.82rem}
+      .exam-hero a[style*="position:absolute"]{position:relative!important;top:auto!important;left:auto!important;margin-bottom:8px;display:inline-flex!important}
+    }
+    @media(max-width:480px){
+      .exam-hero-chips{flex-wrap:wrap}
+      .info-grid{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body class="bg-light">

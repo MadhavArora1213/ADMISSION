@@ -126,11 +126,38 @@ $levelLabels = ['national'=>'National Level','state'=>'State Level','university'
     .exam-filter-list a.active i{opacity:1}
 
     @media(max-width:768px){
-      .exams-layout{grid-template-columns:1fr}
+      .exams-layout{grid-template-columns:1fr;gap:0}
       .exams-grid{grid-template-columns:1fr}
-      .exam-filter-card{position:static}
+      .exams-head{flex-direction:column;align-items:flex-start}
       .exams-hero h1{font-size:1.5rem}
+      .exams-hero-sub{font-size:.92rem}
+      .exams-stats{grid-template-columns:repeat(2,1fr);gap:8px}
+      .exam-stat{padding:12px 10px}
+      .exam-stat-val{font-size:1.2rem}
+      .exams-filter-toggle{display:flex}
+      aside{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(0,0,0,.4);padding:0}
+      aside.open{display:flex;align-items:flex-end}
+      aside .exam-filter-card{position:static;border-radius:16px 16px 0 0;max-height:80vh;overflow-y:auto;width:100%;box-shadow:0 -4px 24px rgba(0,0,0,.15);animation:slideUp .3s ease}
+      .filter-close{display:flex}
     }
+    @media(max-width:480px){
+      .exams-stats{grid-template-columns:repeat(2,1fr)}
+      .exam-stat-val{font-size:1rem}
+      .exam-stat-lbl{font-size:.65rem}
+    }
+    .exams-filter-toggle{
+      display:none;align-items:center;gap:6px;padding:10px 20px;
+      border-radius:12px;border:1.5px solid rgba(15,23,42,.1);background:#fff;
+      font-size:.85rem;font-weight:700;color:#0B2447;cursor:pointer;
+      transition:all .2s
+    }
+    .exams-filter-toggle:hover{border-color:#2563eb;color:#2563eb}
+    .filter-close{
+      display:none;position:absolute;top:12px;right:12px;width:32px;height:32px;
+      border-radius:8px;background:rgba(15,23,42,.06);border:none;cursor:pointer;
+      align-items:center;justify-content:center;font-size:1rem;color:#0f172a;z-index:1
+    }
+    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
   </style>
 </head>
 <body class="bg-light">
@@ -180,9 +207,12 @@ $levelLabels = ['national'=>'National Level','state'=>'State Level','university'
 <div class="container">
   <div class="exams-layout">
 
+    <button class="exams-filter-toggle" onclick="document.querySelector('aside').classList.toggle('open')"><i class="ph ph-funnel"></i> Filters</button>
+
     <!-- Sidebar -->
     <aside>
       <div class="exam-filter-card">
+        <button class="filter-close" onclick="this.closest('aside').classList.remove('open')"><i class="ph ph-x"></i></button>
         <h3><i class="ph ph-funnel"></i> Filter Exams</h3>
 
         <div class="exam-filter-group">
@@ -256,5 +286,11 @@ $levelLabels = ['national'=>'National Level','state'=>'State Level','university'
 </div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
+<script src="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/js/main.js"></script>
+<script>
+document.querySelector('aside')?.addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+</script>
 </body>
 </html>

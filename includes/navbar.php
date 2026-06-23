@@ -47,6 +47,126 @@ if (!isset($navColleges)) {
         <input type="text" placeholder="Search for Colleges, Exams, Courses and More.." id="navSearchInput" autocomplete="off">
         <div class="nav-search-dropdown" id="navSearchDropdown"></div>
       </div>
+      <script>
+      (function(){
+        const input = document.getElementById('navSearchInput');
+        const dd = document.getElementById('navSearchDropdown');
+        if (!input || !dd) return;
+        let timer = null, activeIdx = -1, lastQ = '', abortCtrl = null;
+
+        function highlight(text, q) {
+          if (!q) return text;
+          const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          return text.replace(new RegExp('(' + esc + ')', 'gi'), '<mark>$1</mark>');
+        }
+
+        function iconFor(type) {
+          const m = {college:'ph-buildings',exam:'ph-clipboard-text',course:'ph-books',career:'ph-briefcase',article:'ph-newspaper',question:'ph-chat-circle-question',university:'ph-globe-hemisphere-west'};
+          return m[type] || 'ph-arrow-right';
+        }
+
+        function typeLabel(type) {
+          const m = {college:'Colleges',exam:'Exams',course:'Courses',career:'Careers',article:'News & Articles',question:'Questions',university:'Foreign Universities'};
+          return m[type] || type;
+        }
+
+        function typeColor(type) {
+          const m = {college:'#19376D',exam:'#7C3AED',course:'#059669',career:'#EA580C',article:'#D97706',question:'#2563EB',university:'#0891B2'};
+          return m[type] || '#64748B';
+        }
+
+        function render(results, q) {
+          if (!results.length) {
+            dd.innerHTML = '<div class="nav-search-empty"><i class="ph ph-magnifying-glass" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:.3"></i>No results found for "<strong>' + q.replace(/</g,'&lt;') + '</strong>"<div style="margin-top:6px;font-size:0.75rem;opacity:.5">Try searching for colleges, exams, courses, careers or news</div></div>';
+            dd.style.display = 'block';
+            return;
+          }
+          const groups = {};
+          results.forEach(r => {
+            if (!groups[r.type]) groups[r.type] = [];
+            groups[r.type].push(r);
+          });
+          let html = '';
+          const order = ['college','exam','course','career','university','article','question'];
+          order.forEach(type => {
+            if (!groups[type]) return;
+            html += '<div class="nav-search-group">';
+            html += '<div class="nav-search-group-title"><i class="ph ' + iconFor(type) + '" style="color:' + typeColor(type) + '"></i> ' + typeLabel(type) + '</div>';
+            groups[type].forEach(r => {
+              html += '<a href="' + r.url + '" class="nav-search-item">';
+              html += '<i class="ph ' + iconFor(type) + '" style="color:' + typeColor(type) + '"></i>';
+              html += '<div style="flex:1;min-width:0">';
+              html += '<div class="nsi-title">' + highlight(r.title, q) + '</div>';
+              if (r.subtitle) html += '<div class="nsi-sub">' + r.subtitle + '</div>';
+              html += '</div>';
+              if (r.badge) html += '<span class="nsi-badge" style="background:' + typeColor(type) + '11;color:' + typeColor(type) + '">' + r.badge + '</span>';
+              html += '</a>';
+            });
+            html += '</div>';
+          });
+          html += '<div class="nav-search-footer"><a href="/ADMISSION/search.php?q=' + encodeURIComponent(q) + '" class="nav-view-all">View all results for "' + q.replace(/</g,'&lt;') + '" <i class="ph ph-arrow-right"></i></a></div>';
+          dd.innerHTML = html;
+          dd.style.display = 'block';
+          activeIdx = -1;
+        }
+
+        function showLoading(q) {
+          dd.innerHTML = '<div class="nav-search-loading"><div class="nav-search-spinner"></div>Searching for "' + q.replace(/</g,'&lt;') + '"...</div>';
+          dd.style.display = 'block';
+        }
+
+        input.addEventListener('input', function() {
+          const q = this.value.trim();
+          clearTimeout(timer);
+          if (abortCtrl) abortCtrl.abort();
+          if (q.length < 1) { dd.style.display = 'none'; dd.innerHTML = ''; return; }
+          showLoading(q);
+          timer = setTimeout(() => {
+            abortCtrl = new AbortController();
+            fetch('/ADMISSION/api/global_search.php?q=' + encodeURIComponent(q), { signal: abortCtrl.signal })
+              .then(r => r.json())
+              .then(data => { if (data.ok) render(data.results, q); })
+              .catch(e => { if (e.name !== 'AbortError') dd.style.display = 'none'; });
+          }, 200);
+        });
+
+        input.addEventListener('keydown', function(e) {
+          const items = dd.querySelectorAll('.nav-search-item');
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (!items.length) return;
+            activeIdx = Math.min(activeIdx + 1, items.length - 1);
+            items.forEach((it, i) => it.classList.toggle('active', i === activeIdx));
+            items[activeIdx]?.scrollIntoView({ block: 'nearest' });
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeIdx = Math.max(activeIdx - 1, 0);
+            items.forEach((it, i) => it.classList.toggle('active', i === activeIdx));
+            items[activeIdx]?.scrollIntoView({ block: 'nearest' });
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (activeIdx >= 0 && items[activeIdx]) {
+              items[activeIdx].click();
+            } else if (items.length) {
+              items[0].click();
+            } else if (this.value.trim()) {
+              window.location.href = '/ADMISSION/search.php?q=' + encodeURIComponent(this.value.trim());
+            }
+          } else if (e.key === 'Escape') {
+            dd.style.display = 'none';
+            input.blur();
+          }
+        });
+
+        input.addEventListener('focus', function() {
+          if (this.value.trim().length >= 1 && dd.innerHTML.trim()) dd.style.display = 'block';
+        });
+
+        document.addEventListener('click', function(e) {
+          if (!e.target.closest('.pro-nav-search')) dd.style.display = 'none';
+        });
+      })();
+      </script>
 
       <div class="pro-nav-right">
         <a href="#" class="pro-icon-btn" title="Saved"><i class="ph ph-heart"></i></a>
@@ -78,6 +198,7 @@ if (!isset($navColleges)) {
   <div class="pro-nav-sub pro-nav-sub-desktop">
     <div class="container pro-nav-flex">
       <ul class="pro-sub-links">
+        <li><a href="<?= $navBase ?>/">Home</a></li>
         <li class="pro-has-mega">
           <a href="<?= $navBase ?>/colleges.php">Colleges <i class="ph ph-caret-down"></i></a>
           <div class="pro-mega-menu">
@@ -473,6 +594,7 @@ if (!isset($navColleges)) {
 
   <div class="pro-mobile-nav-links">
     <div class="pro-mobile-section-title">Quick Links</div>
+    <a href="<?= $navBase ?>/" class="pro-mobile-link"><i class="ph ph-house"></i> Home</a>
     <a href="<?= $navBase ?>/colleges.php" class="pro-mobile-link pro-has-sub"><i class="ph ph-buildings"></i> Colleges <i class="ph ph-caret-right pro-mobile-arrow"></i></a>
     <div class="pro-mobile-sub" id="mobileSubColleges">
       <a href="<?= $navBase ?>/colleges.php">All Colleges</a>
@@ -935,61 +1057,5 @@ if (moreWrap) {
   display: inline-block !important;
 }
 </style>
-<script>
-(function(){
-  const input = document.getElementById('navSearchInput');
-  const dropdown = document.getElementById('navSearchDropdown');
-  if (!input || !dropdown) return;
-  let timer = null;
 
-  input.addEventListener('input', function(){
-    clearTimeout(timer);
-    const q = this.value.trim();
-    if (q.length < 2) { dropdown.style.display = 'none'; dropdown.innerHTML = ''; return; }
-    timer = setTimeout(() => {
-      fetch('/ADMISSION/api/search.php?q=' + encodeURIComponent(q))
-        .then(r => r.json())
-        .then(data => {
-          if (!data.results || data.results.length === 0) {
-            dropdown.innerHTML = '<div class="nav-search-empty">No results found</div>';
-            dropdown.style.display = 'block';
-            return;
-          }
-          const typeLabels = { college: 'Colleges', exam: 'Exams', course: 'Courses', career: 'Careers' };
-          const typeOrder = ['college', 'exam', 'course', 'career'];
-          let html = '';
-          for (const type of typeOrder) {
-            const items = data.results.filter(r => r.type === type);
-            if (!items.length) continue;
-            html += '<div class="nav-search-group"><div class="nav-search-group-title">' + (typeLabels[type] || type) + '</div>';
-            for (const item of items) {
-              html += '<a class="nav-search-item" href="' + item.url + '"><i class="ph ' + item.icon + '"></i> ' + item.label + '</a>';
-            }
-            html += '</div>';
-          }
-          dropdown.innerHTML = html;
-          dropdown.style.display = 'block';
-        })
-        .catch(() => { dropdown.style.display = 'none'; });
-    }, 300);
-  });
-
-  input.addEventListener('keydown', function(e){
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const firstLink = dropdown.querySelector('.nav-search-item');
-      if (firstLink) window.location.href = firstLink.href;
-    }
-    if (e.key === 'Escape') { dropdown.style.display = 'none'; }
-  });
-
-  document.addEventListener('click', function(e){
-    if (!e.target.closest('.pro-nav-search')) { dropdown.style.display = 'none'; }
-  });
-
-  input.addEventListener('focus', function(){
-    if (dropdown.innerHTML.trim()) dropdown.style.display = 'block';
-  });
-})();
-</script>
 </header>

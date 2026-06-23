@@ -56,22 +56,191 @@ if (!$article) {
     exit;
 }
 
-// Increment view count
-$pdo->prepare("UPDATE articles SET view_count = view_count + 1 WHERE id = ?")->execute([$article['id']]);
+// Track unique view (by user_id, session, or IP — only once per 24h)
+$articleId = $article['id'];
+$viewerUserId   = $_SESSION['user_id'] ?? null;
+$viewerSession  = session_id();
+$viewerIp       = $_SERVER['REMOTE_ADDR'] ?? '';
 
-// Fetch related articles (same type or same category, exclude current)
-$related = $pdo->prepare("
-    SELECT a.id, a.article_title, a.article_slug, a.article_type, a.featured_image_url, a.publish_at, c.category_name
-    FROM articles a
-    LEFT JOIN article_categories c ON a.category_id = c.id
-    WHERE a.status = 'published'
-      AND a.id != ?
-      AND (a.article_type = ? OR a.category_id = ?)
-    ORDER BY a.publish_at DESC
-    LIMIT 4
-");
-$related->execute([$article['id'], $article['article_type'], $article['category_id']]);
-$relatedArticles = $related->fetchAll(PDO::FETCH_ASSOC);
+$alreadyViewed = false;
+if ($viewerUserId) {
+    $chk = $pdo->prepare("SELECT id FROM article_views WHERE article_id=? AND user_id=? AND viewed_at > DATE_SUB(NOW(), INTERVAL 24 HOUR) LIMIT 1");
+    $chk->execute([$articleId, $viewerUserId]);
+    $alreadyViewed = (bool)$chk->fetch();
+} else {
+    $chk = $pdo->prepare("SELECT id FROM article_views WHERE article_id=? AND ip_address=? AND viewed_at > DATE_SUB(NOW(), INTERVAL 24 HOUR) LIMIT 1");
+    $chk->execute([$articleId, $viewerIp]);
+    $alreadyViewed = (bool)$chk->fetch();
+}
+
+if (!$alreadyViewed) {
+    $ins = $pdo->prepare("INSERT INTO article_views (article_id, user_id, session_id, ip_address) VALUES (?, ?, ?, ?)");
+    $ins->execute([$articleId, $viewerUserId, $viewerSession, $viewerIp]);
+    // Update cached view_count
+    $cnt = $pdo->prepare("SELECT COUNT(DISTINCT COALESCE(user_id, ip_address)) FROM article_views WHERE article_id=?");
+    $cnt->execute([$articleId]);
+    $uniqueViews = (int)$cnt->fetchColumn();
+    $pdo->prepare("UPDATE articles SET view_count=? WHERE id=?")->execute([$uniqueViews, $articleId]);
+    $article['view_count'] = $uniqueViews;
+}
+
+// Fetch related articles with multi-criteria matching:
+// 1. Shared tags (JSON array in articles.tags) - using JSON_CONTAINS (MariaDB compatible)
+// 2. Same category
+// 3. Same article_type
+// 4. Title keyword overlap (LIKE)
+// Excludes current article, ordered by relevance then recency
+$currentTags = json_decode($article['tags'] ?? '[]', true);
+$currentTags = is_array($currentTags) ? array_filter(array_map('intval', $currentTags)) : [];
+$currentTitleWords = array_filter(explode(' ', mb_strtolower($article['article_title'] ?? '')));
+$currentTitleWords = array_map(fn($w) => preg_replace('/[^a-z0-9]/', '', $w), $currentTitleWords);
+$currentTitleWords = array_filter($currentTitleWords, fn($w) => mb_strlen($w) > 3);
+
+$related = [];
+
+// Strategy 1: Articles sharing tags (MariaDB: use JSON_CONTAINS for each tag)
+if (count($currentTags) > 0) {
+    // WHERE: match any shared tag via JSON_CONTAINS
+    $jsonContainsParts = [];
+    $jsonContainsParams = [];
+    foreach ($currentTags as $tid) {
+        $jsonContainsParts[] = "JSON_CONTAINS(a.tags, ?)";
+        $jsonContainsParams[] = json_encode((int)$tid);
+    }
+    $tagWhereSql = implode(' OR ', $jsonContainsParts);
+
+    // SELECT: count how many tags overlap via LIKE
+    $tagOverlapParts = [];
+    foreach ($currentTags as $tid) {
+        $tagOverlapParts[] = "(CASE WHEN a.tags LIKE ? THEN 1 ELSE 0 END)";
+    }
+    $tagOverlapSql = implode('+', $tagOverlapParts);
+
+    // Params: overlap params + where params + exclude current article
+    $overlapLikeParams = array_map(fn($tid) => '%"'.$tid.'"%', array_values($currentTags));
+    $params = array_merge($overlapLikeParams, $jsonContainsParams, [$article['id']]);
+
+    $stmtRel = $pdo->prepare("
+        SELECT a.id, a.article_title, a.article_slug, a.article_type, a.category_id,
+               a.featured_image_url, a.publish_at, a.tags, c.category_name,
+               1 AS match_priority,
+               ($tagOverlapSql) AS tag_overlap
+        FROM articles a
+        LEFT JOIN article_categories c ON a.category_id = c.id
+        WHERE a.status = 'published'
+          AND a.id != ?
+          AND ($tagWhereSql)
+        ORDER BY tag_overlap DESC, a.publish_at DESC
+        LIMIT 8
+    ");
+    $stmtRel->execute($params);
+    $related = $stmtRel->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Strategy 2: If not enough tag matches, fill with same category
+$relatedIds = array_column($related, 'id');
+if (count($related) < 4 && !empty($article['category_id'])) {
+    $excludeIds = array_merge([$article['id']], $relatedIds);
+    $placeholders = implode(',', array_fill(0, count($excludeIds), '?'));
+    $stmtCat = $pdo->prepare("
+        SELECT a.id, a.article_title, a.article_slug, a.article_type, a.category_id,
+               a.featured_image_url, a.publish_at, a.tags, c.category_name,
+               2 AS match_priority, 0 AS tag_overlap
+        FROM articles a
+        LEFT JOIN article_categories c ON a.category_id = c.id
+        WHERE a.status = 'published'
+          AND a.id NOT IN ($placeholders)
+          AND a.category_id = ?
+        ORDER BY a.publish_at DESC
+        LIMIT 8
+    ");
+    $catParams = array_merge($excludeIds, [$article['category_id']]);
+    $stmtCat->execute($catParams);
+    $related = array_merge($related, $stmtCat->fetchAll(PDO::FETCH_ASSOC));
+}
+
+// Strategy 3: Fill remaining with same article_type
+$relatedIds = array_column($related, 'id');
+if (count($related) < 4) {
+    $excludeIds = array_merge([$article['id']], $relatedIds);
+    $placeholders = implode(',', array_fill(0, count($excludeIds), '?'));
+    $stmtType = $pdo->prepare("
+        SELECT a.id, a.article_title, a.article_slug, a.article_type, a.category_id,
+               a.featured_image_url, a.publish_at, a.tags, c.category_name,
+               3 AS match_priority, 0 AS tag_overlap
+        FROM articles a
+        LEFT JOIN article_categories c ON a.category_id = c.id
+        WHERE a.status = 'published'
+          AND a.id NOT IN ($placeholders)
+          AND a.article_type = ?
+        ORDER BY a.publish_at DESC
+        LIMIT 8
+    ");
+    $stmtType->execute(array_merge($excludeIds, [$article['article_type']]));
+    $related = array_merge($related, $stmtType->fetchAll(PDO::FETCH_ASSOC));
+}
+
+// Strategy 4: Fill remaining with any recent articles
+$relatedIds = array_column($related, 'id');
+if (count($related) < 4) {
+    $excludeIds = array_merge([$article['id']], $relatedIds);
+    if (count($excludeIds) > 0) {
+        $placeholders = implode(',', array_fill(0, count($excludeIds), '?'));
+        $stmtAny = $pdo->prepare("
+            SELECT a.id, a.article_title, a.article_slug, a.article_type, a.category_id,
+                   a.featured_image_url, a.publish_at, a.tags, c.category_name,
+                   4 AS match_priority, 0 AS tag_overlap
+            FROM articles a
+            LEFT JOIN article_categories c ON a.category_id = c.id
+            WHERE a.status = 'published'
+              AND a.id NOT IN ($placeholders)
+            ORDER BY a.view_count DESC, a.publish_at DESC
+            LIMIT 8
+        ");
+        $stmtAny->execute($excludeIds);
+        $related = array_merge($related, $stmtAny->fetchAll(PDO::FETCH_ASSOC));
+    }
+}
+
+// Strategy 5: Title keyword overlap (LIKE match on important words from title)
+$relatedIds = array_column($related, 'id');
+if (count($related) < 4 && count($currentTitleWords) > 0) {
+    $excludeIds = array_merge([$article['id']], $relatedIds);
+    $placeholders = implode(',', array_fill(0, count($excludeIds), '?'));
+    $likeClauses = [];
+    $likeParams = [];
+    foreach (array_slice($currentTitleWords, 0, 5) as $word) {
+        $likeClauses[] = "a.article_title LIKE ?";
+        $likeParams[] = "%{$word}%";
+    }
+    $likeSql = implode(' OR ', $likeClauses);
+    $kwParams = array_merge($excludeIds, $likeParams);
+    $stmtKw = $pdo->prepare("
+        SELECT a.id, a.article_title, a.article_slug, a.article_type, a.category_id,
+               a.featured_image_url, a.publish_at, a.tags, c.category_name,
+               5 AS match_priority, 0 AS tag_overlap
+        FROM articles a
+        LEFT JOIN article_categories c ON a.category_id = c.id
+        WHERE a.status = 'published'
+          AND a.id NOT IN ($placeholders)
+          AND ($likeSql)
+        ORDER BY a.publish_at DESC
+        LIMIT 4
+    ");
+    $stmtKw->execute($kwParams);
+    $related = array_merge($related, $stmtKw->fetchAll(PDO::FETCH_ASSOC));
+}
+
+// Deduplicate by id (keep first occurrence = highest priority)
+$seen = [];
+$relatedArticles = [];
+foreach ($related as $rel) {
+    if (!isset($seen[$rel['id']])) {
+        $seen[$rel['id']] = true;
+        $relatedArticles[] = $rel;
+    }
+}
+$relatedArticles = array_slice($relatedArticles, 0, 4);
 
 // Sidebar: Popular news
 $popular = $pdo->query("
@@ -293,14 +462,30 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
       </div>
 
       <!-- ═══ NPS RATING WIDGET ═══ -->
+      <?php
+      $npsUserId = $_SESSION['user_id'] ?? null;
+      $npsAlreadySubmitted = false;
+      if ($npsUserId) {
+          $npsChk = $pdo->prepare("SELECT id FROM nps_feedback WHERE user_id = ? ORDER BY created_at DESC LIMIT 1");
+          $npsChk->execute([$npsUserId]);
+          $npsAlreadySubmitted = (bool)$npsChk->fetch();
+      }
+      ?>
+      <?php if ($npsUserId): ?>
       <div class="nps-widget" id="npsWidget">
         <p class="nps-question">How likely are you to recommend <strong>AdmissionSeason</strong> to a friend or a colleague?</p>
-        <div class="nps-scale">
+        <?php if ($npsAlreadySubmitted): ?>
+        <div class="nps-thanks" style="display:block;">
+          <i class="ph-fill ph-check-circle" style="color:#059669;font-size:2rem;"></i>
+          <p>You have already submitted your feedback. Thank you!</p>
+        </div>
+        <?php else: ?>
+        <div class="nps-scale" id="npsScale">
           <?php for($i = 1; $i <= 10; $i++): ?>
           <button class="nps-btn" data-score="<?= $i ?>" onclick="selectNps(this, <?= $i ?>)"><?= $i ?></button>
           <?php endfor; ?>
         </div>
-        <div class="nps-labels">
+        <div class="nps-labels" id="npsLabels">
           <span>Not so likely</span>
           <span>Highly Likely</span>
         </div>
@@ -308,7 +493,20 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
           <i class="ph ph-smiley"></i>
           <p>Thank you for your feedback!</p>
         </div>
+        <?php endif; ?>
       </div>
+      <?php else: ?>
+      <div class="nps-widget" id="npsWidget">
+        <p class="nps-question">How likely are you to recommend <strong>AdmissionSeason</strong> to a friend or a colleague?</p>
+        <div style="text-align:center;padding:20px 0;">
+          <i class="ph ph-lock-key" style="font-size:2rem;color:rgba(15,23,42,0.15);display:block;margin-bottom:10px;"></i>
+          <p style="font-size:.9rem;color:rgba(15,23,42,0.5);margin-bottom:12px;">Please log in to share your feedback.</p>
+          <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/login.php?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" style="display:inline-flex;align-items:center;gap:6px;padding:10px 24px;background:linear-gradient(135deg,#0B2447,#19376D);color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:.88rem;">
+            <i class="ph ph-sign-in"></i> Login to Rate
+          </a>
+        </div>
+      </div>
+      <?php endif; ?>
 
       <!-- ═══ COMMENTS SECTION ═══ -->
       <div class="comments-section" id="comments-section">
@@ -387,6 +585,23 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
           <?php foreach ($relatedArticles as $rel):
             $relDate = !empty($rel['publish_at']) ? date('M d, Y', strtotime($rel['publish_at'])) : '';
             $relType = ucwords(str_replace('_', ' ', $rel['article_type']));
+            $matchLabel = '';
+            $matchClass = '';
+            $mp = $rel['match_priority'] ?? 4;
+            $tagOverlap = (int)($rel['tag_overlap'] ?? 0);
+            if ($mp == 1 && $tagOverlap > 0) {
+              $matchLabel = $tagOverlap . ' tag' . ($tagOverlap > 1 ? 's' : '') . ' matched';
+              $matchClass = 'match-tags';
+            } elseif ($mp == 2) {
+              $matchLabel = 'Same category';
+              $matchClass = 'match-category';
+            } elseif ($mp == 3) {
+              $matchLabel = $relType;
+              $matchClass = 'match-type';
+            } elseif ($mp == 5) {
+              $matchLabel = 'Keyword match';
+              $matchClass = 'match-keyword';
+            }
           ?>
           <a href="news_details.php?slug=<?= urlencode($rel['article_slug']) ?>" class="art-rel-card">
             <div class="art-rel-img">
@@ -394,6 +609,9 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
             </div>
             <div class="art-rel-body">
               <span class="art-rel-type"><?= $relType ?></span>
+              <?php if ($matchLabel): ?>
+              <span class="art-rel-match <?= $matchClass ?>"><?= $matchLabel ?></span>
+              <?php endif; ?>
               <h4><?= htmlspecialchars($rel['article_title']) ?></h4>
               <span class="art-rel-date"><i class="ph ph-calendar-blank"></i> <?= $relDate ?></span>
             </div>
@@ -464,20 +682,30 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
 <?php include 'includes/footer.php'; ?>
 <script src="assets/js/main.js"></script>
 <script>
+const NPS_ARTICLE_ID = <?= json_encode($article['id']) ?>;
+const NPS_ARTICLE_SLUG = <?= json_encode($slug) ?>;
 function selectNps(btn, score) {
-  // Remove selected from all
   document.querySelectorAll('.nps-btn').forEach(b => b.classList.remove('selected'));
-  
-  // Mark this button selected
   btn.classList.add('selected');
 
-  // After short delay, show thank you
-  setTimeout(() => {
-    document.querySelector('.nps-scale').style.opacity = '0.5';
-    document.querySelector('.nps-scale').style.pointerEvents = 'none';
-    document.querySelector('.nps-labels').style.display = 'none';
-    document.getElementById('npsThanks').style.display = 'block';
-  }, 600);
+  var scale = document.getElementById('npsScale');
+  var labels = document.getElementById('npsLabels');
+  if (scale) { scale.style.opacity = '0.5'; scale.style.pointerEvents = 'none'; }
+  if (labels) labels.style.display = 'none';
+
+  fetch('<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/api/nps_submit.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      score: score,
+      article_id: NPS_ARTICLE_ID,
+      article_slug: NPS_ARTICLE_SLUG,
+      page_url: window.location.href
+    })
+  })
+  .then(r => r.json())
+  .then(data => { document.getElementById('npsThanks').style.display = 'block'; })
+  .catch(() => { document.getElementById('npsThanks').style.display = 'block'; });
 }
 </script>
 </body>

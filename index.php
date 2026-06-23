@@ -40,14 +40,16 @@ $categories = cAll($pdo, "SELECT id,category_name,category_slug,icon_url FROM co
 if (empty($categories)) {
   $categories = cAll($pdo, "SELECT DISTINCT course_level AS category_name, LOWER(course_level) AS category_slug FROM courses WHERE status='active' LIMIT 6");
 }
-$catFallback = [
-    ['name'=>'Engineering','slug'=>'engineering','icon'=>'ph-laptop','count'=>'6,000+'],
-    ['name'=>'Management','slug'=>'management','icon'=>'ph-briefcase','count'=>'4,500+'],
-    ['name'=>'Medical','slug'=>'medical','icon'=>'ph-stethoscope','count'=>'1,200+'],
-    ['name'=>'Commerce','slug'=>'commerce','icon'=>'ph-chart-line','count'=>'3,100+'],
-    ['name'=>'Arts & Design','slug'=>'arts','icon'=>'ph-palette','count'=>'2,000+'],
-    ['name'=>'Law','slug'=>'law','icon'=>'ph-scales','count'=>'1,100+'],
-];
+// Dynamic stream counts
+$catFallback = [];
+$streamSlugMap = ['engineering'=>['Engineering','IT & Software'],'management'=>['Management','Commerce'],'medical'=>['Medical','Nursing'],'law'=>['Law'],'arts'=>['Arts'],'science'=>['Science'],'commerce'=>['Commerce']];
+foreach ($streamSlugMap as $slug => $cats) {
+    $ph = implode(',', array_fill(0, count($cats), '?'));
+    $cnt = $pdo->prepare("SELECT COUNT(*) as cnt FROM courses WHERE status='active' AND course_category IN ($ph)");
+    $cnt->execute($cats);
+    $c = $cnt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0;
+    $catFallback[] = ['name'=>ucfirst($slug),'slug'=>$slug,'icon'=>['engineering'=>'ph-laptop','management'=>'ph-briefcase','medical'=>'ph-stethoscope','law'=>'ph-scales','arts'=>'ph-palette','science'=>'ph-flask','commerce'=>'ph-chart-line'][$slug],'count'=>number_format($c).'+'];
+}
 
 $sqlC = "SELECT c.id,c.name,c.slug,c.college_type,c.naac_grade,c.ranking_nirf,c.overall_rating_avg,c.total_reviews,
                 s.name AS state_name,ct.name AS city_name,cm.cover_image_url,cm.logo_url,
@@ -111,7 +113,7 @@ $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.feat
 <meta name="description" content="India's leading college discovery platform. Find top colleges, exams, courses, fees, rankings, and admission updates.">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=12">
+  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=13">
 </head>
 <body>
 

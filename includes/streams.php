@@ -1,4 +1,4 @@
-<!-- ═══ STREAMS — Color-Coded Cards ═══ -->
+<!-- ═══ STREAMS — Premium Icon Grid ═══ -->
 <section class="section">
   <div class="container">
     <div class="section-hdr reveal">
@@ -8,51 +8,94 @@
     </div>
     <div class="stream-grid">
     <?php
-    $streamData = [
-      'engineering' => ['icon'=>'ph-laptop','color'=>'#2563eb','bg'=>'#eff6ff','count'=>'6,000+'],
-      'management'  => ['icon'=>'ph-briefcase','color'=>'#7c3aed','bg'=>'#f5f3ff','count'=>'4,500+'],
-      'medical'     => ['icon'=>'ph-stethoscope','color'=>'#059669','bg'=>'#ecfdf5','count'=>'1,200+'],
-      'commerce'    => ['icon'=>'ph-chart-line','color'=>'#d97706','bg'=>'#fffbeb','count'=>'3,100+'],
-      'law'         => ['icon'=>'ph-scales','color'=>'#dc2626','bg'=>'#fef2f2','count'=>'1,100+'],
-      'arts'        => ['icon'=>'ph-palette','color'=>'#e11d48','bg'=>'#fff1f2','count'=>'2,000+'],
-      'science'     => ['icon'=>'ph-flask','color'=>'#0891b2','bg'=>'#ecfeff','count'=>'2,500+'],
-      'design'      => ['icon'=>'ph-magic-wand','color'=>'#9333ea','bg'=>'#faf5ff','count'=>'1,800+'],
+    // Dynamic stream counts from database
+    $streamMap = [
+      'engineering' => ['icon'=>'ph-laptop','color'=>'#2563eb','bg'=>'#eff6ff','accent'=>'#dbeafe','categories'=>['Engineering','IT & Software'],'desc'=>'Tech, CS, IT & more'],
+      'management'  => ['icon'=>'ph-briefcase','color'=>'#7c3aed','bg'=>'#f5f3ff','accent'=>'#ede9fe','categories'=>['Management','Commerce'],'desc'=>'MBA, BBA & Commerce'],
+      'medical'     => ['icon'=>'ph-stethoscope','color'=>'#059669','bg'=>'#ecfdf5','accent'=>'#d1fae5','categories'=>['Medical','Nursing'],'desc'=>'MBBS, BDS, Nursing'],
+      'law'         => ['icon'=>'ph-scales','color'=>'#dc2626','bg'=>'#fef2f2','accent'=>'#fecaca','categories'=>['Law'],'desc'=>'LLB, CLAT & Legal'],
+      'science'     => ['icon'=>'ph-flask','color'=>'#0891b2','bg'=>'#ecfeff','accent'=>'#cffafe','categories'=>['Science'],'desc'=>'BSc, Research & Lab'],
+      'arts'        => ['icon'=>'ph-palette','color'=>'#e11d48','bg'=>'#fff1f2','accent'=>'#ffe4e6','categories'=>['Arts'],'desc'=>'Design, Fine Arts'],
+      'design'      => ['icon'=>'ph-magic-wand','color'=>'#9333ea','bg'=>'#faf5ff','accent'=>'#f3e8ff','categories'=>['Design'],'desc'=>'UI/UX, Graphic & more'],
+      'commerce'    => ['icon'=>'ph-chart-line','color'=>'#d97706','bg'=>'#fffbeb','accent'=>'#fef3c7','categories'=>['Commerce'],'desc'=>'BCom, CA, Finance'],
     ];
+
+    // Fetch real counts from DB
+    $streamCounts = [];
+    try {
+        foreach ($streamMap as $slug => $sd) {
+            $cats = $sd['categories'];
+            $placeholders = implode(',', array_fill(0, count($cats), '?'));
+            $cntStmt = $pdo->prepare("SELECT COUNT(*) as cnt FROM courses WHERE status='active' AND course_category IN ($placeholders)");
+            $cntStmt->execute($cats);
+            $streamCounts[$slug] = $cntStmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0;
+        }
+    } catch (Exception $e) {
+        foreach ($streamMap as $slug => $sd) $streamCounts[$slug] = 0;
+    }
+
+    $streamData = [];
+    foreach ($streamMap as $slug => $sd) {
+        $count = $streamCounts[$slug] ?? 0;
+        $display = $count >= 1000 ? round($count / 100) * 100 : $count;
+        $streamData[$slug] = [
+            'icon' => $sd['icon'], 'color' => $sd['color'], 'bg' => $sd['bg'], 'accent' => $sd['accent'],
+            'count' => $display > 0 ? number_format($display) . '+' : '0',
+            'desc' => $sd['desc'],
+        ];
+    }
+
     $streamFallback = [
-      ['name'=>'Engineering','slug'=>'engineering','icon'=>'ph-laptop'],
-      ['name'=>'Management','slug'=>'management','icon'=>'ph-briefcase'],
-      ['name'=>'Medical','slug'=>'medical','icon'=>'ph-stethoscope'],
-      ['name'=>'Commerce','slug'=>'commerce','icon'=>'ph-chart-line'],
-      ['name'=>'Law','slug'=>'law','icon'=>'ph-scales'],
-      ['name'=>'Arts & Design','slug'=>'arts','icon'=>'ph-palette'],
-      ['name'=>'Science','slug'=>'science','icon'=>'ph-flask'],
+      ['name'=>'Engineering','slug'=>'engineering'],
+      ['name'=>'Management','slug'=>'management'],
+      ['name'=>'Medical','slug'=>'medical'],
+      ['name'=>'Law','slug'=>'law'],
+      ['name'=>'Science','slug'=>'science'],
+      ['name'=>'Arts & Design','slug'=>'arts'],
+      ['name'=>'Commerce','slug'=>'commerce'],
     ];
     if (!empty($categories)): ?>
       <?php foreach ($categories as $i=>$cat):
         $name = $cat['category_name'] ?? $cat['name'] ?? '';
         $slug = strtolower($cat['category_slug'] ?? $cat['slug'] ?? '');
-        $sd = $streamData[$slug] ?? ['icon'=>'ph-graduation-cap','color'=>'#0B2447','bg'=>'#f0f4ff','count'=>rand(500,5000).'+'];
+        $sd = $streamData[$slug] ?? null;
+        if (!$sd) {
+            // Dynamic fallback for unknown categories
+            $cntStmt = $pdo->prepare("SELECT COUNT(*) as cnt FROM courses WHERE status='active' AND course_category = ?");
+            $cntStmt->execute([$name]);
+            $c = $cntStmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0;
+            $display = $c >= 1000 ? round($c / 100) * 100 : $c;
+            $sd = ['icon'=>'ph-graduation-cap','color'=>'#0B2447','bg'=>'#f0f4ff','accent'=>'#e2e8f0','count'=>$display > 0 ? number_format($display).'+' : '0','desc'=>'Explore programs'];
+        }
       ?>
-      <a href="<?=coursesUrl(['level'=>$name])?>" class="stream-card reveal reveal-delay-<?=$i?>" style="--sc-color:<?=$sd['color']?>;--sc-bg:<?=$sd['bg']?>">
-        <div class="sc-icon"><i class="ph <?=$sd['icon']?>"></i></div>
-        <div class="sc-info">
-          <h3><?=htmlspecialchars($name)?></h3>
-          <span><?=$sd['count']?> Programs</span>
+      <a href="<?=coursesUrl(['category'=>$name])?>" class="sc reveal reveal-delay-<?=$i?>" style="--sc:<?=$sd['color']?>;--sc-bg:<?=$sd['bg']?>;--sc-accent:<?=$sd['accent']?>">
+        <div class="sc-top">
+          <div class="sc-icon"><i class="ph <?=$sd['icon']?>"></i></div>
+          <div class="sc-badge"><?=$sd['count']?></div>
         </div>
-        <div class="sc-arrow"><i class="ph ph-arrow-right"></i></div>
+        <h3 class="sc-name"><?=htmlspecialchars($name)?></h3>
+        <p class="sc-desc"><?=$sd['desc']?></p>
+        <div class="sc-footer">
+          <span>Explore</span>
+          <i class="ph ph-arrow-up-right"></i>
+        </div>
       </a>
       <?php endforeach; ?>
     <?php else: ?>
       <?php foreach ($streamFallback as $i=>$c):
-        $sd = $streamData[$c['slug']] ?? ['icon'=>$c['icon'],'color'=>'#0B2447','bg'=>'#f0f4ff','count'=>rand(500,5000).'+'];
+        $sd = $streamData[$c['slug']] ?? ['icon'=>'ph-graduation-cap','color'=>'#0B2447','bg'=>'#f0f4ff','accent'=>'#e2e8f0','count'=>'0','desc'=>'Explore programs'];
       ?>
-      <a href="<?=coursesUrl(['level'=>$c['name']])?>" class="stream-card reveal reveal-delay-<?=$i?>" style="--sc-color:<?=$sd['color']?>;--sc-bg:<?=$sd['bg']?>">
-        <div class="sc-icon"><i class="ph <?=$sd['icon']?>"></i></div>
-        <div class="sc-info">
-          <h3><?=$c['name']?></h3>
-          <span><?=$sd['count']?> Programs</span>
+      <a href="<?=coursesUrl(['category'=>$c['name']])?>" class="sc reveal reveal-delay-<?=$i?>" style="--sc:<?=$sd['color']?>;--sc-bg:<?=$sd['bg']?>;--sc-accent:<?=$sd['accent']?>">
+        <div class="sc-top">
+          <div class="sc-icon"><i class="ph <?=$sd['icon']?>"></i></div>
+          <div class="sc-badge"><?=$sd['count']?></div>
         </div>
-        <div class="sc-arrow"><i class="ph ph-arrow-right"></i></div>
+        <h3 class="sc-name"><?=$c['name']?></h3>
+        <p class="sc-desc"><?=$sd['desc']?></p>
+        <div class="sc-footer">
+          <span>Explore</span>
+          <i class="ph ph-arrow-up-right"></i>
+        </div>
       </a>
       <?php endforeach; ?>
     <?php endif; ?>

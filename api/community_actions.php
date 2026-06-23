@@ -107,35 +107,35 @@ try {
             ];
         }
     } elseif ($action === 'increment_views') {
-        if (!isset($_SESSION['viewed_questions'])) {
-            $_SESSION['viewed_questions'] = [];
+        $viewerUserId  = $_SESSION['user_id'] ?? null;
+        $viewerSession = session_id();
+        $viewerIp      = $_SERVER['REMOTE_ADDR'] ?? '';
+
+        // Check if already viewed in last 24h
+        $alreadyViewed = false;
+        if ($viewerUserId) {
+            $chk = $pdo->prepare("SELECT id FROM question_views WHERE question_id=? AND user_id=? AND viewed_at > DATE_SUB(NOW(), INTERVAL 24 HOUR) LIMIT 1");
+            $chk->execute([$id, $viewerUserId]);
+            $alreadyViewed = (bool)$chk->fetch();
+        } else {
+            $chk = $pdo->prepare("SELECT id FROM question_views WHERE question_id=? AND ip_address=? AND viewed_at > DATE_SUB(NOW(), INTERVAL 24 HOUR) LIMIT 1");
+            $chk->execute([$id, $viewerIp]);
+            $alreadyViewed = (bool)$chk->fetch();
         }
 
-        if (!in_array($id, $_SESSION['viewed_questions'])) {
-            $stmt = $pdo->prepare("UPDATE questions SET views = views + 1, trending_score = trending_score + 0.1 WHERE id = ?");
-            $stmt->execute([$id]);
-
-            $_SESSION['viewed_questions'][] = $id;
-
-            $stmtCount = $pdo->prepare("SELECT views FROM questions WHERE id = ?");
-            $stmtCount->execute([$id]);
-            $newCount = $stmtCount->fetchColumn();
-
-            $response = [
-                'status' => 'success',
-                'action' => 'incremented',
-                'count' => (int)$newCount
-            ];
+        if (!$alreadyViewed) {
+            $ins = $pdo->prepare("INSERT INTO question_views (question_id, user_id, session_id, ip_address) VALUES (?, ?, ?, ?)");
+            $ins->execute([$id, $viewerUserId, $viewerSession, $viewerIp]);
+            // Update cached count + trending
+            $cnt = $pdo->prepare("SELECT COUNT(DISTINCT COALESCE(user_id, ip_address)) FROM question_views WHERE question_id=?");
+            $cnt->execute([$id]);
+            $newCount = (int)$cnt->fetchColumn();
+            $pdo->prepare("UPDATE questions SET views=?, trending_score = trending_score + 0.1 WHERE id=?")->execute([$newCount, $id]);
+            $response = ['status' => 'success', 'action' => 'incremented', 'count' => $newCount];
         } else {
             $stmtCount = $pdo->prepare("SELECT views FROM questions WHERE id = ?");
             $stmtCount->execute([$id]);
-            $newCount = $stmtCount->fetchColumn();
-
-            $response = [
-                'status' => 'success',
-                'action' => 'ignored',
-                'count' => (int)$newCount
-            ];
+            $response = ['status' => 'success', 'action' => 'ignored', 'count' => (int)$stmtCount->fetchColumn()];
         }
     } else if ($action === 'toggle_follow') {
         if (!isset($_SESSION['user_id'])) {

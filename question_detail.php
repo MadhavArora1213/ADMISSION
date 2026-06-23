@@ -30,11 +30,33 @@ if (!$question) {
     exit;
 }
 
-// Increment views
-$questionId = $question['id']; // Use actual ID for DB operations
+// Track unique view (by user_id, session, or IP — only once per 24h)
+$questionId = $question['id'];
 $questionSlug = $question['slug'] ?? '';
-$pdo->prepare("UPDATE questions SET views = views + 1 WHERE id = ?")->execute([$questionId]);
-$question['views'] = (int)$question['views'] + 1;
+$viewerUserId   = $_SESSION['user_id'] ?? null;
+$viewerSession  = session_id();
+$viewerIp       = $_SERVER['REMOTE_ADDR'] ?? '';
+
+$alreadyViewed = false;
+if ($viewerUserId) {
+    $chk = $pdo->prepare("SELECT id FROM question_views WHERE question_id=? AND user_id=? AND viewed_at > DATE_SUB(NOW(), INTERVAL 24 HOUR) LIMIT 1");
+    $chk->execute([$questionId, $viewerUserId]);
+    $alreadyViewed = (bool)$chk->fetch();
+} else {
+    $chk = $pdo->prepare("SELECT id FROM question_views WHERE question_id=? AND ip_address=? AND viewed_at > DATE_SUB(NOW(), INTERVAL 24 HOUR) LIMIT 1");
+    $chk->execute([$questionId, $viewerIp]);
+    $alreadyViewed = (bool)$chk->fetch();
+}
+
+if (!$alreadyViewed) {
+    $ins = $pdo->prepare("INSERT INTO question_views (question_id, user_id, session_id, ip_address) VALUES (?, ?, ?, ?)");
+    $ins->execute([$questionId, $viewerUserId, $viewerSession, $viewerIp]);
+    $cnt = $pdo->prepare("SELECT COUNT(DISTINCT COALESCE(user_id, ip_address)) FROM question_views WHERE question_id=?");
+    $cnt->execute([$questionId]);
+    $uniqueViews = (int)$cnt->fetchColumn();
+    $pdo->prepare("UPDATE questions SET views=? WHERE id=?")->execute([$uniqueViews, $questionId]);
+    $question['views'] = $uniqueViews;
+}
 
 // SEO-friendly URL
 $sharePath = !empty($questionSlug) ? 'question/' . $questionSlug : 'question/' . $questionId;

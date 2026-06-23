@@ -124,11 +124,38 @@ $stats = [
     .course-filter-list a.active i{opacity:1}
 
     @media(max-width:768px){
-      .courses-layout{grid-template-columns:1fr}
+      .courses-layout{grid-template-columns:1fr;gap:0}
       .courses-grid{grid-template-columns:1fr}
-      .course-filter-card{position:static}
+      .courses-head{flex-direction:column;align-items:flex-start}
       .courses-hero h1{font-size:1.5rem}
+      .courses-hero-sub{font-size:.92rem}
+      .courses-stats{grid-template-columns:repeat(2,1fr);gap:8px}
+      .course-stat{padding:12px 10px}
+      .course-stat-val{font-size:1.2rem}
+      .courses-filter-toggle{display:flex}
+      aside{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(0,0,0,.4);padding:0}
+      aside.open{display:flex;align-items:flex-end}
+      aside .course-filter-card{position:static;border-radius:16px 16px 0 0;max-height:80vh;overflow-y:auto;width:100%;box-shadow:0 -4px 24px rgba(0,0,0,.15);animation:slideUp .3s ease}
+      .filter-close{display:flex}
     }
+    @media(max-width:480px){
+      .courses-stats{grid-template-columns:repeat(2,1fr)}
+      .course-stat-val{font-size:1rem}
+      .course-stat-lbl{font-size:.65rem}
+    }
+    .courses-filter-toggle{
+      display:none;align-items:center;gap:6px;padding:10px 20px;
+      border-radius:12px;border:1.5px solid rgba(15,23,42,.1);background:#fff;
+      font-size:.85rem;font-weight:700;color:#0B2447;cursor:pointer;
+      transition:all .2s;width:100%;justify-content:center;
+    }
+    .courses-filter-toggle:hover{border-color:#2563eb;color:#2563eb}
+    .filter-close{
+      display:none;position:absolute;top:12px;right:12px;width:32px;height:32px;
+      border-radius:8px;background:rgba(15,23,42,.06);border:none;cursor:pointer;
+      align-items:center;justify-content:center;font-size:1rem;color:#0f172a;z-index:1
+    }
+    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
   </style>
 </head>
 <body class="bg-light">
@@ -179,6 +206,7 @@ $stats = [
 
     <aside>
       <div class="course-filter-card">
+        <button class="filter-close" onclick="document.querySelector('aside').classList.remove('open')"><i class="ph ph-x"></i></button>
         <h3><i class="ph ph-funnel"></i> Filter Courses</h3>
 
         <div class="course-filter-group">
@@ -209,9 +237,12 @@ $stats = [
     <main class="courses-main">
       <div class="courses-head">
         <h2>Showing <?= count($courses) ?> Course<?= count($courses) !== 1 ? 's' : '' ?></h2>
-        <?php if ($level !== 'all' || $category !== 'all' || $search !== ''): ?>
-        <a href="courses.php" style="font-size:.82rem;color:#2563eb;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px"><i class="ph ph-x-circle"></i> Clear Filters</a>
-        <?php endif; ?>
+        <div style="display:flex;align-items:center;gap:10px">
+          <?php if ($level !== 'all' || $category !== 'all' || $search !== ''): ?>
+          <a href="courses.php" style="font-size:.82rem;color:#2563eb;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px"><i class="ph ph-x-circle"></i> Clear Filters</a>
+          <?php endif; ?>
+          <button class="courses-filter-toggle" onclick="document.querySelector('aside').classList.toggle('open')"><i class="ph ph-funnel"></i> Filters</button>
+        </div>
       </div>
 
       <?php if (!empty($courses)): ?>
@@ -260,5 +291,10 @@ $stats = [
 </div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
+<script>
+document.querySelector('aside')?.addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+</script>
 </body>
 </html>

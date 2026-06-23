@@ -736,14 +736,33 @@ body.bg-light{background:var(--cp-bg)}
   .college-list-card{flex-direction:column}
   .clc-img{width:100%;height:180px}
   .college-hero-title{font-size:1.35rem}
+  .college-hero-sub{font-size:.82rem}
   .college-hero-card{flex-direction:column;align-items:stretch}
   .college-hero-actions{justify-content:flex-start;border-top:none;padding-top:0;margin-top:12px}
-  .college-detail-tabs{gap:0}
-  .college-detail-tabs a{padding:12px 12px;font-size:.8rem}
+  .college-hero-actions .college-btn-primary,
+  .college-hero-actions .college-btn-outline{width:100%;justify-content:center}
+  .college-detail-tabs{gap:0;overflow-x:auto;scrollbar-width:none}
+  .college-detail-tabs::-webkit-scrollbar{display:none}
+  .college-detail-tabs a{padding:12px 12px;font-size:.8rem;white-space:nowrap}
   .college-tab-content{padding:18px}
   .college-rating-row{padding:14px}
   .college-rating-pill{min-width:120px}
   .clc-stats{flex-wrap:wrap}
+  .overview-stat-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .overview-stat{padding:14px 10px}
+  .overview-stat-val{font-size:1.15rem}
+  .cr-sub-ratings{grid-template-columns:1fr}
+  .placement-highlight{grid-template-columns:repeat(2,1fr);gap:8px}
+  .ph-stat{padding:14px}
+  .ph-stat strong{font-size:1.1rem}
+  .compare-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .college-tabs-wrapper .tab-arrow{display:none}
+  .college-hero-logo{width:56px;height:56px;border-radius:12px}
+  .college-hero-chips{gap:6px}
+  .college-hero-chips span{padding:5px 10px;font-size:.72rem}
+  .college-pager{flex-wrap:wrap;justify-content:center}
+  .sort-bar{flex-direction:column;align-items:flex-start;gap:8px}
+  .sort-result-count{margin-left:0}
 }
 @media(max-width:480px){
   .college-faculty-grid{grid-template-columns:1fr}
@@ -751,4 +770,8 @@ body.bg-light{background:var(--cp-bg)}
   .college-gallery-grid{grid-template-columns:repeat(2,1fr)}
   .college-news-item{flex-direction:column}
   .cn-thumb{flex:none;width:100%;height:160px}
+  .overview-stat-grid{grid-template-columns:1fr 1fr}
+  .placement-highlight{grid-template-columns:1fr}
+  .compare-grid{grid-template-columns:1fr}
+  .college-hero-chips{flex-wrap:wrap}
 }

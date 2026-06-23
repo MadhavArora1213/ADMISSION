@@ -141,8 +141,29 @@ $pageTitle = 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions
     @media(max-width:768px){
       .cl-stats-bar{grid-template-columns:repeat(2,1fr)}
       .sort-result-count{display:none}
+      .col-filter-toggle{display:flex}
+      .shiksha-sidebar{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(0,0,0,.4);padding:0}
+      .shiksha-sidebar.open{display:flex;align-items:flex-end}
+      .shiksha-sidebar .shiksha-widget{position:static;border-radius:16px 16px 0 0;max-height:80vh;overflow-y:auto;width:100%;box-shadow:0 -4px 24px rgba(0,0,0,.15);animation:slideUp .3s ease}
+      .shiksha-sidebar .shiksha-widget-wrapper{display:flex;flex-direction:column;gap:0;background:#fff;padding:20px;border-radius:16px 16px 0 0}
+      .col-filter-close{display:flex}
+      .college-filter-bar .college-search-form{flex-direction:column}
+      .college-filter-bar .college-search-form select,
+      .college-filter-bar .college-search-form button{width:100%}
     }
     @media(max-width:480px){.cl-stats-bar{grid-template-columns:1fr 1fr}}
+    .col-filter-toggle{
+      display:none;align-items:center;gap:6px;padding:10px 20px;
+      border-radius:12px;border:1.5px solid rgba(15,23,42,.1);background:#fff;
+      font-size:.85rem;font-weight:700;color:#0B2447;cursor:pointer;transition:all .2s
+    }
+    .col-filter-toggle:hover{border-color:#2563eb;color:#2563eb}
+    .col-filter-close{
+      display:none;position:absolute;top:12px;right:12px;width:32px;height:32px;
+      border-radius:8px;background:rgba(15,23,42,.06);border:none;cursor:pointer;
+      align-items:center;justify-content:center;font-size:1rem;color:#0f172a;z-index:1
+    }
+    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
   </style>
 </head>
 <body class="bg-light">
@@ -332,8 +353,12 @@ $pageTitle = 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions
       <?php endif; ?>
     </main>
 
+    <button class="col-filter-toggle" onclick="document.querySelector('.shiksha-sidebar').classList.toggle('open')"><i class="ph ph-funnel"></i> Filters</button>
+
     <!-- Sidebar -->
     <aside class="shiksha-sidebar">
+      <div class="shiksha-widget-wrapper">
+        <button class="col-filter-close" onclick="this.closest('.shiksha-sidebar').classList.remove('open')"><i class="ph ph-x"></i></button>
       <div class="shiksha-widget">
         <h4 class="shiksha-widget-title">🗺️ Browse by State</h4>
         <ul class="shiksha-widget-list">
@@ -365,6 +390,7 @@ $pageTitle = 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions
           Create Free Account →
         </a>
       </div>
+      </div><!-- /shiksha-widget-wrapper -->
     </aside>
 
   </div>
@@ -372,5 +398,10 @@ $pageTitle = 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
 <script src="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/js/main.js"></script>
+<script>
+document.querySelector('.shiksha-sidebar')?.addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+</script>
 </body>
 </html>
