@@ -334,122 +334,162 @@ $subs = $pdo->query("
 ")->fetchAll(PDO::FETCH_ASSOC);
 
 $typeLabels = ['profile'=>'College Profile','courses'=>'Course','placements'=>'Placement','cutoffs'=>'Cutoff','seat_matrix'=>'Seat Matrix','facilities'=>'Facilities','faqs'=>'FAQs'];
+
+function renderField($data, $fieldName, $label) {
+    echo '<tr>';
+    echo '<td style="font-weight:700; width:220px; color:#475569; text-transform:capitalize; padding:8px; border-bottom:1px solid #e2e8f0; background:#f8fafc; font-size:0.75rem;">' . htmlspecialchars($label) . '</td>';
+    echo '<td style="color:#0f172a; padding:8px; border-bottom:1px solid #e2e8f0; font-size:0.78rem; font-weight:600;">';
+    if (!isset($data[$fieldName]) || $data[$fieldName] === '' || $data[$fieldName] === null) {
+        echo '<span style="color:#ef4444; font-style:italic; font-weight:700;">[Empty / Not Updated]</span>';
+    } else {
+        $val = $data[$fieldName];
+        if (is_array($val)) {
+            echo '<pre style="margin:0; font-family:monospace; white-space:pre-wrap; background:#f1f5f9; padding:6px; border-radius:4px; font-size:0.75rem;">' . htmlspecialchars(json_encode($val, JSON_PRETTY_PRINT)) . '</pre>';
+        } else {
+            echo htmlspecialchars((string)$val);
+        }
+    }
+    echo '</td>';
+    echo '</tr>';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>College Submissions – Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>College Submissions | AdmissionSeason Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="../assets/css/style.css">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:#f1f5f9;padding:24px}
-.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
-.page-header h1{font-size:1.4rem;font-weight:800;color:#0B2447}
-.msg{padding:12px 16px;border-radius:10px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;font-size:.82rem;margin-bottom:20px}
-.card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px;margin-bottom:16px}
-table{width:100%;border-collapse:collapse;font-size:.8rem}
-th{text-align:left;padding:10px 12px;background:#f8fafc;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;font-size:.72rem;text-transform:uppercase}
-td{padding:10px 12px;border-bottom:1px solid #f1f5f9;color:#334155}
-.badge{display:inline-flex;padding:3px 8px;border-radius:5px;font-size:.65rem;font-weight:600}
-.badge-green{background:#dcfce7;color:#166534}
-.badge-yellow{background:#fef3c7;color:#92400e}
-.badge-red{background:#fef2f2;color:#991b1b}
-.badge-blue{background:#eff6ff;color:#1d4ed8}
-.btn{padding:6px 12px;border:none;border-radius:6px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit}
-.btn-green{background:#16a34a;color:#fff}.btn-green:hover{background:#15803d}
-.btn-red{background:#dc2626;color:#fff}.btn-red:hover{background:#b91c1c}
-.btn-sm{padding:4px 8px;font-size:.7rem}
-.btn-ghost{background:#f1f5f9;color:#334155}
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
-.modal-bg.show{display:flex}
-.modal{background:#fff;border-radius:14px;padding:24px;width:100%;max-width:500px}
-.modal h3{font-size:1rem;font-weight:700;margin-bottom:12px;color:#0B2447}
-.modal textarea{width:100%;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:.82rem;font-family:inherit;margin-bottom:12px}
-.modal .btns{display:flex;gap:8px;justify-content:flex-end}
-.data-preview{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;font-size:.78rem;color:#475569;max-height:120px;overflow:auto;margin-top:4px;white-space:pre-wrap;word-break:break-all}
-.filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.filters select,.filters input{padding:6px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:.8rem;font-family:inherit}
+    body { background-color: #F8FAFC; margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    .admin-layout { display: flex; min-height: 100vh; }
+    
+    /* Sidebar styles */
+    .sidebar { width: 260px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 50; }
+    .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .sidebar-header .logo { font-size: 1.2rem; color: #f8fafc; display:flex; align-items:center; gap:8px; font-weight:700; text-decoration:none; }
+    .sidebar-nav { padding: 16px 0; flex: 1; }
+    .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: rgba(255,255,255,0.6); transition: all 0.2s; font-size:0.95rem; text-decoration:none; }
+    .sidebar-nav a:hover, .sidebar-nav a.active { color: #fff; background: rgba(255,255,255,0.05); border-left: 3px solid #19376D; }
+    .sidebar-nav a i { font-size: 1.2rem; }
+    
+    .main-content { flex: 1; margin-left: 260px; display: flex; flex-direction: column; }
+    
+    /* Top Header */
+    .topbar { height: 64px; background: #fff; border-bottom: 1px solid rgba(15,23,42,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: sticky; top: 0; z-index: 40; }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .env-badge { background: rgba(11,36,71,0.04); color: #0B2447; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; border: 1px solid rgba(11,36,71,0.04); }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: #0f172a; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size:0.85rem; cursor:pointer; }
+    
+    .content-area { padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+    .msg{padding: 12px 16px; border-radius: 10px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; font-size: .82rem; margin-bottom: 20px;}
+    
+    .card{background:#fff; border:1px solid rgba(15,23,42,0.08); border-radius:14px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+    table.subs-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    table.subs-table th { text-align: left; padding: 12px; background: #f8fafc; color: #64748b; font-weight: 700; border-bottom: 2px solid #e2e8f0; font-size: .72rem; text-transform: uppercase; }
+    table.subs-table td { padding: 14px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+    
+    .badge{display:inline-flex; padding:4px 8px; border-radius:6px; font-size:.7rem; font-weight:700;}
+    .badge-green{background:#dcfce7; color:#166534;}
+    .badge-yellow{background:#fef3c7; color:#92400e;}
+    .badge-red{background:#fef2f2; color:#991b1b;}
+    .badge-blue{background:#eff6ff; color:#1d4ed8;}
+    
+    .btn{padding:8px 14px; border:none; border-radius:8px; font-size:.78rem; font-weight:700; cursor:pointer; font-family:inherit; transition:all 0.2s;}
+    .btn-green{background:#16a34a; color:#fff;}.btn-green:hover{background:#15803d;}
+    .btn-red{background:#dc2626; color:#fff;}.btn-red:hover{background:#b91c1c;}
+    .btn-sm{padding:6px 10px; font-size:.72rem;}
+    .btn-ghost{background:#f1f5f9; color:#334155;}
+    .btn-ghost:hover{background:#e2e8f0;}
+
+    .modal-bg{display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; align-items:center; justify-content:center;}
+    .modal-bg.show{display:flex;}
+    .modal{background:#fff; border-radius:14px; padding:24px; width:100%; max-width:500px;}
+    .modal h3{font-size:1.1rem; font-weight:700; margin-bottom:12px; color:#0f172a;}
+    .modal textarea{width:100%; padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:.82rem; font-family:inherit; margin-bottom:12px;}
+    .modal .btns{display:flex; gap:8px; justify-content:flex-end;}
+    
+    .data-preview{background:#fff; border:1px solid #cbd5e1; border-radius:12px; padding:20px; font-size:.78rem; color:#475569; max-height:480px; overflow-y:auto; margin-top:8px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);}
+    .section-header { font-size: 0.85rem; font-weight: 800; color: #1e293b; background: #e2e8f0; padding: 6px 12px; margin-top: 14px; margin-bottom: 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .filters{display:flex; gap:10px; margin-bottom:20px;}
+    .filters select{padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:.85rem; font-family:inherit; background:#fff;}
 </style>
 </head>
 <body>
-<div class="page-header">
-  <h1><i class="ph ph-inbox"></i> College Submissions</h1>
-  <a href="/ADMISSION/admin/dashboard.php" style="font-size:.82rem;color:#19376D;text-decoration:none"><i class="ph ph-arrow-left"></i> Back</a>
-</div>
 
-<?php if($msg): ?><div class="msg"><?=$msg?></div><?php endif;?>
+<div class="admin-layout">
+    <?php include 'sidebar.php'; ?>
 
-<div class="filters">
-  <select id="filterStatus" onchange="filterTable()">
-    <option value="">All Status</option>
-    <option value="pending">Pending</option>
-    <option value="approved">Approved</option>
-    <option value="rejected">Rejected</option>
-  </select>
-  <select id="filterType" onchange="filterTable()">
-    <option value="">All Types</option>
-    <option value="profile">Profile</option>
-    <option value="courses">Courses</option>
-    <option value="placements">Placements</option>
-    <option value="cutoffs">Cutoffs</option>
-    <option value="seat_matrix">Seat Matrix</option>
-  </select>
-</div>
+    <main class="main-content">
+        <header class="topbar">
+            <div class="header-left">
+                <div class="env-badge">PRODUCTION</div>
+                <div style="font-weight:700; color:#0f172a; margin-left:16px;">College Submissions Review Dashboard</div>
+            </div>
+            <div class="header-right">
+                <div class="avatar">A</div>
+            </div>
+        </header>
 
-<div class="card">
-<table>
-<thead>
-<tr><th>Institute</th><th>Type</th><th>Data</th><th>Status</th><th>Date</th><th>Actions</th></tr>
-</thead>
-<tbody>
-<?php if (empty($subs)): ?>
-<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:32px">No submissions yet.</td></tr>
-<?php endif; ?>
-<?php foreach($subs as $s): ?>
-<tr class="sub-row" data-status="<?=$s['status']?>" data-type="<?=$s['submission_type']?>">
-  <td style="font-weight:600"><?=htmlspecialchars($s['institute_name'] ?? 'Unknown')?></td>
-  <td><span class="badge badge-blue"><?=($typeLabels[$s['submission_type']] ?? $s['submission_type'])?></span></td>
-  <td>
-    <button class="btn btn-ghost btn-sm" onclick="this.nextElementSibling.classList.toggle('show');this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">View Details</button>
-    <div class="data-preview" style="display:none; background:#fff; border:1px solid #cbd5e1; padding:16px; border-radius:10px; max-height:400px; overflow-y:auto; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)">
-      <?php
-      $subData = json_decode($s['data_json'], true);
-      if (is_array($subData)) {
-          echo '<table style="width:100%; font-size:0.75rem; border-collapse:collapse; margin-top:0;">';
-          foreach ($subData as $key => $val) {
-              echo '<tr>';
-              echo '<td style="font-weight:700; width:150px; color:#1e293b; text-transform:capitalize; padding:6px 8px; border-bottom:1px solid #f1f5f9; background:none;">' . htmlspecialchars(str_replace('_', ' ', $key)) . '</td>';
-              echo '<td style="color:#475569; padding:6px 8px; border-bottom:1px solid #f1f5f9;">';
-              if (is_array($val)) {
-                  echo '<pre style="margin:0; font-family:inherit; white-space:pre-wrap; background:#f8fafc; padding:6px; border-radius:4px;">' . htmlspecialchars(json_encode($val, JSON_PRETTY_PRINT)) . '</pre>';
-              } else {
-                  echo htmlspecialchars((string)$val);
-              }
-              echo '</td>';
-              echo '</tr>';
-          }
-          echo '</table>';
-      } else {
-          echo htmlspecialchars($s['data_json']);
-      }
-      ?>
-    </div>
-  </td>
-  <td><span class="badge <?=($s['status']==='approved'?'badge-green':($s['status']==='rejected'?'badge-red':'badge-yellow'))?>"><?=ucfirst($s['status'])?></span></td>
-  <td><?=date('d M Y', strtotime($s['created_at']))?></td>
-  <td>
-    <?php if($s['status']==='pending'): ?>
-    <form method="POST" style="display:inline"><input type="hidden" name="action" value="approve"><input type="hidden" name="submission_id" value="<?=$s['id']?>"><button class="btn btn-green btn-sm"><i class="ph ph-check"></i> Approve</button></form>
-    <button class="btn btn-red btn-sm" onclick="showReject('<?=$s['id']?>')"><i class="ph ph-x"></i> Reject</button>
-    <?php endif; ?>
-  </td>
-</tr>
-<?php endforeach;?>
-</tbody>
-</table>
+        <div class="content-area">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <h2 style="font-size:1.3rem; font-weight:800; color:#0f172a;">College Submissions Queue</h2>
+            </div>
+
+            <?php if($msg): ?><div class="msg"><?=$msg?></div><?php endif;?>
+
+            <div class="filters">
+              <select id="filterStatus" onchange="filterTable()">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              <select id="filterType" onchange="filterTable()">
+                <option value="">All Types</option>
+                <option value="profile">Profile</option>
+                <option value="courses">Courses</option>
+                <option value="placements">Placements</option>
+                <option value="cutoffs">Cutoffs</option>
+                <option value="seat_matrix">Seat Matrix</option>
+              </select>
+            </div>
+
+            <div class="card">
+            <table class="subs-table">
+            <thead>
+            <tr><th>Institute</th><th>Type</th><th>Submitted Data Fields</th><th>Status</th><th>Submitted Date</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+            <?php if (empty($subs)): ?>
+            <tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:32px">No submissions yet.</td></tr>
+            <?php endif; ?>
+            <?php foreach($subs as $s): ?>
+            <tr class="sub-row" data-status="<?=$s['status']?>" data-type="<?=$s['submission_type']?>">
+              <td style="font-weight:700; color:#0f172a;"><?=htmlspecialchars($s['institute_name'] ?? 'Unknown')?></td>
+              <td><span class="badge badge-blue"><?=($typeLabels[$s['submission_type']] ?? $s['submission_type'])?></span></td>
+              <td>
+                <a href="submission_details.php?id=<?=$s['id']?>" class="btn btn-ghost btn-sm" style="text-decoration:none;"><i class="ph ph-eye"></i> View Details</a>
+              </td>
+              <td><span class="badge <?=($s['status']==='approved'?'badge-green':($s['status']==='rejected'?'badge-red':'badge-yellow'))?>"><?=ucfirst($s['status'])?></span></td>
+              <td><?=date('d M Y', strtotime($s['created_at']))?></td>
+              <td>
+                <?php if($s['status']==='pending'): ?>
+                <form method="POST" style="display:inline"><input type="hidden" name="action" value="approve"><input type="hidden" name="submission_id" value="<?=$s['id']?>"><button class="btn btn-green btn-sm"><i class="ph ph-check"></i> Approve</button></form>
+                <button class="btn btn-red btn-sm" onclick="showReject('<?=$s['id']?>')"><i class="ph ph-x"></i> Reject</button>
+                <?php endif; ?>
+              </td>
+            </tr>
+            <?php endforeach;?>
+            </tbody>
+            </table>
+            </div>
+        </div>
+    </main>
 </div>
 
 <div class="modal-bg" id="rejectModal">
