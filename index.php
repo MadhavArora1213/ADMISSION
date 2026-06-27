@@ -70,7 +70,7 @@ $sqlCourses = "SELECT id,course_name,course_slug,course_level,duration_years,avg
 $popularCourses = cAll($pdo, str_replace("WHERE status='active'","WHERE status='active' AND is_popular=1",$sqlCourses));
 if (empty($popularCourses)) $popularCourses = cAll($pdo, $sqlCourses);
 
-$upcomingExams = cAll($pdo, "SELECT e.id,e.exam_name AS name,e.exam_slug AS slug,e.exam_level AS level,ed.exam_date,ed.application_start,ed.application_end,ed.result_date,ed.event_name FROM exams e LEFT JOIN exam_dates ed ON ed.exam_id=e.id AND (ed.exam_date>=CURDATE() OR ed.application_end>=CURDATE()) GROUP BY e.id ORDER BY ed.exam_date ASC LIMIT 6");
+$upcomingExams = cAll($pdo, "SELECT e.id,e.exam_name AS name,e.exam_slug AS slug,e.exam_abbreviation AS abbr,e.exam_level AS level,e.participating_colleges_count AS colleges,e.applicants_last_year AS applicants,MIN(ed.exam_date) AS exam_date,MIN(ed.application_end) AS app_end,MIN(ed.application_start) AS app_start FROM exams e LEFT JOIN exam_dates ed ON ed.exam_id=e.id AND (ed.exam_date>=CURDATE() OR ed.application_end>=CURDATE()) WHERE e.status='active' GROUP BY e.id ORDER BY e.applicants_last_year DESC LIMIT 8");
 
 $reviews = cAll($pdo, "SELECT r.overall_rating,r.review_title,r.review_body,r.batch_year,r.created_at,c.name AS college_name,c.slug AS college_slug FROM reviews r JOIN colleges c ON c.id=r.college_id WHERE r.moderation_status='approved' ORDER BY r.helpful_votes DESC,r.created_at DESC LIMIT 6");
 
@@ -139,12 +139,10 @@ $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.feat
 <?php include 'includes/featured_colleges.php'; ?>
 <?php include 'includes/tools.php'; ?>
 <?php include 'includes/exams.php'; ?>
-<?php include 'includes/featured_exams.php'; ?>
 <?php include 'includes/courses.php'; ?>
 <?php include 'includes/reviews.php'; ?>
 <?php include 'includes/news.php'; ?>
 <?php include 'includes/stats.php'; ?>
-<?php include 'includes/newsletter.php'; ?>
 
 <!-- ═══ FOOTER ═══ -->
 <?php include 'includes/footer.php'; ?>

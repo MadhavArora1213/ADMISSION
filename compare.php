@@ -11,6 +11,9 @@ $navBase = '/ADMISSION';
 
 $id1 = $_GET['id1'] ?? '';
 $id2 = $_GET['id2'] ?? '';
+
+$courseLevels = $pdo->query("SELECT DISTINCT course_level FROM college_courses WHERE course_level IS NOT NULL AND course_level != '' ORDER BY course_level")->fetchAll(PDO::FETCH_COLUMN);
+$allCourses = $pdo->query("SELECT id, course_name, course_level FROM college_courses WHERE course_level IS NOT NULL ORDER BY course_level, course_name")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -19,15 +22,25 @@ $id2 = $_GET['id2'] ?? '';
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Compare Colleges – AdmissionSeason</title>
 <meta name="description" content="Compare top colleges side-by-side on fees, placements, ratings, rankings and more.">
-<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://unpkg.com/@phosphor-icons/web" defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= $navBase ?>/assets/css/style.css?v=<?= time() ?>">
 <style>
-.cmp{padding:100px 0 60px;min-height:100vh}
-.cmp-hero{text-align:center;margin-bottom:36px}
-.cmp-hero .nh-badge{margin:0 auto 14px}
-.cmp-hero h1{font-size:1.8rem;font-weight:800;color:var(--text);margin-bottom:6px;letter-spacing:-.02em}
-.cmp-hero p{color:var(--text2);font-size:.9rem}
+.cmp{padding:40px 0 60px;min-height:100vh}
+.cmp-hero{text-align:center;margin-bottom:24px}
+.cmp-hero .nh-badge{margin:0 auto 10px}
+.cmp-hero h1{font-size:1.6rem;font-weight:800;color:var(--text);margin-bottom:4px;letter-spacing:-.02em}
+.cmp-hero p{color:var(--text2);font-size:.85rem}
+
+/* ── Course Bar ── */
+.cmp-course-bar{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:28px;flex-wrap:wrap}
+.cmp-course-label{font-size:.85rem;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.cmp-course-label i{font-size:1rem;color:var(--secondary)}
+.cmp-course-select{padding:9px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:.85rem;font-family:var(--font2);background:var(--card);color:var(--text);cursor:pointer;transition:border-color .2s;min-width:180px}
+.cmp-course-select:focus{outline:none;border-color:var(--secondary)}
+.cmp-course-tag{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:linear-gradient(135deg,var(--secondary),#4f46e5);color:#fff;border-radius:20px;font-size:.8rem;font-weight:600;animation:fadeIn .2s}
+.cmp-course-tag button{background:none;border:none;color:#fff;cursor:pointer;font-size:.85rem;padding:0 0 0 4px;opacity:.8;line-height:1}
+.cmp-course-tag button:hover{opacity:1}
 
 /* ── Slots ── */
 .cmp-slots{display:grid;grid-template-columns:1fr 60px 1fr;gap:0;align-items:stretch;margin-bottom:32px}
@@ -135,21 +148,63 @@ $id2 = $_GET['id2'] ?? '';
 .cmp-loading{text-align:center;padding:60px}
 .cmp-loading i{font-size:2rem;color:var(--secondary);animation:spin 1s linear infinite;display:block;margin-bottom:12px}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
 
-/* Responsive */
+/* ── Responsive ── */
+@media(max-width:1024px){
+  .cmp-course-bar{gap:8px}
+  .cmp-course-select{min-width:150px;font-size:.82rem}
+  .cmp-row{grid-template-columns:160px 1fr 1fr}
+}
 @media(max-width:768px){
+  .cmp{padding:30px 0 40px}
   .cmp-slots{grid-template-columns:1fr;gap:12px}
   .cmp-vs{display:none}
+  .cmp-course-bar{flex-direction:column;gap:8px}
+  .cmp-course-label{font-size:.8rem}
+  .cmp-course-select{width:100%;min-width:0}
   .cmp-summary{grid-template-columns:1fr}
-  .cmp-row{grid-template-columns:120px 1fr 1fr}
-  .cmp-label{padding:10px 14px;font-size:.75rem}
+  .cmp-sum-card{padding:16px;gap:12px}
+  .cmp-sum-card img{width:48px;height:48px;border-radius:12px}
+  .cmp-sum-info h3{font-size:.9rem}
+  .cmp-row{grid-template-columns:1fr}
+  .cmp-row .cmp-label{background:var(--primary-light);font-size:.75rem;padding:8px 14px}
   .cmp-val{padding:10px 14px;font-size:.82rem}
-  .cmp-sug-card{width:160px}
-  .cmp-sum-card img{width:48px;height:48px}
+  .cmp-sec-hdr{padding:12px 16px;font-size:.8rem}
+  .cmp-hero h1{font-size:1.3rem}
+  .cmp-hero p{font-size:.8rem}
+  .cmp-apply-btn{padding:12px 32px;font-size:.9rem}
+  .cmp-verdict{padding:20px}
+  .cmp-verdict h3{font-size:.95rem}
+  .cmp-verdict .winner-tag{font-size:.8rem;padding:6px 16px}
+  .cmp-slot{min-height:160px;padding:20px 16px}
+  .cmp-slot-icon{width:48px;height:48px;border-radius:12px;font-size:1.2rem}
+  .cmp-slot h3{font-size:.88rem}
 }
 @media(max-width:480px){
-  .cmp-row{grid-template-columns:1fr}
-  .cmp-row .cmp-label{background:var(--primary-light);font-size:.72rem;padding:8px 14px}
+  .cmp{padding:20px 0 30px}
+  .cmp-hero{margin-bottom:16px}
+  .cmp-hero h1{font-size:1.1rem}
+  .cmp-hero p{font-size:.75rem}
+  .cmp-course-bar{gap:6px}
+  .cmp-course-label{font-size:.75rem}
+  .cmp-course-select{padding:8px 12px;font-size:.78rem}
+  .cmp-slot{min-height:140px;padding:16px 12px}
+  .cmp-slot-icon{width:42px;height:42px;font-size:1rem}
+  .cmp-slot h3{font-size:.82rem}
+  .cmp-slot .loc{font-size:.7rem}
+  .cmp-sum-card{flex-direction:column;text-align:center;padding:14px}
+  .cmp-sum-tags{justify-content:center}
+  .cmp-sec-hdr{padding:10px 14px;font-size:.75rem;gap:8px}
+  .cmp-sec-hdr i{font-size:.9rem}
+  .cmp-label{font-size:.7rem;padding:8px 10px}
+  .cmp-val{padding:8px 10px;font-size:.78rem}
+  .cmp-val .big{font-size:1rem}
+  .cmp-verdict{padding:16px;border-radius:12px}
+  .cmp-verdict h3{font-size:.88rem}
+  .cmp-verdict p{font-size:.8rem}
+  .cmp-apply-btn{width:100%;justify-content:center}
+  .cmp-bar{height:6px}
 }
 </style>
 </head>
@@ -164,6 +219,24 @@ $id2 = $_GET['id2'] ?? '';
       <div class="nh-badge"><i class="ph-fill ph-scales"></i> Compare</div>
       <h1>Compare Colleges Side by Side</h1>
       <p>Select two colleges to compare fees, placements, ratings, rankings and more</p>
+    </div>
+
+    <!-- Course selector -->
+    <div class="cmp-course-bar">
+      <div class="cmp-course-label"><i class="ph ph-graduation-cap"></i> Comparing for:</div>
+      <select id="courseLevel" class="cmp-course-select" onchange="filterCourses()">
+        <option value="">All Levels</option>
+        <?php foreach ($courseLevels as $cl): ?>
+        <option value="<?=htmlspecialchars($cl)?>"><?=htmlspecialchars($cl)?></option>
+        <?php endforeach;?>
+      </select>
+      <select id="coursePick" class="cmp-course-select" onchange="pickCourse()">
+        <option value="">Select specific course (optional)</option>
+        <?php foreach ($allCourses as $ac): ?>
+        <option value="<?=htmlspecialchars($ac['id'],ENT_QUOTES)?>" data-level="<?=htmlspecialchars($ac['course_level'],ENT_QUOTES)?>"><?=htmlspecialchars($ac['course_name'])?> (<?=htmlspecialchars($ac['course_level'])?>)</option>
+        <?php endforeach;?>
+      </select>
+      <span id="courseTag" class="cmp-course-tag" style="display:none"></span>
     </div>
 
     <!-- Slots -->
@@ -217,7 +290,37 @@ $id2 = $_GET['id2'] ?? '';
 
 <script>
 const B='<?=$navBase?>';
-let slot=null,pick=null,col={1:null,2:null},timer=null;
+let slot=null,pick=null,col={1:null,2:null},timer=null,selectedCourse=null;
+
+function filterCourses(){
+  var level=document.getElementById('courseLevel').value;
+  var sel=document.getElementById('coursePick');
+  var opts=sel.options;
+  for(var i=1;i<opts.length;i++){
+    var ol=opts[i].getAttribute('data-level');
+    opts[i].style.display=(!level||ol===level)?'':'none';
+  }
+  sel.value='';
+  selectedCourse=null;
+  document.getElementById('courseTag').style.display='none';
+}
+function pickCourse(){
+  var sel=document.getElementById('coursePick');
+  var tag=document.getElementById('courseTag');
+  if(sel.value){
+    selectedCourse={id:sel.value,name:sel.options[sel.selectedIndex].text};
+    tag.innerHTML=selectedCourse.name+' <button onclick="clearCourse()">&times;</button>';
+    tag.style.display='inline-flex';
+  }else{
+    selectedCourse=null;
+    tag.style.display='none';
+  }
+}
+function clearCourse(){
+  document.getElementById('coursePick').value='';
+  selectedCourse=null;
+  document.getElementById('courseTag').style.display='none';
+}
 
 function openModal(s){
   slot=s;pick=null;
@@ -314,18 +417,39 @@ function updateSlots(){
 
 function loadComparison(){
   if(!col[1]||!col[2])return;
-  const btn=document.getElementById('applyBtn');
+  var btn=document.getElementById('applyBtn');
   btn.innerHTML='<i class="ph ph-spinner"></i> Comparing…';btn.disabled=true;
   document.getElementById('results').innerHTML='<div class="cmp-loading"><i class="ph ph-spinner"></i> Loading comparison data…</div>';
   document.getElementById('results').classList.add('show');
 
-  fetch(`${B}/api/college_compare.php?id1=${col[1].id}&id2=${col[2].id}`)
-  .then(r=>r.json()).then(d=>{
-    if(d.error){alert(d.error);btn.innerHTML='<i class="ph ph-scales"></i> Compare Now';btn.disabled=false;return;}
+  var url=B+'/api/college_compare.php?id1='+col[1].id+'&id2='+col[2].id;
+  if(selectedCourse) url+='&course_id='+encodeURIComponent(selectedCourse.id);
+
+  var controller=new AbortController();
+  var timeoutId=setTimeout(function(){controller.abort();},15000);
+
+  fetch(url,{signal:controller.signal})
+  .then(function(r){clearTimeout(timeoutId);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(d){
+    if(d.error){alert(d.error);btn.innerHTML='<i class="ph ph-scales"></i> Compare Now';btn.disabled=false;document.getElementById('results').innerHTML='';document.getElementById('results').classList.remove('show');return;}
     render(d.college1,d.college2);
     btn.innerHTML='<i class="ph ph-scales"></i> Compare Now';btn.disabled=false;
-  }).catch(()=>{btn.innerHTML='<i class="ph ph-scales"></i> Compare Now';btn.disabled=false;});
+  }).catch(function(e){
+    clearTimeout(timeoutId);
+    console.error('Compare error:',e);
+    btn.innerHTML='<i class="ph ph-scales"></i> Compare Now';btn.disabled=false;
+    var msg=e.name==='AbortError'?'Request timed out (15s). Server too slow.':e.message;
+    document.getElementById('results').innerHTML='<div class="cmp-empty"><i class="ph ph-warning-circle"></i><h2>Something went wrong</h2><p>'+msg+'</p></div>';
+    document.getElementById('results').classList.add('show');
+  });
 }
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function ucfirst(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+function fmtPkg(n,suffix){return n?'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:1,maximumFractionDigits:1})+(suffix||''):'—'}
+function fmtNum(n){return n?Number(n).toLocaleString('en-IN'):'—'}
+function cmpBar(v,mx,cls){var p=mx>0?Math.min(v/mx*100,100):0;return '<div class="cmp-bar"><div class="cmp-bar-fill '+cls+'" style="width:'+p+'%"></div></div>'}
+function cmpW(va,vb,lower){if(!va||!vb)return'';var na=parseFloat(String(va).replace(/[^0-9.]/g,''))||0;var nb=parseFloat(String(vb).replace(/[^0-9.]/g,''))||0;if(lower?na<nb:na>nb)return'winner';return''}
 
 function render(a,b){
   const imgA=a.cover_image_url||a.logo_url||'';
@@ -337,16 +461,14 @@ function render(a,b){
   const rsA=a.review_stats||{};
   const rsB=b.review_stats||{};
 
-  function fmt(n,suffix=''){return n?'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:1,maximumFractionDigits:1})+suffix:'—'}
-  function fmtI(n){return n?Number(n).toLocaleString('en-IN'):'—'}
-  function bar(v,mx,cls){const p=mx>0?Math.min(v/mx*100,100):0;return `<div class="cmp-bar"><div class="cmp-bar-fill ${cls}" style="width:${p}%"></div></div>`}
-  function w(va,vb,lower){if(!va||!vb)return'';const na=parseFloat(String(va).replace(/[^0-9.]/g,''))||0;const nb=parseFloat(String(vb).replace(/[^0-9.]/g,''))||0;if(lower?na<nb:na>nb)return'winner';return''}
-
   // Verdict
   let scores={a:0,b:0};
-  const checks=[[rA,rB,0],[parseFloat(a.avg_package)||0,parseFloat(b.avg_package)||0,1],[parseFloat(a.highest_package)||0,parseFloat(b.highest_package)||0,1],[parseFloat(c1_placement_pct(a)),parseFloat(c1_placement_pct(b)),1],[parseInt(a.total_students)||0,parseInt(b.total_students)||0,0]];
-  function c1_placement_pct(c){return c.placement_pct||0}
-  checks.forEach(([va,vb,hig])=>{if(va&&vb){if(hig?(va>vb?scores.a++:va<vb?scores.b++:0):(va>vb?scores.a++:va<vb?scores.b++:0))}});
+  const checks=[[rA,rB,0],[parseFloat(a.avg_package)||0,parseFloat(b.avg_package)||0,1],[parseFloat(a.highest_package)||0,parseFloat(b.highest_package)||0,1],[parseFloat(a.placement_pct)||0,parseFloat(b.placement_pct)||0,1],[parseInt(a.total_students)||0,parseInt(b.total_students)||0,0]];
+  checks.forEach(function(x){
+    var va=x[0],vb=x[1],higher=x[2];
+    if(!va||!vb)return;
+    if(va>vb)scores.a++;else if(va<vb)scores.b++;
+  });
   const overallWinner=scores.a>scores.b?a:scores.b>scores.a?b:null;
 
   let h=`<div class="cmp-summary">
@@ -378,7 +500,7 @@ function render(a,b){
     row('Established Year',a.established_year||'—',b.established_year||'—'),
     row('Ownership',ucfirst(a.college_type||'—'),ucfirst(b.college_type||'—')),
     row('NAAC Grade',a.naac_grade?'NAAC '+a.naac_grade:'—',b.naac_grade?'NAAC '+b.naac_grade:'—',true),
-    row('Total Students',a.total_students?fmtI(a.total_students)+'+':'—',b.total_students?fmtI(b.total_students)+'+':'—',true),
+    row('Total Students',a.total_students?fmtNum(a.total_students)+'+':'—',b.total_students?fmtNum(b.total_students)+'+':'—',true),
     row('Campus Area',a.campus_area_acres?a.campus_area_acres+' acres':'—',b.campus_area_acres?b.campus_area_acres+' acres':'—'),
     row('Accreditations',(a.facilities||[]).join(', ')||'—',(b.facilities||[]).join(', ')||'—'),
   ]);
@@ -406,16 +528,18 @@ function render(a,b){
   h+=sec('Placements','ph-briefcase',[
     rowBar('Avg Package',a.avg_package,b.avg_package,'green',' LPA'),
     rowBar('Highest Package',a.highest_package,b.highest_package,'amber',' LPA'),
-    row('Median Package',fmt(a.median_package,' LPA'),fmt(b.median_package,' LPA')),
+    row('Median Package',fmtPkg(a.median_package,' LPA'),fmtPkg(b.median_package,' LPA')),
     row('% Batch Placed',a.placement_pct?Math.round(a.placement_pct)+'%':'—',b.placement_pct?Math.round(b.placement_pct)+'%':'—',true),
-    row('Students Placed',a.total_placed?fmtI(a.total_placed):'—',b.total_placed?fmtI(b.total_placed):'—'),
+    row('Students Placed',a.total_placed?fmtNum(a.total_placed):'—',b.total_placed?fmtNum(b.total_placed):'—'),
     row('Top Recruiters',a.top_recruiters||'—',b.top_recruiters||'—'),
   ]);
 
   // Section: Fees
-  h+=sec('Fees','ph-money',[
-    row('Min Annual Fee',a.min_fee?'₹'+fmtI(a.min_fee):'—',b.min_fee?'₹'+fmtI(b.min_fee):'—',true,true),
-    row('Max Total Fee',a.max_total_fee?'₹'+fmtI(a.max_total_fee):'—',b.max_total_fee?'₹'+fmtI(b.max_total_fee):'—',true,true),
+  var feeTitle='Fees';
+  if(selectedCourse) feeTitle+=' — '+selectedCourse.name;
+  h+=sec(feeTitle,'ph-money',[
+    row('Min Annual Fee',a.min_fee?'₹'+fmtNum(a.min_fee):'—',b.min_fee?'₹'+fmtNum(b.min_fee):'—',true,true),
+    row('Max Total Fee',a.max_total_fee?'₹'+fmtNum(a.max_total_fee):'—',b.max_total_fee?'₹'+fmtNum(b.max_total_fee):'—',true,true),
   ]);
 
   // Section: Courses
@@ -446,24 +570,22 @@ function sec(title,icon,rows){
   return `<div class="cmp-section"><div class="cmp-sec-hdr"><i class="ph ${icon}"></i> ${title}</div>${rows.join('')}</div>`;
 }
 function row(label,a,b,lower,betterHigh){
-  const cls=betterHigh===true?'':w(a,b,lower||false);
+  const cls=betterHigh===true?'':cmpW(a,b,lower||false);
   return `<div class="cmp-row"><div class="cmp-label">${label}</div><div class="cmp-val ${cls==='winner'?'winner':''}">${a}</div><div class="cmp-val ${cls==='winner'&&b!==a?'winner':''}">${b}</div></div>`;
 }
 function rowRating(label,rA,nA,rB,nB){
   return `<div class="cmp-row"><div class="cmp-label">${label}</div>
-    <div class="cmp-val ${w(rA,rB)?'winner':''}"><span class="big">${rA?rA+'/5':'—'}</span>${nA?`<span class="sub">${nA} verified reviews</span>`:''}${rA?bar(rA,5,'blue'):''}</div>
-    <div class="cmp-val ${w(rB,rA)?'winner':''}"><span class="big">${rB?rB+'/5':'—'}</span>${nB?`<span class="sub">${nB} verified reviews</span>`:''}${rB?bar(rB,5,'blue'):''}</div></div>`;
+    <div class="cmp-val ${cmpW(rA,rB)?'winner':''}"><span class="big">${rA?rA+'/5':'—'}</span>${nA?`<span class="sub">${nA} verified reviews</span>`:''}${rA?cmpBar(rA,5,'blue'):''}</div>
+    <div class="cmp-val ${cmpW(rB,rA)?'winner':''}"><span class="big">${rB?rB+'/5':'—'}</span>${nB?`<span class="sub">${nB} verified reviews</span>`:''}${rB?cmpBar(rB,5,'blue'):''}</div></div>`;
 }
 function rowBar(label,vA,vB,cls,sfx){
   cls=cls||'blue';sfx=sfx||'';
   const mx=Math.max(vA||0,vB||0)||1;
   return `<div class="cmp-row"><div class="cmp-label">${label}</div>
-    <div class="cmp-val ${w(vA,vB)?'winner':''}"><span class="big">${vA?vA+sfx:'—'}</span>${bar(vA,mx,cls)}</div>
-    <div class="cmp-val ${w(vB,vA)?'winner':''}"><span class="big">${vB?vB+sfx:'—'}</span>${bar(vB,mx,cls)}</div></div>`;
+    <div class="cmp-val ${cmpW(vA,vB)?'winner':''}"><span class="big">${vA?vA+sfx:'—'}</span>${cmpBar(vA,mx,cls)}</div>
+    <div class="cmp-val ${cmpW(vB,vA)?'winner':''}"><span class="big">${vB?vB+sfx:'—'}</span>${cmpBar(vB,mx,cls)}</div></div>`;
 }
 
-function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function ucfirst(s){return s.charAt(0).toUpperCase()+s.slice(1)}
 
 <?php if($id1&&$id2):?>
 document.addEventListener('DOMContentLoaded',()=>{
@@ -479,6 +601,11 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()});
+
+document.querySelectorAll('.cmp-slot').forEach(function(el){
+  var num=parseInt(el.id.replace('slot',''));
+  if(num===1||num===2) el.addEventListener('click',function(){openModal(num)});
+});
 </script>
 <?php include 'includes/footer.php'; ?>
 </body>

@@ -17,7 +17,7 @@
         </div>
         <span class="tool-cta">Compare Now <i class="ph ph-arrow-right"></i></span>
       </a>
-      <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/counselling.php" class="tool-card reveal reveal-delay-2">
+      <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/predictor.php" class="tool-card reveal reveal-delay-2">
         <div class="tool-card-left">
           <div class="tool-icon"><i class="ph ph-chart-line-up"></i></div>
           <div>

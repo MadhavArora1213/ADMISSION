@@ -2,7 +2,6 @@
 <section class="section news-editorial" id="news">
   <div class="container">
     <div class="section-hdr-flex reveal">
-      <div class="ne-icon"><i class="ph-fill ph-newspaper"></i></div>
       <div><h2>Latest Education News</h2><p>Exam alerts, results, cutoffs, and admission updates</p></div>
       <a href="news.php" class="section-link">View All <i class="ph ph-arrow-right"></i></a>
     </div>
