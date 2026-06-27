@@ -41,6 +41,11 @@ function linesToJsonObject($text) {
 function generateUUID() {
     return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
 }
+function createSubmission($pdo, $accountId, $collegeId, $type, $dataArray) {
+    $uuid = generateUUID();
+    $stmt = $pdo->prepare("INSERT INTO college_submissions (id, account_id, college_id, submission_type, data_json, status, created_at) VALUES (?, ?, ?, ?, ?, 'pending', NOW())");
+    return $stmt->execute([$uuid, $accountId, $collegeId, $type, json_encode($dataArray)]);
+}
 
 // Fetch Reference Data
 $states = [];
@@ -51,6 +56,8 @@ $exams = [];
 try { $exams = $pdo->query("SELECT id, exam_name FROM exams WHERE status='active' ORDER BY exam_name ASC")->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 $global_categories = [];
 try { $global_categories = $pdo->query("SELECT c1.*, c2.category_name as parent_name FROM course_categories c1 LEFT JOIN course_categories c2 ON c1.parent_category_id = c2.id ORDER BY c1.sort_order ASC, c1.category_name ASC")->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
+$all_colleges = [];
+try { $all_colleges = $pdo->query("SELECT id, name FROM colleges WHERE id != " . $pdo->quote($collegeId) . " ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC); } catch(Exception $e){}
 
 // Handle Form POST Submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
@@ -58,52 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
 
     if ($action === 'update_identity') {
         try {
-            $pdo->beginTransaction();
-            
-            // 1. Update Colleges Table
-            $stmt = $pdo->prepare("
-                UPDATE colleges SET 
-                    name = ?, 
-                    college_type = ?, 
-                    ownership = ?, 
-                    type_label = ?, 
-                    founded_year = ?, 
-                    university_id = ?, 
-                    naac_grade = ?, 
-                    ranking_nirf = ?, 
-                    autonomous = ?, 
-                    ugc_approved = ?, 
-                    aicte_approved = ?, 
-                    total_students = ?, 
-                    total_faculty = ?, 
-                    campus_area_acres = ?, 
-                    campus_type = ?,
-                    state_id = ?,
-                    city_id = ?
-                WHERE id = ?
-            ");
-            $stmt->execute([
-                $_POST['name'],
-                $_POST['college_type'] ?: null,
-                $_POST['ownership'] ?: null,
-                $_POST['type_label'] ?: null,
-                $_POST['founded_year'] ?: null,
-                $_POST['university_id'] ?: null,
-                $_POST['naac_grade'] ?: null,
-                $_POST['ranking_nirf'] ?: null,
-                isset($_POST['autonomous']) ? 1 : 0,
-                isset($_POST['ugc_approved']) ? 1 : 0,
-                isset($_POST['aicte_approved']) ? 1 : 0,
-                $_POST['total_students'] ?: null,
-                $_POST['total_faculty'] ?: null,
-                $_POST['campus_area_acres'] ?: null,
-                $_POST['campus_type'] ?: null,
-                $_POST['state_id'] ?: null,
-                $_POST['city_id'] ?: null,
-                $collegeId
-            ]);
-
-            // 2. Handle File Uploads
             $upload_dir = '../uploads/';
             if (!file_exists($upload_dir)) {
                 mkdir($upload_dir, 0777, true);
@@ -127,19 +88,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
                 }
             }
 
-            // 3. College Media
-            $mediaCheck = $pdo->prepare("SELECT id FROM college_media WHERE college_id = ? AND image_type IS NULL");
-            $mediaCheck->execute([$collegeId]);
-            if ($mediaCheck->rowCount() > 0) {
-                $stmt = $pdo->prepare("UPDATE college_media SET logo_url = ?, cover_image_url = ? WHERE college_id = ? AND image_type IS NULL");
-                $stmt->execute([$logo_url, $cover_image_url, $collegeId]);
-            } else {
-                $stmt = $pdo->prepare("INSERT INTO college_media (id, college_id, logo_url, cover_image_url) VALUES (?, ?, ?, ?)");
-                $stmt->execute([generateUUID(), $collegeId, $logo_url, $cover_image_url]);
-            }
-
-            // 4. College Contacts
-            $contactData = [
+            $subData = [
+                'name' => $_POST['name'],
+                'college_type' => $_POST['college_type'] ?: null,
+                'ownership' => $_POST['ownership'] ?: null,
+                'type_label' => $_POST['type_label'] ?: null,
+                'founded_year' => $_POST['founded_year'] ?: null,
+                'university_id' => $_POST['university_id'] ?: null,
+                'naac_grade' => $_POST['naac_grade'] ?: null,
+                'ranking_nirf' => $_POST['ranking_nirf'] ?: null,
+                'autonomous' => isset($_POST['autonomous']) ? 1 : 0,
+                'ugc_approved' => isset($_POST['ugc_approved']) ? 1 : 0,
+                'aicte_approved' => isset($_POST['aicte_approved']) ? 1 : 0,
+                'total_students' => $_POST['total_students'] ?: null,
+                'total_faculty' => $_POST['total_faculty'] ?: null,
+                'campus_area_acres' => $_POST['campus_area_acres'] ?: null,
+                'campus_type' => $_POST['campus_type'] ?: null,
+                'state_id' => $_POST['state_id'] ?: null,
+                'city_id' => $_POST['city_id'] ?: null,
+                'logo_url' => $logo_url,
+                'cover_image_url' => $cover_image_url,
                 'email' => $_POST['contact_email'] ?: null,
                 'phone' => $_POST['contact_phone'] ?: null,
                 'address' => $_POST['address'] ?: null,
@@ -151,54 +119,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
                 'nearest_railway_km' => $_POST['nearest_railway_km'] ?: null,
                 'nearest_airport_km' => $_POST['nearest_airport_km'] ?: null
             ];
-            $contactCheck = $pdo->prepare("SELECT id FROM college_contacts WHERE college_id = ?");
-            $contactCheck->execute([$collegeId]);
-            if ($contactCheck->rowCount() > 0) {
-                $fields = []; foreach ($contactData as $k => $v) $fields[] = "$k = :$k";
-                $contactData['college_id'] = $collegeId;
-                $stmt = $pdo->prepare("UPDATE college_contacts SET " . implode(", ", $fields) . " WHERE college_id = :college_id");
-                $stmt->execute($contactData);
-            } else {
-                $contactData['id'] = generateUUID();
-                $contactData['college_id'] = $collegeId;
-                $keys = array_keys($contactData);
-                $stmt = $pdo->prepare("INSERT INTO college_contacts (" . implode(", ", $keys) . ") VALUES (:" . implode(", :", $keys) . ")");
-                $stmt->execute($contactData);
-            }
 
-            $pdo->commit();
-            $msg = 'Identity & Contact details saved successfully!';
+            createSubmission($pdo, $account['id'], $collegeId, 'profile', $subData);
+            $msg = 'Identity & Contact changes submitted for verification. Admin approval is pending.';
         } catch (Exception $e) {
-            $pdo->rollBack();
-            $error = 'Error saving identity details: ' . $e->getMessage();
+            $error = 'Error saving details: ' . $e->getMessage();
         }
     }
 
     if ($action === 'update_about') {
         try {
-            $pdo->beginTransaction();
-            
-            // 1. College Content
-            $contentData = [
+            $subData = [
                 'about_text' => $_POST['about_text'],
                 'highlights_json' => linesToJsonList($_POST['highlights_json']),
                 'accreditations_json' => linesToJsonList($_POST['accreditations_json']),
                 'rankings_json' => linesToJsonObject($_POST['rankings_json']),
-                'awards_json' => linesToJsonList($_POST['awards_json'])
+                'awards_json' => linesToJsonList($_POST['awards_json']),
+                'library' => isset($_POST['library']) ? 1 : 0,
+                'auditorium' => isset($_POST['auditorium']) ? 1 : 0,
+                'cafeteria' => isset($_POST['cafeteria']) ? 1 : 0,
+                'wifi' => isset($_POST['wifi']) ? 1 : 0,
+                'medical_facility' => isset($_POST['medical_facility']) ? 1 : 0,
+                'transport' => isset($_POST['transport']) ? 1 : 0,
+                'ev_charging' => isset($_POST['ev_charging']) ? 1 : 0,
+                'solar_power' => isset($_POST['solar_power']) ? 1 : 0,
+                'sports_facilities' => linesToJsonList($_POST['sports_facilities']),
+                'labs' => linesToJsonList($_POST['labs']),
+                'hostel_available' => isset($_POST['hostel_available']) ? 1 : 0,
+                'hostel_type' => $_POST['hostel_type'] ?: null,
+                'hostel_capacity' => $_POST['hostel_capacity'] ?: null,
+                'hostel_fee_annual' => $_POST['hostel_fee_annual'] ?: null,
+                'mess_available' => isset($_POST['mess_available']) ? 1 : 0,
+                'mess_type' => $_POST['mess_type'] ?: null,
+                'ac_available' => isset($_POST['ac_available']) ? 1 : 0,
+                'laundry_available' => isset($_POST['laundry_available']) ? 1 : 0
             ];
-            $chk = $pdo->prepare("SELECT id FROM college_content WHERE college_id = ?"); $chk->execute([$collegeId]);
-            if($chk->rowCount() > 0) {
-                $fields = []; foreach($contentData as $k=>$v) $fields[] = "$k = :$k";
-                $contentData['college_id'] = $collegeId;
-                $pdo->prepare("UPDATE college_content SET " . implode(", ", $fields) . " WHERE college_id = :college_id")->execute($contentData);
-            } else {
-                $contentData['id'] = generateUUID(); $contentData['college_id'] = $collegeId;
-                $keys = array_keys($contentData);
-                $pdo->prepare("INSERT INTO college_content (" . implode(", ", $keys) . ") VALUES (:" . implode(", :", $keys) . ")")->execute($contentData);
-            }
 
-            // 2. College Admissions
-            $admData = [
+            createSubmission($pdo, $account['id'], $collegeId, 'profile', $subData);
+            $msg = 'About & Infrastructure updates submitted for verification. Admin approval is pending.';
+        } catch (Exception $e) {
+            $error = 'Error saving details: ' . $e->getMessage();
+        }
+    }
+
+    if ($action === 'update_admissions') {
+        try {
+            $subData = [
                 'admission_process' => $_POST['admission_process'],
                 'accepted_exams' => linesToJsonList($_POST['accepted_exams']),
                 'admission_start_date' => $_POST['admission_start_date'] ?: null,
@@ -210,78 +176,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
                 'lateral_entry_available' => isset($_POST['lateral_entry_available']) ? 1 : 0,
                 'application_mode' => $_POST['application_mode'] ?: null
             ];
-            $chk = $pdo->prepare("SELECT id FROM college_admissions WHERE college_id = ?"); $chk->execute([$collegeId]);
-            if($chk->rowCount() > 0) {
-                $fields = []; foreach($admData as $k=>$v) $fields[] = "$k = :$k";
-                $admData['college_id'] = $collegeId;
-                $pdo->prepare("UPDATE college_admissions SET " . implode(", ", $fields) . " WHERE college_id = :college_id")->execute($admData);
-            } else {
-                $admData['id'] = generateUUID(); $admData['college_id'] = $collegeId;
-                $keys = array_keys($admData);
-                $pdo->prepare("INSERT INTO college_admissions (" . implode(", ", $keys) . ") VALUES (:" . implode(", :", $keys) . ")")->execute($admData);
-            }
 
-            // 3. College Infrastructure
-            $infData = [
-                'library' => isset($_POST['library']) ? 1 : 0,
-                'auditorium' => isset($_POST['auditorium']) ? 1 : 0,
-                'cafeteria' => isset($_POST['cafeteria']) ? 1 : 0,
-                'wifi' => isset($_POST['wifi']) ? 1 : 0,
-                'medical_facility' => isset($_POST['medical_facility']) ? 1 : 0,
-                'transport' => isset($_POST['transport']) ? 1 : 0,
-                'ev_charging' => isset($_POST['ev_charging']) ? 1 : 0,
-                'solar_power' => isset($_POST['solar_power']) ? 1 : 0,
-                'sports_facilities' => linesToJsonList($_POST['sports_facilities']),
-                'labs' => linesToJsonList($_POST['labs'])
-            ];
-            $chk = $pdo->prepare("SELECT id FROM college_infrastructure WHERE college_id = ?"); $chk->execute([$collegeId]);
-            if($chk->rowCount() > 0) {
-                $fields = []; foreach($infData as $k=>$v) $fields[] = "$k = :$k";
-                $infData['college_id'] = $collegeId;
-                $pdo->prepare("UPDATE college_infrastructure SET " . implode(", ", $fields) . " WHERE college_id = :college_id")->execute($infData);
-            } else {
-                $infData['id'] = generateUUID(); $infData['college_id'] = $collegeId;
-                $keys = array_keys($infData);
-                $pdo->prepare("INSERT INTO college_infrastructure (" . implode(", ", $keys) . ") VALUES (:" . implode(", :", $keys) . ")")->execute($infData);
-            }
-
-            // 4. College Hostels
-            $hstData = [
-                'hostel_available' => isset($_POST['hostel_available']) ? 1 : 0,
-                'hostel_type' => $_POST['hostel_type'] ?: null,
-                'hostel_capacity' => $_POST['hostel_capacity'] ?: null,
-                'hostel_fee_annual' => $_POST['hostel_fee_annual'] ?: null,
-                'mess_available' => isset($_POST['mess_available']) ? 1 : 0,
-                'mess_type' => $_POST['mess_type'] ?: null,
-                'ac_available' => isset($_POST['ac_available']) ? 1 : 0,
-                'laundry_available' => isset($_POST['laundry_available']) ? 1 : 0
-            ];
-            $chk = $pdo->prepare("SELECT id FROM college_hostels WHERE college_id = ?"); $chk->execute([$collegeId]);
-            if($chk->rowCount() > 0) {
-                $fields = []; foreach($hstData as $k=>$v) $fields[] = "$k = :$k";
-                $hstData['college_id'] = $collegeId;
-                $pdo->prepare("UPDATE college_hostels SET " . implode(", ", $fields) . " WHERE college_id = :college_id")->execute($hstData);
-            } else {
-                $hstData['id'] = generateUUID(); $hstData['college_id'] = $collegeId;
-                $keys = array_keys($hstData);
-                $pdo->prepare("INSERT INTO college_hostels (" . implode(", ", $keys) . ") VALUES (:" . implode(", :", $keys) . ")")->execute($hstData);
-            }
-
-            $pdo->commit();
-            $msg = 'About & Infrastructure details saved successfully!';
+            createSubmission($pdo, $account['id'], $collegeId, 'profile', $subData);
+            $msg = 'Admissions updates submitted for verification. Admin approval is pending.';
         } catch (Exception $e) {
-            $pdo->rollBack();
-            $error = 'Error saving About details: ' . $e->getMessage();
+            $error = 'Error saving details: ' . $e->getMessage();
         }
     }
 
     if ($action === 'update_seo') {
         try {
-            $pdo->beginTransaction();
-            
-            $pdo->prepare("UPDATE colleges SET publish_status = ? WHERE id = ?")->execute([$_POST['publish_status'], $collegeId]);
-            
-            // Handle SEO image upload
             $upload_dir = '../uploads/';
             $og_image_url = $_POST['existing_og_image_url'] ?? '';
             if (isset($_FILES['og_image_file']) && $_FILES['og_image_file']['error'] == 0) {
@@ -291,8 +195,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
                     $og_image_url = 'uploads/' . $filename;
                 }
             }
-            
-            $seoData = [
+
+            $subData = [
+                'publish_status' => $_POST['publish_status'],
                 'meta_title' => $_POST['meta_title'],
                 'meta_description' => $_POST['meta_description'],
                 'og_image_url' => $og_image_url,
@@ -300,26 +205,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
                 'schema_markup' => $_POST['schema_markup'] ?: null,
                 'noindex' => isset($_POST['noindex']) ? 1 : 0
             ];
-            
-            $chk = $pdo->prepare("SELECT id FROM seo_meta WHERE page_type = 'college' AND page_id = ?"); 
-            $chk->execute([$collegeId]);
-            if($chk->rowCount() > 0) {
-                $fields = []; foreach($seoData as $k=>$v) $fields[] = "$k = :$k";
-                $seoData['page_id'] = $collegeId;
-                $pdo->prepare("UPDATE seo_meta SET " . implode(", ", $fields) . " WHERE page_type = 'college' AND page_id = :page_id")->execute($seoData);
-            } else {
-                $seoData['id'] = generateUUID(); 
-                $seoData['page_type'] = 'college';
-                $seoData['page_id'] = $collegeId;
-                $keys = array_keys($seoData);
-                $pdo->prepare("INSERT INTO seo_meta (" . implode(", ", $keys) . ") VALUES (:" . implode(", :", $keys) . ")")->execute($seoData);
-            }
-            
-            $pdo->commit();
-            $msg = 'SEO settings saved successfully!';
+
+            createSubmission($pdo, $account['id'], $collegeId, 'profile', $subData);
+            $msg = 'SEO & publish status updates submitted for verification. Admin approval is pending.';
         } catch (Exception $e) {
-            $pdo->rollBack();
-            $error = 'Error saving SEO settings: ' . $e->getMessage();
+            $error = 'Error saving details: ' . $e->getMessage();
         }
     }
 
@@ -334,29 +224,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
                 }
             }
 
-            $slug = strtolower(preg_replace('/[^a-z0-9]+/','-', $_POST['course_name']));
-            $ins = $pdo->prepare("
-                INSERT INTO college_courses 
-                (id, college_id, course_name, course_slug, course_level, duration_years, total_fee, semester_fee, annual_fee, seats_available, specializations, eligibility_criteria, application_fee, emi_available, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')
-            ");
-            $ins->execute([
-                generateUUID(),
-                $collegeId,
-                $_POST['course_name'],
-                $slug,
-                $_POST['course_level'],
-                $_POST['duration_years'] ?: null,
-                $_POST['total_fee'] ?: null,
-                $_POST['semester_fee'] ?: null,
-                $_POST['annual_fee'] ?: null,
-                $_POST['seats_available'] ?: null,
-                $specializations_json,
-                $_POST['eligibility_criteria'] ?: null,
-                $_POST['application_fee'] ?: null,
-                isset($_POST['emi_available']) ? 1 : 0
-            ]);
-            $msg = 'Course added successfully!';
+            $subData = [
+                'course_name' => $_POST['course_name'],
+                'course_level' => $_POST['course_level'],
+                'duration_years' => $_POST['duration_years'] ?: null,
+                'total_fee' => $_POST['total_fee'] ?: null,
+                'semester_fee' => $_POST['semester_fee'] ?: null,
+                'annual_fee' => $_POST['annual_fee'] ?: null,
+                'seats_available' => $_POST['seats_available'] ?: null,
+                'specializations' => $specializations_json,
+                'eligibility_criteria' => $_POST['eligibility_criteria'] ?: null,
+                'application_fee' => $_POST['application_fee'] ?: null,
+                'emi_available' => isset($_POST['emi_available']) ? 1 : 0
+            ];
+
+            createSubmission($pdo, $account['id'], $collegeId, 'courses', $subData);
+            $msg = 'Course creation request submitted for verification. Admin approval is pending.';
         } catch (Exception $e) {
             $error = 'Error adding course: ' . $e->getMessage();
         }
@@ -374,24 +257,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
 
     if ($action === 'add_placement') {
         try {
-            $ins = $pdo->prepare("
-                INSERT INTO college_placements 
-                (id, college_id, placement_year, avg_package_lpa, highest_package_lpa, median_package_lpa, placement_percentage, total_students, total_placed, top_recruiters) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ");
-            $ins->execute([
-                generateUUID(),
-                $collegeId,
-                (int)$_POST['placement_year'],
-                (float)$_POST['avg_package_lpa'] ?: null,
-                (float)$_POST['highest_package_lpa'] ?: null,
-                (float)$_POST['median_package_lpa'] ?: null,
-                (float)$_POST['placement_percentage'] ?: null,
-                (int)$_POST['total_students'] ?: null,
-                (int)$_POST['total_placed'] ?: null,
-                trim($_POST['top_recruiters'] ?? '')
-            ]);
-            $msg = 'Placement data added successfully!';
+            $subData = [
+                'placement_year' => (int)$_POST['placement_year'],
+                'avg_package_lpa' => (float)$_POST['avg_package_lpa'] ?: null,
+                'highest_package_lpa' => (float)$_POST['highest_package_lpa'] ?: null,
+                'median_package_lpa' => (float)$_POST['median_package_lpa'] ?: null,
+                'placement_percentage' => (float)$_POST['placement_percentage'] ?: null,
+                'total_students' => (int)$_POST['total_students'] ?: null,
+                'total_placed' => (int)$_POST['total_placed'] ?: null,
+                'top_recruiters' => trim($_POST['top_recruiters'] ?? '')
+            ];
+
+            createSubmission($pdo, $account['id'], $collegeId, 'placements', $subData);
+            $msg = 'Placement data submission sent for verification. Admin approval is pending.';
         } catch (Exception $e) {
             $error = 'Error adding placement: ' . $e->getMessage();
         }
@@ -409,23 +287,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
 
     if ($action === 'add_cutoff') {
         try {
-            $ins = $pdo->prepare("
-                INSERT INTO college_cutoffs 
-                (id, college_id, exam_id, year, category, quota, opening_rank, closing_rank, course_name) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ");
-            $ins->execute([
-                generateUUID(),
-                $collegeId,
-                $_POST['exam_id'],
-                (int)$_POST['year'],
-                $_POST['category'],
-                $_POST['quota'],
-                (int)$_POST['opening_rank'] ?: null,
-                (int)$_POST['closing_rank'] ?: null,
-                trim($_POST['course_name'] ?? '')
-            ]);
-            $msg = 'Cutoff details added successfully!';
+            $subData = [
+                'exam_id' => $_POST['exam_id'],
+                'year' => (int)$_POST['year'],
+                'category' => $_POST['category'],
+                'quota' => $_POST['quota'],
+                'opening_rank' => (int)$_POST['opening_rank'] ?: null,
+                'closing_rank' => (int)$_POST['closing_rank'] ?: null,
+                'course_name' => trim($_POST['course_name'] ?? '')
+            ];
+
+            createSubmission($pdo, $account['id'], $collegeId, 'cutoffs', $subData);
+            $msg = 'Cutoff submission sent for verification. Admin approval is pending.';
         } catch (Exception $e) {
             $error = 'Error adding cutoff: ' . $e->getMessage();
         }
@@ -443,20 +316,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
 
     if ($action === 'add_seat_matrix') {
         try {
-            $ins = $pdo->prepare("
-                INSERT INTO seat_matrix 
-                (id, college_id, course_id, category, total_seats, entrance_exam) 
-                VALUES (?, ?, ?, ?, ?, ?)
-            ");
-            $ins->execute([
-                generateUUID(),
-                $collegeId,
-                $_POST['course_id'],
-                $_POST['category'],
-                (int)$_POST['total_seats'] ?: null,
-                trim($_POST['entrance_exam'] ?? '')
-            ]);
-            $msg = 'Seat matrix added successfully!';
+            $subData = [
+                'course_id' => $_POST['course_id'],
+                'category' => $_POST['category'],
+                'total_seats' => (int)$_POST['total_seats'] ?: 0,
+                'year' => (int)($_POST['year'] ?? date('Y')),
+                'source' => trim($_POST['source'] ?? 'Portal')
+            ];
+
+            createSubmission($pdo, $account['id'], $collegeId, 'seat_matrix', $subData);
+            $msg = 'Seat matrix submission sent for verification. Admin approval is pending.';
         } catch (Exception $e) {
             $error = 'Error adding seat matrix: ' . $e->getMessage();
         }
@@ -469,6 +338,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
             $msg = 'Seat matrix deleted successfully!';
         } catch (Exception $e) {
             $error = 'Error deleting seat matrix: ' . $e->getMessage();
+        }
+    }
+
+    // Rankings Actions
+    if ($action === 'add_ranking') {
+        try {
+            $ins = $pdo->prepare("
+                INSERT INTO rankings 
+                (ranking_body, ranking_year, category, college_id, rank_position, rank_band, score, source_url) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $ins->execute([
+                $_POST['ranking_body'],
+                (int)$_POST['ranking_year'],
+                $_POST['category'],
+                $collegeId,
+                $_POST['rank_position'] ?: null,
+                $_POST['rank_band'] ?: null,
+                $_POST['score'] ?: null,
+                $_POST['source_url'] ?: null
+            ]);
+            $msg = 'Ranking added successfully!';
+        } catch (Exception $e) {
+            $error = 'Error adding ranking: ' . $e->getMessage();
+        }
+    }
+
+    if ($action === 'delete_ranking') {
+        try {
+            $stmt = $pdo->prepare("DELETE FROM rankings WHERE id = ? AND college_id = ?");
+            $stmt->execute([$_POST['ranking_id'], $collegeId]);
+            $msg = 'Ranking deleted!';
+        } catch (Exception $e) {
+            $error = 'Error: ' . $e->getMessage();
         }
     }
 
@@ -645,6 +548,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
 $college = []; $contact = []; $media = []; $content = []; $admissions = []; $infrastructure = []; $hostels = []; $seo = [];
 $courses = []; $placements = []; $cutoffs = []; $seatMatrix = []; $leads = []; $pendingSubs = [];
 $galleryMedia = []; $faqs = []; $faculty = []; $scholarships = []; $updates = []; $qna = [];
+$rankings = []; $reviews = [];
 
 if ($collegeId) {
     try {
@@ -703,7 +607,7 @@ if ($collegeId) {
         $cutoffs=$s->fetchAll(PDO::FETCH_ASSOC);
     } catch(Exception $e){}
     try {
-        $s=$pdo->prepare("SELECT * FROM seat_matrix WHERE college_id=? ORDER BY course_id");
+        $s=$pdo->prepare("SELECT sm.*, cc.course_name FROM seat_matrix sm LEFT JOIN college_courses cc ON sm.course_id = cc.id WHERE sm.college_id=? ORDER BY sm.year DESC");
         $s->execute([$collegeId]);
         $seatMatrix=$s->fetchAll(PDO::FETCH_ASSOC);
     } catch(Exception $e){}
@@ -747,6 +651,16 @@ if ($collegeId) {
         $stmt->execute([$collegeId]);
         $qna = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch(Exception $e){}
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM rankings WHERE college_id = ? ORDER BY ranking_year DESC, ranking_body ASC");
+        $stmt->execute([$collegeId]);
+        $rankings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch(Exception $e){}
+    try {
+        $stmt = $pdo->prepare("SELECT r.*, u.name as user_name FROM reviews r LEFT JOIN users u ON r.user_id = u.id WHERE r.college_id = ? ORDER BY r.created_at DESC");
+        $stmt->execute([$collegeId]);
+        $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch(Exception $e){}
 }
 
 // Fetch virtual tour setting
@@ -769,6 +683,48 @@ if ($currentStateId) {
         $cities = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch(Exception $e){}
 }
+
+// Handle Compare logic
+$compare_result = null;
+$compare_college = null;
+if ($tab === 'compare' && !empty($_GET['compare_id'])) {
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM colleges WHERE id = ?");
+        $stmt->execute([$_GET['compare_id']]);
+        $compare_college = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($compare_college) {
+            // Get comparison details
+            $stmtCon = $pdo->prepare("SELECT * FROM college_contacts WHERE college_id = ?");
+            $stmtCon->execute([$compare_college['id']]);
+            $compare_contact = $stmtCon->fetch(PDO::FETCH_ASSOC) ?: [];
+
+            $stmtPl = $pdo->prepare("SELECT * FROM college_placements WHERE college_id = ? ORDER BY placement_year DESC LIMIT 1");
+            $stmtPl->execute([$compare_college['id']]);
+            $compare_placement = $stmtPl->fetch(PDO::FETCH_ASSOC) ?: [];
+
+            $myPlacement = [];
+            if ($placements) $myPlacement = $placements[0];
+
+            $compare_result = [
+                'my_name' => $college['name'] ?? '',
+                'other_name' => $compare_college['name'] ?? '',
+                'my_type' => $college['college_type'] ?? '-',
+                'other_type' => $compare_college['college_type'] ?? '-',
+                'my_est' => $college['founded_year'] ?? '-',
+                'other_est' => $compare_college['founded_year'] ?? '-',
+                'my_naac' => $college['naac_grade'] ?? '-',
+                'other_naac' => $compare_college['naac_grade'] ?? '-',
+                'my_nirf' => $college['ranking_nirf'] ?? '-',
+                'other_nirf' => $compare_college['ranking_nirf'] ?? '-',
+                'my_avg_lpa' => $myPlacement['avg_package_lpa'] ?? '-',
+                'other_avg_lpa' => $compare_placement['avg_package_lpa'] ?? '-',
+                'my_highest_lpa' => $myPlacement['highest_package_lpa'] ?? '-',
+                'other_highest_lpa' => $compare_placement['highest_package_lpa'] ?? '-',
+            ];
+        }
+    } catch(Exception $e){}
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -779,46 +735,57 @@ if ($currentStateId) {
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link rel="stylesheet" href="/ADMISSION/assets/css/style.css?v=15">
+<!-- jQuery and Trumbowyg -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/ui/trumbowyg.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/trumbowyg.min.js"></script>
 <style>
 :root {
   --primary: #0B2447;
   --secondary: #19376D;
-  --bg-light: #f8fafc;
-  --text-dark: #0f172a;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.02), 0 8px 24px rgba(15,23,42,0.04);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 10px 15px -3px rgba(0,0,0,0.03);
+  --accent: #19376D;
+  --accent-light: rgba(11,36,71,0.06);
+  --bg-light: #F8FAFC;
+  --text-dark: #0F172A;
+  --text-muted: rgba(15,23,42,0.65);
+  --border-color: rgba(15,23,42,0.1);
+  --shadow-sm: 0 1px 3px rgba(11,36,71,0.06), 0 8px 24px rgba(11,36,71,0.04);
+  --shadow-md: 0 4px 6px -1px rgba(11,36,71,0.08), 0 10px 15px -3px rgba(11,36,71,0.04);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f1f5f9; min-height: 100vh; color: var(--text-dark); }
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F1F5F9; min-height: 100vh; color: var(--text-dark); -webkit-font-smoothing: antialiased; }
 
 /* Header Styling */
 .dash-top {
-  background: linear-gradient(135deg, #0B2447, #15305B);
+  background: linear-gradient(135deg, #0B2447, #19376D);
   color: #fff;
-  padding: 18px 32px;
+  padding: 0 32px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 100;
-  box-shadow: 0 4px 20px rgba(11,36,71,0.15);
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 24px rgba(11,36,71,0.15);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .dash-top h1 {
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 800;
   display: flex;
   align-items: center;
-  gap: 10px;
-  letter-spacing: -0.3px;
+  gap: 12px;
+  letter-spacing: -0.5px;
 }
 .dash-top h1 i {
-  font-size: 1.5rem;
-  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  font-size: 1.6rem;
+  background: linear-gradient(135deg, #60A5FA, #3B82F6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(96,165,250,0.3));
 }
 .dash-user {
   display: flex;
@@ -827,36 +794,40 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f1f5f9; min-he
   font-size: 0.85rem;
 }
 .dash-user span {
-  opacity: 0.9;
-  font-weight: 600;
+  opacity: 0.95;
+  font-weight: 700;
   background: rgba(255,255,255,0.08);
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  letter-spacing: 0.2px;
 }
 .dash-user a {
   color: #fff;
   text-decoration: none;
   padding: 8px 16px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
   border-radius: 10px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 .dash-user a:hover {
-  background: #dc2626;
-  border-color: #dc2626;
-  box-shadow: 0 0 15px rgba(220,38,38,0.45);
+  background: #EF4444;
+  border-color: #EF4444;
+  box-shadow: 0 4px 16px rgba(239,68,68,0.35);
+  transform: translateY(-1px);
 }
 
 /* Layout Wrapper */
 .dash-layout {
   display: flex;
-  min-height: calc(100vh - 66px);
+  padding-top: 70px;
+  min-height: 100vh;
 }
 
 /* Sidebar */
@@ -864,35 +835,39 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f1f5f9; min-he
   width: 280px;
   background: #fff;
   border-right: 1px solid var(--border-color);
-  padding: 24px 0;
+  padding: 20px 0;
   flex-shrink: 0;
-  position: sticky;
-  top: 66px;
-  height: calc(100vh - 66px);
+  position: fixed;
+  top: 70px;
+  left: 0;
+  bottom: 0;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 999;
 }
 .dash-side a {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 24px;
+  padding: 10px 24px;
   font-size: 0.85rem;
   color: var(--text-muted);
   text-decoration: none;
   font-weight: 600;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
   border-left: 4px solid transparent;
-  margin-bottom: 2px;
 }
 .dash-side a:hover {
-  background: #f8fafc;
-  color: var(--primary);
+  background: var(--bg-light);
+  color: var(--accent);
   padding-left: 28px;
 }
 .dash-side a.active {
-  background: #f0f4ff;
-  color: var(--primary);
-  border-left-color: var(--secondary);
+  background: var(--accent-light);
+  color: var(--accent);
+  border-left-color: var(--accent);
   font-weight: 700;
 }
 .dash-side a i {
@@ -905,28 +880,29 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f1f5f9; min-he
   flex: 1;
   padding: 32px;
   min-width: 0;
-  background: #f8fafc;
+  background: var(--bg-light);
+  margin-left: 280px;
 }
 .dash-msg {
   padding: 16px 20px;
   border-radius: 12px;
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+  background: #ECFDF5;
+  color: #065F46;
+  border: 1px solid #A7F3D0;
   font-size: 0.85rem;
   margin-bottom: 24px;
   display: flex;
   align-items: center;
   gap: 10px;
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(22,101,52,0.03);
+  box-shadow: 0 4px 12px rgba(6,95,70,0.03);
 }
 .dash-error {
   padding: 16px 20px;
   border-radius: 12px;
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
+  background: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FEE2E2;
   font-size: 0.85rem;
   margin-bottom: 24px;
   display: flex;
@@ -938,7 +914,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f1f5f9; min-he
   background: #fff;
   border: 1px solid var(--border-color);
   border-radius: 16px;
-  padding: 24px;
+  padding: 28px;
   margin-bottom: 24px;
   box-shadow: var(--shadow-sm);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -947,18 +923,18 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f1f5f9; min-he
   box-shadow: var(--shadow-md);
 }
 .dash-card h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1.15rem;
+  font-weight: 800;
   color: var(--primary);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border-color);
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--bg-light);
 }
 .dash-card h3 i {
-  color: var(--secondary);
+  color: var(--accent);
 }
 
 /* Stat Grid */
@@ -975,28 +951,31 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f1f5f9; min-he
   padding: 24px;
   text-align: center;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
 }
 .stat-box:hover {
   transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent);
 }
 .stat-box .num {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 800;
   color: var(--primary);
+  line-height: 1.2;
 }
 .stat-box .lbl {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
-  margin-top: 4px;
-  font-weight: 600;
+  margin-top: 6px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
 }
 .stat-box i {
-  font-size: 1.75rem;
-  color: var(--secondary);
-  margin-bottom: 10px;
+  font-size: 1.8rem;
+  color: var(--accent);
+  margin-bottom: 12px;
   display: block;
 }
 
@@ -1009,72 +988,80 @@ table {
 }
 th {
   text-align: left;
-  padding: 12px 16px;
-  background: #f8fafc;
+  padding: 14px 18px;
+  background: var(--bg-light);
   color: var(--text-muted);
   font-weight: 700;
   border-bottom: 2px solid var(--border-color);
   font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 td {
-  padding: 14px 16px;
+  padding: 16px 18px;
   border-bottom: 1px solid var(--border-color);
   color: var(--text-dark);
+  font-weight: 500;
 }
 tr:hover td {
-  background: #f8fafc;
+  background: var(--bg-light);
 }
 .badge {
   display: inline-flex;
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: 0.2px;
 }
-.badge-green { background: #dcfce7; color: #15803d; }
-.badge-yellow { background: #fef3c7; color: #b45309; }
-.badge-red { background: #fef2f2; color: #b91c1c; }
-.badge-blue { background: #eff6ff; color: #1d4ed8; }
+.badge-green { background: #D1FAE5; color: #065F46; }
+.badge-yellow { background: #FEF3C7; color: #92400E; }
+.badge-red { background: #FEE2E2; color: #991B1B; }
+.badge-blue { background: #DBEAFE; color: #1E40AF; }
 
 /* Forms */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 20px;
 }
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 .form-group.full {
   grid-column: 1 / -1;
 }
 .form-group label {
   display: block;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.72rem;
+  font-weight: 800;
   color: var(--text-muted);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
 }
 .form-group input, .form-group select, .form-group textarea {
   width: 100%;
-  padding: 10px 14px;
+  padding: 12px 16px;
   border: 1.5px solid var(--border-color);
-  border-radius: 10px;
-  font-size: 0.85rem;
+  border-radius: 12px;
+  font-size: 0.88rem;
   font-family: inherit;
-  background: #f8fafc;
+  background: var(--bg-light);
   color: var(--text-dark);
   transition: all 0.2s ease;
+  font-weight: 500;
 }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
   outline: none;
-  border-color: var(--secondary);
+  border-color: var(--accent);
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(25,55,109,0.08);
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
 }
 .checkbox-group {
   display: flex;
@@ -1141,10 +1128,12 @@ tr:hover td {
 }
 
 @media(max-width:768px) {
+  .dash-top { padding: 0 16px; }
+  .dash-layout { padding-top: 70px; }
   .dash-side { display: none; }
+  .dash-main { padding: 16px; margin-left: 0; }
   .dash-stats { grid-template-columns: repeat(2, 1fr); }
   .form-row { grid-template-columns: 1fr; }
-  .dash-main { padding: 16px; }
 }
 </style>
 </head>
@@ -1158,20 +1147,22 @@ tr:hover td {
 </div>
 <div class="dash-layout">
   <nav class="dash-side">
-    <a href="?tab=overview" class="<?=$tab==='overview'?'active':''?>"><i class="ph ph-squares-four"></i> Overview</a>
+    <a href="?tab=overview" class="<?=$tab==='overview'?'active':''?>"><i class="ph ph-squares-four"></i> College Info</a>
     <a href="?tab=identity" class="<?=$tab==='identity'?'active':''?>"><i class="ph ph-notebook"></i> Identity & Contact</a>
-    <a href="?tab=about" class="<?=$tab==='about'?'active':''?>"><i class="ph ph-info"></i> About & Amenities</a>
+    <a href="?tab=infrastructure" class="<?=$tab==='infrastructure'?'active':''?>"><i class="ph ph-buildings"></i> Infrastructure</a>
     <a href="?tab=seo" class="<?=$tab==='seo'?'active':''?>"><i class="ph ph-globe"></i> SEO & Publish</a>
     <a href="?tab=courses" class="<?=$tab==='courses'?'active':''?>"><i class="ph ph-book-open"></i> Courses & Fees</a>
+    <a href="?tab=reviews" class="<?=$tab==='reviews'?'active':''?>"><i class="ph ph-star"></i> Reviews</a>
+    <a href="?tab=admissions" class="<?=$tab==='admissions'?'active':''?>"><i class="ph ph-check-square"></i> Admissions</a>
     <a href="?tab=placements" class="<?=$tab==='placements'?'active':''?>"><i class="ph ph-chart-line-up"></i> Placements</a>
-    <a href="?tab=cutoffs" class="<?=$tab==='cutoffs'?'active':''?>"><i class="ph ph-bar-chart"></i> Cutoffs</a>
+    <a href="?tab=cutoffs" class="<?=$tab==='cutoffs'?'active':''?>"><i class="ph ph-scissors"></i> Cut-Offs</a>
     <a href="?tab=seats" class="<?=$tab==='seats'?'active':''?>"><i class="ph ph-table"></i> Seat Matrix</a>
-    <a href="?tab=media" class="<?=$tab==='media'?'active':''?>"><i class="ph ph-images"></i> Media & Gallery</a>
-    <a href="?tab=faqs" class="<?=$tab==='faqs'?'active':''?>"><i class="ph ph-question"></i> FAQs</a>
+    <a href="?tab=rankings" class="<?=$tab==='rankings'?'active':''?>"><i class="ph ph-trophy"></i> Rankings</a>
+    <a href="?tab=media" class="<?=$tab==='media'?'active':''?>"><i class="ph ph-images"></i> Gallery</a>
     <a href="?tab=faculty" class="<?=$tab==='faculty'?'active':''?>"><i class="ph ph-users"></i> Faculty</a>
-    <a href="?tab=scholarships" class="<?=$tab==='scholarships'?'active':''?>"><i class="ph ph-graduation-cap"></i> Scholarships</a>
-    <a href="?tab=updates" class="<?=$tab==='updates'?'active':''?>"><i class="ph ph-megaphone"></i> News & Updates</a>
-    <a href="?tab=qna" class="<?=$tab==='qna'?'active':''?>"><i class="ph ph-chats-teardrop"></i> Student Q&A</a>
+    <a href="?tab=compare" class="<?=$tab==='compare'?'active':''?>"><i class="ph ph-scales"></i> Compare</a>
+    <a href="?tab=qna" class="<?=$tab==='qna'?'active':''?>"><i class="ph ph-chats-teardrop"></i> Q&A</a>
+    <a href="?tab=updates" class="<?=$tab==='updates'?'active':''?>"><i class="ph ph-megaphone"></i> News</a>
     <a href="?tab=categories" class="<?=$tab==='categories'?'active':''?>"><i class="ph ph-folders"></i> Course Categories</a>
     <a href="?tab=leads" class="<?=$tab==='leads'?'active':''?>"><i class="ph ph-funnel"></i> Leads</a>
     <a href="?tab=submissions" class="<?=$tab==='submissions'?'active':''?>"><i class="ph ph-clock-countdown"></i> My Submissions</a>
@@ -1189,7 +1180,7 @@ tr:hover td {
     <div class="dash-stats">
       <div class="stat-box"><i class="ph ph-book-open"></i><div class="num"><?=count($courses)?></div><div class="lbl">Courses</div></div>
       <div class="stat-box"><i class="ph ph-chart-line-up"></i><div class="num"><?=count($placements)?></div><div class="lbl">Placements</div></div>
-      <div class="stat-box"><i class="ph ph-bar-chart"></i><div class="num"><?=count($cutoffs)?></div><div class="lbl">Cutoffs</div></div>
+      <div class="stat-box"><i class="ph ph-scissors"></i><div class="num"><?=count($cutoffs)?></div><div class="lbl">Cutoffs</div></div>
       <div class="stat-box"><i class="ph ph-users-three"></i><div class="num"><?=count($leads)?></div><div class="lbl">Leads</div></div>
     </div>
     <div class="dash-card">
@@ -1424,7 +1415,7 @@ tr:hover td {
     }
     </script>
 
-    <?php elseif($tab==='about'): ?>
+    <?php elseif($tab==='infrastructure'): ?>
     <form method="POST">
       <input type="hidden" name="action" value="update_about">
       
@@ -1449,49 +1440,6 @@ tr:hover td {
         <div class="form-group">
             <label>Awards (One per line)</label>
             <textarea name="awards_json" rows="3"><?=jsonToLines(getValue($content, 'awards_json'))?></textarea>
-        </div>
-      </div>
-
-      <div class="dash-card">
-        <h3><i class="ph ph-check-square"></i> Admissions Info</h3>
-        <div class="form-group">
-            <label>Admission Process Description</label>
-            <textarea name="admission_process" rows="4"><?=getValue($admissions, 'admission_process')?></textarea>
-        </div>
-        <div class="form-group">
-            <label>Accepted Exams (One per line)</label>
-            <textarea name="accepted_exams" rows="3"><?=jsonToLines(getValue($admissions, 'accepted_exams'))?></textarea>
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label>Admission Start Date</label>
-                <input type="date" name="admission_start_date" value="<?=getValue($admissions, 'admission_start_date')?>">
-            </div>
-            <div class="form-group">
-                <label>Admission End Date</label>
-                <input type="date" name="admission_end_date" value="<?=getValue($admissions, 'admission_end_date')?>">
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label>Management Quota Seats</label>
-                <input type="number" name="management_quota_seats" value="<?=getValue($admissions, 'management_quota_seats')?>">
-            </div>
-            <div class="form-group">
-                <label>NRI Quota Seats</label>
-                <input type="number" name="nri_quota_seats" value="<?=getValue($admissions, 'nri_quota_seats')?>">
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label>Application Mode</label>
-                <input type="text" name="application_mode" placeholder="e.g. Online / Offline" value="<?=getValue($admissions, 'application_mode')?>">
-            </div>
-            <div class="form-group" style="padding-top:20px;">
-                <div class="checkbox-group"><input type="checkbox" name="merit_based" <?=!empty($admissions['merit_based']) ? 'checked' : ''?> id="mb"><label for="mb">Merit Based</label></div>
-                <div class="checkbox-group"><input type="checkbox" name="direct_admission" <?=!empty($admissions['direct_admission']) ? 'checked' : ''?> id="da"><label for="da">Direct Admission</label></div>
-                <div class="checkbox-group"><input type="checkbox" name="lateral_entry_available" <?=!empty($admissions['lateral_entry_available']) ? 'checked' : ''?> id="le"><label for="le">Lateral Entry Available</label></div>
-            </div>
         </div>
       </div>
 
@@ -1545,9 +1493,203 @@ tr:hover td {
             <div class="checkbox-group"><input type="checkbox" name="ac_available" <?=!empty($hostels['ac_available']) ? 'checked' : ''?> id="hst3"><label for="hst3">A/C Available</label></div>
             <div class="checkbox-group"><input type="checkbox" name="laundry_available" <?=!empty($hostels['laundry_available']) ? 'checked' : ''?> id="hst4"><label for="hst4">Laundry Available</label></div>
         </div>
-        <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Save About & Infrastructure</button>
+        <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Save Info & Hostels</button>
       </div>
     </form>
+
+    <?php elseif($tab==='admissions'): ?>
+    <form method="POST">
+        <input type="hidden" name="action" value="update_admissions">
+        <div class="dash-card">
+            <h3><i class="ph ph-check-square"></i> Admissions Info</h3>
+            <div class="form-group">
+                <label>Admission Process Description</label>
+                <textarea name="admission_process" rows="4"><?=getValue($admissions, 'admission_process')?></textarea>
+            </div>
+            <div class="form-group">
+                <label>Accepted Exams (One per line)</label>
+                <textarea name="accepted_exams" rows="3"><?=jsonToLines(getValue($admissions, 'accepted_exams'))?></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Admission Start Date</label>
+                    <input type="date" name="admission_start_date" value="<?=getValue($admissions, 'admission_start_date')?>">
+                </div>
+                <div class="form-group">
+                    <label>Admission End Date</label>
+                    <input type="date" name="admission_end_date" value="<?=getValue($admissions, 'admission_end_date')?>">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Management Quota Seats</label>
+                    <input type="number" name="management_quota_seats" value="<?=getValue($admissions, 'management_quota_seats')?>">
+                </div>
+                <div class="form-group">
+                    <label>NRI Quota Seats</label>
+                    <input type="number" name="nri_quota_seats" value="<?=getValue($admissions, 'nri_quota_seats')?>">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Application Mode</label>
+                    <input type="text" name="application_mode" placeholder="e.g. Online / Offline" value="<?=getValue($admissions, 'application_mode')?>">
+                </div>
+                <div class="form-group" style="padding-top:20px;">
+                    <div class="checkbox-group"><input type="checkbox" name="merit_based" <?=!empty($admissions['merit_based']) ? 'checked' : ''?> id="mb"><label for="mb">Merit Based</label></div>
+                    <div class="checkbox-group"><input type="checkbox" name="direct_admission" <?=!empty($admissions['direct_admission']) ? 'checked' : ''?> id="da"><label for="da">Direct Admission</label></div>
+                    <div class="checkbox-group"><input type="checkbox" name="lateral_entry_available" <?=!empty($admissions['lateral_entry_available']) ? 'checked' : ''?> id="le"><label for="le">Lateral Entry Available</label></div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Save Admissions Info</button>
+        </div>
+    </form>
+
+    <?php elseif($tab==='reviews'): ?>
+    <div class="dash-card">
+      <h3><i class="ph ph-star"></i> Student Reviews & Feedback (<?=count($reviews)?>)</h3>
+      <?php if($reviews): ?>
+      <?php foreach($reviews as $r): ?>
+      <div style="border: 1px solid var(--border-color); border-radius:12px; padding:18px; margin-bottom:16px; background:#fafbfc;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+              <span style="font-weight:700; color:var(--primary);"><?=htmlspecialchars($r['user_name'] ?: 'Student')?></span>
+              <div>
+                  <?php for($i=1; $i<=5; $i++): ?>
+                      <i class="ph-fill ph-star" style="color: <?=$i<=$r['overall_rating']?'#f59e0b':'#e2e8f0'?>"></i>
+                  <?php endfor; ?>
+              </div>
+          </div>
+          <h4 style="font-size:0.9rem; font-weight:700; margin-bottom:8px;"><?=htmlspecialchars($r['review_title'])?></h4>
+          <p style="font-size:0.82rem; color:var(--text-dark); line-height:1.5;"><?=nl2br(htmlspecialchars($r['review_body']))?></p>
+          <div style="margin-top:10px; display:flex; gap:16px; font-size:0.75rem; color:var(--text-muted);">
+              <span><strong>Pros:</strong> <?=htmlspecialchars($r['pros'] ?: 'None')?></span>
+              <span><strong>Cons:</strong> <?=htmlspecialchars($r['cons'] ?: 'None')?></span>
+          </div>
+      </div>
+      <?php endforeach; ?>
+      <?php else: ?><div class="empty">No student reviews received yet.</div><?php endif; ?>
+    </div>
+
+    <?php elseif($tab==='rankings'): ?>
+    <div class="dash-card">
+      <h3><i class="ph ph-trophy"></i> Rankings History (<?=count($rankings)?>)</h3>
+      <?php if($rankings): ?>
+      <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Ranking Body</th><th>Year</th><th>Category</th><th>Rank Position</th><th>Rank Band</th><th>Score</th><th>Actions</th></tr></thead>
+        <tbody>
+            <?php foreach($rankings as $rk): ?>
+            <tr>
+                <td style="font-weight:700; color:var(--primary);"><?=htmlspecialchars($rk['ranking_body'])?></td>
+                <td><?=$rk['ranking_year']?></td>
+                <td><?=htmlspecialchars($rk['category'])?></td>
+                <td><?=$rk['rank_position'] ?: '-'?></td>
+                <td><?=htmlspecialchars($rk['rank_band'] ?: '-')?></td>
+                <td><?=$rk['score'] ?: '-'?></td>
+                <td>
+                    <form method="POST" style="display:inline;" onsubmit="return confirm('Delete ranking?');">
+                        <input type="hidden" name="action" value="delete_ranking">
+                        <input type="hidden" name="ranking_id" value="<?=$rk['id']?>">
+                        <button type="submit" style="background:none; border:none; color:#dc2626; cursor:pointer;" title="Delete"><i class="ph ph-trash" style="font-size:1.2rem;"></i></button>
+                    </form>
+                </td>
+            </tr>
+            <?php endforeach;?>
+        </tbody>
+      </table>
+      </div>
+      <?php else: ?><div class="empty">No rankings posted yet.</div><?php endif; ?>
+    </div>
+
+    <div class="dash-card">
+      <h3><i class="ph ph-plus-circle"></i> Add Ranking</h3>
+      <form method="POST">
+        <input type="hidden" name="action" value="add_ranking">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Ranking Body *</label>
+                <select name="ranking_body" required>
+                    <option>NIRF</option><option>QS</option><option>Times</option>
+                    <option>Outlook</option><option>IndiaToday</option>
+                    <option>NAAC</option><option>Careers360</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Ranking Year *</label>
+                <input type="number" name="ranking_year" value="<?=date('Y')?>" required>
+            </div>
+            <div class="form-group">
+                <label>Category *</label>
+                <select name="category" required>
+                    <option>Overall</option><option>Engineering</option>
+                    <option>Management</option><option>Medical</option>
+                    <option>Law</option><option>Arts</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Rank Position</label>
+                <input type="number" name="rank_position" placeholder="e.g. 23">
+            </div>
+            <div class="form-group">
+                <label>Rank Band (If exact rank not given)</label>
+                <input type="text" name="rank_band" placeholder="e.g. 51-100">
+            </div>
+            <div class="form-group">
+                <label>Score</label>
+                <input type="number" step="0.01" name="score" placeholder="e.g. 78.45">
+            </div>
+            <div class="form-group full">
+                <label>Source URL (Link details)</label>
+                <input type="url" name="source_url">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="ph ph-plus"></i> Add Ranking</button>
+      </form>
+    </div>
+
+    <?php elseif($tab==='compare'): ?>
+    <div class="dash-card">
+      <h3><i class="ph ph-scales"></i> Compare Colleges</h3>
+      <p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:16px;">Compare your college against other colleges listed on AdmissionSeason in real-time.</p>
+      
+      <form method="GET" style="margin-bottom: 24px;">
+          <input type="hidden" name="tab" value="compare">
+          <div class="form-row" style="align-items: flex-end;">
+              <div class="form-group" style="margin-bottom:0;">
+                  <label>Select College to Compare With</label>
+                  <select name="compare_id" required>
+                      <option value="">Choose college...</option>
+                      <?php foreach($all_colleges as $c): ?>
+                          <option value="<?=$c['id']?>" <?=(isset($_GET['compare_id']) && $_GET['compare_id']==$c['id']?'selected':'')?>><?=htmlspecialchars($c['name'])?></option>
+                      <?php endforeach; ?>
+                  </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Run Comparison</button>
+          </div>
+      </form>
+
+      <?php if ($compare_result): ?>
+      <div style="overflow-x:auto; margin-top:20px;">
+          <table style="border: 1px solid var(--border-color); border-radius:10px;">
+              <thead>
+                  <tr>
+                      <th style="width:250px;">Metric</th>
+                      <th><?=htmlspecialchars($compare_result['my_name'])?> (You)</th>
+                      <th><?=htmlspecialchars($compare_result['other_name'])?></th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr><td style="font-weight:600;">College Type</td><td><?=ucfirst($compare_result['my_type'])?></td><td><?=ucfirst($compare_result['other_type'])?></td></tr>
+                  <tr><td style="font-weight:600;">Founded Year</td><td><?=$compare_result['my_est']?></td><td><?=$compare_result['other_est']?></td></tr>
+                  <tr><td style="font-weight:600;">NAAC Grade</td><td><span class="badge badge-blue"><?=$compare_result['my_naac']?></span></td><td><span class="badge badge-blue"><?=$compare_result['other_naac']?></span></td></tr>
+                  <tr><td style="font-weight:600;">NIRF Ranking</td><td><strong><?=$compare_result['my_nirf']?></strong></td><td><strong><?=$compare_result['other_nirf']?></strong></td></tr>
+                  <tr><td style="font-weight:600;">Avg Salary Package (LPA)</td><td>₹<?=$compare_result['my_avg_lpa']?> LPA</td><td>₹<?=$compare_result['other_avg_lpa']?> LPA</td></tr>
+                  <tr><td style="font-weight:600;">Highest Salary Package (LPA)</td><td>₹<?=$compare_result['my_highest_lpa']?> LPA</td><td>₹<?=$compare_result['other_highest_lpa']?> LPA</td></tr>
+              </tbody>
+          </table>
+      </div>
+      <?php endif; ?>
+    </div>
 
     <?php elseif($tab==='seo'): ?>
     <form method="POST" enctype="multipart/form-data">
@@ -1764,7 +1906,7 @@ tr:hover td {
 
     <?php elseif($tab==='cutoffs'): ?>
     <div class="dash-card">
-      <h3><i class="ph ph-bar-chart"></i> Cutoffs (<?=count($cutoffs)?>)</h3>
+      <h3><i class="ph ph-scissors"></i> Cutoffs (<?=count($cutoffs)?>)</h3>
       <?php if($cutoffs): ?>
       <div style="overflow-x:auto;">
       <table>
@@ -1854,22 +1996,14 @@ tr:hover td {
       <?php if($seatMatrix): ?>
       <div style="overflow-x:auto;">
       <table>
-        <thead><tr><th>Course</th><th>Category</th><th>Total Seats</th><th>Entrance Exam</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Course</th><th>Category</th><th>Total Seats</th><th>Year</th><th>Actions</th></tr></thead>
         <tbody>
         <?php foreach($seatMatrix as $sm): ?>
         <tr>
-          <td style="font-weight:600">
-             <?php
-             $cName = '-';
-             foreach($courses as $c) {
-                 if($c['id'] == $sm['course_id']) { $cName = $c['course_name']; break; }
-             }
-             echo htmlspecialchars($cName);
-             ?>
-          </td>
+          <td style="font-weight:600"><?=htmlspecialchars($sm['course_name'] ?: '-')?></td>
           <td><span class="badge badge-blue"><?=htmlspecialchars($sm['category'])?></span></td>
           <td><?=$sm['total_seats'] ?: '-'?></td>
-          <td><?=htmlspecialchars($sm['entrance_exam']??'-')?></td>
+          <td><?=$sm['year']?></td>
           <td>
              <form method="POST" style="display:inline;" onsubmit="return confirm('Delete seat matrix?');">
                  <input type="hidden" name="action" value="delete_seat_matrix">
@@ -1914,11 +2048,15 @@ tr:hover td {
           </div>
           <div class="form-group">
               <label>Total Seats</label>
-              <input type="number" name="total_seats">
+              <input type="number" name="total_seats" required>
           </div>
           <div class="form-group">
-              <label>Entrance Exam required</label>
-              <input type="text" name="entrance_exam" placeholder="e.g. JEE Main / NEET">
+              <label>Year</label>
+              <input type="number" name="year" value="<?=date('Y')?>" required>
+          </div>
+          <div class="form-group">
+              <label>Source</label>
+              <input type="text" name="source" placeholder="e.g. JoSAA / State Counselling">
           </div>
         </div>
         <div style="text-align: right; margin-top:16px;">
@@ -2210,86 +2348,6 @@ tr:hover td {
       </form>
     </div>
 
-    <?php elseif($tab==='scholarships'): ?>
-    <div class="dash-card">
-      <h3><i class="ph ph-graduation-cap"></i> Scholarships Offered (<?=count($scholarships)?>)</h3>
-      <?php if($scholarships): ?>
-      <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>Name</th><th>Type</th><th>Amount</th><th>Eligibility</th><th>Actions</th></tr></thead>
-        <tbody>
-            <?php foreach($scholarships as $s): ?>
-            <tr>
-                <td style="font-weight:600; color:var(--primary);"><?=htmlspecialchars($s['scholarship_name'])?></td>
-                <td style="text-transform:capitalize;"><span class="badge badge-blue"><?=$s['scholarship_type']?></span></td>
-                <td>
-                    <?php if($s['amount_type'] == 'percentage') echo $s['amount'].'%'; 
-                          elseif($s['amount_type'] == 'full_tuition') echo 'Full Tuition Waiver';
-                          else echo '₹' . number_format($s['amount']); ?>
-                </td>
-                <td><?=htmlspecialchars($s['eligibility_criteria'] ?: '-')?></td>
-                <td>
-                    <form method="POST" style="display:inline;" onsubmit="return confirm('Delete scholarship?');">
-                        <input type="hidden" name="action" value="delete_scholarship">
-                        <input type="hidden" name="scholarship_id" value="<?=$s['id']?>">
-                        <button type="submit" style="background:none; border:none; color:#dc2626; cursor:pointer;" title="Delete"><i class="ph ph-trash" style="font-size:1.2rem;"></i></button>
-                    </form>
-                </td>
-            </tr>
-            <?php endforeach;?>
-        </tbody>
-      </table>
-      </div>
-      <?php else: ?><div class="empty">No scholarship details added yet.</div><?php endif; ?>
-    </div>
-
-    <div class="dash-card">
-      <h3><i class="ph ph-plus-circle"></i> Add Scholarship Details</h3>
-      <form method="POST">
-        <input type="hidden" name="action" value="add_scholarship">
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Scholarship Name *</label>
-                <input type="text" name="scholarship_name" required>
-            </div>
-            <div class="form-group">
-                <label>Scholarship Type</label>
-                <select name="scholarship_type">
-                    <option value="merit">Merit Based</option>
-                    <option value="need">Need / EWS Based</option>
-                    <option value="sports">Sports Quota</option>
-                    <option value="minority">Minority Category</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Amount (Value)</label>
-                <input type="number" name="amount" placeholder="e.g. 50000 or 50 for percentage">
-            </div>
-            <div class="form-group">
-                <label>Amount Type</label>
-                <select name="amount_type">
-                    <option value="fixed">Fixed cash amount (₹)</option>
-                    <option value="percentage">Percentage waiver (%)</option>
-                    <option value="full_tuition">Full Tuition Fee waiver</option>
-                </select>
-            </div>
-            <div class="form-group full">
-                <label>Eligibility Criteria</label>
-                <textarea name="eligibility_criteria" rows="2" placeholder="e.g. 90% in 12th board exams"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Application Link / Website</label>
-                <input type="url" name="apply_link">
-            </div>
-            <div class="form-group checkbox-group" style="padding-top:24px;">
-                <input type="checkbox" name="renewable" id="ren" checked>
-                <label for="ren">Renewable yearly based on performance</label>
-            </div>
-        </div>
-        <button type="submit" class="btn btn-primary"><i class="ph ph-plus"></i> Add Scholarship</button>
-      </form>
-    </div>
-
     <?php elseif($tab==='updates'): ?>
     <div class="dash-card">
       <h3><i class="ph ph-megaphone"></i> News & Announcements (<?=count($updates)?>)</h3>
@@ -2360,7 +2418,7 @@ tr:hover td {
                 <option value="draft">Save as Draft</option>
             </select>
         </div>
-        <button type="submit" class="btn btn-primary"><i class="ph ph-plus"></i> Post Update</button>
+        <button type="submit" class="btn btn-primary"><i class="ph ph-plus"></i> Post News / Blog / Update</button>
       </form>
     </div>
 
@@ -2472,5 +2530,39 @@ tr:hover td {
     <?php endif; ?>
   </main>
 </div>
+<script>
+$(document).ready(function() {
+    if (typeof $.fn.trumbowyg === 'function') {
+        $('textarea[name="about_text"], textarea[name="admission_process"], textarea[name="description"]').trumbowyg({
+            btns: [
+                ['viewHTML'],
+                ['undo', 'redo'],
+                ['formatting'],
+                ['strong', 'em', 'del'],
+                ['superscript', 'subscript'],
+                ['link'],
+                ['insertImage'],
+                ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
+                ['unorderedList', 'orderedList'],
+                ['horizontalRule'],
+                ['removeformat'],
+                ['fullscreen']
+            ]
+        });
+    }
+});
+</script>
+<style>
+.trumbowyg-box, .trumbowyg-editor {
+    border-radius: 10px;
+    background: #f8fafc !important;
+    font-family: inherit;
+    border-color: var(--border-color) !important;
+}
+.trumbowyg-button-pane {
+    background: #f1f5f9 !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+</style>
 </body>
 </html>
