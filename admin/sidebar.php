@@ -116,6 +116,20 @@ if (isset($pdo)) {
         <a href="partners.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['partners.php']) ? 'active' : ''; ?>"><i class="ph ph-handshake"></i> Partner Accounts</a>
         <a href="partner_requests.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['partner_requests.php']) ? 'active' : ''; ?>"><i class="ph ph-envelope-open"></i> Content Requests</a>
         
+        <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">College Portal</div>
+        <a href="college_accounts.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['college_accounts.php','college_submissions.php']) ? 'active' : ''; ?>" style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="display:flex; align-items:center; gap:12px;"><i class="ph ph-graduation-cap"></i> Accounts</span>
+            <?php try { $pendingCount = (int)$pdo->query("SELECT COUNT(*) FROM college_accounts WHERE status='pending'")->fetchColumn(); if($pendingCount > 0): ?>
+            <span style="background:#fbbf24;color:#19376D;font-size:0.7rem;padding:2px 6px;border-radius:10px;font-weight:700;"><?= $pendingCount ?></span>
+            <?php endif; } catch(Exception $e) {} ?>
+        </a>
+        <a href="college_submissions.php" class="<?php echo ($current_page == 'college_submissions.php') ? 'active' : ''; ?>" style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="display:flex; align-items:center; gap:12px;"><i class="ph ph-inbox"></i> Submissions</span>
+            <?php try { $subCount = (int)$pdo->query("SELECT COUNT(*) FROM college_submissions WHERE status='pending'")->fetchColumn(); if($subCount > 0): ?>
+            <span style="background:#fbbf24;color:#19376D;font-size:0.7rem;padding:2px 6px;border-radius:10px;font-weight:700;"><?= $subCount ?></span>
+            <?php endif; } catch(Exception $e) {} ?>
+        </a>
+        
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">System</div>
         <a href="audit_logs.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['audit_logs.php']) ? 'active' : ''; ?>"><i class="ph ph-file-search"></i> Audit Logs</a>
         <a href="alerts.php" style="display:flex; justify-content:space-between; align-items:center;" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['alerts.php']) ? 'active' : ''; ?>">

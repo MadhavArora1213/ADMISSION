@@ -118,7 +118,7 @@ $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.feat
 <meta name="description" content="India's leading college discovery platform. Find top colleges, exams, courses, fees, rankings, and admission updates.">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=14">
+  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=15">
 </head>
 <body>
 
@@ -133,6 +133,7 @@ $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.feat
 
 <?php include 'includes/navbar.php'; ?>
 <?php include 'includes/hero.php'; ?>
+<?php include 'includes/stats.php'; ?>
 <?php include 'includes/marquee.php'; ?>
 <?php include 'includes/streams.php'; ?>
 <?php include 'includes/top_ranked.php'; ?>
@@ -142,7 +143,6 @@ $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.feat
 <?php include 'includes/courses.php'; ?>
 <?php include 'includes/reviews.php'; ?>
 <?php include 'includes/news.php'; ?>
-<?php include 'includes/stats.php'; ?>
 
 <!-- ═══ FOOTER ═══ -->
 <?php include 'includes/footer.php'; ?>

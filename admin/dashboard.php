@@ -462,6 +462,60 @@ try {
                     </div>
                 </div>
 
+                <!-- College Portal Stats -->
+                <?php
+                $pendingAccounts = safeCount($pdo, "SELECT COUNT(*) FROM college_accounts WHERE status='pending'");
+                $approvedAccounts = safeCount($pdo, "SELECT COUNT(*) FROM college_accounts WHERE status='approved'");
+                $totalAccounts = safeCount($pdo, "SELECT COUNT(*) FROM college_accounts");
+                $pendingSubmissions = safeCount($pdo, "SELECT COUNT(*) FROM college_submissions WHERE status='pending'");
+                ?>
+                <div class="section-title" style="margin-top:10px;">College Portal</div>
+                <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <a href="college_accounts.php" style="text-decoration:none;">
+                        <div class="kpi-card" style="border-left:3px solid #19376D;">
+                            <div class="kpi-header">
+                                <span class="kpi-title">College Accounts</span>
+                                <i class="ph-fill ph-graduation-cap kpi-icon bg-blue"></i>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-value"><?= number_format($totalAccounts) ?></span>
+                                <?php if($pendingAccounts > 0): ?>
+                                <span class="kpi-trend" style="background:#fef3c7;color:#92400e;"><?= $pendingAccounts ?> pending</span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="college_submissions.php" style="text-decoration:none;">
+                        <div class="kpi-card" style="border-left:3px solid #059669;">
+                            <div class="kpi-header">
+                                <span class="kpi-title">Pending Submissions</span>
+                                <i class="ph-fill ph-inbox kpi-icon bg-green"></i>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-value"><?= number_format($pendingSubmissions) ?></span>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="kpi-card" style="border-left:3px solid #7c3aed;">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Approved Accounts</span>
+                            <i class="ph-fill ph-check-circle kpi-icon bg-purple"></i>
+                        </div>
+                        <div class="kpi-value-row">
+                            <span class="kpi-value"><?= number_format($approvedAccounts) ?></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card" style="border-left:3px solid #ea580c;">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Portal Actions</span>
+                            <i class="ph-fill ph-link kpi-icon bg-orange"></i>
+                        </div>
+                        <div class="kpi-value-row">
+                            <span style="font-size:0.85rem;color:rgba(15,23,42,0.65);">Manage institute portal access, approve accounts & review submissions</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="section-title" style="margin-top:10px;">Engagement & Activity</div>
 
                 <div class="widget-grid">
