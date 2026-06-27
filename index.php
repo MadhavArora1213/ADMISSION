@@ -59,7 +59,7 @@ $sqlC = "SELECT c.id,c.name,c.slug,c.college_type,c.naac_grade,c.ranking_nirf,c.
                 (SELECT MIN(annual_fee) FROM college_courses cc WHERE cc.college_id=c.id) AS min_fee
          FROM colleges c LEFT JOIN states s ON c.state_id=s.id LEFT JOIN cities ct ON c.city_id=ct.id
          LEFT JOIN college_media cm ON cm.college_id=c.id AND (cm.image_type IS NULL OR cm.image_type='cover' OR cm.image_type='campus')
-         WHERE c.status='active' AND c.is_featured=1 GROUP BY c.id ORDER BY c.featured_order ASC, c.ranking_nirf ASC LIMIT 10";
+         WHERE c.status='active' AND c.is_featured=1 GROUP BY c.id ORDER BY (c.featured_order > 0) DESC, c.featured_order ASC, c.ranking_nirf ASC LIMIT 6";
 $featuredColleges = cAll($pdo, $sqlC);
 if (empty($featuredColleges)) $featuredColleges = cAll($pdo, str_replace("AND c.is_featured=1","AND c.overall_rating_avg>0",$sqlC));
 // Prefer colleges with actual data for rankings display
@@ -118,7 +118,7 @@ $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.feat
 <meta name="description" content="India's leading college discovery platform. Find top colleges, exams, courses, fees, rankings, and admission updates.">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=13">
+  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=14">
 </head>
 <body>
 

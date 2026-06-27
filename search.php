@@ -110,7 +110,7 @@ $totalResults = array_sum(array_map('count', $results));
     <title>Search Results for "<?= htmlspecialchars($q) ?>" - AdmissionSeason</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="<?= $navBase ?>/assets/css/style.css">
     <style>
         .search-page { max-width: 900px; margin: 0 auto; padding: 30px 20px 60px; }

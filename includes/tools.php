@@ -7,9 +7,9 @@
       <p>Smart tools to help you make the right college decision</p>
     </div>
     <div class="tools-grid">
-      <a href="#" class="tool-card tool-card-accent reveal reveal-delay-1">
+      <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/compare.php" class="tool-card tool-card-accent reveal reveal-delay-1">
         <div class="tool-card-left">
-          <div class="tool-icon"><i class="ph ph-arrow-counter-clockwise"></i></div>
+          <div class="tool-icon"><i class="ph ph-scales"></i></div>
           <div>
             <h3>College Compare</h3>
             <p>Compare fees, placements, rankings side-by-side</p>
@@ -17,9 +17,9 @@
         </div>
         <span class="tool-cta">Compare Now <i class="ph ph-arrow-right"></i></span>
       </a>
-      <a href="#" class="tool-card reveal reveal-delay-2">
+      <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/counselling.php" class="tool-card reveal reveal-delay-2">
         <div class="tool-card-left">
-          <div class="tool-icon"><i class="ph ph-calculator"></i></div>
+          <div class="tool-icon"><i class="ph ph-chart-line-up"></i></div>
           <div>
             <h3>College Predictor</h3>
             <p>Know your admission chances by exam score</p>
@@ -27,7 +27,7 @@
         </div>
         <span class="tool-cta">Predict Now <i class="ph ph-arrow-right"></i></span>
       </a>
-      <a href="#" class="tool-card reveal reveal-delay-3">
+      <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/ask-question.php" class="tool-card reveal reveal-delay-3">
         <div class="tool-card-left">
           <div class="tool-icon"><i class="ph ph-chat-circle"></i></div>
           <div>
@@ -36,16 +36,6 @@
           </div>
         </div>
         <span class="tool-cta">Ask Now <i class="ph ph-arrow-right"></i></span>
-      </a>
-      <a href="#" class="tool-card reveal reveal-delay-4">
-        <div class="tool-card-left">
-          <div class="tool-icon"><i class="ph ph-bell"></i></div>
-          <div>
-            <h3>Admission Alerts</h3>
-            <p>Never miss deadlines or exam notifications</p>
-          </div>
-        </div>
-        <span class="tool-cta">Subscribe <i class="ph ph-arrow-right"></i></span>
       </a>
     </div>
   </div>

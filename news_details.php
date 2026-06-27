@@ -251,7 +251,7 @@ $popular = $pdo->query("
 
 // Sidebar: Categories
 $sidebarCats = $pdo->query("
-    SELECT c.category_name, COUNT(a.id) as count 
+    SELECT c.category_name, c.category_slug, COUNT(a.id) as count 
     FROM article_categories c 
     LEFT JOIN articles a ON a.category_id = c.id AND a.status='published' 
     GROUP BY c.id ORDER BY count DESC LIMIT 8
@@ -381,7 +381,7 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
       <a href="news.php">News</a>
       <i class="ph ph-caret-right"></i>
       <?php if (!empty($article['category_name'])): ?>
-        <a href="news.php"><?= htmlspecialchars($article['category_name']) ?></a>
+        <a href="news.php?category=<?=urlencode($article['category_slug']) ?>"><?= htmlspecialchars($article['category_name']) ?></a>
         <i class="ph ph-caret-right"></i>
       <?php endif; ?>
       <span><?= htmlspecialchars(mb_strimwidth($article['article_title'], 0, 50, '...')) ?></span>
@@ -651,13 +651,16 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
           <?php foreach ($sidebarCats as $sc): ?>
             <?php if ($sc['count'] > 0): ?>
             <li>
-              <a href="news.php">
+              <a href="news.php?category=<?=urlencode($sc['category_slug']) ?>">
                 <span><i class="ph ph-caret-right"></i> <?= htmlspecialchars($sc['category_name']) ?></span>
                 <span>(<?= $sc['count'] ?>)</span>
               </a>
             </li>
             <?php endif; ?>
           <?php endforeach; ?>
+          <?php if (empty($sidebarCats)): ?>
+            <li><a href="news.php"><i class="ph ph-caret-right"></i> All Articles</a></li>
+          <?php endif; ?>
         </ul>
       </div>
 

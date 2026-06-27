@@ -77,7 +77,7 @@ $rkStates = $pdo->query("SELECT id, name FROM states ORDER BY name ASC")->fetchA
     <title>College Rankings 2026 - AdmissionSeason</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="/ADMISSION/assets/css/style.css">
     <style>
         .rkp{max-width:1100px;margin:0 auto;padding:30px 20px 60px}
@@ -140,7 +140,7 @@ $rkStates = $pdo->query("SELECT id, name FROM states ORDER BY name ASC")->fetchA
         .rkp-page .off{opacity:.35;pointer-events:none}
         .rkp-info{text-align:center;margin-top:12px;color:rgba(15,23,42,.4);font-size:.82rem;font-family:var(--font2)}.rkp-info strong{color:var(--primary);font-weight:800}
 
-        @media(max-width:768px){.rkp{padding:20px 12px 40px}.rkp-hero h1{font-size:1.5rem}.podium{flex-direction:column;align-items:center;gap:12px}.pod-item{max-width:100%}.pod-bar{display:none}.rkp-tw{overflow-x:auto}.rkp-tbl{min-width:700px}}
+        @media(max-width:768px){.rkp{padding:20px 12px 40px}.rkp-hero h1{font-size:1.5rem}.podium{flex-direction:column;align-items:center;gap:12px}.pod-item{max-width:100%;order:unset!important}.pod-bar{display:none}.rkp-tw{overflow-x:auto}.rkp-tbl{min-width:700px}}
     </style>
 </head>
 <body>

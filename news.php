@@ -25,6 +25,7 @@ if (!function_exists('cImg')) {
 }
 
 $type = $_GET['type'] ?? 'all';
+$categorySlug = $_GET['category'] ?? '';
 $valid_types = ['all', 'news', 'blog', 'guide', 'exam_update', 'opinion', 'ranking'];
 
 if (!in_array($type, $valid_types)) {
@@ -36,23 +37,39 @@ $query = "SELECT a.id, a.article_title, a.article_slug, a.article_type, a.excerp
           LEFT JOIN article_categories c ON a.category_id = c.id 
           WHERE a.status = 'published'";
 
+$params = [];
 if ($type !== 'all') {
     $query .= " AND a.article_type = :type";
+    $params[':type'] = $type;
+}
+if (!empty($categorySlug)) {
+    $query .= " AND c.category_slug = :category_slug";
+    $params[':category_slug'] = $categorySlug;
 }
 
 $query .= " ORDER BY a.publish_at DESC LIMIT 50";
 
 $stmt = $pdo->prepare($query);
-if ($type !== 'all') {
-    $stmt->bindParam(':type', $type);
-}
-$stmt->execute();
+$stmt->execute($params);
 $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$categoryLabel = '';
+if (!empty($categorySlug)) {
+    $catStmt = $pdo->prepare("SELECT category_name FROM article_categories WHERE category_slug = ?");
+    $catStmt->execute([$categorySlug]);
+    $categoryLabel = $catStmt->fetchColumn() ?: $categorySlug;
+}
 
 // Fetch categories for the sidebar
 $sidebarCats = cAll($pdo, "SELECT category_name, category_slug, COUNT(a.id) as count FROM article_categories c LEFT JOIN articles a ON a.category_id = c.id WHERE a.status='published' GROUP BY c.id ORDER BY count DESC LIMIT 8");
 
-$pageTitle = $type === 'all' ? 'College & University News ' . date('Y') . ': Latest News & Notifications' : ucwords(str_replace('_', ' ', $type)) . ' Updates';
+if (!empty($categoryLabel)) {
+    $pageTitle = $categoryLabel . ' - Latest Articles';
+} elseif ($type !== 'all') {
+    $pageTitle = ucwords(str_replace('_', ' ', $type)) . ' Updates';
+} else {
+    $pageTitle = 'College & University News ' . date('Y') . ': Latest News & Notifications';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -77,7 +94,7 @@ $pageTitle = $type === 'all' ? 'College & University News ' . date('Y') . ': Lat
     <div class="shiksha-breadcrumb">
       <a href="index.php">Home</a> <i class="ph ph-caret-right"></i>
       <a href="news.php">News</a> <i class="ph ph-caret-right"></i>
-      <span><?= $type === 'all' ? 'College' : ucwords(str_replace('_', ' ', $type)) ?></span>
+      <span><?= !empty($categoryLabel) ? htmlspecialchars($categoryLabel) : ($type === 'all' ? 'College' : ucwords(str_replace('_', ' ', $type))) ?></span>
     </div>
     <h1 class="shiksha-title"><?= htmlspecialchars($pageTitle) ?></h1>
   </div>
@@ -87,7 +104,7 @@ $pageTitle = $type === 'all' ? 'College & University News ' . date('Y') . ': Lat
 <div class="shiksha-tabs-nav">
   <div class="container">
     <div class="shiksha-tabs">
-      <a href="?type=all" class="<?= $type === 'all' ? 'active' : '' ?>">All News</a>
+      <a href="news.php" class="<?= $type === 'all' && empty($categorySlug) ? 'active' : '' ?>">All News</a>
       <a href="?type=news" class="<?= $type === 'news' ? 'active' : '' ?>">College News</a>
       <a href="?type=exam_update" class="<?= $type === 'exam_update' ? 'active' : '' ?>">Exam Alerts</a>
       <a href="?type=blog" class="<?= $type === 'blog' ? 'active' : '' ?>">Blogs & Tips</a>
@@ -152,12 +169,11 @@ $pageTitle = $type === 'all' ? 'College & University News ' . date('Y') . ': Lat
         <ul class="shiksha-cat-list">
           <?php foreach($sidebarCats as $sc): ?>
             <?php if($sc['count'] > 0): ?>
-            <li><a href="news.php?type=all"><i class="ph ph-caret-right"></i> <?=htmlspecialchars($sc['category_name'])?> <span>(<?=$sc['count']?>)</span></a></li>
+            <li><a href="news.php?category=<?=urlencode($sc['category_slug'])?>"><i class="ph ph-caret-right"></i> <?=htmlspecialchars($sc['category_name'])?> <span>(<?=$sc['count']?>)</span></a></li>
             <?php endif; ?>
           <?php endforeach; ?>
           <?php if(empty($sidebarCats)): ?>
-            <li><a href="#"><i class="ph ph-caret-right"></i> Admissions Updates <span>(0)</span></a></li>
-            <li><a href="#"><i class="ph ph-caret-right"></i> Exam Dates <span>(0)</span></a></li>
+            <li><a href="news.php"><i class="ph ph-caret-right"></i> All Articles</a></li>
           <?php endif; ?>
         </ul>
       </div>

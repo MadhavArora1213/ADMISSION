@@ -66,14 +66,41 @@ function uuidv4() {
 }
 
 // First, get a category ID to use
-$stmtCat = $pdo->query("SELECT id FROM article_categories LIMIT 1");
+$stmtCat = $pdo->query("SELECT id FROM article_categories WHERE category_name != 'ytrdfgtryhg' LIMIT 1");
 $catId = $stmtCat->fetchColumn();
 
 if (!$catId) {
-    // Insert a dummy category if none exists
-    $pdo->exec("INSERT INTO article_categories (category_name, category_slug, status) VALUES ('General Updates', 'general-updates', 'active')");
-    $catId = $pdo->lastInsertId();
+    // Insert meaningful seed categories
+    $categories = [
+        ['Engineering', 'engineering'],
+        ['Medical', 'medical'],
+        ['Admissions', 'admissions'],
+        ['Exam Updates', 'exam-updates'],
+        ['College News', 'college-news'],
+        ['Career Guidance', 'career-guidance'],
+        ['Student Life', 'student-life'],
+        ['Scholarships', 'scholarships'],
+    ];
+    foreach ($categories as [$name, $slug]) {
+        $pdo->prepare("INSERT IGNORE INTO article_categories (category_name, category_slug, parent_id, sort_order, created_at) VALUES (?, ?, NULL, 0, NOW())")->execute([$name, $slug]);
+    }
+    $catId = $pdo->query("SELECT id FROM article_categories WHERE category_slug = 'engineering' LIMIT 1")->fetchColumn();
+    if (!$catId) {
+        $catId = $pdo->query("SELECT id FROM article_categories LIMIT 1")->fetchColumn();
+    }
 }
+
+// Assign articles to different categories for diversity
+$categoryMap = [
+    'ranking'        => 'engineering',
+    'exam_update'    => 'exam-updates',
+    'guide'          => 'career-guidance',
+    'news'           => 'college-news',
+    'blog'           => 'student-life',
+    'opinion'        => 'admissions',
+];
+$catSlugStmt = $pdo->prepare("SELECT id FROM article_categories WHERE category_slug = ?");
+$catIdFallback = $catId;
 
 $inserted = 0;
 foreach ($articles as $art) {
@@ -84,6 +111,11 @@ foreach ($articles as $art) {
         continue;
     }
 
+    // Resolve category for this article type
+    $targetSlug = $categoryMap[$art['type']] ?? 'engineering';
+    $catSlugStmt->execute([$targetSlug]);
+    $articleCatId = $catSlugStmt->fetchColumn() ?: $catIdFallback;
+
     $stmt = $pdo->prepare("INSERT INTO articles (
         id, category_id, article_title, article_slug, article_type, 
         excerpt, content_body, featured_image_url, custom_author_name, 
@@ -92,7 +124,7 @@ foreach ($articles as $art) {
     
     $stmt->execute([
         uuidv4(),
-        $catId,
+        $articleCatId,
         $art['title'],
         $art['slug'],
         $art['type'],
