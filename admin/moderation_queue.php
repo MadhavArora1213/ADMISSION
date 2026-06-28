@@ -205,8 +205,12 @@ $total = array_sum($counts);
                                 </td>
                                 <td>
                                     <span class="badge" style="background:rgba(15,23,42,0.08); color:#0f172a; margin-bottom: 6px;"><?php echo strtoupper($t['entity_type']); ?></span>
-                                    <div style="font-size: 0.75rem; font-family: monospace; color: var(--text-muted); word-break: break-all; max-width: 200px;"><?php echo htmlspecialchars($t['entity_id']); ?></div>
-                                    <a href="#" style="font-size: 0.8rem; color: var(--primary); text-decoration: none; display:inline-block; margin-top:4px;">View Content &rarr;</a>
+                                    <div style="font-size: 0.75rem; font-family: monospace; color: var(--text-muted); word-break: break-all; max-width: 200px;"><?php echo htmlspecialchars(substr($t['entity_id'], 0, 12)); ?>...</div>
+                                    <?php if($t['entity_type'] === 'review'): ?>
+                                        <a href="reviews.php" style="font-size: 0.8rem; color: var(--primary); text-decoration: none; display:inline-block; margin-top:4px;">Review Moderation &rarr;</a>
+                                    <?php elseif(strpos($t['entity_type'], 'qa_') === 0): ?>
+                                        <a href="qa_moderation.php" style="font-size: 0.8rem; color: var(--primary); text-decoration: none; display:inline-block; margin-top:4px;">Q&A Moderation &rarr;</a>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if($t['ai_score']): ?>

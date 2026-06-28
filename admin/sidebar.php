@@ -13,7 +13,9 @@ if (isset($pdo)) {
 <aside class="sidebar">
     <div class="sidebar-header">
         <div class="logo">
-            <i class="ph-fill ph-graduation-cap"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 256 256" fill="currentColor" style="flex-shrink:0;">
+                <path d="M251.76,88.94l-120-64a8,8,0,0,0-7.52,0l-120,64a8,8,0,0,0,0,14.12L32,117.87V176a16,16,0,0,0,8,13.83l80,44.44a15.92,15.92,0,0,0,16,0l80-44.44A16,16,0,0,0,224,176V117.87l24-12.81A8,8,0,0,0,251.76,88.94ZM208,176l-80,44.44L48,176V127.93l72,38.41a8,8,0,0,0,7.52,0l80-42.67ZM128,154.07,25.37,96,128,37.93,230.63,96Z"/>
+            </svg>
             AdmissionSeason
         </div>
     </div>
@@ -78,8 +80,6 @@ if (isset($pdo)) {
 
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Analytics & Reports</div>
         <a href="page_analytics.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['page_analytics.php', 'page_analytic_form.php']) ? 'active' : ''; ?>"><i class="ph ph-chart-line-up"></i> Traffic</a>
-        <a href="funnel_analytics.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['funnel_analytics.php', 'funnel_analytic_form.php']) ? 'active' : ''; ?>"><i class="ph ph-funnel"></i> Funnels</a>
-
 
         <a href="analytics_reports.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['analytics_reports.php', 'analytics_report_form.php']) ? 'active' : ''; ?>"><i class="ph ph-file-pdf"></i> Reports</a>
         <a href="nps_feedback.php" class="<?php echo ($current_page == 'nps_feedback.php') ? 'active' : ''; ?>"><i class="ph ph-smiley"></i> NPS Feedback</a>
@@ -92,18 +92,13 @@ if (isset($pdo)) {
         
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Search & Discovery</div>
         <a href="search_analytics.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['search_analytics.php','search_config.php']) ? 'active' : ''; ?>"><i class="ph ph-magnifying-glass"></i> Search Analytics</a>
-        <a href="compare_engine.php" class="<?php echo ($current_page == 'compare_engine.php') ? 'active' : ''; ?>"><i class="ph ph-scales"></i> Compare Engine</a>
-        <a href="emi_calculator.php" class="<?php echo ($current_page == 'emi_calculator.php') ? 'active' : ''; ?>"><i class="ph ph-calculator"></i> Fee / EMI Calculator</a>
-        
+
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">SEO Management</div>
         <a href="seo_dashboard.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['seo_dashboard.php','redirects.php']) ? 'active' : ''; ?>"><i class="ph ph-globe"></i> SEO Dashboard</a>
         
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Communications</div>
         <a href="notifications_dashboard.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['notifications_dashboard.php','notification_templates.php','audience_segments.php','notification_campaigns.php','notification_logs.php']) ? 'active' : ''; ?>"><i class="ph ph-megaphone"></i> Notifications</a>
-        
-        <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">AI Systems</div>
-        <a href="ai_dashboard.php" class="<?php echo ($current_page == 'ai_dashboard.php') ? 'active' : ''; ?>"><i class="ph ph-robot"></i> AI Engine</a>
-        
+
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">Security & Moderation</div>
         <a href="moderation_queue.php" class="<?php echo ($current_page == 'moderation_queue.php') ? 'active' : ''; ?>"><i class="ph ph-shield-check"></i> Moderation Queue</a>
         <a href="spam_logs.php" class="<?php echo ($current_page == 'spam_logs.php') ? 'active' : ''; ?>"><i class="ph ph-warning-circle"></i> Spam & Bans</a>
@@ -138,6 +133,5 @@ if (isset($pdo)) {
             <span style="background: #19376D; color: #0F172A; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: 700;"><?= $sidebarAlertCount ?></span>
             <?php endif; ?>
         </a>
-        <a href="settings.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['settings.php']) ? 'active' : ''; ?>"><i class="ph ph-gear"></i> Settings</a>
     </nav>
 </aside>

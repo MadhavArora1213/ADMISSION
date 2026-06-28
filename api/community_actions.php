@@ -416,6 +416,25 @@ try {
         $pdo->prepare("INSERT INTO qa_reports (question_id, answer_id, report_reason, reported_by) VALUES (?, ?, ?, ?)")
              ->execute([$questionIdCol, $answerIdCol, $reasonText, $userId]);
 
+        $priorityMap = ['spam' => 'medium', 'offensive' => 'critical', 'wrong_info' => 'medium', 'duplicate' => 'low'];
+        $reportReasonKey = $reasons[0] ?? 'spam';
+        $priority = $priorityMap[$reportReasonKey] ?? 'medium';
+        $reportCount = 1;
+        try {
+            $cntStmt = $pdo->prepare("SELECT COUNT(*) FROM qa_reports WHERE question_id = ? AND answer_id " . ($answerIdCol ? "= ?" : "IS NULL"));
+            if ($answerIdCol) { $cntStmt->execute([$questionIdCol, $answerIdCol]); }
+            else { $cntStmt->execute([$questionIdCol]); }
+            $reportCount = (int)$cntStmt->fetchColumn();
+        } catch (Exception $e) {}
+        if ($reportCount >= 3) $priority = 'high';
+        if ($reportCount >= 5) $priority = 'critical';
+
+        $slaHours = ['critical' => 4, 'high' => 12, 'medium' => 24, 'low' => 48];
+        $slaDue = date('Y-m-d H:i:s', time() + ($slaHours[$priority] ?? 24) * 3600);
+
+        $pdo->prepare("INSERT INTO moderation_queue (id, entity_type, entity_id, status, priority, flagged_reason, ai_score, reporter_id, sla_due_at, created_at) VALUES (UUID(), ?, ?, 'pending', ?, ?, ?, ?, ?, NOW())")
+             ->execute(['qa_' . $reportType, $reportId, $priority, $reasonText, $reportCount, $userId, $slaDue]);
+
         $response = ['status' => 'success', 'message' => 'Report submitted. Thank you!'];
     } else {
         throw new Exception('Invalid action specified.');

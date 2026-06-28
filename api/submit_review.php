@@ -128,6 +128,16 @@ $stmt->execute([
     $courseId !== '' ? $courseId : null,
 ]);
 
+try {
+    $priority = 'medium';
+    if ($overall <= 1.0) $priority = 'high';
+    if ($body && preg_match('/(scam|fake|fraud|idiot|stupid|worthless)/i', $body)) $priority = 'critical';
+    $slaHours = ['critical' => 4, 'high' => 12, 'medium' => 24, 'low' => 48];
+    $slaDue = date('Y-m-d H:i:s', time() + ($slaHours[$priority] ?? 24) * 3600);
+    $pdo->prepare("INSERT INTO moderation_queue (id, entity_type, entity_id, status, priority, flagged_reason, reporter_id, sla_due_at, created_at) VALUES (UUID(), 'review', ?, 'pending', ?, 'new_review', ?, ?, NOW())")
+         ->execute([$reviewId, $priority, $userId, $slaDue]);
+} catch (Exception $e) {}
+
 echo json_encode([
     'ok' => true,
     'message' => 'Review submitted successfully! It will appear after moderation.',

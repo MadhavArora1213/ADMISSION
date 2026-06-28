@@ -580,6 +580,9 @@ if (isset($_SESSION['user_id'])) {
                 <?php if ($rev['review_body']): ?><p><?= nl2br(htmlspecialchars($rev['review_body'])) ?></p><?php endif; ?>
                 <?php if ($rev['pros']): ?><p class="cr-pros"><strong><i class="ph ph-thumbs-up"></i> Pros:</strong> <?= htmlspecialchars($rev['pros']) ?></p><?php endif; ?>
                 <?php if ($rev['cons']): ?><p class="cr-cons"><strong><i class="ph ph-thumbs-down"></i> Cons:</strong> <?= htmlspecialchars($rev['cons']) ?></p><?php endif; ?>
+                <div style="margin-top:10px; display:flex; align-items:center; gap:12px;">
+                  <button onclick="reportReview('<?= $rev['id'] ?>', '<?= $college['id'] ?>')" style="background:none; border:none; color:var(--text-muted); font-size:.78rem; cursor:pointer; display:inline-flex; align-items:center; gap:4px; padding:4px 0;"><i class="ph ph-flag"></i> Report</button>
+                </div>
               </article>
               <?php endforeach; ?>
             </div>
@@ -1753,6 +1756,34 @@ function savePref(key, value) {
       if (fb) fb.querySelector('div').innerHTML = '<span style="font-size:13px;color:#16a34a;font-weight:600;"><i class="ph-fill ph-check-circle"></i> Thank you for your feedback!</span>';
     }
   }).catch(function(){});
+}
+
+function reportReview(reviewId, collegeId) {
+  <?php if (!$isLoggedIn): ?>
+  openLoginPrompt();
+  return;
+  <?php endif; ?>
+  var reasons = ['spam','offensive','wrong_info','duplicate','other'];
+  var reasonLabels = ['Spam','Offensive/Abusive','Wrong Information','Duplicate','Other'];
+  var html = '<div id="reviewReportModal" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);backdrop-filter:blur(3px)"><div style="background:#fff;border-radius:14px;padding:28px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.25)"><h3 style="margin:0 0 14px;font-size:1.1rem;font-weight:700">Report this review</h3><p style="font-size:.85rem;color:#64748b;margin-bottom:16px">Select a reason:</p><div style="display:flex;flex-direction:column;gap:8px">';
+  reasons.forEach(function(r,i){ html += '<label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:.88rem"><input type="radio" name="reportReason" value="'+r+'"> '+reasonLabels[i]+'</label>'; });
+  html += '</div><div style="margin-top:12px"><textarea id="reportOtherText" placeholder="Additional details (optional)" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.85rem;resize:vertical;min-height:50px"></textarea></div><div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end"><button onclick="document.getElementById(\'reviewReportModal\').remove()" style="padding:8px 18px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-size:.88rem">Cancel</button><button onclick="submitReviewReport(\''+reviewId+'\')" style="padding:8px 18px;border:none;border-radius:8px;background:var(--primary);color:#fff;cursor:pointer;font-size:.88rem;font-weight:600">Submit</button></div></div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function submitReviewReport(reviewId) {
+  var sel = document.querySelector('input[name="reportReason"]:checked');
+  if (!sel) { alert('Please select a reason.'); return; }
+  var otherText = document.getElementById('reportOtherText').value.trim();
+  fetch('<?= rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/") ?>/api/report_review.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ review_id: reviewId, reason: sel.value, other_text: otherText })
+  }).then(function(r){ return r.json(); }).then(function(data) {
+    document.getElementById('reviewReportModal').remove();
+    if (data.ok) { alert(data.message || 'Report submitted.'); }
+    else { alert(data.message || 'Failed to submit report.'); }
+  }).catch(function(){ alert('Network error.'); });
 }
 
 function sendCourseList() {
