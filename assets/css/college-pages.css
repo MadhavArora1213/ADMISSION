@@ -757,6 +757,7 @@ body.bg-light{background:var(--cp-bg)}
   .ph-stat strong{font-size:1.1rem}
   .compare-grid{grid-template-columns:repeat(2,1fr);gap:10px}
   .college-tabs-wrapper .tab-arrow{display:none}
+  .college-tabs-wrapper .shiksha-tabs{padding:4px 12px}
   .college-hero-logo{width:56px;height:56px;border-radius:12px}
   .college-hero-chips{gap:6px}
   .college-hero-chips span{padding:5px 10px;font-size:.72rem}

@@ -68,6 +68,30 @@ try {
     ");
     $stmt->execute([$id, $user_id, $college_id, $courseId, $appNumber, $remarks]);
     
+    // Also save as a Lead/Enquiry for the college dashboard leads tab
+    try {
+        $leadId = sprintf('%08x-%04x-%04x-%04x-%012x', mt_rand(0, 0xffffffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffffffffffff));
+        $leadStmt = $pdo->prepare("
+            INSERT INTO leads 
+            (id, user_id, name, lead_type, source_page, college_id, course_id, phone, email, class_12_score, target_year, lead_status, priority, counsellor_notes, created_at, updated_at)
+            VALUES (?, ?, ?, 'apply', 'apply_page', ?, ?, ?, ?, ?, ?, 'new', 'high', ?, NOW(), NOW())
+        ");
+        $leadStmt->execute([
+            $leadId,
+            $user_id,
+            $name,
+            $college_id,
+            $courseId,
+            $phone,
+            $email,
+            !empty($exam_score) ? (float)$exam_score : null,
+            $target_year,
+            "Applied via Application Number: $appNumber\nRemarks: $remarks"
+        ]);
+    } catch (Exception $e) {
+        @file_put_contents(__DIR__ . '/scratch/lead_error.log', date('Y-m-d H:i:s') . ' - Error: ' . $e->getMessage() . "\n", FILE_APPEND);
+    }
+
     // Log activity
     try {
         $logStmt = $pdo->prepare("INSERT INTO activity_log (activity_type, actor_id, entity_type, entity_id, meta_json, created_at) VALUES ('create', ?, 'college', ?, ?, NOW())");

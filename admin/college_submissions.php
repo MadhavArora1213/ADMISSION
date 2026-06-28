@@ -58,9 +58,212 @@ function generateUUID() {
     return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
 }
 
+function applySubmissionApproval($pdo, $sub, $adminId) {
+    $data = json_decode($sub['data_json'], true);
+    $collegeId = $sub['college_id'];
+    $type = $sub['submission_type'];
+
+    switch ($type) {
+        case 'profile':
+            if ($data && $collegeId) {
+                // 1. Update Colleges
+                $colFields = []; $colVals = [];
+                foreach (['name', 'college_type', 'ownership', 'type_label', 'founded_year', 'university_id', 'naac_grade', 'ranking_nirf', 'autonomous', 'ugc_approved', 'aicte_approved', 'total_students', 'total_faculty', 'campus_area_acres', 'campus_type', 'state_id', 'city_id', 'publish_status'] as $f) {
+                    if (isset($data[$f])) { $colFields[] = "$f=?"; $colVals[] = $data[$f]; }
+                }
+                if ($colFields) { $colVals[] = $collegeId; $pdo->prepare("UPDATE colleges SET ".implode(',',$colFields)." WHERE id=?")->execute($colVals); }
+
+                // 2. Update Media
+                if (isset($data['logo_url']) || isset($data['cover_image_url'])) {
+                    $mediaCheck = $pdo->prepare("SELECT id FROM college_media WHERE college_id = ? AND image_type IS NULL");
+                    $mediaCheck->execute([$collegeId]);
+                    if ($mediaCheck->rowCount() > 0) {
+                        $pdo->prepare("UPDATE college_media SET logo_url = ?, cover_image_url = ? WHERE college_id = ? AND image_type IS NULL")
+                            ->execute([$data['logo_url'] ?? null, $data['cover_image_url'] ?? null, $collegeId]);
+                    } else {
+                        $pdo->prepare("INSERT INTO college_media (id, college_id, logo_url, cover_image_url) VALUES (?, ?, ?, ?)")
+                            ->execute([generateUUID(), $collegeId, $data['logo_url'] ?? null, $data['cover_image_url'] ?? null]);
+                    }
+                }
+
+                // 3. Update Contacts
+                $conFields = []; $conVals = [];
+                foreach (['email', 'phone', 'address', 'latitude', 'longitude', 'website_url', 'pincode', 'google_maps_embed_url', 'nearest_railway_km', 'nearest_airport_km'] as $f) {
+                    if (isset($data[$f])) { $conFields[] = "$f=?"; $conVals[] = $data[$f]; }
+                }
+                if ($conFields) {
+                    $contactCheck = $pdo->prepare("SELECT id FROM college_contacts WHERE college_id = ?");
+                    $contactCheck->execute([$collegeId]);
+                    if ($contactCheck->rowCount() > 0) {
+                        $conVals[] = $collegeId;
+                        $pdo->prepare("UPDATE college_contacts SET ".implode(',',$conFields)." WHERE college_id=?")->execute($conVals);
+                    } else {
+                        $newId = generateUUID();
+                        array_unshift($conVals, $newId, $collegeId);
+                        $placeholders = array_fill(0, count($conFields), '?');
+                        $pdo->prepare("INSERT INTO college_contacts (id, college_id, ".implode(',', array_map(fn($x) => str_replace('=?','',$x), $conFields)).") VALUES (?, ?, ".implode(',',$placeholders).")")->execute($conVals);
+                    }
+                }
+
+                // 4. Update Content
+                $contentFields = []; $contentVals = [];
+                foreach (['about_text', 'highlights_json', 'accreditations_json', 'rankings_json', 'awards_json'] as $f) {
+                    if (isset($data[$f])) { $contentFields[] = "$f=?"; $contentVals[] = $data[$f]; }
+                }
+                if ($contentFields) {
+                    $chk = $pdo->prepare("SELECT id FROM college_content WHERE college_id = ?"); $chk->execute([$collegeId]);
+                    if ($chk->rowCount() > 0) {
+                        $contentVals[] = $collegeId;
+                        $pdo->prepare("UPDATE college_content SET ".implode(',',$contentFields)." WHERE college_id=?")->execute($contentVals);
+                    } else {
+                        $newId = generateUUID();
+                        array_unshift($contentVals, $newId, $collegeId);
+                        $placeholders = array_fill(0, count($contentFields), '?');
+                        $pdo->prepare("INSERT INTO college_content (id, college_id, ".implode(',', array_map(fn($x) => str_replace('=?','',$x), $contentFields)).") VALUES (?, ?, ".implode(',',$placeholders).")")->execute($contentVals);
+                    }
+                }
+
+                // 5. Update Infrastructure
+                $infFields = []; $infVals = [];
+                foreach (['library', 'auditorium', 'cafeteria', 'wifi', 'medical_facility', 'transport', 'ev_charging', 'solar_power', 'sports_facilities', 'labs'] as $f) {
+                    if (isset($data[$f])) { $infFields[] = "$f=?"; $infVals[] = $data[$f]; }
+                }
+                if ($infFields) {
+                    $chk = $pdo->prepare("SELECT id FROM college_infrastructure WHERE college_id = ?"); $chk->execute([$collegeId]);
+                    if ($chk->rowCount() > 0) {
+                        $infVals[] = $collegeId;
+                        $pdo->prepare("UPDATE college_infrastructure SET ".implode(',',$infFields)." WHERE college_id=?")->execute($infVals);
+                    } else {
+                        $newId = generateUUID();
+                        array_unshift($infVals, $newId, $collegeId);
+                        $placeholders = array_fill(0, count($infFields), '?');
+                        $pdo->prepare("INSERT INTO college_infrastructure (id, college_id, ".implode(',', array_map(fn($x) => str_replace('=?','',$x), $infFields)).") VALUES (?, ?, ".implode(',',$placeholders).")")->execute($infVals);
+                    }
+                }
+
+                // 6. Update Hostels
+                $hstFields = []; $hstVals = [];
+                foreach (['hostel_available', 'hostel_type', 'hostel_capacity', 'hostel_fee_annual', 'mess_available', 'mess_type', 'ac_available', 'laundry_available'] as $f) {
+                    if (isset($data[$f])) { $hstFields[] = "$f=?"; $hstVals[] = $data[$f]; }
+                }
+                if ($hstFields) {
+                    $chk = $pdo->prepare("SELECT id FROM college_hostels WHERE college_id = ?"); $chk->execute([$collegeId]);
+                    if ($chk->rowCount() > 0) {
+                        $hstVals[] = $collegeId;
+                        $pdo->prepare("UPDATE college_hostels SET ".implode(',',$hstFields)." WHERE college_id=?")->execute($hstVals);
+                    } else {
+                        $newId = generateUUID();
+                        array_unshift($hstVals, $newId, $collegeId);
+                        $placeholders = array_fill(0, count($hstFields), '?');
+                        $pdo->prepare("INSERT INTO college_hostels (id, college_id, ".implode(',', array_map(fn($x) => str_replace('=?','',$x), $hstFields)).") VALUES (?, ?, ".implode(',',$placeholders).")")->execute($hstVals);
+                    }
+                }
+
+                // 7. Update Admissions
+                $admFields = []; $admVals = [];
+                foreach (['admission_process', 'accepted_exams', 'admission_start_date', 'admission_end_date', 'merit_based', 'direct_admission', 'management_quota_seats', 'nri_quota_seats', 'lateral_entry_available', 'application_mode'] as $f) {
+                    if (isset($data[$f])) { $admFields[] = "$f=?"; $admVals[] = $data[$f]; }
+                }
+                if ($admFields) {
+                    $chk = $pdo->prepare("SELECT id FROM college_admissions WHERE college_id = ?"); $chk->execute([$collegeId]);
+                    if ($chk->rowCount() > 0) {
+                        $admVals[] = $collegeId;
+                        $pdo->prepare("UPDATE college_admissions SET ".implode(',',$admFields)." WHERE college_id=?")->execute($admVals);
+                    } else {
+                        $newId = generateUUID();
+                        array_unshift($admVals, $newId, $collegeId);
+                        $placeholders = array_fill(0, count($admFields), '?');
+                        $pdo->prepare("INSERT INTO college_admissions (id, college_id, ".implode(',', array_map(fn($x) => str_replace('=?','',$x), $admFields)).") VALUES (?, ?, ".implode(',',$placeholders).")")->execute($admVals);
+                    }
+                }
+
+                // 8. Update SEO
+                $seoFields = []; $seoVals = [];
+                foreach (['meta_title', 'meta_description', 'og_image_url', 'canonical_url', 'schema_markup', 'noindex'] as $f) {
+                    if (isset($data[$f])) { $seoFields[] = "$f=?"; $seoVals[] = $data[$f]; }
+                }
+                if ($seoFields) {
+                    $chk = $pdo->prepare("SELECT id FROM seo_meta WHERE page_type='college' AND page_id=?"); $chk->execute([$collegeId]);
+                    if ($chk->rowCount() > 0) {
+                        $seoVals[] = $collegeId;
+                        $pdo->prepare("UPDATE seo_meta SET ".implode(',',$seoFields)." WHERE page_type='college' AND page_id=?")->execute($seoVals);
+                    } else {
+                        $newId = generateUUID();
+                        array_unshift($seoVals, $newId, 'college', $collegeId);
+                        $placeholders = array_fill(0, count($seoFields), '?');
+                        $pdo->prepare("INSERT INTO seo_meta (id, page_type, page_id, ".implode(',', array_map(fn($x) => str_replace('=?','',$x), $seoFields)).") VALUES (?, ?, ?, ".implode(',',$placeholders).")")->execute($seoVals);
+                    }
+                }
+            }
+            break;
+        case 'courses':
+            if (isset($data['course_name']) && $collegeId) {
+                $pdo->prepare("
+                    INSERT INTO college_courses 
+                    (id, college_id, course_name, course_level, duration_years, total_fee, semester_fee, annual_fee, seats_available, specializations, eligibility_criteria, application_fee, emi_available) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ")->execute([
+                    generateUUID(), $collegeId, $data['course_name'], 
+                    $data['course_level'] ?? 'UG', $data['duration_years'] ?? null,
+                    $data['total_fee'] ?? null, $data['semester_fee'] ?? null,
+                    $data['annual_fee'] ?? null, $data['seats_available'] ?? null,
+                    $data['specializations'] ?? null, $data['eligibility_criteria'] ?? null,
+                    $data['application_fee'] ?? null, $data['emi_available'] ?? 0
+                ]);
+            }
+            break;
+        case 'placements':
+            if (isset($data['placement_year']) && $collegeId) {
+                $pdo->prepare("
+                    INSERT INTO college_placements 
+                    (id, college_id, placement_year, avg_package_lpa, highest_package_lpa, median_package_lpa, placement_percentage, students_placed, top_recruiters) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ")->execute([
+                    generateUUID(), $collegeId, (int)$data['placement_year'],
+                    $data['avg_package_lpa'] ?? null, $data['highest_package_lpa'] ?? null,
+                    $data['median_package_lpa'] ?? null, $data['placement_percentage'] ?? null,
+                    $data['total_placed'] ?? $data['students_placed'] ?? null,
+                    $data['top_recruiters'] ?? ''
+                ]);
+            }
+            break;
+        case 'cutoffs':
+            if (isset($data['exam_id']) && $collegeId) {
+                $pdo->prepare("
+                    INSERT INTO college_cutoffs 
+                    (id, college_id, exam_id, course_id, category, year, opening_rank, closing_rank, quota) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ")->execute([
+                    generateUUID(), $collegeId, $data['exam_id'],
+                    $data['course_id'] ?? null, $data['category'] ?? 'General',
+                    (int)$data['year'], $data['opening_rank'] ?? null,
+                    $data['closing_rank'] ?? null, $data['quota'] ?? null
+                ]);
+            }
+            break;
+        case 'seat_matrix':
+            if (isset($data['course_id']) && $collegeId) {
+                $pdo->prepare("
+                    INSERT INTO seat_matrix 
+                    (college_id, course_id, category, total_seats, year, source) 
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ")->execute([
+                    $collegeId, $data['course_id'], $data['category'],
+                    (int)$data['total_seats'] ?? 0, (int)($data['year'] ?? date('Y')),
+                    $data['source'] ?? 'Portal'
+                ]);
+            }
+            break;
+    }
+
+    $pdo->prepare("UPDATE college_submissions SET status='approved',reviewed_by=?,reviewed_at=NOW() WHERE id=?")
+        ->execute([$adminId, $sub['id']]);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $act = $_POST['action'] ?? '';
     $id = $_POST['submission_id'] ?? '';
+    $accountId = $_POST['account_id'] ?? '';
 
     if ($act === 'approve' && $id) {
         $stmt = $pdo->prepare("SELECT s.*, a.institute_name, a.email FROM college_submissions s LEFT JOIN college_accounts a ON s.account_id = a.id WHERE s.id = ?");
@@ -68,214 +271,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sub = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($sub) {
-            $data = json_decode($sub['data_json'], true);
-            $collegeId = $sub['college_id'];
-            $type = $sub['submission_type'];
-
-            // Apply data to main tables based on type
-            switch ($type) {
-                case 'profile':
-                    if ($data && $collegeId) {
-                        // 1. Update Colleges
-                        $colFields = []; $colVals = [];
-                        foreach (['name', 'college_type', 'ownership', 'type_label', 'founded_year', 'university_id', 'naac_grade', 'ranking_nirf', 'autonomous', 'ugc_approved', 'aicte_approved', 'total_students', 'total_faculty', 'campus_area_acres', 'campus_type', 'state_id', 'city_id', 'publish_status'] as $f) {
-                            if (isset($data[$f])) { $colFields[] = "$f=?"; $colVals[] = $data[$f]; }
-                        }
-                        if ($colFields) { $colVals[] = $collegeId; $pdo->prepare("UPDATE colleges SET ".implode(',',$colFields)." WHERE id=?")->execute($colVals); }
-
-                        // 2. Update Media
-                        if (isset($data['logo_url']) || isset($data['cover_image_url'])) {
-                            $mediaCheck = $pdo->prepare("SELECT id FROM college_media WHERE college_id = ? AND image_type IS NULL");
-                            $mediaCheck->execute([$collegeId]);
-                            if ($mediaCheck->rowCount() > 0) {
-                                $pdo->prepare("UPDATE college_media SET logo_url = ?, cover_image_url = ? WHERE college_id = ? AND image_type IS NULL")
-                                    ->execute([$data['logo_url'] ?? null, $data['cover_image_url'] ?? null, $collegeId]);
-                            } else {
-                                $pdo->prepare("INSERT INTO college_media (id, college_id, logo_url, cover_image_url) VALUES (?, ?, ?, ?)")
-                                    ->execute([generateUUID(), $collegeId, $data['logo_url'] ?? null, $data['cover_image_url'] ?? null]);
-                            }
-                        }
-
-                        // 3. Update Contacts
-                        $conFields = []; $conVals = [];
-                        foreach (['email', 'phone', 'address', 'latitude', 'longitude', 'website_url', 'pincode', 'google_maps_embed_url', 'nearest_railway_km', 'nearest_airport_km'] as $f) {
-                            if (isset($data[$f])) { $conFields[] = "$f=?"; $conVals[] = $data[$f]; }
-                        }
-                        if ($conFields) {
-                            $contactCheck = $pdo->prepare("SELECT id FROM college_contacts WHERE college_id = ?");
-                            $contactCheck->execute([$collegeId]);
-                            if ($contactCheck->rowCount() > 0) {
-                                $conVals[] = $collegeId;
-                                $pdo->prepare("UPDATE college_contacts SET ".implode(',',$conFields)." WHERE college_id=?")->execute($conVals);
-                            } else {
-                                $newId = generateUUID();
-                                array_unshift($conVals, $newId, $collegeId);
-                                $placeholders = array_fill(0, count($conFields), '?');
-                                $pdo->prepare("INSERT INTO college_contacts (id, college_id, ".implode(',', array_map(fn($x) => str_replace('=?','',$x), $conFields)).") VALUES (?, ?, ".implode(',',$placeholders).")")->execute($conVals);
-                            }
-                        }
-
-                        // 4. Update Content
-                        $contentFields = []; $contentVals = [];
-                        foreach (['about_text', 'highlights_json', 'accreditations_json', 'rankings_json', 'awards_json'] as $f) {
-                            if (isset($data[$f])) { $contentFields[] = "$f=?"; $contentVals[] = $data[$f]; }
-                        }
-                        if ($contentFields) {
-                            $chk = $pdo->prepare("SELECT id FROM college_content WHERE college_id = ?"); $chk->execute([$collegeId]);
-                            if ($chk->rowCount() > 0) {
-                                $contentVals[] = $collegeId;
-                                $pdo->prepare("UPDATE college_content SET ".implode(',',$contentFields)." WHERE college_id=?")->execute($contentVals);
-                            } else {
-                                $newId = generateUUID();
-                                array_unshift($contentVals, $newId, $collegeId);
-                                $placeholders = array_fill(0, count($contentFields), '?');
-                                $pdo->prepare("INSERT INTO college_content (id, college_id, ".implode(',', array_map(fn($x) => str_replace('=?','',$x), $contentFields)).") VALUES (?, ?, ".implode(',',$placeholders).")")->execute($contentVals);
-                            }
-                        }
-
-                        // 5. Update Infrastructure
-                        $infFields = []; $infVals = [];
-                        foreach (['library', 'auditorium', 'cafeteria', 'wifi', 'medical_facility', 'transport', 'ev_charging', 'solar_power', 'sports_facilities', 'labs'] as $f) {
-                            if (isset($data[$f])) { $infFields[] = "$f=?"; $infVals[] = $data[$f]; }
-                        }
-                        if ($infFields) {
-                            $chk = $pdo->prepare("SELECT id FROM college_infrastructure WHERE college_id = ?"); $chk->execute([$collegeId]);
-                            if ($chk->rowCount() > 0) {
-                                $infVals[] = $collegeId;
-                                $pdo->prepare("UPDATE college_infrastructure SET ".implode(',',$infFields)." WHERE college_id=?")->execute($infVals);
-                            } else {
-                                $newId = generateUUID();
-                                array_unshift($infVals, $newId, $collegeId);
-                                $placeholders = array_fill(0, count($infFields), '?');
-                                $pdo->prepare("INSERT INTO college_infrastructure (id, college_id, ".implode(',', array_map(fn($x) => str_replace('=?','',$x), $infFields)).") VALUES (?, ?, ".implode(',',$placeholders).")")->execute($infVals);
-                            }
-                        }
-
-                        // 6. Update Hostels
-                        $hstFields = []; $hstVals = [];
-                        foreach (['hostel_available', 'hostel_type', 'hostel_capacity', 'hostel_fee_annual', 'mess_available', 'mess_type', 'ac_available', 'laundry_available'] as $f) {
-                            if (isset($data[$f])) { $hstFields[] = "$f=?"; $hstVals[] = $data[$f]; }
-                        }
-                        if ($hstFields) {
-                            $chk = $pdo->prepare("SELECT id FROM college_hostels WHERE college_id = ?"); $chk->execute([$collegeId]);
-                            if ($chk->rowCount() > 0) {
-                                $hstVals[] = $collegeId;
-                                $pdo->prepare("UPDATE college_hostels SET ".implode(',',$hstFields)." WHERE college_id=?")->execute($hstVals);
-                            } else {
-                                $newId = generateUUID();
-                                array_unshift($hstVals, $newId, $collegeId);
-                                $placeholders = array_fill(0, count($hstFields), '?');
-                                $pdo->prepare("INSERT INTO college_hostels (id, college_id, ".implode(',', array_map(fn($x) => str_replace('=?','',$x), $hstFields)).") VALUES (?, ?, ".implode(',',$placeholders).")")->execute($hstVals);
-                            }
-                        }
-
-                        // 7. Update Admissions
-                        $admFields = []; $admVals = [];
-                        foreach (['admission_process', 'accepted_exams', 'admission_start_date', 'admission_end_date', 'merit_based', 'direct_admission', 'management_quota_seats', 'nri_quota_seats', 'lateral_entry_available', 'application_mode'] as $f) {
-                            if (isset($data[$f])) { $admFields[] = "$f=?"; $admVals[] = $data[$f]; }
-                        }
-                        if ($admFields) {
-                            $chk = $pdo->prepare("SELECT id FROM college_admissions WHERE college_id = ?"); $chk->execute([$collegeId]);
-                            if ($chk->rowCount() > 0) {
-                                $admVals[] = $collegeId;
-                                $pdo->prepare("UPDATE college_admissions SET ".implode(',',$admFields)." WHERE college_id=?")->execute($admVals);
-                            } else {
-                                $newId = generateUUID();
-                                array_unshift($admVals, $newId, $collegeId);
-                                $placeholders = array_fill(0, count($admFields), '?');
-                                $pdo->prepare("INSERT INTO college_admissions (id, college_id, ".implode(',', array_map(fn($x) => str_replace('=?','',$x), $admFields)).") VALUES (?, ?, ".implode(',',$placeholders).")")->execute($admVals);
-                            }
-                        }
-
-                        // 8. Update SEO
-                        $seoFields = []; $seoVals = [];
-                        foreach (['meta_title', 'meta_description', 'og_image_url', 'canonical_url', 'schema_markup', 'noindex'] as $f) {
-                            if (isset($data[$f])) { $seoFields[] = "$f=?"; $seoVals[] = $data[$f]; }
-                        }
-                        if ($seoFields) {
-                            $chk = $pdo->prepare("SELECT id FROM seo_meta WHERE page_type='college' AND page_id=?"); $chk->execute([$collegeId]);
-                            if ($chk->rowCount() > 0) {
-                                $seoVals[] = $collegeId;
-                                $pdo->prepare("UPDATE seo_meta SET ".implode(',',$seoFields)." WHERE page_type='college' AND page_id=?")->execute($seoVals);
-                            } else {
-                                $newId = generateUUID();
-                                array_unshift($seoVals, $newId, 'college', $collegeId);
-                                $placeholders = array_fill(0, count($seoFields), '?');
-                                $pdo->prepare("INSERT INTO seo_meta (id, page_type, page_id, ".implode(',', array_map(fn($x) => str_replace('=?','',$x), $seoFields)).") VALUES (?, ?, ?, ".implode(',',$placeholders).")")->execute($seoVals);
-                            }
-                        }
-                    }
-                    break;
-                case 'courses':
-                    if (isset($data['course_name']) && $collegeId) {
-                        $pdo->prepare("
-                            INSERT INTO college_courses 
-                            (id, college_id, course_name, course_slug, course_level, duration_years, total_fee, semester_fee, annual_fee, seats_available, specializations, eligibility_criteria, application_fee, emi_available, status) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')
-                        ")->execute([
-                            generateUUID(), $collegeId, $data['course_name'], 
-                            strtolower(preg_replace('/[^a-z0-9]+/','-', $data['course_name'])),
-                            $data['course_level'] ?? 'UG', $data['duration_years'] ?? null,
-                            $data['total_fee'] ?? null, $data['semester_fee'] ?? null,
-                            $data['annual_fee'] ?? null, $data['seats_available'] ?? null,
-                            $data['specializations'] ?? null, $data['eligibility_criteria'] ?? null,
-                            $data['application_fee'] ?? null, $data['emi_available'] ?? 0
-                        ]);
-                    }
-                    break;
-                case 'placements':
-                    if (isset($data['placement_year']) && $collegeId) {
-                        $pdo->prepare("
-                            INSERT INTO college_placements 
-                            (id, college_id, placement_year, avg_package_lpa, highest_package_lpa, median_package_lpa, placement_percentage, total_students, total_placed, top_recruiters) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        ")->execute([
-                            generateUUID(), $collegeId, (int)$data['placement_year'],
-                            $data['avg_package_lpa'] ?? null, $data['highest_package_lpa'] ?? null,
-                            $data['median_package_lpa'] ?? null, $data['placement_percentage'] ?? null,
-                            $data['total_students'] ?? null, $data['total_placed'] ?? null,
-                            $data['top_recruiters'] ?? ''
-                        ]);
-                    }
-                    break;
-                case 'cutoffs':
-                    if (isset($data['exam_id']) && $collegeId) {
-                        $pdo->prepare("
-                            INSERT INTO college_cutoffs 
-                            (id, college_id, exam_id, year, category, quota, opening_rank, closing_rank, course_name) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        ")->execute([
-                            generateUUID(), $collegeId, $data['exam_id'], (int)$data['year'],
-                            $data['category'] ?? 'General', $data['quota'] ?? 'All India',
-                            $data['opening_rank'] ?? null, $data['closing_rank'] ?? null,
-                            $data['course_name'] ?? ''
-                        ]);
-                    }
-                    break;
-                case 'seat_matrix':
-                    if (isset($data['course_id']) && $collegeId) {
-                        $pdo->prepare("
-                            INSERT INTO seat_matrix 
-                            (college_id, course_id, category, total_seats, year, source) 
-                            VALUES (?, ?, ?, ?, ?, ?)
-                        ")->execute([
-                            $collegeId, $data['course_id'], $data['category'],
-                            (int)$data['total_seats'] ?? 0, (int)($data['year'] ?? date('Y')),
-                            $data['source'] ?? 'Portal'
-                        ]);
-                    }
-                    break;
-            }
-
-            $pdo->prepare("UPDATE college_submissions SET status='approved',reviewed_by=?,reviewed_at=NOW() WHERE id=?")
-                ->execute([$_SESSION['admin_id'], $id]);
+            applySubmissionApproval($pdo, $sub, $_SESSION['admin_id']);
 
             // Send Confirmation Email
             if (!empty($sub['email'])) {
                 $toEmail = $sub['email'];
                 $toName = $sub['institute_name'] ?: 'Institute';
                 $subject = "Submission Approved - AdmissionSeason";
-                $typeLabel = ucfirst(str_replace('_', ' ', $type));
+                $typeLabel = ucfirst(str_replace('_', ' ', $sub['submission_type']));
                 $html = "
                 <div style='font-family:sans-serif; max-width:600px; padding:20px; border:1px solid #e2e8f0; border-radius:10px;'>
                     <h2 style='color:#15803d;'>Updates Approved & Published</h2>
@@ -288,6 +291,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 sendCollegeAccountEmail($toEmail, $toName, $subject, $html);
             }
             $msg = 'Submission approved, applied to database, and email sent.';
+        }
+    }
+
+    if ($act === 'approve_all' && $accountId) {
+        $stmt = $pdo->prepare("SELECT s.*, a.institute_name, a.email FROM college_submissions s LEFT JOIN college_accounts a ON s.account_id = a.id WHERE s.account_id = ? AND s.status = 'pending'");
+        $stmt->execute([$accountId]);
+        $pendingList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!empty($pendingList)) {
+            $approvedTypes = [];
+            $accountEmail = '';
+            $instituteName = '';
+
+            foreach ($pendingList as $sub) {
+                applySubmissionApproval($pdo, $sub, $_SESSION['admin_id']);
+                $approvedTypes[] = $sub['submission_type'];
+                $accountEmail = $sub['email'];
+                $instituteName = $sub['institute_name'];
+            }
+
+            // Send Single Combined Confirmation Email
+            if (!empty($accountEmail)) {
+                $toEmail = $accountEmail;
+                $toName = $instituteName ?: 'Institute';
+                $subject = "All Submissions Approved - AdmissionSeason";
+                
+                $itemsHtml = '';
+                foreach (array_unique($approvedTypes) as $t) {
+                    $itemsHtml .= "<li><strong>" . ucfirst(str_replace('_', ' ', $t)) . "</strong> details</li>";
+                }
+                
+                $html = "
+                <div style='font-family:sans-serif; max-width:600px; padding:20px; border:1px solid #e2e8f0; border-radius:10px;'>
+                    <h2 style='color:#15803d;'>Updates Approved & Published</h2>
+                    <p>Dear <strong>{$toName}</strong>,</p>
+                    <p>We are pleased to inform you that your requests to update the following details have been verified and successfully approved by our team:</p>
+                    <ul style='line-height: 1.6; margin: 16px 0; padding-left: 20px;'>
+                        {$itemsHtml}
+                    </ul>
+                    <p>All updates are now live on your college profile page.</p>
+                    <br>
+                    <p style='color:#64748b; font-size:11px;'>Regards,<br>Team AdmissionSeason</p>
+                </div>";
+                sendCollegeAccountEmail($toEmail, $toName, $subject, $html);
+            }
+            $msg = 'All pending submissions approved, applied to database, and a single confirmation email sent.';
         }
     }
 
@@ -324,12 +373,184 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $msg = 'Submission rejected and email notification sent.';
     }
+
+    if ($act === 'reject_all' && $accountId) {
+        $reason = trim($_POST['rejection_reason'] ?? '');
+        
+        $stmt = $pdo->prepare("SELECT s.*, a.institute_name, a.email FROM college_submissions s LEFT JOIN college_accounts a ON s.account_id = a.id WHERE s.account_id = ? AND s.status = 'pending'");
+        $stmt->execute([$accountId]);
+        $pendingList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!empty($pendingList)) {
+            $rejectedTypes = [];
+            $accountEmail = '';
+            $instituteName = '';
+
+            foreach ($pendingList as $sub) {
+                $pdo->prepare("UPDATE college_submissions SET status='rejected',rejection_reason=?,reviewed_by=?,reviewed_at=NOW() WHERE id=?")
+                    ->execute([$reason ?: 'Rejected by admin', $_SESSION['admin_id'], $sub['id']]);
+                
+                $rejectedTypes[] = $sub['submission_type'];
+                $accountEmail = $sub['email'];
+                $instituteName = $sub['institute_name'];
+            }
+
+            // Send Single Combined Rejection Email
+            if (!empty($accountEmail)) {
+                $toEmail = $accountEmail;
+                $toName = $instituteName ?: 'Institute';
+                $subject = "Submissions Rejected - AdmissionSeason";
+                
+                $itemsHtml = '';
+                foreach (array_unique($rejectedTypes) as $t) {
+                    $itemsHtml .= "<li><strong>" . ucfirst(str_replace('_', ' ', $t)) . "</strong> details</li>";
+                }
+                
+                $safeReason = htmlspecialchars($reason ?: 'No specific reason provided.');
+                
+                $html = "
+                <div style='font-family:sans-serif; max-width:600px; padding:20px; border:1px solid #e2e8f0; border-radius:10px;'>
+                    <h2 style='color:#b91c1c;'>Updates Rejected</h2>
+                    <p>Dear <strong>{$toName}</strong>,</p>
+                    <p>We regret to inform you that your requests to update the following details have been rejected:</p>
+                    <ul style='line-height: 1.6; margin: 16px 0; padding-left: 20px;'>
+                        {$itemsHtml}
+                    </ul>
+                    <p><strong>Reason for rejection:</strong></p>
+                    <div style='background:#fef2f2; border:1px solid #fecaca; padding:12px; border-radius:6px; color:#991b1b; font-weight:bold; margin:16px 0;'>
+                        {$safeReason}
+                    </div>
+                    <p>Please review and submit a fresh request with correct details.</p>
+                    <br>
+                    <p style='color:#64748b; font-size:11px;'>Regards,<br>Team AdmissionSeason</p>
+                </div>";
+                sendCollegeAccountEmail($toEmail, $toName, $subject, $html);
+            }
+            $msg = 'All pending submissions rejected and a single email notification sent.';
+        }
+    }
+
+    if ($act === 'approve_selected') {
+        $selectedIds = $_POST['selected_ids'] ?? [];
+        if (!empty($selectedIds)) {
+            $inClause = implode(',', array_fill(0, count($selectedIds), '?'));
+            $stmt = $pdo->prepare("SELECT s.*, a.institute_name, a.email FROM college_submissions s LEFT JOIN college_accounts a ON s.account_id = a.id WHERE s.id IN ($inClause) AND s.status = 'pending'");
+            $stmt->execute($selectedIds);
+            $pendingList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (!empty($pendingList)) {
+                $approvedTypes = [];
+                $accountEmail = '';
+                $instituteName = '';
+
+                foreach ($pendingList as $sub) {
+                    applySubmissionApproval($pdo, $sub, $_SESSION['admin_id']);
+                    $approvedTypes[] = $sub['submission_type'];
+                    $accountEmail = $sub['email'];
+                    $instituteName = $sub['institute_name'];
+                }
+
+                // Send Single Combined Confirmation Email
+                if (!empty($accountEmail)) {
+                    $toEmail = $accountEmail;
+                    $toName = $instituteName ?: 'Institute';
+                    $subject = "Submissions Approved - AdmissionSeason";
+                    
+                    $itemsHtml = '';
+                    foreach (array_unique($approvedTypes) as $t) {
+                        $itemsHtml .= "<li><strong>" . ucfirst(str_replace('_', ' ', $t)) . "</strong> details</li>";
+                    }
+                    
+                    $html = "
+                    <div style='font-family:sans-serif; max-width:600px; padding:20px; border:1px solid #e2e8f0; border-radius:10px;'>
+                        <h2 style='color:#15803d;'>Updates Approved & Published</h2>
+                        <p>Dear <strong>{$toName}</strong>,</p>
+                        <p>We are pleased to inform you that your request to update the following details has been verified and successfully approved by our team:</p>
+                        <ul style='line-height: 1.6; margin: 16px 0; padding-left: 20px;'>
+                            {$itemsHtml}
+                        </ul>
+                        <p>All approved updates are now live on your college profile page.</p>
+                        <br>
+                        <p style='color:#64748b; font-size:11px;'>Regards,<br>Team AdmissionSeason</p>
+                    </div>";
+                    sendCollegeAccountEmail($toEmail, $toName, $subject, $html);
+                }
+                $msg = 'Selected submissions approved, applied to database, and a single confirmation email sent.';
+            }
+        } else {
+            $error = 'No items selected for approval.';
+        }
+    }
+
+    if ($act === 'reject_selected') {
+        $selectedIdsCsv = $_POST['selected_ids_csv'] ?? '';
+        $reason = trim($_POST['rejection_reason'] ?? '');
+        $selectedIds = array_filter(array_map('trim', explode(',', $selectedIdsCsv)));
+
+        if (!empty($selectedIds)) {
+            $inClause = implode(',', array_fill(0, count($selectedIds), '?'));
+            $stmt = $pdo->prepare("SELECT s.*, a.institute_name, a.email FROM college_submissions s LEFT JOIN college_accounts a ON s.account_id = a.id WHERE s.id IN ($inClause) AND s.status = 'pending'");
+            $stmt->execute($selectedIds);
+            $pendingList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (!empty($pendingList)) {
+                $rejectedTypes = [];
+                $accountEmail = '';
+                $instituteName = '';
+
+                foreach ($pendingList as $sub) {
+                    $pdo->prepare("UPDATE college_submissions SET status='rejected',rejection_reason=?,reviewed_by=?,reviewed_at=NOW() WHERE id=?")
+                        ->execute([$reason ?: 'Rejected by admin', $_SESSION['admin_id'], $sub['id']]);
+                    
+                    $rejectedTypes[] = $sub['submission_type'];
+                    $accountEmail = $sub['email'];
+                    $instituteName = $sub['institute_name'];
+                }
+
+                // Send Single Combined Rejection Email
+                if (!empty($accountEmail)) {
+                    $toEmail = $accountEmail;
+                    $toName = $instituteName ?: 'Institute';
+                    $subject = "Submissions Rejected - AdmissionSeason";
+                    
+                    $itemsHtml = '';
+                    foreach (array_unique($rejectedTypes) as $t) {
+                        $itemsHtml .= "<li><strong>" . ucfirst(str_replace('_', ' ', $t)) . "</strong> details</li>";
+                    }
+                    
+                    $safeReason = htmlspecialchars($reason ?: 'No specific reason provided.');
+                    
+                    $html = "
+                    <div style='font-family:sans-serif; max-width:600px; padding:20px; border:1px solid #e2e8f0; border-radius:10px;'>
+                        <h2 style='color:#b91c1c;'>Updates Rejected</h2>
+                        <p>Dear <strong>{$toName}</strong>,</p>
+                        <p>We regret to inform you that your request to update the following details has been rejected:</p>
+                        <ul style='line-height: 1.6; margin: 16px 0; padding-left: 20px;'>
+                            {$itemsHtml}
+                        </ul>
+                        <p><strong>Reason for rejection:</strong></p>
+                        <div style='background:#fef2f2; border:1px solid #fecaca; padding:12px; border-radius:6px; color:#991b1b; font-weight:bold; margin:16px 0;'>
+                            {$safeReason}
+                        </div>
+                        <p>Please review and submit a fresh request with correct details.</p>
+                        <br>
+                        <p style='color:#64748b; font-size:11px;'>Regards,<br>Team AdmissionSeason</p>
+                    </div>";
+                    sendCollegeAccountEmail($toEmail, $toName, $subject, $html);
+                }
+                $msg = 'Selected submissions rejected and a single email notification sent.';
+            }
+        } else {
+            $error = 'No items selected for rejection.';
+        }
+    }
 }
 
 $subs = $pdo->query("
     SELECT s.*, a.institute_name, a.email
     FROM college_submissions s
     LEFT JOIN college_accounts a ON s.account_id = a.id
+    WHERE s.status != 'draft'
     ORDER BY FIELD(s.status,'pending','approved','rejected'), s.created_at DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
 
@@ -459,45 +680,87 @@ function renderField($data, $fieldName, $label) {
               </select>
             </div>
 
-            <div class="card">
-            <table class="subs-table">
-            <thead>
-            <tr><th>Institute</th><th>Type</th><th>Submitted Data Fields</th><th>Status</th><th>Submitted Date</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-            <?php if (empty($subs)): ?>
-            <tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:32px">No submissions yet.</td></tr>
+            <?php
+            $grouped = [];
+            foreach ($subs as $s) {
+                $grouped[$s['account_id']]['institute_name'] = $s['institute_name'];
+                $grouped[$s['account_id']]['email'] = $s['email'];
+                $grouped[$s['account_id']]['items'][] = $s;
+            }
+            ?>
+
+            <?php if (empty($grouped)): ?>
+            <div class="card"><div class="empty" style="text-align:center;color:#94a3b8;padding:32px">No submissions yet.</div></div>
             <?php endif; ?>
-            <?php foreach($subs as $s): ?>
-            <tr class="sub-row" data-status="<?=$s['status']?>" data-type="<?=$s['submission_type']?>">
-              <td style="font-weight:700; color:#0f172a;"><?=htmlspecialchars($s['institute_name'] ?? 'Unknown')?></td>
-              <td><span class="badge badge-blue"><?=($typeLabels[$s['submission_type']] ?? $s['submission_type'])?></span></td>
-              <td>
-                <a href="submission_details.php?id=<?=$s['id']?>" class="btn btn-ghost btn-sm" style="text-decoration:none;"><i class="ph ph-eye"></i> View Details</a>
-              </td>
-              <td><span class="badge <?=($s['status']==='approved'?'badge-green':($s['status']==='rejected'?'badge-red':'badge-yellow'))?>"><?=ucfirst($s['status'])?></span></td>
-              <td><?=date('d M Y', strtotime($s['created_at']))?></td>
-              <td>
-                <?php if($s['status']==='pending'): ?>
-                <form method="POST" style="display:inline"><input type="hidden" name="action" value="approve"><input type="hidden" name="submission_id" value="<?=$s['id']?>"><button class="btn btn-green btn-sm"><i class="ph ph-check"></i> Approve</button></form>
-                <button class="btn btn-red btn-sm" onclick="showReject('<?=$s['id']?>')"><i class="ph ph-x"></i> Reject</button>
-                <?php endif; ?>
-              </td>
-            </tr>
-            <?php endforeach;?>
-            </tbody>
-            </table>
+            
+            <?php foreach($grouped as $accountId => $group): 
+                $pendingCount = count(array_filter($group['items'], function($x) { return $x['status'] === 'pending'; }));
+            ?>
+            <form method="POST" id="form-<?=$accountId?>" style="margin: 0; padding: 0;">
+            <input type="hidden" name="action" id="action-<?=$accountId?>" value="approve_selected">
+            <div class="card" style="margin-bottom: 24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:#0f172a;"><?=htmlspecialchars($group['institute_name'] ?: 'Unknown Institute')?></h3>
+                        <span style="font-size:0.8rem; color:#64748b;"><?=htmlspecialchars($group['email'] ?: '')?></span>
+                    </div>
+                    <?php if ($pendingCount > 0): ?>
+                    <div style="display:flex; gap:8px;">
+                        <button type="submit" onclick="return submitApproveSelected('<?=$accountId?>', event)" class="btn btn-green btn-sm"><i class="ph ph-check-square"></i> Approve Selected</button>
+                        <button type="button" onclick="submitRejectSelected('<?=$accountId?>', event)" class="btn btn-red btn-sm"><i class="ph ph-x-square"></i> Reject Selected</button>
+                    </div>
+                    <?php endif; ?>
+                </div>
+
+                <div style="overflow-x:auto;">
+                <table class="subs-table">
+                <thead>
+                <tr>
+                  <th style="width: 40px;">
+                    <?php if ($pendingCount > 0): ?>
+                    <input type="checkbox" onclick="toggleSelectAll('<?=$accountId?>', this)">
+                    <?php endif; ?>
+                  </th>
+                  <th>Submission Type</th><th>Status</th><th>Submitted Date</th><th style="text-align:right;">Actions</th></tr>
+                </thead>
+                <tbody>
+                <?php foreach($group['items'] as $s): ?>
+                <tr class="sub-row" data-status="<?=$s['status']?>" data-type="<?=$s['submission_type']?>">
+                  <td>
+                    <?php if($s['status']==='pending'): ?>
+                    <input type="checkbox" name="selected_ids[]" value="<?=$s['id']?>" class="sub-cb-<?=$accountId?>">
+                    <?php endif; ?>
+                  </td>
+                  <td><span class="badge badge-blue"><?=($typeLabels[$s['submission_type']] ?? $s['submission_type'])?></span></td>
+                  <td><span class="badge <?=($s['status']==='approved'?'badge-green':($s['status']==='rejected'?'badge-red':'badge-yellow'))?>"><?=ucfirst($s['status'])?></span></td>
+                  <td><?=date('d M Y', strtotime($s['created_at']))?></td>
+                  <td style="text-align:right;">
+                    <a href="submission_details.php?id=<?=$s['id']?>" class="btn btn-ghost btn-sm" style="text-decoration:none;"><i class="ph ph-eye"></i> View Details</a>
+                    <?php if($s['status']==='pending'): ?>
+                    <button type="button" class="btn btn-green btn-ghost btn-sm" style="color:#16a34a; border: 1px solid #16a34a; margin-left:4px;" onclick="approveSingleDirect('<?=$s['id']?>')"><i class="ph ph-check"></i> Approve Single</button>
+                    <button type="button" class="btn btn-red btn-ghost btn-sm" style="color:#dc2626; border: 1px solid #dc2626; margin-left:4px;" onclick="showReject('<?=$s['id']?>')"><i class="ph ph-x"></i> Reject Single</button>
+                    <?php endif; ?>
+                  </td>
+                </tr>
+                <?php endforeach; ?>
+                </tbody>
+                </table>
+                </div>
             </div>
+            </form>
+            <?php endforeach; ?>
         </div>
     </main>
 </div>
 
 <div class="modal-bg" id="rejectModal">
 <div class="modal">
-  <h3>Reject Submission</h3>
+  <h3 id="rejectModalTitle">Reject Submission</h3>
   <form method="POST">
-    <input type="hidden" name="action" value="reject">
+    <input type="hidden" name="action" id="rejectAction" value="reject">
     <input type="hidden" name="submission_id" id="rejectId">
+    <input type="hidden" name="account_id" id="rejectAccountId">
+    <input type="hidden" name="selected_ids_csv" id="rejectSelectedIds">
     <textarea name="rejection_reason" rows="3" placeholder="Reason for rejection (optional)"></textarea>
     <div class="btns">
       <button type="button" class="btn btn-ghost" onclick="document.getElementById('rejectModal').classList.remove('show')">Cancel</button>
@@ -507,11 +770,75 @@ function renderField($data, $fieldName, $label) {
 </div>
 </div>
 
+<form id="singleActionForm" method="POST" style="display:none;">
+    <input type="hidden" name="action" id="singleAction" value="">
+    <input type="hidden" name="submission_id" id="singleSubmissionId" value="">
+</form>
+
 <script>
+function toggleSelectAll(accountId, masterCb) {
+    const checkboxes = document.querySelectorAll('.sub-cb-' + accountId);
+    checkboxes.forEach(cb => cb.checked = masterCb.checked);
+}
+
+function submitApproveSelected(accountId, event) {
+    const checked = document.querySelectorAll('.sub-cb-' + accountId + ':checked');
+    if (checked.length === 0) {
+        alert('Please select at least one submission to approve.');
+        event.preventDefault();
+        return false;
+    }
+    if (!confirm('Approve the selected updates?')) {
+        event.preventDefault();
+        return false;
+    }
+    document.getElementById('action-' + accountId).value = 'approve_selected';
+    return true;
+}
+
+function submitRejectSelected(accountId, event) {
+    event.preventDefault();
+    const checked = document.querySelectorAll('.sub-cb-' + accountId + ':checked');
+    if (checked.length === 0) {
+        alert('Please select at least one submission to reject.');
+        return false;
+    }
+    const ids = Array.from(checked).map(cb => cb.value).join(',');
+    
+    document.getElementById('rejectAction').value = 'reject_selected';
+    document.getElementById('rejectId').value = '';
+    document.getElementById('rejectAccountId').value = '';
+    document.getElementById('rejectSelectedIds').value = ids;
+    document.getElementById('rejectModalTitle').textContent = 'Reject Selected Submissions';
+    document.getElementById('rejectModal').classList.add('show');
+}
+
+function approveSingleDirect(id) {
+    if(confirm('Approve this submission?')) {
+        document.getElementById('singleAction').value = 'approve';
+        document.getElementById('singleSubmissionId').value = id;
+        document.getElementById('singleActionForm').submit();
+    }
+}
+
 function showReject(id){
-  document.getElementById('rejectId').value=id;
+  document.getElementById('rejectAction').value = 'reject';
+  document.getElementById('rejectId').value = id;
+  document.getElementById('rejectAccountId').value = '';
+  document.getElementById('rejectSelectedIds').value = '';
+  document.getElementById('rejectModalTitle').textContent = 'Reject Submission';
   document.getElementById('rejectModal').classList.add('show');
 }
+
+function showRejectAll(accountId){
+  document.getElementById('rejectAction').value = 'reject_all';
+  document.getElementById('rejectId').value = '';
+  document.getElementById('rejectAccountId').value = accountId;
+  document.getElementById('rejectSelectedIds').value = '';
+  document.getElementById('rejectModalTitle').textContent = 'Reject All Submissions';
+  document.getElementById('rejectModal').classList.add('show');
+}
+
 function filterTable(){
   var st=document.getElementById('filterStatus').value;
   var ty=document.getElementById('filterType').value;

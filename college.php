@@ -96,11 +96,16 @@ $tabIcons = [
 
 // Check if logged-in user already applied to this college
 $userAlreadyApplied = null;
+$userSavedThisCollege = false;
 if (isset($_SESSION['user_id'])) {
     try {
         $ua = $pdo->prepare("SELECT application_number, status FROM applications WHERE user_id = ? AND college_id = ? LIMIT 1");
         $ua->execute([$_SESSION['user_id'], $cid]);
         $userAlreadyApplied = $ua->fetch(PDO::FETCH_ASSOC) ?: null;
+        
+        $us = $pdo->prepare("SELECT id FROM saved_colleges WHERE user_id = ? AND college_id = ? LIMIT 1");
+        $us->execute([$_SESSION['user_id'], $cid]);
+        $userSavedThisCollege = (bool)$us->fetch();
     } catch(Exception $e) {}
 }
 ?>
@@ -154,19 +159,81 @@ if (isset($_SESSION['user_id'])) {
       letter-spacing:.4px;background:rgba(11,36,71,0.06);color:#19376D;display:inline-block}
 
     /* Tab scroll arrows */
-    .college-tabs-wrapper{position:relative;display:flex;align-items:center}
-    .college-tabs-wrapper .shiksha-tabs{flex:1;overflow-x:auto;scrollbar-width:none;scroll-behavior:smooth;
-      display:flex;gap:2px;padding:4px 0}
-    .college-tabs-wrapper .shiksha-tabs::-webkit-scrollbar{display:none}
-    .tab-arrow{
-      flex-shrink:0;width:32px;height:32px;border:none;border-radius:8px;cursor:pointer;
-      display:flex;align-items:center;justify-content:center;font-size:1rem;
-      color:#19376D;background:rgba(11,36,71,0.06);border:1px solid rgba(15,23,42,0.08);
-      transition:all .2s;z-index:2;margin:0 4px;
+    .college-tabs-wrapper {
+      position: relative;
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
     }
-    .tab-arrow:hover{background:#19376D;color:#fff;border-color:#19376D}
-    .tab-arrow:active{transform:scale(.95)}
-    .tab-arrow.hidden{display:none}
+    .college-tabs-wrapper .shiksha-tabs {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+      padding: 8px 0;
+    }
+    @media (min-width: 769px) {
+      .college-tabs-wrapper.has-scroll .shiksha-tabs {
+        padding: 8px 48px;
+      }
+    }
+    .college-tabs-wrapper .shiksha-tabs::-webkit-scrollbar {
+      display: none;
+    }
+    .tab-arrow {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 64px;
+      border: none;
+      background: none;
+      padding: 0;
+      margin: 0;
+      outline: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      z-index: 10;
+      transition: all .25s ease;
+    }
+    .tab-arrow-left {
+      left: 0;
+      background: linear-gradient(90deg, #ffffff 50%, rgba(255,255,255,0));
+      justify-content: flex-start;
+      padding-left: 8px;
+    }
+    .tab-arrow-right {
+      right: 0;
+      background: linear-gradient(270deg, #ffffff 50%, rgba(255,255,255,0));
+      justify-content: flex-end;
+      padding-right: 8px;
+    }
+    .tab-arrow i {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 1px solid rgba(15,23,42,0.12);
+      box-shadow: 0 4px 10px rgba(11,36,71,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: #19376D;
+      transition: all 0.2s ease;
+    }
+    .tab-arrow:hover i {
+      color: #ffffff;
+      background: #19376D;
+      border-color: #19376D;
+      transform: scale(1.1);
+    }
+    .tab-arrow.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -212,8 +279,12 @@ if (isset($_SESSION['user_id'])) {
         </div>
       </div>
       <div class="college-hero-actions">
-        <button type="button" class="college-btn-outline" title="Save to wishlist" onclick="this.innerHTML='<i class=\'ph-fill ph-heart\'></i> Saved'">
-          <i class="ph ph-heart"></i> Save
+        <button type="button" class="college-btn-outline" id="saveCollegeBtn" title="Save to wishlist" onclick="toggleSaveCollege()">
+          <?php if ($userSavedThisCollege): ?>
+            <i class="ph-fill ph-heart" style="color:#e11d48"></i> Saved
+          <?php else: ?>
+            <i class="ph ph-heart"></i> Save
+          <?php endif; ?>
         </button>
         <?php if ($brochureUrl): ?>
         <?php if ($isLoggedIn): ?>
@@ -1279,10 +1350,17 @@ function scrollTabs(dir) {
 function updateTabArrows() {
   const tabs = document.getElementById('collegeTabs');
   if (!tabs) return;
+  const wrapper = tabs.closest('.college-tabs-wrapper');
   const left = document.querySelector('.tab-arrow-left');
   const right = document.querySelector('.tab-arrow-right');
-  if (left) left.classList.toggle('hidden', tabs.scrollLeft <= 5);
-  if (right) right.classList.toggle('hidden', tabs.scrollLeft + tabs.clientWidth >= tabs.scrollWidth - 5);
+  
+  const canScroll = tabs.scrollWidth > tabs.clientWidth;
+  if (wrapper) {
+    wrapper.classList.toggle('has-scroll', canScroll);
+  }
+  
+  if (left) left.classList.toggle('hidden', !canScroll || tabs.scrollLeft <= 5);
+  if (right) right.classList.toggle('hidden', !canScroll || tabs.scrollLeft + tabs.clientWidth >= tabs.scrollWidth - 5);
 }
 document.addEventListener('DOMContentLoaded', () => {
   const tabs = document.getElementById('collegeTabs');
@@ -1292,6 +1370,48 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', updateTabArrows);
   }
 });
+
+let userSavedThisCollege = <?= $userSavedThisCollege ? 'true' : 'false' ?>;
+const collegeId = '<?= htmlspecialchars((string)$cid) ?>';
+
+function toggleSaveCollege() {
+  const btn = document.getElementById('saveCollegeBtn');
+  if (!btn) return;
+  
+  btn.disabled = true;
+  const action = userSavedThisCollege ? 'unsave' : 'save';
+  
+  fetch('<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/api/save_college.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      college_id: collegeId,
+      action: action
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    btn.disabled = false;
+    if (data.ok) {
+      userSavedThisCollege = data.saved;
+      if (userSavedThisCollege) {
+        btn.innerHTML = '<i class="ph-fill ph-heart" style="color:#e11d48"></i> Saved';
+      } else {
+        btn.innerHTML = '<i class="ph ph-heart"></i> Save';
+      }
+    } else if (data.error === 'login_required') {
+      openLoginPrompt();
+    } else {
+      alert(data.msg || 'Something went wrong.');
+    }
+  })
+  .catch(err => {
+    btn.disabled = false;
+    console.error(err);
+  });
+}
 </script>
 
 <!-- Login Required Prompt Modal -->

@@ -43,7 +43,7 @@ function generateUUID() {
 }
 function createSubmission($pdo, $accountId, $collegeId, $type, $dataArray) {
     $uuid = generateUUID();
-    $stmt = $pdo->prepare("INSERT INTO college_submissions (id, account_id, college_id, submission_type, data_json, status, created_at) VALUES (?, ?, ?, ?, ?, 'pending', NOW())");
+    $stmt = $pdo->prepare("INSERT INTO college_submissions (id, account_id, college_id, submission_type, data_json, status, created_at) VALUES (?, ?, ?, ?, ?, 'draft', NOW())");
     return $stmt->execute([$uuid, $accountId, $collegeId, $type, json_encode($dataArray)]);
 }
 
@@ -62,6 +62,16 @@ try { $all_colleges = $pdo->query("SELECT id, name FROM colleges WHERE id != " .
 // Handle Form POST Submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
     $action = $_POST['action'] ?? '';
+
+    if ($action === 'submit_all_drafts') {
+        try {
+            $stmt = $pdo->prepare("UPDATE college_submissions SET status = 'pending' WHERE account_id = ? AND status = 'draft'");
+            $stmt->execute([$account['id']]);
+            $msg = 'All draft changes have been successfully submitted to admin for approval!';
+        } catch (Exception $e) {
+            $error = 'Error submitting drafts: ' . $e->getMessage();
+        }
+    }
 
     if ($action === 'update_identity') {
         try {
@@ -121,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
             ];
 
             createSubmission($pdo, $account['id'], $collegeId, 'profile', $subData);
-            $msg = 'Identity & Contact changes submitted for verification. Admin approval is pending.';
+            $msg = 'Identity & Contact details saved as draft. Submit it for approval in the "My Submissions" tab.';
         } catch (Exception $e) {
             $error = 'Error saving details: ' . $e->getMessage();
         }
@@ -156,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
             ];
 
             createSubmission($pdo, $account['id'], $collegeId, 'profile', $subData);
-            $msg = 'About & Infrastructure updates submitted for verification. Admin approval is pending.';
+            $msg = 'About & Infrastructure details saved as draft. Submit it for approval in the "My Submissions" tab.';
         } catch (Exception $e) {
             $error = 'Error saving details: ' . $e->getMessage();
         }
@@ -178,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
             ];
 
             createSubmission($pdo, $account['id'], $collegeId, 'profile', $subData);
-            $msg = 'Admissions updates submitted for verification. Admin approval is pending.';
+            $msg = 'Admissions details saved as draft. Submit it for approval in the "My Submissions" tab.';
         } catch (Exception $e) {
             $error = 'Error saving details: ' . $e->getMessage();
         }
@@ -186,28 +196,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
 
     if ($action === 'update_seo') {
         try {
-            $upload_dir = '../uploads/';
-            $og_image_url = $_POST['existing_og_image_url'] ?? '';
-            if (isset($_FILES['og_image_file']) && $_FILES['og_image_file']['error'] == 0) {
-                $ext = pathinfo($_FILES['og_image_file']['name'], PATHINFO_EXTENSION);
-                $filename = 'college_og_' . time() . '_' . uniqid() . '.' . $ext;
-                if (move_uploaded_file($_FILES['og_image_file']['tmp_name'], $upload_dir . $filename)) {
-                    $og_image_url = 'uploads/' . $filename;
+            // Fetch existing SEO details
+            $seoStmt = $pdo->prepare("SELECT canonical_url, og_image_url, schema_markup, noindex FROM seo_meta WHERE page_type = 'college' AND page_id = ?");
+            $seoStmt->execute([$collegeId]);
+            $existingSeo = $seoStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+            // 1. Auto Canonical URL
+            $canonical_url = $existingSeo['canonical_url'] ?? '';
+            if (empty($canonical_url)) {
+                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+                $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                $canonical_url = $protocol . $host . '/ADMISSION/college.php?id=' . $collegeId;
+            }
+
+            // 2. Auto OG Image
+            $og_image_url = $existingSeo['og_image_url'] ?? '';
+            if (empty($og_image_url)) {
+                $mediaStmt = $pdo->prepare("SELECT cover_image_url, logo_url FROM college_media WHERE college_id = ? AND image_type IS NULL");
+                $mediaStmt->execute([$collegeId]);
+                $mediaRow = $mediaStmt->fetch(PDO::FETCH_ASSOC);
+                if (!empty($mediaRow['cover_image_url'])) {
+                    $og_image_url = $mediaRow['cover_image_url'];
+                } elseif (!empty($mediaRow['logo_url'])) {
+                    $og_image_url = $mediaRow['logo_url'];
                 }
             }
+
+            // 3. Auto Schema Markup
+            $schema_markup = $existingSeo['schema_markup'] ?? null;
+            if (empty($schema_markup)) {
+                $colStmt = $pdo->prepare("SELECT c.name, cc.address, cc.website_url, cc.phone, ct.about_text 
+                                          FROM colleges c 
+                                          LEFT JOIN college_contacts cc ON c.id = cc.college_id 
+                                          LEFT JOIN college_content ct ON c.id = ct.college_id 
+                                          WHERE c.id = ?");
+                $colStmt->execute([$collegeId]);
+                $colData = $colStmt->fetch(PDO::FETCH_ASSOC);
+                if ($colData) {
+                    $schema = [
+                        "@context" => "https://schema.org",
+                        "@type" => "CollegeOrUniversity",
+                        "name" => $colData['name'],
+                        "description" => $colData['about_text'] ? substr(strip_tags($colData['about_text']), 0, 160) : '',
+                        "url" => $colData['website_url'] ?: '',
+                        "telephone" => $colData['phone'] ?: '',
+                        "address" => [
+                            "@type" => "PostalAddress",
+                            "streetAddress" => $colData['address'] ?: ''
+                        ]
+                    ];
+                    $schema_markup = json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                }
+            }
+
+            $noindex = $existingSeo['noindex'] ?? 0;
 
             $subData = [
                 'publish_status' => $_POST['publish_status'],
                 'meta_title' => $_POST['meta_title'],
                 'meta_description' => $_POST['meta_description'],
                 'og_image_url' => $og_image_url,
-                'canonical_url' => $_POST['canonical_url'],
-                'schema_markup' => $_POST['schema_markup'] ?: null,
-                'noindex' => isset($_POST['noindex']) ? 1 : 0
+                'canonical_url' => $canonical_url,
+                'schema_markup' => $schema_markup,
+                'noindex' => $noindex
             ];
 
             createSubmission($pdo, $account['id'], $collegeId, 'profile', $subData);
-            $msg = 'SEO & publish status updates submitted for verification. Admin approval is pending.';
+            $msg = 'SEO details saved as draft. Submit it for approval in the "My Submissions" tab.';
         } catch (Exception $e) {
             $error = 'Error saving details: ' . $e->getMessage();
         }
@@ -239,7 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
             ];
 
             createSubmission($pdo, $account['id'], $collegeId, 'courses', $subData);
-            $msg = 'Course creation request submitted for verification. Admin approval is pending.';
+            $msg = 'Course details saved as draft. Submit it for approval in the "My Submissions" tab.';
         } catch (Exception $e) {
             $error = 'Error adding course: ' . $e->getMessage();
         }
@@ -269,7 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
             ];
 
             createSubmission($pdo, $account['id'], $collegeId, 'placements', $subData);
-            $msg = 'Placement data submission sent for verification. Admin approval is pending.';
+            $msg = 'Placement data saved as draft. Submit it for approval in the "My Submissions" tab.';
         } catch (Exception $e) {
             $error = 'Error adding placement: ' . $e->getMessage();
         }
@@ -298,7 +353,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
             ];
 
             createSubmission($pdo, $account['id'], $collegeId, 'cutoffs', $subData);
-            $msg = 'Cutoff submission sent for verification. Admin approval is pending.';
+            $msg = 'Cutoff data saved as draft. Submit it for approval in the "My Submissions" tab.';
         } catch (Exception $e) {
             $error = 'Error adding cutoff: ' . $e->getMessage();
         }
@@ -325,7 +380,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
             ];
 
             createSubmission($pdo, $account['id'], $collegeId, 'seat_matrix', $subData);
-            $msg = 'Seat matrix submission sent for verification. Admin approval is pending.';
+            $msg = 'Seat matrix saved as draft. Submit it for approval in the "My Submissions" tab.';
         } catch (Exception $e) {
             $error = 'Error adding seat matrix: ' . $e->getMessage();
         }
@@ -612,7 +667,14 @@ if ($collegeId) {
         $seatMatrix=$s->fetchAll(PDO::FETCH_ASSOC);
     } catch(Exception $e){}
     try {
-        $s=$pdo->prepare("SELECT * FROM leads WHERE college_id=? ORDER BY created_at DESC LIMIT 50");
+        $s=$pdo->prepare("
+            SELECT l.*, cc.course_name AS course_interest 
+            FROM leads l 
+            LEFT JOIN college_courses cc ON cc.id = l.course_id 
+            WHERE l.college_id = ? 
+            ORDER BY l.created_at DESC 
+            LIMIT 50
+        ");
         $s->execute([$collegeId]);
         $leads=$s->fetchAll(PDO::FETCH_ASSOC);
     } catch(Exception $e){}
@@ -1403,13 +1465,15 @@ tr:hover td {
             document.getElementById('city_id').innerHTML = '<option value="">Select City</option>';
             return;
         }
-        fetch('/ADMISSION/api/get_cities.php?state_id=' + stateId)
+        fetch('/ADMISSION/api/cities.php?state_id=' + stateId)
             .then(res => res.json())
             .then(data => {
                 let html = '<option value="">Select City</option>';
-                data.forEach(c => {
-                    html += `<option value="${c.id}">${c.name}</option>`;
-                });
+                if (data.cities && data.cities.length > 0) {
+                    data.cities.forEach(c => {
+                        html += `<option value="${c.id}">${c.name}</option>`;
+                    });
+                }
                 document.getElementById('city_id').innerHTML = html;
             });
     }
@@ -1697,6 +1761,7 @@ tr:hover td {
       
       <div class="dash-card">
         <h3><i class="ph ph-globe"></i> SEO Settings & Publish Status</h3>
+        
         <div class="form-group">
             <label>Publish Status</label>
             <select name="publish_status" required>
@@ -1705,33 +1770,17 @@ tr:hover td {
                 <option value="archived" <?=getValue($college, 'publish_status') === 'archived' ? 'selected' : ''?>>Archived</option>
             </select>
         </div>
+        
         <div class="form-group">
-            <label>Meta Title</label>
-            <input type="text" name="meta_title" value="<?=getValue($seo, 'meta_title')?>">
+            <label>Search Engine Title (How your college name appears on Google search results)</label>
+            <input type="text" name="meta_title" value="<?=getValue($seo, 'meta_title')?>" placeholder="e.g. Harvard University | Admissions, Fees & Courses">
         </div>
+        
         <div class="form-group">
-            <label>Meta Description</label>
-            <textarea name="meta_description" rows="3"><?=getValue($seo, 'meta_description')?></textarea>
+            <label>Search Engine Description (A brief summary of your college shown on Google search results)</label>
+            <textarea name="meta_description" rows="3" placeholder="e.g. Explore details about courses, annual fees, eligibility, placements, campus facilities, and admission updates."><?=getValue($seo, 'meta_description')?></textarea>
         </div>
-        <div class="form-group">
-            <label>Canonical URL</label>
-            <input type="url" name="canonical_url" value="<?=getValue($seo, 'canonical_url')?>">
-        </div>
-        <div class="form-group">
-            <label>OG Image File</label>
-            <?php if(getValue($seo, 'og_image_url')): ?>
-                <div style="margin-bottom:8px;">
-                    <img src="../<?=getValue($seo, 'og_image_url')?>" style="height: 50px; border-radius: 4px; border: 1px solid #ccc;">
-                </div>
-            <?php endif; ?>
-            <input type="hidden" name="existing_og_image_url" value="<?=getValue($seo, 'og_image_url')?>">
-            <input type="file" name="og_image_file" accept="image/*">
-        </div>
-        <div class="form-group">
-            <label>Schema Markup</label>
-            <textarea name="schema_markup" rows="5"><?=getValue($seo, 'schema_markup')?></textarea>
-        </div>
-        <div class="checkbox-group" style="margin-bottom:14px;"><input type="checkbox" name="noindex" <?=!empty($seo['noindex']) ? 'checked' : ''?> id="noind"><label for="noind">Mark Page as No-Index (Do not show on Google)</label></div>
+
         <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Save SEO Settings</button>
       </div>
     </form>
@@ -2504,15 +2553,46 @@ tr:hover td {
       <?php else: ?><div class="empty">No enquiries received yet.</div><?php endif;?>
     </div>
 
-    <?php elseif($tab==='submissions'): ?>
+    <?php elseif($tab==='submissions'): 
+      $drafts = array_filter($pendingSubs, function($s) { return $s['status'] === 'draft'; });
+      $history = array_filter($pendingSubs, function($s) { return $s['status'] !== 'draft'; });
+    ?>
+    
+    <?php if(!empty($drafts)): ?>
+    <div class="dash-card" style="border: 1.5px solid #3b82f6; background: #eff6ff; margin-bottom: 24px;">
+      <h3 style="color: #1d4ed8; display:flex; align-items:center; gap:8px;"><i class="ph ph-info"></i> Draft Changes Pending Submission</h3>
+      <p style="font-size:0.85rem; color:#1e40af; margin-bottom:16px;">The changes below have been saved but are NOT yet sent to the admin for approval. You can continue updating other sections, and then submit all your changes at once using the button below.</p>
+      
+      <form method="POST" style="margin-bottom: 20px;">
+          <input type="hidden" name="action" value="submit_all_drafts">
+          <button type="submit" class="btn btn-primary" style="background:#1e40af;"><i class="ph ph-paper-plane-tilt"></i> Submit All Drafts to Admin for Approval</button>
+      </form>
+
+      <div style="overflow-x:auto;">
+      <table style="width:100%;">
+        <thead><tr><th>Type</th><th>Status</th><th>Saved Date</th></tr></thead>
+        <tbody>
+        <?php foreach($drafts as $ps): ?>
+        <tr>
+          <td style="font-weight:600"><?=ucfirst(str_replace('_',' ',$ps['submission_type']))?></td>
+          <td><span class="badge badge-blue">Draft</span></td>
+          <td><?=date('d M Y h:i A', strtotime($ps['created_at']))?></td>
+        </tr>
+        <?php endforeach;?>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    <?php endif; ?>
+
     <div class="dash-card">
       <h3><i class="ph ph-clock-countdown"></i> Account Submissions History</h3>
-      <?php if($pendingSubs): ?>
+      <?php if(!empty($history)): ?>
       <div style="overflow-x:auto;">
       <table>
         <thead><tr><th>Type</th><th>Status</th><th>Submitted Date</th><th>Admin Note</th></tr></thead>
         <tbody>
-        <?php foreach($pendingSubs as $ps): ?>
+        <?php foreach($history as $ps): ?>
         <tr>
           <td style="font-weight:600"><?=ucfirst(str_replace('_',' ',$ps['submission_type']))?></td>
           <td><span class="badge <?=($ps['status']==='approved'?'badge-green':($ps['status']==='rejected'?'badge-red':'badge-yellow'))?>"><?=ucfirst($ps['status'])?></span></td>
