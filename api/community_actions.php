@@ -9,6 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/spam_detector.php';
 
 $response = ['status' => 'error', 'message' => 'Invalid request'];
 
@@ -378,6 +379,12 @@ try {
         $reasons = $input['reasons'] ?? [];
         $otherText = $input['other_text'] ?? '';
         $userId = $_SESSION['user_id'];
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+
+        $blCheck = checkBlacklist($pdo, $ip, null, $userId);
+        if ($blCheck['blocked']) {
+            throw new Exception('Action blocked: ' . $blCheck['reason']);
+        }
 
         if (empty($reportType) || empty($reportId) || empty($reasons)) {
             throw new Exception('Missing report details.');
@@ -432,8 +439,16 @@ try {
         $slaHours = ['critical' => 4, 'high' => 12, 'medium' => 24, 'low' => 48];
         $slaDue = date('Y-m-d H:i:s', time() + ($slaHours[$priority] ?? 24) * 3600);
 
-        $pdo->prepare("INSERT INTO moderation_queue (id, entity_type, entity_id, status, priority, flagged_reason, ai_score, reporter_id, sla_due_at, created_at) VALUES (UUID(), ?, ?, 'pending', ?, ?, ?, ?, ?, NOW())")
-             ->execute(['qa_' . $reportType, $reportId, $priority, $reasonText, $reportCount, $userId, $slaDue]);
+        $entityTypeMap = ['answer' => 'qa_answer', 'question' => 'qa_question', 'comment' => 'qa_comment'];
+        $modEntityType = $entityTypeMap[$reportType] ?? 'qa';
+
+        $reasonMap = ['spam' => 'spam', 'offensive' => 'offensive', 'wrong_info' => 'wrong_info', 'duplicate' => 'duplicate'];
+        $modFlagReason = $reasonMap[$reportReasonKey] ?? 'abuse';
+
+        $pdo->prepare("INSERT INTO moderation_queue (id, entity_type, entity_id, status, priority, flagged_reason, reporter_id, sla_due_at, created_at) VALUES (UUID(), ?, ?, 'pending', ?, ?, ?, ?, NOW())")
+             ->execute([$modEntityType, $reportId, $priority, $modFlagReason, $userId, $slaDue]);
+
+        try { detectSpam($pdo, $reasonText, $ip, $userId, null, 'qa_report'); } catch (Exception $e) {}
 
         $response = ['status' => 'success', 'message' => 'Report submitted. Thank you!'];
     } else {

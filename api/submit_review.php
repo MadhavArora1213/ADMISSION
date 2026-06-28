@@ -40,6 +40,15 @@ if (empty($_SESSION['user_id'])) {
 }
 
 require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/spam_detector.php';
+
+$ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+$userId = $_SESSION['user_id'];
+$blCheck = checkBlacklist($pdo, $ip, null, $userId);
+if ($blCheck['blocked']) {
+    echo json_encode(['ok' => false, 'message' => 'Action blocked: ' . $blCheck['reason']]);
+    exit;
+}
 
 $input = json_decode(file_get_contents('php://input'), true);
 if (!$input || !is_array($input)) {
@@ -136,6 +145,11 @@ try {
     $slaDue = date('Y-m-d H:i:s', time() + ($slaHours[$priority] ?? 24) * 3600);
     $pdo->prepare("INSERT INTO moderation_queue (id, entity_type, entity_id, status, priority, flagged_reason, reporter_id, sla_due_at, created_at) VALUES (UUID(), 'review', ?, 'pending', ?, 'new_review', ?, ?, NOW())")
          ->execute([$reviewId, $priority, $userId, $slaDue]);
+} catch (Exception $e) {}
+
+try {
+    $spamContent = implode(' ', array_filter([$title, $body, $pros, $cons]));
+    detectSpam($pdo, $spamContent, $ip, $userId, null, 'review');
 } catch (Exception $e) {}
 
 echo json_encode([

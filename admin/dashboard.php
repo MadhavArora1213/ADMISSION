@@ -255,7 +255,52 @@ try {
         .bg-red { background: rgba(15,23,42,0.04); color: #0F172A; }
         .bg-indigo { background: rgba(11,36,71,0.06); color: #19376D; }
         .bg-teal { background: rgba(11,36,71,0.04); color: #19376D; }
-        
+
+        .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:49; }
+        .mobile-toggle { display:none; position:fixed; bottom:20px; right:20px; z-index:60; width:50px; height:50px; border-radius:50%; background:#0f172a; color:#fff; border:none; font-size:1.4rem; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.3); align-items:center; justify-content:center; }
+
+        @media(max-width:1280px){
+            .widget-grid { grid-template-columns:repeat(12,1fr); }
+            .col-span-8 { grid-column:span 12; }
+            .col-span-4 { grid-column:span 6; }
+            .col-span-6 { grid-column:span 6; }
+        }
+        @media(max-width:1024px){
+            .sidebar { transform:translateX(-100%); transition:transform .3s ease; }
+            .sidebar.open { transform:translateX(0); }
+            .sidebar-overlay.show { display:block; }
+            .mobile-toggle { display:flex; }
+            .main-content { margin-left:0; }
+            .kpi-grid { grid-template-columns:repeat(2, 1fr); }
+            .col-span-3, .col-span-4, .col-span-6, .col-span-8, .col-span-12 { grid-column:span 12; }
+            .content-area { padding:16px; }
+            .header-left { margin-left:0 !important; }
+        }
+        @media(max-width:768px){
+            .kpi-grid { grid-template-columns:1fr; }
+            .widget-grid { grid-template-columns:1fr; }
+            .topbar { padding:0 12px; height:56px; }
+            .content-area { padding:12px; gap:16px; }
+            .kpi-value { font-size:1.4rem; }
+            .section-title { font-size:1rem; }
+            .widget-header { padding:12px 16px; }
+            .widget-body { padding:12px 16px; }
+            .data-table th, .data-table td { padding:8px 12px; font-size:0.8rem; }
+            .revenue-list li { padding:8px 0; }
+            .rev-label, .rev-val { font-size:0.82rem; }
+            .env-badge { display:none; }
+            .header-left div:last-child { display:none; }
+            .alert-item { padding:10px 12px; }
+            .feed-item { gap:10px; }
+        }
+        @media(max-width:480px){
+            .kpi-card { padding:14px; }
+            .kpi-header { margin-bottom:8px; }
+            .kpi-icon { font-size:1rem; padding:6px; }
+            .widget-body { padding:10px 12px; overflow-x:auto; }
+            .data-table { font-size:0.78rem; }
+            .section-title { font-size:0.9rem; margin-top:4px; }
+        }
     </style>
 </head>
 <body>
