@@ -266,7 +266,7 @@ try {
         <main class="main-content">
             <header class="topbar">
                 <div class="header-left">
-                    <div class="env-badge">PRODUCTION</div>
+
                     <div style="font-weight:700; color:#0f172a; margin-left:16px;">College Directory OS</div>
                 </div>
                 <div class="header-right">

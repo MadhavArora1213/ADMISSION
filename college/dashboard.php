@@ -821,11 +821,12 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F1F5F9; min-he
 .dash-top {
   background: linear-gradient(135deg, #0B2447, #19376D);
   color: #fff;
-  padding: 0 32px;
-  height: 70px;
+  padding: 0 24px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   position: fixed;
   top: 0;
   left: 0;
@@ -833,41 +834,58 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F1F5F9; min-he
   z-index: 1000;
   box-shadow: 0 4px 24px rgba(11,36,71,0.15);
   border-bottom: 1px solid rgba(255,255,255,0.06);
+  min-width: 0;
 }
 .dash-top h1 {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 800;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   letter-spacing: -0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
 }
 .dash-top h1 i {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
+  flex-shrink: 0;
   background: linear-gradient(135deg, #60A5FA, #3B82F6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 2px 8px rgba(96,165,250,0.3));
 }
+.dash-top h1 span.h1-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .dash-user {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
   font-size: 0.85rem;
+  flex-shrink: 0;
 }
-.dash-user span {
+.dash-user .inst-name {
   opacity: 0.95;
   font-weight: 700;
   background: rgba(255,255,255,0.08);
-  padding: 6px 14px;
+  padding: 6px 12px;
   border-radius: 20px;
   border: 1px solid rgba(255,255,255,0.1);
   letter-spacing: 0.2px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.dash-user a {
+.dash-user a.logout-btn {
   color: #fff;
   text-decoration: none;
-  padding: 8px 16px;
+  padding: 8px 14px;
   background: rgba(239,68,68,0.1);
   border: 1px solid rgba(239,68,68,0.2);
   border-radius: 10px;
@@ -877,8 +895,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F1F5F9; min-he
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
-.dash-user a:hover {
+.dash-user a.logout-btn:hover {
   background: #EF4444;
   border-color: #EF4444;
   box-shadow: 0 4px 16px rgba(239,68,68,0.35);
@@ -1189,22 +1208,82 @@ tr:hover td {
   display: block;
 }
 
+.dash-mobile-nav {
+  display: none;
+}
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+.table-wrapper table {
+  min-width: 650px;
+  margin-top: 0;
+}
+
 @media(max-width:768px) {
-  .dash-top { padding: 0 16px; }
-  .dash-layout { padding-top: 70px; }
+  .dash-top { padding: 0 14px; }
+  .dash-layout { padding-top: 118px !important; }
   .dash-side { display: none; }
+  .dash-mobile-nav {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    background: #fff;
+    border-bottom: 1px solid var(--border-color);
+    padding: 10px 16px;
+    gap: 8px;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    z-index: 998;
+    scrollbar-width: none;
+  }
+  .dash-mobile-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .dash-mobile-nav a {
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--bg-light);
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+  }
+  .dash-mobile-nav a.active {
+    background: linear-gradient(135deg, #0b2447, #19376d);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 10px rgba(11,36,71,0.15);
+  }
   .dash-main { padding: 16px; margin-left: 0; }
-  .dash-stats { grid-template-columns: repeat(2, 1fr); }
+  .dash-stats { grid-template-columns: repeat(2, 1fr) !important; }
   .form-row { grid-template-columns: 1fr; }
+}
+@media(max-width:576px) {
+  .dash-top h1 { font-size: 0.9rem; }
+  .dash-user .inst-name { display: none; }
+  .dash-user a.logout-btn .logout-text { display: none; }
+  .dash-user a.logout-btn { padding: 8px 12px; }
+}
+@media(max-width:480px) {
+  .dash-stats { grid-template-columns: 1fr !important; }
 }
 </style>
 </head>
 <body>
 <div class="dash-top">
-  <h1><i class="ph-fill ph-graduation-cap"></i> AdmissionSeason Dashboard</h1>
+  <h1><i class="ph-fill ph-graduation-cap"></i><span class="h1-text">AdmissionSeason Dashboard</span></h1>
   <div class="dash-user">
-    <span><?=htmlspecialchars($account['institute_name'])?></span>
-    <a href="/ADMISSION/college/logout.php"><i class="ph ph-sign-out"></i> Logout</a>
+    <span class="inst-name"><?=htmlspecialchars($account['institute_name'])?></span>
+    <a href="/ADMISSION/college/logout.php" class="logout-btn"><i class="ph ph-sign-out"></i><span class="logout-text">Logout</span></a>
   </div>
 </div>
 <div class="dash-layout">
@@ -1229,6 +1308,28 @@ tr:hover td {
     <a href="?tab=leads" class="<?=$tab==='leads'?'active':''?>"><i class="ph ph-funnel"></i> Leads</a>
     <a href="?tab=submissions" class="<?=$tab==='submissions'?'active':''?>"><i class="ph ph-clock-countdown"></i> My Submissions</a>
   </nav>
+  
+  <div class="dash-mobile-nav" id="dashMobileNav">
+    <a href="?tab=overview" class="<?=$tab==='overview'?'active':''?>">Info</a>
+    <a href="?tab=identity" class="<?=$tab==='identity'?'active':''?>">Identity</a>
+    <a href="?tab=infrastructure" class="<?=$tab==='infrastructure'?'active':''?>">Infras.</a>
+    <a href="?tab=seo" class="<?=$tab==='seo'?'active':''?>">SEO</a>
+    <a href="?tab=courses" class="<?=$tab==='courses'?'active':''?>">Courses</a>
+    <a href="?tab=reviews" class="<?=$tab==='reviews'?'active':''?>">Reviews</a>
+    <a href="?tab=admissions" class="<?=$tab==='admissions'?'active':''?>">Admissions</a>
+    <a href="?tab=placements" class="<?=$tab==='placements'?'active':''?>">Placements</a>
+    <a href="?tab=cutoffs" class="<?=$tab==='cutoffs'?'active':''?>">Cut-Offs</a>
+    <a href="?tab=seats" class="<?=$tab==='seats'?'active':''?>">Seats</a>
+    <a href="?tab=rankings" class="<?=$tab==='rankings'?'active':''?>">Rankings</a>
+    <a href="?tab=media" class="<?=$tab==='media'?'active':''?>">Gallery</a>
+    <a href="?tab=faculty" class="<?=$tab==='faculty'?'active':''?>">Faculty</a>
+    <a href="?tab=compare" class="<?=$tab==='compare'?'active':''?>">Compare</a>
+    <a href="?tab=qna" class="<?=$tab==='qna'?'active':''?>">Q&A</a>
+    <a href="?tab=updates" class="<?=$tab==='updates'?'active':''?>">News</a>
+    <a href="?tab=categories" class="<?=$tab==='categories'?'active':''?>">Categories</a>
+    <a href="?tab=leads" class="<?=$tab==='leads'?'active':''?>">Leads</a>
+    <a href="?tab=submissions" class="<?=$tab==='submissions'?'active':''?>">Submissions</a>
+  </div>
   
   <main class="dash-main">
     <?php if($msg): ?><div class="dash-msg"><i class="ph ph-check-circle"></i> <?=$msg?></div><?php endif;?>
@@ -2630,6 +2731,11 @@ $(document).ready(function() {
             ]
         });
     }
+    
+    // Smooth active mobile tab scroll on load
+    document.querySelectorAll('#dashMobileNav a.active').forEach(el => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    });
 });
 </script>
 <style>

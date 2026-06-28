@@ -161,7 +161,7 @@ try {
         <?php include 'sidebar.php'; ?>
         <main class="main-content">
             <header class="topbar">
-                <div class="env-badge">PRODUCTION</div>
+
                 <div style="font-weight:700;color:#0f172a;">NPS Feedback Dashboard</div>
                 <div></div>
             </header>

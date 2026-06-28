@@ -214,6 +214,19 @@ function applySubmissionApproval($pdo, $sub, $adminId) {
             break;
         case 'placements':
             if (isset($data['placement_year']) && $collegeId) {
+                $topRecruiters = '[]';
+                if (!empty($data['top_recruiters'])) {
+                    if (is_array($data['top_recruiters'])) {
+                        $topRecruiters = json_encode($data['top_recruiters']);
+                    } else {
+                        $arr = array_filter(array_map('trim', explode(',', (string)$data['top_recruiters'])));
+                        $jsonArr = [];
+                        foreach ($arr as $r) {
+                            $jsonArr[] = ['name' => $r];
+                        }
+                        $topRecruiters = json_encode($jsonArr);
+                    }
+                }
                 $pdo->prepare("
                     INSERT INTO college_placements 
                     (id, college_id, placement_year, avg_package_lpa, highest_package_lpa, median_package_lpa, placement_percentage, students_placed, top_recruiters) 
@@ -223,7 +236,7 @@ function applySubmissionApproval($pdo, $sub, $adminId) {
                     $data['avg_package_lpa'] ?? null, $data['highest_package_lpa'] ?? null,
                     $data['median_package_lpa'] ?? null, $data['placement_percentage'] ?? null,
                     $data['total_placed'] ?? $data['students_placed'] ?? null,
-                    $data['top_recruiters'] ?? ''
+                    $topRecruiters
                 ]);
             }
             break;
@@ -347,7 +360,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$id]);
         $sub = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $pdo->prepare("UPDATE college_submissions SET status='rejected',rejection_reason=?,reviewed_by=?,reviewed_at=NOW() WHERE id=?")
+        $pdo->prepare("UPDATE college_submissions SET status='rejected',admin_note=?,reviewed_by=?,reviewed_at=NOW() WHERE id=?")
             ->execute([$reason ?: 'Rejected by admin', $_SESSION['admin_id'], $id]);
 
         // Send Rejection Email
@@ -387,7 +400,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $instituteName = '';
 
             foreach ($pendingList as $sub) {
-                $pdo->prepare("UPDATE college_submissions SET status='rejected',rejection_reason=?,reviewed_by=?,reviewed_at=NOW() WHERE id=?")
+                $pdo->prepare("UPDATE college_submissions SET status='rejected',admin_note=?,reviewed_by=?,reviewed_at=NOW() WHERE id=?")
                     ->execute([$reason ?: 'Rejected by admin', $_SESSION['admin_id'], $sub['id']]);
                 
                 $rejectedTypes[] = $sub['submission_type'];
@@ -499,7 +512,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $instituteName = '';
 
                 foreach ($pendingList as $sub) {
-                    $pdo->prepare("UPDATE college_submissions SET status='rejected',rejection_reason=?,reviewed_by=?,reviewed_at=NOW() WHERE id=?")
+                    $pdo->prepare("UPDATE college_submissions SET status='rejected',admin_note=?,reviewed_by=?,reviewed_at=NOW() WHERE id=?")
                         ->execute([$reason ?: 'Rejected by admin', $_SESSION['admin_id'], $sub['id']]);
                     
                     $rejectedTypes[] = $sub['submission_type'];
@@ -648,8 +661,7 @@ function renderField($data, $fieldName, $label) {
     <main class="main-content">
         <header class="topbar">
             <div class="header-left">
-                <div class="env-badge">PRODUCTION</div>
-                <div style="font-weight:700; color:#0f172a; margin-left:16px;">College Submissions Review Dashboard</div>
+                <div style="font-weight:700; color:#0f172a;">College Submissions Review Dashboard</div>
             </div>
             <div class="header-right">
                 <div class="avatar">A</div>

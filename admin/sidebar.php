@@ -124,7 +124,7 @@ if (isset($pdo)) {
             <?php endif; } catch(Exception $e) {} ?>
         </a>
         <a href="college_submissions.php" class="<?php echo ($current_page == 'college_submissions.php') ? 'active' : ''; ?>" style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="display:flex; align-items:center; gap:12px;"><i class="ph ph-inbox"></i> Submissions</span>
+            <span style="display:flex; align-items:center; gap:12px;"><i class="ph ph-tray"></i> Submissions</span>
             <?php try { $subCount = (int)$pdo->query("SELECT COUNT(*) FROM college_submissions WHERE status='pending'")->fetchColumn(); if($subCount > 0): ?>
             <span style="background:#fbbf24;color:#19376D;font-size:0.7rem;padding:2px 6px;border-radius:10px;font-weight:700;"><?= $subCount ?></span>
             <?php endif; } catch(Exception $e) {} ?>
