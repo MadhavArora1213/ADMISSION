@@ -86,12 +86,13 @@ function displayJSONListField($submittedVal, $liveVal, $label) {
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/admin-responsive.css">
 <style>
     body { background-color: #F8FAFC; margin: 0; font-family: 'Inter', sans-serif; }
     .admin-layout { display: flex; min-height: 100vh; }
     
     /* Sidebar */
-    .sidebar { width: 260px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 50; }
+    .sidebar { width: 260px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease; }
     .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .sidebar-header .logo { font-size: 1.2rem; color: #f8fafc; display:flex; align-items:center; gap:8px; font-weight:700; text-decoration:none; }
     .sidebar-nav { padding: 16px 0; flex: 1; }

@@ -596,12 +596,13 @@ function renderField($data, $fieldName, $label) {
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/admin-responsive.css">
 <style>
     body { background-color: #F8FAFC; margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .admin-layout { display: flex; min-height: 100vh; }
     
     /* Sidebar styles */
-    .sidebar { width: 260px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 50; }
+    .sidebar { width: 260px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease; }
     .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .sidebar-header .logo { font-size: 1.2rem; color: #f8fafc; display:flex; align-items:center; gap:8px; font-weight:700; text-decoration:none; }
     .sidebar-nav { padding: 16px 0; flex: 1; }
@@ -651,15 +652,27 @@ function renderField($data, $fieldName, $label) {
 
     .filters{display:flex; gap:10px; margin-bottom:20px;}
     .filters select{padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:.85rem; font-family:inherit; background:#fff;}
+
+    @media(max-width:768px){
+        .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sidebar-overlay.show{display:block}
+        .main-content{margin-left:0}.topbar{height:56px;padding:0 12px;justify-content:space-between}
+        .mobile-menu-btn{display:block}.content-area{padding:12px}
+        .page-header{flex-direction:column;align-items:flex-start}.page-header h2{font-size:1.2rem}
+        .filters{flex-direction:column;gap:6px}.filters select{width:100%}
+        table{font-size:.75rem}th,td{padding:8px 10px}
+    }
 </style>
 </head>
 <body>
 
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="admin-layout">
     <?php include 'sidebar.php'; ?>
 
     <main class="main-content">
         <header class="topbar">
+            <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div class="header-left">
                 <div style="font-weight:700; color:#0f172a;">College Submissions Review Dashboard</div>
             </div>
@@ -861,6 +874,16 @@ function filterTable(){
     r.style.display=show?'':'none';
   });
 }
+</script>
+<script>
+document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('show');
+});
+document.getElementById('sidebar-overlay').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.remove('open');
+    this.classList.remove('show');
+});
 </script>
 </body>
 </html>

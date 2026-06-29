@@ -242,11 +242,12 @@ if (isset($_GET['view'])) {
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>College Accounts – Admin</title>
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/admin-responsive.css">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <style>
 body { background-color: var(--bg-light); }
 .admin-layout { display: flex; min-height: 100vh; }
-.sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 100; }
+.sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease; }
 .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
 .sidebar-header .logo { font-size: 1.3rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
 .sidebar-nav { padding: 24px 0; flex: 1; }
@@ -254,7 +255,7 @@ body { background-color: var(--bg-light); }
 .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
 .sidebar-nav a i { font-size: 1.25rem; }
 
-.main-content { flex: 1; margin-left: 280px; max-width: calc(100% - 280px); display: flex; flex-direction: column; }
+.main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; }
 .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
 .user-profile { display: flex; align-items: center; gap: 12px; font-weight: 500; }
 .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; }
@@ -306,11 +307,12 @@ td{padding:12px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
 .kyc-verified{background:#dcfce7;color:#166534}
 .kyc-pending{background:#fef3c7;color:#92400e}
 
-@media(max-width:768px){.detail-grid,.doc-grid{grid-template-columns:1fr 1fr}table{font-size:.7rem}}
+@media(max-width:768px){.detail-grid,.doc-grid{grid-template-columns:1fr 1fr}table{font-size:.7rem}.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sidebar-overlay.show{display:block}.main-content{margin-left:0}.topbar{height:56px;padding:0 12px;justify-content:space-between}.mobile-menu-btn{display:block}.content-area{padding:12px}.page-header{flex-direction:column;align-items:flex-start}.page-header h2{font-size:1.4rem}.filters{flex-wrap:wrap;gap:6px}.filters a{padding:5px 10px;font-size:.7rem}}
 </style>
 </head>
 <body>
 
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <div class="admin-layout">
         <!-- Sidebar -->
         <?php include 'sidebar.php'; ?>
@@ -318,6 +320,7 @@ td{padding:12px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
         <!-- Main Content -->
         <main class="main-content">
             <header class="topbar">
+                <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
                 <div class="user-profile">
                     <span><?php echo htmlspecialchars($_SESSION['admin_username'] ?? 'Admin'); ?></span>
                     <div class="avatar"><?php echo strtoupper(substr($_SESSION['admin_username'] ?? 'A', 0, 1)); ?></div>
@@ -461,5 +464,15 @@ td{padding:12px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
             </div>
         </main>
     </div>
+<script>
+document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('show');
+});
+document.getElementById('sidebar-overlay').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.remove('open');
+    this.classList.remove('show');
+});
+</script>
 </body>
 </html>

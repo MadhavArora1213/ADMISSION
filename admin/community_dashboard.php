@@ -21,16 +21,54 @@ $recentReports = $pdo->query("SELECT * FROM qa_reports WHERE moderation_action I
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Community Dashboard | Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/admin-responsive.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h2{font-size:2rem;font-weight:800}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}.stat-card{background:#fff;border-radius:12px;border:1px solid var(--border-color);padding:20px;box-shadow:var(--shadow-sm)}.stat-card .num{font-size:2rem;font-weight:800;color:var(--primary)}.stat-card .label{font-size:.8rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-top:4px}.panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}.panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}tr:hover{background:rgba(0,0,0,.015)}.badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700}.sub-links{display:flex;gap:8px;margin-bottom:20px}.sub-link{font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .2s}.sub-link:hover,.sub-link.active{background:rgba(0,0,0,.05);color:var(--primary)}
+        body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}
+        .sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto;z-index:100;transition:transform 0.3s ease}
+        .sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}
+        .sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s;text-decoration:none}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}
+        .main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}
+        .topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}
+        .content-area{padding:32px;max-width:1400px;margin:0 auto;width:100%;box-sizing:border-box}
+        .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:12px;flex-wrap:wrap}.page-header h2{font-size:2rem;font-weight:800}
+        .sub-links{display:flex;gap:8px;margin-bottom:24px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;flex-wrap:nowrap;border-bottom:1px solid var(--border-color);padding-bottom:12px}
+        .sub-links::-webkit-scrollbar{height:5px}.sub-links::-webkit-scrollbar-track{background:#e2e8f0;border-radius:3px}.sub-links::-webkit-scrollbar-thumb{background:var(--primary);border-radius:3px}
+        .sub-link{padding:8px 16px;font-weight:600;color:var(--text-muted);border-radius:8px;transition:all .2s;white-space:nowrap;flex-shrink:0;font-size:.88rem;text-decoration:none;display:flex;align-items:center;gap:6px}
+        .sub-link:hover{background:rgba(0,0,0,.05);color:var(--primary)}.sub-link.active{background:var(--primary);color:white}
+        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+        .stat-card{background:#fff;border-radius:12px;border:1px solid var(--border-color);padding:20px;box-shadow:var(--shadow-sm)}.stat-card .num{font-size:2rem;font-weight:800;color:var(--primary)}.stat-card .label{font-size:.8rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-top:4px}
+        .panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px;overflow-x:auto}
+        .panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}
+        table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:400px}
+        th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}
+        .badge{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700;display:inline-block;white-space:nowrap}
+        .two-col-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+        .mobile-menu-btn{display:none;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-dark);padding:4px}
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90}
+
+        @media(max-width:1024px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:768px){
+            .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
+            .sidebar-overlay.show{display:block}.main-content{margin-left:0}
+            .topbar{height:56px;padding:0 12px;justify-content:space-between}
+            .mobile-menu-btn{display:block}.content-area{padding:12px}
+            .page-header{flex-direction:column;align-items:flex-start}.page-header h2{font-size:1.4rem}
+            .stats-grid{grid-template-columns:repeat(2,1fr);gap:12px}.stat-card{padding:14px}.stat-card .num{font-size:1.4rem}
+            .two-col-grid{grid-template-columns:1fr}
+            .sub-links{gap:4px;margin-bottom:16px}.sub-link{padding:6px 12px;font-size:.8rem}
+            th,td{padding:10px 12px;font-size:.82rem}
+        }
+        @media(max-width:480px){.content-area{padding:8px}.page-header h2{font-size:1.2rem}.stats-grid{grid-template-columns:1fr}}
     </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="admin-layout">
     <?php include 'sidebar.php'; ?>
     <main class="main-content">
         <header class="topbar">
+            <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div class="user-profile">
                 <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
                 <a href="logout.php" style="margin-left:16px;color:#19376d;"><i class="ph ph-sign-out" style="font-size:1.5rem;"></i></a>
@@ -59,7 +97,7 @@ $recentReports = $pdo->query("SELECT * FROM qa_reports WHERE moderation_action I
                 <div class="stat-card"><div class="num" style="color:#0F172A;"><?php echo number_format($pendingReports); ?></div><div class="label">Pending Reports</div></div>
             </div>
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
+            <div class="two-col-grid">
                 <div class="panel">
                     <h3><i class="ph ph-question"></i> Recent Questions</h3>
                     <div style="overflow-x:auto;">
@@ -121,5 +159,15 @@ $recentReports = $pdo->query("SELECT * FROM qa_reports WHERE moderation_action I
         </div>
     </main>
 </div>
+<script>
+document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('show');
+});
+document.getElementById('sidebar-overlay').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.remove('open');
+    this.classList.remove('show');
+});
+</script>
 </body>
 </html>
