@@ -415,58 +415,87 @@ function getValue($arr, $key, $default = '') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $is_edit ? 'Edit University' : 'Add New University'; ?> | AdmissionSeason Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/admin-responsive.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         body { background-color: var(--bg-light); }
         .admin-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; }
+        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease; }
         .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-header .logo { font-size: 1.3rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
         .sidebar-nav { padding: 24px 0; flex: 1; }
-        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; text-decoration: none; }
         .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
         .sidebar-nav a i { font-size: 1.25rem; }
         .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; padding-bottom: 60px; }
         .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
-        .content-area { padding: 32px; max-width: 1000px; margin: 0 auto; width: 100%; }
-        
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+        .content-area { padding: 32px; max-width: 1000px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; gap: 12px; flex-wrap: wrap; }
         .page-header h2 { font-size: 2rem; font-weight: 800; display: flex; align-items: center; gap: 12px; }
-        
         .form-section { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); padding: 32px; box-shadow: var(--shadow-sm); margin-bottom: 24px; }
         .form-section h3 { font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 24px; display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
-        
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
         .form-group { margin-bottom: 20px; }
         .form-group.full { grid-column: 1 / -1; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-dark); font-size: 0.95rem; }
-        .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 1rem; color: var(--text-dark); background: #fff; transition: all 0.3s ease; }
+        .form-control { width: 100%; min-width: 0; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 1rem; color: var(--text-dark); background: #fff; transition: all 0.3s ease; box-sizing: border-box; }
         .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(11, 36, 71, 0.1); }
-        
         .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 32px; }
         .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
         .checkbox-group label { margin-bottom: 0; cursor: pointer; }
-        
         .error-alert { padding: 16px; background: rgba(15,23,42,0.06); color: #0B2447; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(15,23,42,0.06); }
-        
         .form-actions { display: flex; justify-content: flex-end; gap: 16px; margin-top: 32px; }
-        
-        /* Tabs Styling */
-        .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding-bottom: 12px; }
-        .tab-link { padding: 8px 16px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
+        .form-actions .btn { white-space: nowrap; box-sizing: border-box; }
+        .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding-bottom: 12px; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+        .tabs-nav::-webkit-scrollbar { height: 5px; }
+        .tabs-nav::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 3px; }
+        .tabs-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+        .tab-link { padding: 8px 16px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; font-size: 0.88rem; }
         .tab-link:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
         .tab-link.active { background: var(--primary); color: white; }
         .tab-link.disabled { opacity: 0.5; cursor: not-allowed; }
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-dark); padding: 4px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-left: 0; }
+            .topbar { height: 56px; padding: 0 12px; justify-content: space-between; }
+            .mobile-menu-btn { display: block; }
+            .content-area { padding: 12px; }
+            .page-header h2 { font-size: 1.3rem; gap: 8px; }
+            .form-section { padding: 16px; }
+            .form-section h3 { font-size: 1rem; margin-bottom: 16px; }
+            .form-grid { grid-template-columns: 1fr; gap: 12px; }
+            .form-group { margin-bottom: 14px; }
+            .form-group label { font-size: 0.85rem; margin-bottom: 6px; }
+            .form-control { padding: 10px 12px; font-size: 0.9rem; }
+            .form-actions { flex-direction: column; gap: 10px; }
+            .form-actions .btn { width: 100%; text-align: center; padding: 14px 16px; justify-content: center; }
+            .tabs-nav { gap: 4px; margin-bottom: 16px; }
+            .tab-link { padding: 6px 12px; font-size: 0.78rem; }
+            .checkbox-group { flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+        }
+        @media (max-width: 480px) {
+            .content-area { padding: 8px; }
+            .form-section { padding: 12px; border-radius: 12px; }
+            .page-header h2 { font-size: 1.1rem; }
+            .tabs-nav { gap: 3px; }
+            .tab-link { padding: 5px 10px; font-size: 0.74rem; }
+        }
     </style>
 </head>
 <body>
 
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <div class="admin-layout">
         <?php include 'sidebar.php'; ?>
 
         <main class="main-content">
             <header class="topbar">
+                <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
                 <div class="user-profile">
                     <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
                     <a href="logout.php" style="margin-left: 16px; color: #19376d;"><i class="ph ph-sign-out" style="font-size: 1.5rem;"></i></a>
@@ -1019,5 +1048,15 @@ function getValue($arr, $key, $default = '') {
             }
         });
     </script>
+<script>
+document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('show');
+});
+document.getElementById('sidebar-overlay').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.remove('open');
+    this.classList.remove('show');
+});
+</script>
 </body>
 </html>

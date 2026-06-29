@@ -42,47 +42,85 @@ $reports = $stmtRep->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moderate Review | AdmissionSeason Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/admin-responsive.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         body { background-color: var(--bg-light); }
         .admin-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; }
+        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease; }
         .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-header .logo { font-size: 1.3rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
         .sidebar-nav { padding: 24px 0; flex: 1; }
-        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; }
-        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; padding-bottom: 60px;}
+        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; text-decoration: none; }
+        .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
+        .sidebar-nav a i { font-size: 1.25rem; }
+        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; padding-bottom: 60px; }
         .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
-        .content-area { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; display: grid; grid-template-columns: 1fr 350px; gap: 32px; align-items: start;}
+        .content-area { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; display: grid; grid-template-columns: 1fr 350px; gap: 32px; align-items: start; box-sizing: border-box; }
         .page-header { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
         .page-header h2 { font-size: 2rem; font-weight: 800; }
-        .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); padding: 24px; box-shadow: var(--shadow-sm); margin-bottom: 24px;}
+        .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); padding: 24px; box-shadow: var(--shadow-sm); margin-bottom: 24px; overflow-x: auto; }
         .panel h3 { font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 24px; display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+        .btn { padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-sizing: border-box; white-space: nowrap; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #19376D; }
         .msg-alert { grid-column: 1 / -1; padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 16px; border: 1px solid rgba(11,36,71,0.04); }
-        
         .detail-row { display: flex; border-bottom: 1px solid var(--border-color); padding: 12px 0; }
         .detail-row:last-child { border-bottom: none; }
-        .detail-label { width: 40%; font-weight: 600; color: var(--text-muted); font-size: 0.9rem;}
-        .detail-value { width: 60%; color: var(--text-dark); font-weight: 500;}
-        
-        .review-text { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 16px; font-size: 0.95rem; line-height: 1.6;}
-        
+        .detail-label { width: 40%; font-weight: 600; color: var(--text-muted); font-size: 0.9rem; }
+        .detail-value { width: 60%; color: var(--text-dark); font-weight: 500; word-break: break-word; }
+        .review-text { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 16px; font-size: 0.95rem; line-height: 1.6; word-break: break-word; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
-        .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 1rem; }
-        
-        .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+        .form-control { width: 100%; min-width: 0; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 1rem; box-sizing: border-box; }
+        .form-control:focus { outline: none; border-color: var(--primary); }
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
         .status-pending { background: rgba(11,36,71,0.06); color: #0F172A; }
         .status-approved { background: rgba(11,36,71,0.04); color: #0B2447; }
         .status-rejected { background: rgba(15,23,42,0.06); color: #0B2447; }
         .status-escalated { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .pros-cons-grid { grid-template-columns: 1fr 1fr; }
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-dark); padding: 4px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+
+        @media (max-width: 1024px) {
+            .content-area { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-left: 0; }
+            .topbar { height: 56px; padding: 0 12px; justify-content: space-between; }
+            .mobile-menu-btn { display: block; }
+            .content-area { padding: 12px; grid-template-columns: 1fr; gap: 16px; }
+            .page-header h2 { font-size: 1.3rem; }
+            .panel { padding: 16px; margin-bottom: 16px; }
+            .panel h3 { font-size: 1rem; margin-bottom: 16px; }
+            .detail-row { flex-direction: column; gap: 4px; }
+            .detail-label, .detail-value { width: 100%; font-size: 0.88rem; }
+            .form-group { margin-bottom: 14px; }
+            .form-group label { font-size: 0.85rem; margin-bottom: 6px; }
+            .form-control { padding: 10px 12px; font-size: 0.9rem; }
+            .btn { width: 100%; padding: 14px 20px; }
+            .pros-cons-grid { grid-template-columns: 1fr; }
+            .info-box { flex-direction: column; gap: 12px; }
+            .info-box-item { text-align: center; }
+        }
+        @media (max-width: 480px) {
+            .content-area { padding: 8px; }
+            .panel { padding: 12px; }
+            .page-header h2 { font-size: 1.1rem; }
+        }
     </style>
 </head>
 <body>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <div class="admin-layout">
         <?php include 'sidebar.php'; ?>
         <main class="main-content">
             <header class="topbar">
+                <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
                 <div class="user-profile">
                     <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
                     <a href="logout.php" style="margin-left: 16px; color: #19376d;"><i class="ph ph-sign-out" style="font-size: 1.5rem;"></i></a>
@@ -109,17 +147,17 @@ $reports = $stmtRep->fetchAll();
                             <span class="badge status-<?php echo $review['moderation_status']; ?>"><?php echo ucfirst($review['moderation_status']); ?></span>
                         </div>
                         
-                        <div style="display:flex; gap:16px; margin-bottom: 24px; background:#F8FAFC; padding:16px; border-radius:8px;">
-                            <div style="flex:1;">
+                        <div class="info-box" style="display:flex; gap:16px; margin-bottom: 24px; background:#F8FAFC; padding:16px; border-radius:8px;">
+                            <div class="info-box-item" style="flex:1;">
                                 <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Overall Rating</div>
                                 <div style="font-size:1.5rem; font-weight:800; color:var(--primary); display:flex; align-items:center; gap:4px;"><i class="ph-fill ph-star" style="color:#19376D;"></i> <?php echo $review['overall_rating']; ?>/5</div>
                             </div>
-                            <div style="flex:1;">
+                            <div class="info-box-item" style="flex:1;">
                                 <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Author</div>
                                 <div style="font-weight:600;"><?php echo htmlspecialchars($review['user_name']); ?></div>
                                 <div style="font-size:0.8rem;"><?php echo htmlspecialchars($review['user_email']); ?></div>
                             </div>
-                            <div style="flex:1;">
+                            <div class="info-box-item" style="flex:1;">
                                 <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Batch</div>
                                 <div style="font-weight:600;"><?php echo $review['batch_year'] ?: 'N/A'; ?></div>
                             </div>
@@ -130,7 +168,7 @@ $reports = $stmtRep->fetchAll();
                             <?php echo nl2br(htmlspecialchars($review['review_body'])); ?>
                         </div>
 
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px;" class="pros-cons-grid">
                             <div class="review-text" style="margin-top:0; border-left:4px solid #19376D;">
                                 <h4 style="margin-top:0; font-size:0.9rem; color:#0B2447; display:flex; align-items:center; gap:4px;"><i class="ph ph-thumbs-up"></i> Pros</h4>
                                 <?php echo nl2br(htmlspecialchars($review['pros'] ?: 'None provided')); ?>
@@ -232,7 +270,17 @@ $reports = $stmtRep->fetchAll();
                 </div>
 
             </div>
-        </main>
-    </div>
+    </main>
+</div>
+<script>
+document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('show');
+});
+document.getElementById('sidebar-overlay').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.remove('open');
+    this.classList.remove('show');
+});
+</script>
 </body>
 </html>

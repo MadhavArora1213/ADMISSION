@@ -90,58 +90,85 @@ $users = $stmt->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management | Admin Panel</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/admin-responsive.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         body { background-color: var(--bg-light); }
         .admin-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; }
+        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease; }
         .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-header .logo { font-size: 1.3rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
         .sidebar-nav { padding: 24px 0; flex: 1; }
-        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; text-decoration: none;}
+        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; text-decoration: none; }
         .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
+        .sidebar-nav a i { font-size: 1.25rem; }
         .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; }
         .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
-        .content-area { padding: 32px; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .content-area { padding: 32px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; flex-wrap: wrap; }
         .page-header h2 { font-size: 2rem; font-weight: 800; }
-        
-        .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 24px;}
-        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: top;}
+        .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 24px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; min-width: 700px; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: top; }
         th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #F8FAFC; }
         tr:hover { background-color: rgba(0,0,0,0.015); }
-        
         .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); }
-        
         .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; white-space: nowrap; }
-        .s-active { background:rgba(11,36,71,0.04); color:#0B2447; }
-        .s-suspended { background:rgba(15,23,42,0.06); color:#0F172A; }
-        .s-pending_verification { background:rgba(11,36,71,0.04); color:#0F172A; }
-        
-        .btn-action { padding: 6px 10px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; color: var(--text-dark); text-decoration: none;}
+        .s-active { background: rgba(11,36,71,0.04); color: #0B2447; }
+        .s-suspended { background: rgba(15,23,42,0.06); color: #0F172A; }
+        .s-pending_verification { background: rgba(11,36,71,0.04); color: #0F172A; }
+        .btn-action { padding: 6px 10px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; color: var(--text-dark); text-decoration: none; white-space: nowrap; }
         .btn-action:hover { background: #F8FAFC; }
-        
-        .search-box { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 14px; width: 300px;}
-        .search-box input { border: none; outline: none; font-size: 0.9rem; width: 100%; }
-        
-        /* Modal */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .search-box { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 14px; flex: 1; min-width: 0; }
+        .search-box input { border: none; outline: none; font-size: 0.9rem; width: 100%; min-width: 0; }
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 16px; }
         .modal.active { display: flex; }
-        .modal-content { background: #fff; padding: 30px; border-radius: 12px; width: 400px; max-width: 90%; }
-        .modal-header { font-size: 1.25rem; font-weight: 800; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
-        
+        .modal-content { background: #fff; padding: 28px; border-radius: 12px; width: 420px; max-width: 100%; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
+        .modal-header { font-size: 1.25rem; font-weight: 800; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
         .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;}
-        .form-group select { width: 100%; padding: 10px; font-size: 0.9rem; border: 1px solid var(--border-color); border-radius: 8px; background: #fff;}
-        .btn-primary { padding: 10px 20px; font-size: 0.9rem; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;}
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
+        .form-group select, .form-group input[type="text"], .form-group input[type="email"], .form-group input[type="password"] { width: 100%; padding: 10px; font-size: 0.9rem; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; box-sizing: border-box; }
+        .btn-primary { padding: 10px 20px; font-size: 0.9rem; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; white-space: nowrap; box-sizing: border-box; }
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-dark); padding: 4px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-left: 0; }
+            .topbar { height: 56px; padding: 0 12px; justify-content: space-between; }
+            .mobile-menu-btn { display: block; }
+            .content-area { padding: 12px; }
+            .page-header { flex-direction: column; align-items: flex-start; }
+            .page-header h2 { font-size: 1.4rem; }
+            .page-header > div { width: 100%; }
+            .panel { border-radius: 12px; }
+            th, td { padding: 10px 12px; font-size: 0.82rem; }
+            .modal { padding: 12px; }
+            .modal-content { padding: 20px; width: 100%; }
+            .modal-header { font-size: 1.1rem; }
+            .btn-primary { width: 100%; text-align: center; justify-content: center; }
+        }
+        @media (max-width: 480px) {
+            .content-area { padding: 8px; }
+            .page-header h2 { font-size: 1.2rem; }
+            .modal-content { padding: 16px; }
+            .form-group { margin-bottom: 12px; }
+        }
+        @media (max-width: 480px) {
+            .content-area { padding: 8px; }
+            .page-header h2 { font-size: 1.2rem; }
+        }
     </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="admin-layout">
     <?php include 'sidebar.php'; ?>
     <main class="main-content">
         <header class="topbar">
+            <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div class="user-profile">
                 <span><?php echo htmlspecialchars($_SESSION['admin_username'] ?? 'Admin'); ?></span>
             </div>
@@ -263,9 +290,9 @@ $users = $stmt->fetchAll();
                 <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Warning: Super Admins bypass all role restrictions and have full access to the system.</p>
             </div>
             
-            <div style="margin-top:24px; text-align:right;">
+            <div style="margin-top:24px; display:flex; gap:10px; justify-content:flex-end;">
                 <button type="button" class="btn-action" style="padding:10px 20px;" onclick="closeModal()">Cancel</button>
-                <button type="submit" class="btn-primary" style="margin-left:10px;">Save Role</button>
+                <button type="submit" class="btn-primary">Save Role</button>
             </div>
         </form>
     </div>
@@ -310,15 +337,23 @@ $users = $stmt->fetchAll();
                 <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; text-transform:none;">Super Admins bypass role restrictions and have full system access.</p>
             </div>
             
-            <div style="margin-top:24px; text-align:right;">
+            <div style="margin-top:24px; display:flex; gap:10px; justify-content:flex-end;">
                 <button type="button" class="btn-action" style="padding:10px 20px;" onclick="closeCreateUserModal()">Cancel</button>
-                <button type="submit" class="btn-primary" style="margin-left:10px;">Create User</button>
+                <button type="submit" class="btn-primary">Create User</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
+document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('show');
+});
+document.getElementById('sidebar-overlay').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.remove('open');
+    this.classList.remove('show');
+});
 function openRoleModal(userId, userName, roleId, isSuperAdmin) {
     document.getElementById('roleModal').classList.add('active');
     document.getElementById('modal_user_id').value = userId;

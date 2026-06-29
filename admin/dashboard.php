@@ -174,14 +174,14 @@ try {
         .admin-layout { display: flex; min-height: 100vh; }
         
         /* Sidebar styles */
-        .sidebar { width: 260px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 50; }
+        .sidebar { width: 260px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 50; transition: transform 0.3s ease; }
         .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .sidebar-header .logo { font-size: 1.2rem; color: #f8fafc; display:flex; align-items:center; gap:8px; font-weight:700; }
         .sidebar-nav { padding: 16px 0; flex: 1; }
         .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: rgba(255,255,255,0.6); transition: all 0.2s; font-size:0.95rem; text-decoration:none; }
         .sidebar-nav a:hover, .sidebar-nav a.active { color: #fff; background: rgba(255,255,255,0.05); border-left: 3px solid #19376D; }
         .sidebar-nav a i { font-size: 1.2rem; }
-        
+
         .main-content { flex: 1; margin-left: 260px; display: flex; flex-direction: column; }
         
         /* Top Header */
@@ -256,50 +256,50 @@ try {
         .bg-indigo { background: rgba(11,36,71,0.06); color: #19376D; }
         .bg-teal { background: rgba(11,36,71,0.04); color: #19376D; }
 
-        .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:49; }
+        .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:49; }
         .mobile-toggle { display:none; position:fixed; bottom:20px; right:20px; z-index:60; width:50px; height:50px; border-radius:50%; background:#0f172a; color:#fff; border:none; font-size:1.4rem; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.3); align-items:center; justify-content:center; }
 
-        @media(max-width:1280px){
-            .widget-grid { grid-template-columns:repeat(12,1fr); }
-            .col-span-8 { grid-column:span 12; }
-            .col-span-4 { grid-column:span 6; }
-            .col-span-6 { grid-column:span 6; }
-        }
         @media(max-width:1024px){
-            .sidebar { transform:translateX(-100%); transition:transform .3s ease; }
-            .sidebar.open { transform:translateX(0); }
+            .sidebar { transform:translateX(-100%) !important; }
+            .sidebar.open { transform:translateX(0) !important; }
             .sidebar-overlay.show { display:block; }
-            .mobile-toggle { display:flex; }
-            .main-content { margin-left:0; }
-            .kpi-grid { grid-template-columns:repeat(2, 1fr); }
-            .col-span-3, .col-span-4, .col-span-6, .col-span-8, .col-span-12 { grid-column:span 12; }
-            .content-area { padding:16px; }
-            .header-left { margin-left:0 !important; }
+            .mobile-toggle { display:none !important; }
+            #topbarToggle { display:flex !important; }
+            .main-content { margin-left:0 !important; }
+            .kpi-grid { grid-template-columns:repeat(2,1fr) !important; gap:12px !important; }
+            .widget-grid { grid-template-columns:1fr !important; gap:16px !important; }
+            .col-span-3, .col-span-4, .col-span-6, .col-span-8, .col-span-12 { grid-column:span 1 !important; }
+            .content-area { padding:16px !important; gap:16px !important; }
         }
         @media(max-width:768px){
-            .kpi-grid { grid-template-columns:1fr; }
-            .widget-grid { grid-template-columns:1fr; }
-            .topbar { padding:0 12px; height:56px; }
-            .content-area { padding:12px; gap:16px; }
-            .kpi-value { font-size:1.4rem; }
-            .section-title { font-size:1rem; }
-            .widget-header { padding:12px 16px; }
-            .widget-body { padding:12px 16px; }
-            .data-table th, .data-table td { padding:8px 12px; font-size:0.8rem; }
-            .revenue-list li { padding:8px 0; }
-            .rev-label, .rev-val { font-size:0.82rem; }
-            .env-badge { display:none; }
-            .header-left div:last-child { display:none; }
-            .alert-item { padding:10px 12px; }
-            .feed-item { gap:10px; }
+            .kpi-grid { grid-template-columns:1fr !important; gap:10px !important; }
+            .widget-grid { grid-template-columns:1fr !important; gap:12px !important; }
+            .topbar { padding:0 12px !important; height:56px !important; }
+            .content-area { padding:12px !important; gap:12px !important; }
+            .kpi-value { font-size:1.4rem !important; }
+            .kpi-card { padding:14px !important; }
+            .section-title { font-size:1rem !important; }
+            .widget-header { padding:12px 16px !important; }
+            .widget-body { padding:12px 16px !important; overflow-x:auto; }
+            .data-table th, .data-table td { padding:8px 10px !important; font-size:0.78rem !important; }
+            .revenue-list li { padding:8px 0 !important; }
+            .rev-label, .rev-val { font-size:0.82rem !important; }
+            .env-badge { display:none !important; }
+            .alert-item { padding:10px 12px !important; }
+            .feed-item { gap:10px !important; }
+            .kpi-title { font-size:0.75rem !important; }
+            .kpi-icon { font-size:1rem !important; padding:6px !important; }
+            .widget-title { font-size:0.9rem !important; }
         }
         @media(max-width:480px){
-            .kpi-card { padding:14px; }
-            .kpi-header { margin-bottom:8px; }
-            .kpi-icon { font-size:1rem; padding:6px; }
-            .widget-body { padding:10px 12px; overflow-x:auto; }
-            .data-table { font-size:0.78rem; }
-            .section-title { font-size:0.9rem; margin-top:4px; }
+            .kpi-card { padding:12px !important; }
+            .kpi-header { margin-bottom:6px !important; }
+            .widget-body { padding:10px 12px !important; overflow-x:auto; }
+            .data-table { font-size:0.75rem !important; }
+            .section-title { font-size:0.9rem !important; margin-top:4px !important; }
+            .kpi-value { font-size:1.2rem !important; }
+            .topbar { padding:0 10px !important; }
+            .content-area { padding:10px !important; gap:10px !important; }
         }
     </style>
 </head>
@@ -311,8 +311,8 @@ try {
         <main class="main-content">
             <header class="topbar">
                 <div class="header-left">
-
-                    <div style="font-weight:700; color:#0f172a; margin-left:16px;">College Directory OS</div>
+                    <button onclick="toggleSidebar()" style="background:none; border:none; font-size:1.4rem; cursor:pointer; color:#0f172a; display:none; padding:4px;" id="topbarToggle"><i class="ph ph-list"></i></button>
+                    <div style="font-weight:700; color:#0f172a; margin-left:8px;">College Directory OS</div>
                 </div>
                 <div class="header-right">
                     <div class="avatar">A</div>
@@ -515,7 +515,7 @@ try {
                 $pendingSubmissions = safeCount($pdo, "SELECT COUNT(*) FROM college_submissions WHERE status='pending'");
                 ?>
                 <div class="section-title" style="margin-top:10px;">College Portal</div>
-                <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+                <div class="kpi-grid">
                     <a href="college_accounts.php" style="text-decoration:none;">
                         <div class="kpi-card" style="border-left:3px solid #19376D;">
                             <div class="kpi-header">
@@ -824,8 +824,16 @@ try {
         </main>
     </div>
 
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <button class="mobile-toggle" id="mobileToggle" onclick="toggleSidebar()"><i class="ph ph-list"></i></button>
+
     <script>
-        // No charts needed - data is displayed in tables/lists from live DB
+        function toggleSidebar() {
+            var sidebar = document.querySelector('.sidebar');
+            var overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
     </script>
 </body>
 </html>

@@ -424,22 +424,28 @@ function getValue($arr, $key, $default = '') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $is_edit ? 'Edit College' : 'Add New College'; ?> | AdmissionSeason Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/admin-responsive.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
+        html, body { overflow-x: auto !important; }
         body { background-color: var(--bg-light); }
         .admin-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; }
+        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 50; transition: transform 0.3s ease; }
         .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-header .logo { font-size: 1.3rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
         .sidebar-nav { padding: 24px 0; flex: 1; }
         .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; }
         .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
         .sidebar-nav a i { font-size: 1.25rem; }
-        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; padding-bottom: 60px; }
-        .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
+        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; padding-bottom: 60px; min-width: 0; }
+        .topbar { height: 64px; background: #fff; border-bottom: 1px solid rgba(15,23,42,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: sticky; top: 0; z-index: 40; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        #topbarToggle { display:none; background:none; border:none; font-size:1.4rem; cursor:pointer; color:#0f172a; padding:4px; }
+        .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:49; }
         .content-area { padding: 32px; max-width: 1000px; margin: 0 auto; width: 100%; }
-        
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+
+        .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; gap: 12px; flex-wrap: wrap; }
         .page-header h2 { font-size: 2rem; font-weight: 800; display: flex; align-items: center; gap: 12px; }
         
         .form-section { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); padding: 32px; box-shadow: var(--shadow-sm); margin-bottom: 24px; }
@@ -449,7 +455,7 @@ function getValue($arr, $key, $default = '') {
         .form-group { margin-bottom: 20px; }
         .form-group.full { grid-column: 1 / -1; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-dark); font-size: 0.95rem; }
-        .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 1rem; color: var(--text-dark); background: #fff; transition: all 0.3s ease; }
+        .form-control { width: 100%; min-width: 0; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 1rem; color: var(--text-dark); background: #fff; transition: all 0.3s ease; box-sizing: border-box; }
         .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(11, 36, 71, 0.1); }
         
         .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 32px; }
@@ -459,12 +465,56 @@ function getValue($arr, $key, $default = '') {
         .error-alert { padding: 16px; background: rgba(15,23,42,0.06); color: #0B2447; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(15,23,42,0.06); }
         
         .form-actions { display: flex; justify-content: flex-end; gap: 16px; margin-top: 32px; }
+        .form-actions .btn { white-space: nowrap; min-width: 0; box-sizing: border-box; }
         
-        .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding-bottom: 12px; }
-        .tab-link { padding: 8px 16px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
+        .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding-bottom: 12px; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+        .tabs-nav::-webkit-scrollbar { height: 6px; }
+        .tabs-nav::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 3px; }
+        .tabs-nav::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+        .tab-link { padding: 8px 16px; font-weight: 600; color: var(--text-muted); border-radius: 8px; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; font-size: 0.88rem; }
         .tab-link:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
         .tab-link.active { background: var(--primary); color: white; }
         .tab-link.disabled { opacity: 0.5; cursor: not-allowed; }
+
+        @media(max-width:1024px){
+            .sidebar { transform:translateX(-100%) !important; }
+            .sidebar.open { transform:translateX(0) !important; }
+            .sidebar-overlay.show { display:block; }
+            #topbarToggle { display:inline-flex !important; }
+            .main-content { margin-left:0 !important; }
+            .content-area { padding:16px !important; max-width:none !important; }
+            .page-header { flex-wrap:wrap !important; gap:10px !important; }
+            .page-header h2 { font-size:1.4rem !important; }
+        }
+        @media(max-width:768px){
+            .topbar { height:56px !important; padding:0 12px !important; }
+            .content-area { padding:12px !important; }
+            .form-section { padding:16px !important; }
+            .form-section h3 { font-size:1rem !important; margin-bottom:16px !important; }
+            .form-grid { grid-template-columns:1fr !important; gap:12px !important; }
+            .form-group { margin-bottom:14px !important; }
+            .form-group label { font-size:0.85rem !important; margin-bottom:6px !important; }
+            .form-control { padding:10px 12px !important; font-size:0.9rem !important; }
+            .form-actions { flex-direction:column !important; gap:10px !important; }
+            .form-actions .btn { width:100% !important; text-align:center !important; padding:14px 16px !important; font-size:0.9rem !important; justify-content:center !important; }
+            .tabs-nav { gap:6px !important; margin-bottom:16px !important; }
+            .tab-link { padding:7px 14px !important; font-size:0.82rem !important; }
+            .page-header h2 { font-size:1.2rem !important; }
+            .checkbox-group { flex-wrap:wrap !important; gap:6px !important; margin-top:16px !important; }
+        }
+        @media(max-width:480px){
+            .content-area { padding:8px !important; }
+            .form-section { padding:12px !important; border-radius:12px !important; }
+            .form-section h3 { font-size:0.92rem !important; }
+            .form-grid { gap:8px !important; }
+            .form-group { margin-bottom:10px !important; }
+            .form-group label { font-size:0.82rem !important; }
+            .form-control { padding:9px 10px !important; font-size:0.85rem !important; }
+            .tabs-nav { gap:4px !important; margin-bottom:12px !important; }
+            .tab-link { padding:6px 10px !important; font-size:0.76rem !important; }
+            .form-actions .btn { padding:12px 14px !important; font-size:0.85rem !important; }
+            .page-header h2 { font-size:1.05rem !important; gap:8px !important; }
+        }
     </style>
 </head>
 <body>
@@ -474,8 +524,13 @@ function getValue($arr, $key, $default = '') {
 
         <main class="main-content">
             <header class="topbar">
-                <div class="user-profile">
-                    <span>Admin</span>
+                <div class="header-left">
+                    <button onclick="toggleSidebar()" id="topbarToggle"><i class="ph ph-list"></i></button>
+                    <div style="font-weight:700; color:#0f172a;"><?php echo $is_edit ? 'Edit College' : 'Add New College'; ?></div>
+                </div>
+                <div class="header-right">
+                    <span style="font-size:0.88rem; color:rgba(15,23,42,0.65);">Admin</span>
+                    <a href="logout.php" style="color:#0f172a; font-size:1.2rem;"><i class="ph ph-sign-out"></i></a>
                 </div>
             </header>
 
@@ -1011,6 +1066,13 @@ function getValue($arr, $key, $default = '') {
             });
         }
     });
+    </script>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <script>
+    function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('show');
+    }
     </script>
 </body>
 </html>
