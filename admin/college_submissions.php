@@ -609,6 +609,7 @@ function renderField($data, $fieldName, $label) {
     .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: rgba(255,255,255,0.6); transition: all 0.2s; font-size:0.95rem; text-decoration:none; }
     .sidebar-nav a:hover, .sidebar-nav a.active { color: #fff; background: rgba(255,255,255,0.05); border-left: 3px solid #19376D; }
     .sidebar-nav a i { font-size: 1.2rem; }
+    .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #0f172a; padding: 4px; }
     
     .main-content { flex: 1; margin-left: 260px; display: flex; flex-direction: column; }
     
@@ -619,11 +620,11 @@ function renderField($data, $fieldName, $label) {
     .header-right { display: flex; align-items: center; gap: 16px; }
     .avatar { width: 32px; height: 32px; border-radius: 50%; background: #0f172a; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size:0.85rem; cursor:pointer; }
     
-    .content-area { padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+    .content-area { padding: 24px; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box; }
     .msg{padding: 12px 16px; border-radius: 10px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; font-size: .82rem; margin-bottom: 20px;}
     
-    .card{background:#fff; border:1px solid rgba(15,23,42,0.08); border-radius:14px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.05);}
-    table.subs-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .card{background:#fff; border:1px solid rgba(15,23,42,0.08); border-radius:14px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.05); overflow-x:auto;}
+    table.subs-table { width: 100%; border-collapse: collapse; font-size: .85rem; min-width: 500px; }
     table.subs-table th { text-align: left; padding: 12px; background: #f8fafc; color: #64748b; font-weight: 700; border-bottom: 2px solid #e2e8f0; font-size: .72rem; text-transform: uppercase; }
     table.subs-table td { padding: 14px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
     
@@ -654,18 +655,19 @@ function renderField($data, $fieldName, $label) {
     .filters select{padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:.85rem; font-family:inherit; background:#fff;}
 
     @media(max-width:768px){
-        .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sidebar-overlay.show{display:block}
+        .sidebar{transform:translateX(-100%);transition:transform .3s}.sidebar.open{transform:translateX(0)}
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90}.sidebar-overlay.show{display:block}
         .main-content{margin-left:0}.topbar{height:56px;padding:0 12px;justify-content:space-between}
-        .mobile-menu-btn{display:block}.content-area{padding:12px}
+        .mobile-menu-btn{display:block!important}.content-area{padding:12px}
         .page-header{flex-direction:column;align-items:flex-start}.page-header h2{font-size:1.2rem}
         .filters{flex-direction:column;gap:6px}.filters select{width:100%}
         table{font-size:.75rem}th,td{padding:8px 10px}
+        .card{overflow-x:auto}
     }
 </style>
 </head>
 <body>
 
-<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="admin-layout">
     <?php include 'sidebar.php'; ?>

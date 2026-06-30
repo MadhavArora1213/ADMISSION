@@ -47,9 +47,9 @@ if ($collegeId) {
 
 function displayField($submittedVal, $liveVal, $label) {
     $hasChange = ($submittedVal !== null && $submittedVal !== $liveVal);
-    echo '<div style="padding:12px; border-bottom:1px solid #f1f5f9; display:flex; font-size:0.85rem; background:' . ($hasChange ? '#fef9c3' : 'none') . ';">';
-    echo '<div style="width:240px; font-weight:700; color:#475569;">' . htmlspecialchars($label) . '</div>';
-    echo '<div style="flex:1;">';
+    echo '<div class="display-row" style="background:' . ($hasChange ? '#fef9c3' : 'none') . ';">';
+    echo '<div class="display-label">' . htmlspecialchars($label) . '</div>';
+    echo '<div class="display-value">';
     if ($hasChange) {
         echo '<div style="color:#ef4444; text-decoration:line-through; font-size:0.78rem;">Live: ' . htmlspecialchars((string)($liveVal ?: '[Empty]')) . '</div>';
         echo '<div style="color:#15803d; font-weight:700;">Proposed: ' . htmlspecialchars((string)($submittedVal ?: '[Empty]')) . '</div>';
@@ -63,9 +63,9 @@ function displayField($submittedVal, $liveVal, $label) {
 
 function displayJSONListField($submittedVal, $liveVal, $label) {
     $hasChange = ($submittedVal !== null && json_encode($submittedVal) !== json_encode($liveVal));
-    echo '<div style="padding:12px; border-bottom:1px solid #f1f5f9; display:flex; font-size:0.85rem; background:' . ($hasChange ? '#fef9c3' : 'none') . ';">';
-    echo '<div style="width:240px; font-weight:700; color:#475569;">' . htmlspecialchars($label) . '</div>';
-    echo '<div style="flex:1;">';
+    echo '<div class="display-row" style="background:' . ($hasChange ? '#fef9c3' : 'none') . ';">';
+    echo '<div class="display-label">' . htmlspecialchars($label) . '</div>';
+    echo '<div class="display-value">';
     if ($hasChange) {
         echo '<div style="color:#ef4444; font-size:0.78rem;">Live: ' . htmlspecialchars(is_array($liveVal) ? implode(', ', $liveVal) : (string)$liveVal) . '</div>';
         echo '<div style="color:#15803d; font-weight:700;">Proposed: ' . htmlspecialchars(is_array($submittedVal) ? implode(', ', $submittedVal) : (string)$submittedVal) . '</div>';
@@ -125,14 +125,36 @@ function displayJSONListField($submittedVal, $liveVal, $label) {
     .btn-red:hover { background: #b91c1c; }
     
     .change-indicator { background: #fef9c3; border: 1px solid #fef08a; color: #854d0e; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-left: 8px; display: inline-block; }
+
+    .display-row { display: flex; border-bottom: 1px solid #f1f5f9; padding: 12px; font-size: 0.85rem; }
+    .display-label { width: 240px; font-weight: 700; color: #475569; flex-shrink: 0; }
+    .display-value { flex: 1; min-width: 0; word-break: break-word; }
+
+    @media(max-width:768px){
+        .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sidebar-overlay.show{display:block}
+        .main-content{margin-left:0}.topbar{height:56px;padding:0 12px;justify-content:space-between}
+        .mobile-menu-btn{display:block}.content-area{padding:12px}
+        .page-header{flex-direction:column;align-items:flex-start}.page-header h2{font-size:1.2rem}
+        .tabs-nav{gap:4px}.tab-btn{padding:8px 12px;font-size:.8rem}
+        .review-action-card{flex-direction:column;gap:12px;text-align:center}
+        .review-action-card>div:last-child{width:100%}.btn{width:100%;justify-content:center}
+        .detail-row{flex-direction:column;gap:4px}.detail-row>div:first-child{width:100%}
+    }
+
+    @media(max-width:768px){
+        .display-row{flex-direction:column;gap:4px;}
+        .display-label{width:100%;margin-bottom:2px;}
+    }
 </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="admin-layout">
     <?php include 'sidebar.php'; ?>
     
     <main class="main-content">
         <header class="topbar">
+            <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div style="font-weight:700; color:#0f172a; display:flex; align-items:center; gap:8px;">
                 <a href="college_submissions.php" style="color:#64748b; text-decoration:none;"><i class="ph ph-arrow-left"></i> Submissions</a>
                 <span>/</span>
@@ -474,6 +496,16 @@ function switchTab(tabId) {
     document.getElementById(tabId).classList.add('active');
     event.currentTarget.classList.add('active');
 }
+</script>
+<script>
+document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('show');
+});
+document.getElementById('sidebar-overlay').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.remove('open');
+    this.classList.remove('show');
+});
 </script>
 </body>
 </html>

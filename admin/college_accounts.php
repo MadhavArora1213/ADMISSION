@@ -265,7 +265,8 @@ body { background-color: var(--bg-light); }
 .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
 .page-header h2{font-size:2rem;font-weight:800;color:#0B2447}
 .msg{padding:12px 16px;border-radius:10px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;font-size:.8rem;margin-bottom:16px}
-.card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:24px;margin-bottom:16px;box-shadow: var(--shadow-sm);}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:24px;margin-bottom:16px;box-shadow: var(--shadow-sm);overflow-x:auto;}
+.mobile-menu-btn{display:none;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#0f172a;padding:4px;}
 
 .filters{display:flex;gap:8px;margin-bottom:16px}
 .filters a{padding:6px 14px;border-radius:8px;font-size:.75rem;font-weight:600;text-decoration:none;color:#64748b;background:#fff;border:1px solid #e2e8f0}
@@ -307,7 +308,7 @@ td{padding:12px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
 .kyc-verified{background:#dcfce7;color:#166534}
 .kyc-pending{background:#fef3c7;color:#92400e}
 
-@media(max-width:768px){.detail-grid,.doc-grid{grid-template-columns:1fr 1fr}table{font-size:.7rem}.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sidebar-overlay.show{display:block}.main-content{margin-left:0}.topbar{height:56px;padding:0 12px;justify-content:space-between}.mobile-menu-btn{display:block}.content-area{padding:12px}.page-header{flex-direction:column;align-items:flex-start}.page-header h2{font-size:1.4rem}.filters{flex-wrap:wrap;gap:6px}.filters a{padding:5px 10px;font-size:.7rem}}
+@media(max-width:768px){.detail-grid,.doc-grid{grid-template-columns:1fr 1fr}table{font-size:.7rem}.sidebar{transform:translateX(-100%);transition:transform .3s}.sidebar.open{transform:translateX(0)}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90}.sidebar-overlay.show{display:block}.main-content{margin-left:0}.topbar{height:56px;padding:0 12px;justify-content:space-between}.mobile-menu-btn{display:block!important}.content-area{padding:12px}.page-header{flex-direction:column;align-items:flex-start}.page-header h2{font-size:1.4rem}.filters{flex-wrap:wrap;gap:6px}.filters a{padding:5px 10px;font-size:.7rem}}
 </style>
 </head>
 <body>

@@ -1,7 +1,7 @@
-/* Shared responsive fixes for admin college tab pages */
 html, body { overflow-x: auto !important; }
 .main-content { min-width: 0; }
 .content-area { box-sizing: border-box; }
+.mobile-menu-btn { display: none; }
 .tabs-nav { flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
 .tabs-nav::-webkit-scrollbar { height: 5px; }
 .tabs-nav::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 3px; }
@@ -12,33 +12,33 @@ html, body { overflow-x: auto !important; }
 .form-actions .btn { white-space: nowrap; box-sizing: border-box; }
 
 @media (max-width: 768px) {
-    .sidebar { transform: translateX(-100%) !important; z-index: 100 !important; }
-    .sidebar.open { transform: translateX(0) !important; }
+    .sidebar { transform: translateX(-100%); z-index: 100; }
+    .sidebar.open { transform: translateX(0); }
     .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
     .sidebar-overlay.show { display: block; }
-    .main-content { margin-left: 0 !important; }
-    .mobile-menu-btn { display: block !important; }
-    .topbar { height: 56px !important; padding: 0 12px !important; justify-content: space-between !important; }
-    .content-area { padding: 10px !important; }
-    .page-header h2 { font-size: 1.2rem !important; gap: 8px !important; }
-    .panel { padding: 14px !important; }
-    .panel h3 { font-size: 0.95rem !important; margin-bottom: 12px !important; }
-    .form-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
-    .form-group { margin-bottom: 12px !important; }
-    .form-group label { font-size: 0.84rem !important; }
-    .form-control { padding: 9px 12px !important; font-size: 0.88rem !important; }
-    .form-actions { flex-direction: column !important; gap: 8px !important; }
-    .form-actions .btn { width: 100% !important; text-align: center !important; padding: 12px 16px !important; justify-content: center !important; }
-    .tabs-nav { gap: 4px !important; margin-bottom: 16px !important; padding-bottom: 10px !important; }
-    .tab-link { padding: 6px 12px !important; font-size: 0.78rem !important; }
-    table { min-width: 500px !important; }
+    .main-content { margin-left: 0; }
+    .mobile-menu-btn { display: block; }
+    .topbar { height: 56px; padding: 0 12px; justify-content: space-between; }
+    .content-area { padding: 10px; }
+    .page-header h2 { font-size: 1.2rem; gap: 8px; }
+    .panel { padding: 14px; }
+    .panel h3 { font-size: 0.95rem; margin-bottom: 12px; }
+    .form-grid { grid-template-columns: 1fr; gap: 10px; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { font-size: 0.84rem; }
+    .form-control { padding: 9px 12px; font-size: 0.88rem; }
+    .form-actions { flex-direction: column; gap: 8px; }
+    .form-actions .btn { width: 100%; text-align: center; padding: 12px 16px; justify-content: center; }
+    .tabs-nav { gap: 4px; margin-bottom: 16px; padding-bottom: 10px; }
+    .tab-link { padding: 6px 12px; font-size: 0.78rem; }
+    table { min-width: 500px; }
 }
 
 @media (max-width: 480px) {
-    .content-area { padding: 8px !important; }
-    .panel { padding: 10px !important; border-radius: 10px !important; }
-    .page-header h2 { font-size: 1.05rem !important; }
-    .tabs-nav { gap: 3px !important; }
-    .tab-link { padding: 5px 10px !important; font-size: 0.74rem !important; }
-    .form-actions .btn { font-size: 0.85rem !important; padding: 10px 12px !important; }
+    .content-area { padding: 8px; }
+    .panel { padding: 10px; border-radius: 10px; }
+    .page-header h2 { font-size: 1.05rem; }
+    .tabs-nav { gap: 3px; }
+    .tab-link { padding: 5px 10px; font-size: 0.74rem; }
+    .form-actions .btn { font-size: 0.85rem; padding: 10px 12px; }
 }
