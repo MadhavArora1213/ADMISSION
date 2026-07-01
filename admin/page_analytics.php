@@ -84,15 +84,36 @@ $avgPerPage      = ($trackedPages > 0 && $totalViews > 0) ? (int)($totalViews / 
         tr:hover td { background:#f8fafc; }
         .empty-state { padding:60px 20px; text-align:center; color:rgba(15,23,42,0.35); font-size:0.9rem; }
         .empty-state i { font-size:2.5rem; display:block; margin-bottom:12px; }
+        .mobile-menu-btn { display:none; background:none; border:none; font-size:1.4rem; cursor:pointer; color:#0f172a; padding:4px; }
+        .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:90; }
         @media(max-width:900px) { .stats-grid { grid-template-columns:repeat(2,1fr); } }
-        @media(max-width:600px) { .stats-grid { grid-template-columns:1fr; } .content-area { padding:16px; } }
+        @media(max-width:768px){
+            .sidebar{transform:translateX(-100%);z-index:100;transition:transform 0.3s ease}
+            .sidebar.open{transform:translateX(0)}
+            .sidebar-overlay.show{display:block}
+            .main-content{margin-left:0}
+            .mobile-menu-btn{display:block}
+            .topbar{height:auto;min-height:56px;padding:10px 12px}
+            .header-left{font-size:0.9rem}
+            .content-area{padding:12px}
+            .page-header h2{font-size:1.2rem}
+            .page-header p{font-size:0.8rem}
+            .stat-card{padding:16px}
+            .stat-card .value{font-size:1.4rem}
+            .chart-container{padding:16px;overflow-x:auto}
+            .table-card-header{flex-direction:column;align-items:flex-start;gap:8px}
+            table{min-width:500px}
+        }
+        @media(max-width:600px) { .stats-grid { grid-template-columns:1fr; } .content-area { padding:10px; } }
     </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="admin-layout">
     <?php include 'sidebar.php'; ?>
     <main class="main-content">
         <header class="topbar">
+            <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div class="header-left">
                 <div style="font-weight:700; color:#0f172a;">Traffic Analytics</div>
             </div>
@@ -204,6 +225,16 @@ new Chart(ctx, {
             x: { grid: { display: false } }
         }
     }
+});
+</script>
+<script>
+document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('show');
+});
+document.getElementById('sidebar-overlay').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.remove('open');
+    this.classList.remove('show');
 });
 </script>
 </body>

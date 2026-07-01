@@ -1,0 +1,2 @@
+# Block all web access to log files
+Require all denied

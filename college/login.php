@@ -1,39 +1,71 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../admin/db.php';
+
+// Security headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
 if (!empty($_SESSION['college_account_id'])) { header('Location: /ADMISSION/college/dashboard.php'); exit; }
 
+$ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 $error = '';
 $flash = $_GET['msg'] ?? '';
 
+// CSRF token
+if (empty($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+// IP rate limiting
+$rlKey = sys_get_temp_dir() . '/college_rl_' . md5($ip);
+$attempts = file_exists($rlKey) ? json_decode(file_get_contents($rlKey), true) ?? [] : [];
+$attempts = array_filter($attempts, fn($t) => (time() - $t) < 900);
+$attemptCount = count($attempts);
+$blocked = $attemptCount >= 5;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-
-    if (!$email || !$password) {
-        $error = 'Email and password are required.';
+    if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'] ?? '')) {
+        $error = 'Invalid security token. Please refresh.';
+    } elseif ($blocked) {
+        $error = 'Too many failed attempts. Try again in 15 minutes.';
     } else {
-        $stmt = $pdo->prepare("SELECT * FROM college_accounts WHERE email=?");
-        $stmt->execute([$email]);
-        $account = $stmt->fetch(PDO::FETCH_ASSOC);
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
 
-        if (!$account) {
-            $error = 'No account found with this email.';
-        } elseif ($account['status'] === 'pending') {
-            $error = 'Your account is pending admin approval. You will receive an email once verified.';
-        } elseif ($account['status'] === 'rejected') {
-            $error = 'Your account has been rejected. Reason: ' . ($account['rejection_reason'] ?: 'Contact support.');
-        } elseif ($account['status'] === 'suspended') {
-            $error = 'Your account has been suspended. Contact support.';
-        } elseif (!password_verify($password, $account['password_hash'])) {
-            $error = 'Incorrect password.';
+        if (!$email || !$password) {
+            $error = 'Email and password are required.';
         } else {
-            $_SESSION['college_account_id'] = $account['id'];
-            $_SESSION['college_name'] = $account['institute_name'];
-            $upd = $pdo->prepare("UPDATE college_accounts SET last_login=NOW() WHERE id=?");
-            $upd->execute([$account['id']]);
-            header('Location: /ADMISSION/college/dashboard.php');
-            exit;
+            $stmt = $pdo->prepare("SELECT * FROM college_accounts WHERE email=?");
+            $stmt->execute([$email]);
+            $account = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$account) {
+                $attempts[] = time();
+                file_put_contents($rlKey, json_encode(array_values($attempts)), LOCK_EX);
+                $error = 'No account found with this email.';
+            } elseif ($account['status'] === 'pending') {
+                $error = 'Your account is pending admin approval.';
+            } elseif ($account['status'] === 'rejected') {
+                $error = 'Your account has been rejected.';
+            } elseif ($account['status'] === 'suspended') {
+                $error = 'Your account has been suspended.';
+            } elseif (!password_verify($password, $account['password_hash'])) {
+                $attempts[] = time();
+                file_put_contents($rlKey, json_encode(array_values($attempts)), LOCK_EX);
+                $remaining = 5 - count($attempts);
+                $error = "Incorrect password. {$remaining} attempts remaining.";
+            } else {
+                session_regenerate_id(true);
+                $_SESSION['college_account_id'] = $account['id'];
+                $_SESSION['college_name'] = $account['institute_name'];
+                $_SESSION['login_ip'] = $ip;
+                $upd = $pdo->prepare("UPDATE college_accounts SET last_login=NOW() WHERE id=?");
+                $upd->execute([$account['id']]);
+                @unlink($rlKey);
+                header('Location: /ADMISSION/college/dashboard.php');
+                exit;
+            }
         }
     }
 }
@@ -164,8 +196,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;background:#0B2
   <?php if($error):?><div class="alert alert-error"><i class="ph ph-warning-circle"></i> <?=$error?></div><?php endif;?>
 
   <form method="POST">
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
     <div class="fg"><label>Email Address</label><input type="email" name="email" placeholder="your@institute.ac.in" required value="<?=htmlspecialchars($_POST['email'] ?? '')?>"></div>
-    <div class="fg"><label>Password</label><div class="fg-icon"><input type="password" name="password" id="pwd" placeholder="Enter your password" required><i class="ph ph-eye" onclick="togglePwd()"></i></div></div>
+    <div class="fg"><label>Password</label><div class="fg-icon"><input type="password" name="password" id="pwd" placeholder="Enter your password" required autocomplete="current-password"><i class="ph ph-eye" onclick="togglePwd()"></i></div></div>
     <a href="#" class="forgot">Forgot password?</a>
     <button type="submit" class="btn-primary"><i class="ph ph-sign-in"></i> Login</button>
   </form>

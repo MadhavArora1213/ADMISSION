@@ -61,6 +61,24 @@ function displayField($submittedVal, $liveVal, $label) {
     echo '</div>';
 }
 
+function displayHTMLField($submittedVal, $liveVal, $label) {
+    $hasChange = ($submittedVal !== null && $submittedVal !== $liveVal);
+    echo '<div class="display-row" style="background:' . ($hasChange ? '#fef9c3' : 'none') . ';">';
+    echo '<div class="display-label">' . htmlspecialchars($label) . '</div>';
+    echo '<div class="display-value" style="max-height:400px; overflow:auto;">';
+    if ($hasChange) {
+        echo '<div style="color:#ef4444; text-decoration:line-through; font-size:0.78rem; margin-bottom:8px;">Live:</div>';
+        echo '<div style="border:1px solid #fecaca; padding:12px; border-radius:6px; margin-bottom:10px; background:#fff5f5;">' . ($liveVal ?: '[Empty]') . '</div>';
+        echo '<div style="color:#15803d; font-weight:700; font-size:0.78rem; margin-bottom:8px;">Proposed:</div>';
+        echo '<div style="border:1px solid #bbf7d0; padding:12px; border-radius:6px; background:#f0fdf4;">' . ($submittedVal ?: '[Empty]') . '</div>';
+    } else {
+        echo '<div style="border:1px solid #e2e8f0; padding:12px; border-radius:6px; background:#fff;">' . ($liveVal ?: '[Empty]') . '</div>';
+        echo ' <span style="color:#94a3b8; font-size:0.75rem;">(Unchanged)</span>';
+    }
+    echo '</div>';
+    echo '</div>';
+}
+
 function displayJSONListField($submittedVal, $liveVal, $label) {
     $hasChange = ($submittedVal !== null && json_encode($submittedVal) !== json_encode($liveVal));
     echo '<div class="display-row" style="background:' . ($hasChange ? '#fef9c3' : 'none') . ';">';
@@ -129,21 +147,23 @@ function displayJSONListField($submittedVal, $liveVal, $label) {
     .display-row { display: flex; border-bottom: 1px solid #f1f5f9; padding: 12px; font-size: 0.85rem; }
     .display-label { width: 240px; font-weight: 700; color: #475569; flex-shrink: 0; }
     .display-value { flex: 1; min-width: 0; word-break: break-word; }
+    .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #0f172a; padding: 4px; }
 
     @media(max-width:768px){
         .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sidebar-overlay.show{display:block}
-        .main-content{margin-left:0}.topbar{height:56px;padding:0 12px;justify-content:space-between}
-        .mobile-menu-btn{display:block}.content-area{padding:12px}
+        .main-content{margin-left:0}
+        .topbar{height:auto;min-height:56px;padding:10px 12px;flex-wrap:wrap;gap:8px}
+        .mobile-menu-btn{display:block}
+        .content-area{padding:12px}
         .page-header{flex-direction:column;align-items:flex-start}.page-header h2{font-size:1.2rem}
         .tabs-nav{gap:4px}.tab-btn{padding:8px 12px;font-size:.8rem}
         .review-action-card{flex-direction:column;gap:12px;text-align:center}
         .review-action-card>div:last-child{width:100%}.btn{width:100%;justify-content:center}
         .detail-row{flex-direction:column;gap:4px}.detail-row>div:first-child{width:100%}
-    }
-
-    @media(max-width:768px){
         .display-row{flex-direction:column;gap:4px;}
         .display-label{width:100%;margin-bottom:2px;}
+        .display-value{overflow-x:auto;}
+        .display-value *{max-width:100%;box-sizing:border-box;}
     }
 </style>
 </head>
@@ -155,12 +175,12 @@ function displayJSONListField($submittedVal, $liveVal, $label) {
     <main class="main-content">
         <header class="topbar">
             <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
-            <div style="font-weight:700; color:#0f172a; display:flex; align-items:center; gap:8px;">
-                <a href="college_submissions.php" style="color:#64748b; text-decoration:none;"><i class="ph ph-arrow-left"></i> Submissions</a>
+            <div class="topbar-left" style="font-weight:700; color:#0f172a; display:flex; align-items:center; gap:8px;">
+                <a href="college_submissions.php" style="color:#64748b; text-decoration:none; white-space:nowrap;"><i class="ph ph-arrow-left"></i> Submissions</a>
                 <span>/</span>
                 <span>Reviewing: <?=htmlspecialchars($sub['institute_name'])?></span>
             </div>
-            <div style="font-size:0.85rem; color:#64748b;">Submission Status: <strong style="color:#d97706;"><?=ucfirst($sub['status'])?></strong></div>
+            <div class="topbar-status" style="font-size:0.85rem; color:#64748b;">Submission Status: <strong style="color:#d97706;"><?=ucfirst($sub['status'])?></strong></div>
         </header>
         
         <div class="content-area">
@@ -243,7 +263,7 @@ function displayJSONListField($submittedVal, $liveVal, $label) {
             <div class="tab-content" id="infrastructure">
                 <h4 style="margin-bottom:16px;">Infrastructure Details & Hostels</h4>
                 <?php
-                displayField($subData['about_text'] ?? null, $content['about_text'] ?? '', "About Text");
+                displayHTMLField($subData['about_text'] ?? null, $content['about_text'] ?? '', "About Text");
                 displayJSONListField($subData['highlights_json'] ?? null, json_decode($content['highlights_json'] ?? '[]', true), "Highlights");
                 displayJSONListField($subData['accreditations_json'] ?? null, json_decode($content['accreditations_json'] ?? '[]', true), "Accreditations");
                 displayJSONListField($subData['awards_json'] ?? null, json_decode($content['awards_json'] ?? '[]', true), "Awards");

@@ -1,10 +1,27 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../admin/db.php';
+
+// Security headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
 if (!empty($_SESSION['college_account_id'])) { header('Location: /ADMISSION/college/dashboard.php'); exit; }
 
+$ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 $error = '';
 $success = '';
+
+// CSRF
+if (empty($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+// IP rate limiting
+$rlKey = sys_get_temp_dir() . '/college_signup_rl_' . md5($ip);
+$attempts = file_exists($rlKey) ? json_decode(file_get_contents($rlKey), true) ?? [] : [];
+$attempts = array_filter($attempts, fn($t) => (time() - $t) < 3600);
+$blocked = count($attempts) >= 3;
 
 function uploadDoc(array $file, string $prefix, bool $required = false): array {
     $dir = __DIR__ . '/../uploads/college_docs/';
@@ -58,24 +75,30 @@ function validatePhone($n) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $type=trim($_POST['institute_type']??'');$name=trim($_POST['institute_name']??'');$website=trim($_POST['website']??'');$stateId=(int)($_POST['state_id']??0);$city=trim($_POST['city']??'');$estYear=(int)($_POST['established_year']??0);$affiliation=trim($_POST['affiliation_details']??'');$person=trim($_POST['contact_person']??'');$designation=trim($_POST['designation']??'');$email=trim($_POST['email']??'');$phone=trim($_POST['phone']??'');$password=$_POST['password']??'';$pan=strtoupper(trim($_POST['pan_number']??''));$aadhar=preg_replace('/[\s-]/','',$_POST['aadhar_number']??'');$gstin=strtoupper(trim($_POST['gst_number']??''));
+    if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'] ?? '')) {
+        $error = 'Invalid security token. Please refresh.';
+    } elseif ($blocked) {
+        $error = 'Too many registration attempts. Please try again later.';
+    } else {
+        $type=trim($_POST['institute_type']??'');$name=trim($_POST['institute_name']??'');$website=trim($_POST['website']??'');$stateId=(int)($_POST['state_id']??0);$city=trim($_POST['city']??'');$estYear=(int)($_POST['established_year']??0);$affiliation=trim($_POST['affiliation_details']??'');$person=trim($_POST['contact_person']??'');$designation=trim($_POST['designation']??'');$email=trim($_POST['email']??'');$phone=trim($_POST['phone']??'');$password=$_POST['password']??'';$pan=strtoupper(trim($_POST['pan_number']??''));$aadhar=preg_replace('/[\s-]/','',$_POST['aadhar_number']??'');$gstin=strtoupper(trim($_POST['gst_number']??''));
 
-    if (!$type||!$name||!$person||!$designation||!$email||!$password||!$phone||!$pan||!$aadhar) $error='All required fields must be filled.';
-    elseif (strlen($password)<6) $error='Password must be at least 6 characters.';
-    elseif (!filter_var($email,FILTER_VALIDATE_EMAIL)) $error='Invalid email address.';
-    elseif ($website && !filter_var($website, FILTER_VALIDATE_URL)) $error='Invalid website URL.';
-    elseif (!validatePhone($phone)) $error='Invalid phone number.';
-    elseif ($estYear && ($estYear < 1800 || $estYear > (int)date('Y'))) $error='Invalid established year.';
-    elseif (!validatePan($pan)) $error='Invalid PAN format. Expected: ABCDE1234F';
-    elseif (!validateAadhar($aadhar)) $error='Aadhar must be exactly 12 digits.';
-    elseif ($gstin&&!validateGstin($gstin)) $error='Invalid GSTIN format.';
-    else {
-        $chk=$pdo->prepare("SELECT id FROM college_accounts WHERE email=?");$chk->execute([$email]);
-        if($chk->fetch()) $error='An account with this email already exists.';
+        if (!$type||!$name||!$person||!$designation||!$email||!$password||!$phone||!$pan||!$aadhar) $error='All required fields must be filled.';
+        elseif (strlen($password)<8) $error='Password must be at least 8 characters.';
+        elseif (!preg_match('/[A-Z]/',$password)||!preg_match('/[a-z]/',$password)||!preg_match('/[0-9]/',$password)) $error='Password must contain uppercase, lowercase and a number.';
+        elseif (!filter_var($email,FILTER_VALIDATE_EMAIL)) $error='Invalid email address.';
+        elseif ($website && !filter_var($website, FILTER_VALIDATE_URL)) $error='Invalid website URL.';
+        elseif (!validatePhone($phone)) $error='Invalid phone number.';
+        elseif ($estYear && ($estYear < 1800 || $estYear > (int)date('Y'))) $error='Invalid established year.';
+        elseif (!validatePan($pan)) $error='Invalid PAN format. Expected: ABCDE1234F';
+        elseif (!validateAadhar($aadhar)) $error='Aadhar must be exactly 12 digits.';
+        elseif ($gstin&&!validateGstin($gstin)) $error='Invalid GSTIN format.';
         else {
-            $chkPan=$pdo->prepare("SELECT id FROM college_accounts WHERE pan_number=?");$chkPan->execute([$pan]);
-            if($chkPan->fetch()) $error='This PAN number is already registered.';
+            $chk=$pdo->prepare("SELECT id FROM college_accounts WHERE email=?");$chk->execute([$email]);
+            if($chk->fetch()) $error='An account with this email already exists.';
             else {
+                $chkPan=$pdo->prepare("SELECT id FROM college_accounts WHERE pan_number=?");$chkPan->execute([$pan]);
+                if($chkPan->fetch()) $error='This PAN number is already registered.';
+                else {
                 [$panDoc, $panErr] = uploadDoc($_FILES['pan_doc'] ?? [], 'pan', true);
                 [$aadharDoc, $aadharErr] = uploadDoc($_FILES['aadhar_doc'] ?? [], 'aadhar', true);
                 [$gstDoc, $gstErr] = uploadDoc($_FILES['gst_doc'] ?? [], 'gst', false);
@@ -86,12 +109,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $id=sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0x0fff)|0x4000,mt_rand(0,0x3fff)|0x8000,mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff));
                     $hash=password_hash($password,PASSWORD_DEFAULT);
-                  $pdo->prepare("INSERT INTO college_accounts (id,institute_type,institute_name,contact_person,designation,email,phone,website,state_id,city,established_year,affiliation_details,pan_number,aadhar_number,gst_number,pan_doc,aadhar_doc,gst_doc,affiliation_doc,password_hash,temp_password,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")->execute([$id,$type,$name,$person,$designation,$email,$phone,$website?:null,$stateId?:null,$city?:null,$estYear?:null,$affiliation?:null,$pan,$aadhar,$gstin?:null,$panDoc,$aadharDoc,$gstDoc,$affDoc,$hash,$password,'pending']);
+                  $pdo->prepare("INSERT INTO college_accounts (id,institute_type,institute_name,contact_person,designation,email,phone,website,state_id,city,established_year,affiliation_details,pan_number,aadhar_number,gst_number,pan_doc,aadhar_doc,gst_doc,affiliation_doc,password_hash,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")->execute([$id,$type,$name,$person,$designation,$email,$phone,$website?:null,$stateId?:null,$city?:null,$estYear?:null,$affiliation?:null,$pan,$aadhar,$gstin?:null,$panDoc,$aadharDoc,$gstDoc,$affDoc,$hash,'pending']);
+                    $attempts[] = time();
+                    file_put_contents($rlKey, json_encode(array_values($attempts)), LOCK_EX);
                     $success='Registration submitted! Our team will verify your documents within 24-48 hours.';
                 }
             }
         }
     }
+}
 }
 $states=$pdo->query("SELECT id,name FROM states ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -291,6 +317,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;background:#0B2
   </div>
 
   <form method="POST" enctype="multipart/form-data" id="regForm" novalidate>
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
 
     <!-- STEP 1 -->
     <div class="step-section active" id="s1">

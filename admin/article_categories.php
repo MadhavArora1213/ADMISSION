@@ -36,14 +36,61 @@ if (isset($_GET['edit_id'])) {
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s ease}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px;display:grid;grid-template-columns:340px 1fr;gap:32px;max-width:1200px;margin:0 auto;width:100%}.page-header{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-bottom:8px}.page-header h2{font-size:2rem;font-weight:800}.panel{background:#f8fafc;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);align-self:start}.form-group{margin-bottom:16px}.form-group label{display:block;font-weight:600;margin-bottom:7px;font-size:.9rem;color:var(--text-muted)}.form-control{width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:8px;font-family:inherit;font-size:.95rem;box-sizing:border-box}.msg-alert{grid-column:1/-1;padding:14px 20px;border-radius:8px;background:rgba(11,36,71,0.04);color:#0B2447;border:1px solid rgba(11,36,71,0.04)}.action-btn{width:30px;height:30px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;background:#F8FAFC;color:var(--text-dark);border:1px solid var(--border-color);text-decoration:none}.action-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}.action-btn.delete:hover{background:#0F172A;border-color:#0F172A}table{width:100%;border-collapse:collapse}th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.78rem;background:#F8FAFC}
+        body{background:var(--bg-light);margin:0}
+        .admin-layout{display:flex;min-height:100vh}
+        .sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto;z-index:100;transition:transform .3s ease}
+        .sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}
+        .sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}
+        .sidebar-nav{padding:24px 0;flex:1}
+        .sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s ease;text-decoration:none}
+        .sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}
+        .main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;min-width:0}
+        .topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}
+        .content-area{padding:32px;display:grid;grid-template-columns:340px 1fr;gap:32px;max-width:1200px;margin:0 auto;width:100%;box-sizing:border-box}
+        .page-header{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+        .page-header h2{font-size:2rem;font-weight:800}
+        .panel{background:#f8fafc;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);align-self:start}
+        .form-group{margin-bottom:16px}
+        .form-group label{display:block;font-weight:600;margin-bottom:7px;font-size:.9rem;color:var(--text-muted)}
+        .form-control{width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:8px;font-family:inherit;font-size:.95rem;box-sizing:border-box}
+        .msg-alert{grid-column:1/-1;padding:14px 20px;border-radius:8px;background:rgba(11,36,71,0.04);color:#0B2447;border:1px solid rgba(11,36,71,0.04)}
+        .action-btn{width:30px;height:30px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;background:#F8FAFC;color:var(--text-dark);border:1px solid var(--border-color);text-decoration:none}
+        .action-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+        .action-btn.delete:hover{background:#0F172A;border-color:#0F172A}
+        table{width:100%;border-collapse:collapse;font-size:.88rem}
+        th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}
+        th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}
+        tr:hover{background-color:rgba(0,0,0,.015)}
+        .mobile-menu-btn{display:none;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#0f172a;padding:4px}
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:90}
+
+        @media(max-width:768px){
+            .sidebar{transform:translateX(-100%)}
+            .sidebar.open{transform:translateX(0)}
+            .sidebar-overlay.show{display:block}
+            .main-content{margin-left:0}
+            .mobile-menu-btn{display:block}
+            .topbar{height:auto;min-height:56px;padding:10px 12px;justify-content:space-between}
+            .content-area{padding:12px;grid-template-columns:1fr;gap:16px}
+            .page-header{flex-direction:column;align-items:flex-start;gap:8px}
+            .page-header h2{font-size:1.3rem}
+            .panel{padding:14px;border-radius:12px;overflow:hidden}
+            th,td{padding:8px 10px;font-size:.82rem}
+        }
+        @media(max-width:480px){
+            .content-area{padding:8px}
+            .page-header h2{font-size:1.1rem}
+            .panel{padding:12px}
+        }
     </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="admin-layout">
     <?php include 'sidebar.php'; ?>
     <main class="main-content">
         <header class="topbar">
+            <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div class="user-profile">
                 <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
                 <a href="logout.php" style="margin-left:16px;color:#19376d;"><i class="ph ph-sign-out" style="font-size:1.5rem;"></i></a>
@@ -83,8 +130,8 @@ if (isset($_GET['edit_id'])) {
                 <h3>All Categories (<?php echo count($cats); ?>)</h3>
                 <?php if(empty($cats)): ?><p style="color:var(--text-muted);margin-top:16px;">No categories yet.</p>
                 <?php else: ?>
-                <div style="overflow-x:auto;">
-                    <table>
+                <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+                    <table style="min-width:420px;">
                         <thead><tr><th>Name</th><th>Parent</th><th>Order</th><th>Actions</th></tr></thead>
                         <tbody>
                             <?php foreach($cats as $c): ?>
@@ -106,5 +153,9 @@ if (isset($_GET['edit_id'])) {
         </div>
     </main>
 </div>
+<script>
+document.getElementById('mobile-menu-btn').addEventListener('click',function(){document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show');});
+document.getElementById('sidebar-overlay').addEventListener('click',function(){document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');});
+</script>
 </body>
 </html>

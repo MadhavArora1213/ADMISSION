@@ -48,54 +48,74 @@ if ($tab === 'bans') {
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body { background-color: var(--bg-light); }
-        .admin-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; }
-        .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-header .logo { font-size: 1.3rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
-        .sidebar-nav { padding: 24px 0; flex: 1; }
-        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; text-decoration: none;}
-        .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
-        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; }
-        .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
-        .content-area { padding: 32px; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .page-header h2 { font-size: 2rem; font-weight: 800; }
-        
-        .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;}
-        .tab-link { padding: 10px 20px; font-weight: 600; color: var(--text-muted); font-size: 0.9rem; text-decoration: none; transition: all 0.2s; border-bottom: 3px solid transparent; }
-        .tab-link:hover { color: var(--primary); }
-        .tab-link.active { color: var(--primary); border-bottom-color: var(--primary); }
-        
-        .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 24px;}
-        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: top;}
-        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #F8FAFC; }
-        tr:hover { background-color: rgba(0,0,0,0.015); }
-        
-        .badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-block; white-space: nowrap; }
-        .s-active { background:rgba(11,36,71,0.04); color:#0B2447; }
-        .s-inactive { background:#F8FAFC; color:rgba(15,23,42,0.4); }
-        
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); }
-        
-        /* Forms */
-        .form-grid { display: grid; grid-template-columns: 1fr 2fr 1fr 1fr auto; gap: 16px; padding: 20px; align-items: end; background: #fff;}
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-group label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;}
-        .form-group input, .form-group select { padding: 10px; font-size: 0.9rem; border: 1px solid var(--border-color); border-radius: 8px; }
-        .btn-primary { padding: 10px 20px; font-size: 0.9rem; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;}
-        .btn-primary:hover { opacity: 0.9; }
-        
-        .btn-action { padding: 4px 8px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; color: var(--text-dark); text-decoration: none;}
-        .btn-action:hover { background: #F8FAFC; }
+        body{background:var(--bg-light);margin:0}
+        .admin-layout{display:flex;min-height:100vh}
+        .sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto;z-index:100;transition:transform .3s ease}
+        .sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}
+        .sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}
+        .sidebar-nav{padding:24px 0;flex:1}
+        .sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s;text-decoration:none}
+        .sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}
+        .main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;min-width:0;padding-bottom:60px}
+        .topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}
+        .content-area{padding:32px}
+        .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:12px;flex-wrap:wrap}
+        .page-header h2{font-size:2rem;font-weight:800}
+        .panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:24px}
+        .panel-body{margin-top:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+        .filter-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border-color);padding-bottom:10px}
+        .tab-link{padding:10px 20px;font-weight:600;color:var(--text-muted);font-size:.9rem;text-decoration:none;transition:all .2s;border-bottom:3px solid transparent;white-space:nowrap}
+        .tab-link:hover{color:var(--primary)}
+        .tab-link.active{color:var(--primary);border-bottom-color:var(--primary)}
+        .form-grid{display:grid;grid-template-columns:1fr 2fr 1fr 1fr auto;gap:16px;padding:20px;align-items:end;background:#fff}
+        .form-group{display:flex;flex-direction:column;gap:6px}
+        .form-group label{font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase}
+        .form-group input,.form-group select{padding:10px;font-size:.9rem;border:1px solid var(--border-color);border-radius:8px;box-sizing:border-box;width:100%}
+        .btn-primary{padding:10px 20px;font-size:.9rem;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;white-space:nowrap}
+        .btn-primary:hover{opacity:.9}
+        .btn-action{padding:4px 8px;font-size:.8rem;border-radius:4px;border:1px solid var(--border-color);background:#fff;cursor:pointer;color:var(--text-dark);text-decoration:none}
+        .btn-action:hover{background:#F8FAFC}
+        table{width:100%;border-collapse:collapse;font-size:.88rem}
+        th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--border-color);vertical-align:top}
+        th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;letter-spacing:.05em;background:#f8fafc}
+        tr:hover{background:rgba(0,0,0,.015)}
+        .badge{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700;display:inline-block;white-space:nowrap}
+        .s-active{background:rgba(11,36,71,.04);color:#0B2447}
+        .s-inactive{background:#F8FAFC;color:rgba(15,23,42,.4)}
+        .msg-alert{padding:14px 20px;border-radius:8px;background:rgba(11,36,71,.04);color:#0B2447;margin-bottom:20px;border:1px solid rgba(11,36,71,.04)}
+
+        .mobile-menu-btn{display:none;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#0f172a;padding:4px}
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:90}
+
+        @media(max-width:768px){
+            .sidebar{transform:translateX(-100%)}
+            .sidebar.open{transform:translateX(0)}
+            .sidebar-overlay.show{display:block}
+            .main-content{margin-left:0}
+            .mobile-menu-btn{display:block}
+            .topbar{height:auto;min-height:56px;padding:10px 12px;justify-content:space-between}
+            .content-area{padding:12px}
+            .page-header{flex-direction:column;align-items:flex-start}
+            .page-header h2{font-size:1.3rem}
+            .filter-bar{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
+            .form-grid{grid-template-columns:1fr;gap:10px;padding:14px}
+            .panel{padding:0;border-radius:12px}
+            th,td{padding:8px 10px;font-size:.8rem}
+        }
+        @media(max-width:480px){
+            .content-area{padding:8px}
+            .page-header h2{font-size:1.1rem}
+            th,td{padding:6px 8px;font-size:.75rem}
+        }
     </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="admin-layout">
     <?php include 'sidebar.php'; ?>
     <main class="main-content">
         <header class="topbar">
+            <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div class="user-profile">
                 <span><?php echo htmlspecialchars($_SESSION['admin_username'] ?? 'Admin'); ?></span>
             </div>
@@ -154,8 +174,8 @@ if ($tab === 'bans') {
                     <?php if(empty($bans)): ?>
                         <p style="color:var(--text-muted); text-align:center; padding:40px;">No bans found.</p>
                     <?php else: ?>
-                    <div style="overflow-x:auto;">
-                        <table>
+                    <div class="panel-body">
+                        <table style="min-width:550px;">
                             <thead>
                                 <tr>
                                     <th>Entity</th>
@@ -210,8 +230,8 @@ if ($tab === 'bans') {
                     <?php if(empty($logs)): ?>
                         <p style="color:var(--text-muted); text-align:center; padding:40px;">No spam logs found.</p>
                     <?php else: ?>
-                    <div style="overflow-x:auto;">
-                        <table>
+                    <div class="panel-body">
+                        <table style="min-width:520px;">
                             <thead>
                                 <tr>
                                     <th>Timestamp</th>
@@ -257,5 +277,9 @@ if ($tab === 'bans') {
         </div>
     </main>
 </div>
+<script>
+document.getElementById('mobile-menu-btn').addEventListener('click',function(){document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show');});
+document.getElementById('sidebar-overlay').addEventListener('click',function(){document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');});
+</script>
 </body>
 </html>

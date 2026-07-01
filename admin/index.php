@@ -1,28 +1,68 @@
 <?php
-session_start();
+require_once 'security.php';
+security_headers();
+session_timeout_check();
+
+if (isset($_SESSION['admin_id'])) {
+    header('Location: dashboard.php');
+    exit;
+}
+
 require_once 'db.php';
 
 $error = '';
+$ip = $_SERVER['REMOTE_ADDR'];
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = trim($_POST['username']);
-    $password = trim($_POST['password']);
-    
-    if (empty($username) || empty($password)) {
-        $error = 'Please enter both username/email and password.';
+// Check if IP is auto-blocked
+check_auto_block($ip);
+if (is_ip_blocked()) {
+    $error = 'Your IP has been temporarily blocked due to too many failed attempts. Try again later.';
+} else {
+    // Check rate limit
+    $rate = rate_limit_check_failed_login($ip);
+    if ($rate) {
+        $error = 'Too many failed login attempts. Please wait 15 minutes before trying again.';
+    }
+}
+
+// Handle login
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($error)) {
+    if (!csrf_verify()) {
+        $error = 'Invalid security token. Please refresh and try again.';
     } else {
-        // We now use the 'users' table which handles RBAC. Admin users must have a role_id or be super_admin.
-        $stmt = $pdo->prepare('SELECT id, full_name as username, password_hash as password FROM users WHERE (email = :username OR phone = :username) AND (role_id IS NOT NULL OR is_super_admin = TRUE) AND status = "active"');
-        $stmt->execute(['username' => $username]);
-        $user = $stmt->fetch();
-        
-        if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['admin_id'] = $user['id'];
-            $_SESSION['admin_username'] = $user['username'];
-            header('Location: dashboard.php');
-            exit;
+        $username = trim($_POST['username'] ?? '');
+        $password = trim($_POST['password'] ?? '');
+
+        if (empty($username) || empty($password)) {
+            $error = 'Please enter both username/email and password.';
         } else {
-            $error = 'Invalid credentials or you do not have admin access.';
+            $stmt = $pdo->prepare('SELECT id, full_name as username, password_hash as password FROM users WHERE (email = :email OR phone = :phone) AND (role_id IS NOT NULL OR is_super_admin = TRUE) AND status = "active"');
+            $stmt->execute(['email' => $username, 'phone' => $username]);
+            $user = $stmt->fetch();
+
+            if ($user && password_verify($password, $user['password'])) {
+                // Successful login
+                session_regenerate_id(true);
+                $_SESSION['admin_id'] = $user['id'];
+                $_SESSION['admin_username'] = $user['username'];
+                $_SESSION['last_activity'] = time();
+                $_SESSION['login_ip'] = $ip;
+                $_SESSION['login_time'] = time();
+
+                log_successful_login($user['id'], $ip);
+                header('Location: dashboard.php');
+                exit;
+            } else {
+                // Failed login
+                $result = rate_limit_failed_login($ip);
+                log_failed_attempt($username, $ip);
+
+                if ($result['blocked']) {
+                    $error = 'Too many failed attempts. Your IP has been blocked for 15 minutes.';
+                } else {
+                    $error = 'Invalid credentials or you do not have admin access. ' . $result['remaining'] . ' attempts remaining.';
+                }
+            }
         }
     }
 }
@@ -91,6 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-family: 'Inter', sans-serif;
             font-size: 1rem;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
         .input-group input:focus {
             outline: none;
@@ -104,8 +145,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin-top: 8px;
         }
         .error-message {
-            background: #f8fafc;
-            color: #19376d;
+            background: #fef2f2;
+            color: #991b1b;
             padding: 12px 16px;
             border-radius: 8px;
             margin-bottom: 24px;
@@ -113,6 +154,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             display: flex;
             align-items: center;
             gap: 8px;
+            border: 1px solid #fecaca;
+        }
+        .login-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
     </style>
 </head>
@@ -135,11 +183,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <?php endif; ?>
 
         <form method="POST" action="index.php">
+            <?php echo csrf_field(); ?>
             <div class="form-group">
                 <label for="username">Username</label>
                 <div class="input-group">
                     <i class="ph ph-user"></i>
-                    <input type="text" id="username" name="username" placeholder="Enter your username" required autofocus>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required autofocus autocomplete="username">
                 </div>
             </div>
 
@@ -147,12 +196,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <label for="password">Password</label>
                 <div class="input-group">
                     <i class="ph ph-lock-key"></i>
-                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
                 </div>
             </div>
 
             <button type="submit" class="btn btn-primary btn-block">Login to Dashboard</button>
         </form>
+
+        <div class="login-footer">
+            Secured with rate limiting and session protection
+        </div>
     </div>
 
 </body>

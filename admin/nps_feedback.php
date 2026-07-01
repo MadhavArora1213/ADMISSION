@@ -100,14 +100,14 @@ try {
     <style>
         body { background-color: #F8FAFC; margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
         .admin-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 50; }
+        .sidebar { width: 260px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 50; transition: transform 0.3s ease; }
         .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .sidebar-header .logo { font-size: 1.2rem; color: #f8fafc; display:flex; align-items:center; gap:8px; font-weight:700; }
         .sidebar-nav { padding: 16px 0; flex: 1; }
         .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: rgba(255,255,255,0.6); transition: all 0.2s; font-size:0.95rem; text-decoration:none; }
         .sidebar-nav a:hover, .sidebar-nav a.active { color: #fff; background: rgba(255,255,255,0.05); border-left: 3px solid #19376D; }
         .sidebar-nav a i { font-size: 1.2rem; }
-        .main-content { flex: 1; margin-left: 260px; display: flex; flex-direction: column; }
+        .main-content { flex: 1; margin-left: 260px; display: flex; flex-direction: column; min-width: 0; }
         .topbar { height: 64px; background: #fff; border-bottom: 1px solid rgba(15,23,42,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: sticky; top: 0; z-index: 40; }
         .content-area { padding: 24px; display: flex; flex-direction: column; gap: 24px; }
         .page-title { font-size: 1.4rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px; }
@@ -127,8 +127,9 @@ try {
 
         .filter-bar { background: #fff; border: 1px solid rgba(15,23,42,0.08); border-radius: 12px; padding: 16px 20px; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
         .filter-bar label { font-size: 0.8rem; font-weight: 600; color: rgba(15,23,42,0.5); display: block; margin-bottom: 4px; }
-        .filter-bar input, .filter-bar select { padding: 8px 12px; border: 1.5px solid rgba(15,23,42,0.12); border-radius: 8px; font-size: 0.85rem; font-family: inherit; }
-        .filter-bar button { padding: 8px 20px; border-radius: 8px; border: none; background: #0f172a; color: #fff; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+        .filter-bar input, .filter-bar select { padding: 8px 12px; border: 1.5px solid rgba(15,23,42,0.12); border-radius: 8px; font-size: 0.85rem; font-family: inherit; box-sizing: border-box; }
+        .filter-bar button { padding: 8px 20px; border-radius: 8px; border: none; background: #0f172a; color: #fff; font-weight: 700; font-size: 0.85rem; cursor: pointer; white-space: nowrap; }
+        .filter-clear { padding: 8px 16px; border-radius: 8px; background: rgba(15,23,42,0.06); color: #0f172a; text-decoration: none; font-size: .85rem; font-weight: 600; white-space: nowrap; }
 
         .score-dist { display: flex; gap: 4px; align-items: flex-end; height: 120px; margin-top: 16px; }
         .score-bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
@@ -139,29 +140,67 @@ try {
         .bar-amber { background: #D97706; }
         .bar-red { background: #DC2626; }
 
+        .fb-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .fb-table { width: 100%; border-collapse: collapse; }
-        .fb-table th { padding: 10px 16px; font-size: 0.78rem; color: rgba(15,23,42,0.45); font-weight: 600; border-bottom: 2px solid rgba(15,23,42,0.08); text-align: left; }
+        .fb-table th { padding: 10px 16px; font-size: 0.78rem; color: rgba(15,23,42,0.45); font-weight: 600; border-bottom: 2px solid rgba(15,23,42,0.08); text-align: left; white-space: nowrap; }
         .fb-table td { padding: 12px 16px; font-size: 0.88rem; border-bottom: 1px solid #F8FAFC; }
         .fb-score { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; font-weight: 800; font-size: 0.9rem; }
         .fb-promoter { background: rgba(5,150,105,0.1); color: #059669; }
         .fb-passive { background: rgba(217,119,6,0.1); color: #D97706; }
         .fb-detractor { background: rgba(220,38,38,0.1); color: #DC2626; }
 
-        .pager { display: flex; gap: 6px; justify-content: center; margin-top: 16px; }
+        .pager { display: flex; gap: 6px; justify-content: center; margin: 16px; flex-wrap: wrap; }
         .pager a { padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(15,23,42,0.1); text-decoration: none; color: #0f172a; font-size: 0.85rem; font-weight: 600; }
         .pager a.active { background: #0f172a; color: #fff; border-color: #0f172a; }
 
-        .legend { display: flex; gap: 16px; font-size: 0.8rem; color: rgba(15,23,42,0.5); margin-top: 8px; }
+        .legend { display: flex; gap: 16px; font-size: 0.8rem; color: rgba(15,23,42,0.5); margin-top: 8px; flex-wrap: wrap; }
         .legend span { display: flex; align-items: center; gap: 4px; }
         .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #0f172a; padding: 4px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+
+        .card-box { background: #fff; border: 1px solid rgba(15,23,42,0.08); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card-box-header { padding: 16px 20px; border-bottom: 1px solid rgba(15,23,42,0.08); background: #f8fafc; }
+        .card-box-body { overflow: hidden; }
+
+        @media(max-width:768px){
+            .sidebar { transform: translateX(-100%); z-index: 100; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-left: 0; }
+            .mobile-menu-btn { display: block; }
+            .topbar { height: auto; min-height: 56px; padding: 10px 12px; }
+            .content-area { padding: 12px; gap: 16px; }
+            .page-title { font-size: 1.1rem; }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .kpi-card { padding: 14px; }
+            .kpi-value { font-size: 1.3rem; }
+            .nps-giant { font-size: 2.5rem; }
+            .filter-bar { flex-direction: column; align-items: stretch; gap: 10px; padding: 14px; }
+            .filter-bar > div { width: 100%; }
+            .filter-bar input, .filter-bar select { width: 100%; }
+            .filter-bar-actions { display: flex; gap: 8px; }
+            .filter-bar button, .filter-clear { flex: 1; text-align: center; }
+            .card-box { padding: 16px; border-radius: 10px; }
+            .card-box-header { padding: 12px 16px; flex-direction: column; gap: 4px; }
+            .legend { gap: 10px; }
+            .score-dist { height: 90px; }
+            .fb-table th, .fb-table td { padding: 8px 10px; font-size: 0.8rem; }
+        }
+        @media(max-width:480px){
+            .kpi-grid { grid-template-columns: 1fr; }
+            .topbar { padding: 8px 12px; }
+        }
     </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
     <div class="admin-layout">
         <?php include 'sidebar.php'; ?>
         <main class="main-content">
             <header class="topbar">
-
+                <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
                 <div style="font-weight:700;color:#0f172a;">NPS Feedback Dashboard</div>
                 <div></div>
             </header>
@@ -181,14 +220,16 @@ try {
                     </div>
                     <div>
                         <label>Min Score</label>
-                        <input type="number" name="score_min" min="1" max="10" value="<?= htmlspecialchars((string)$scoreMin) ?>" style="width:70px">
+                        <input type="number" name="score_min" min="1" max="10" value="<?= htmlspecialchars((string)$scoreMin) ?>">
                     </div>
                     <div>
                         <label>Max Score</label>
-                        <input type="number" name="score_max" min="1" max="10" value="<?= htmlspecialchars((string)$scoreMax) ?>" style="width:70px">
+                        <input type="number" name="score_max" min="1" max="10" value="<?= htmlspecialchars((string)$scoreMax) ?>">
                     </div>
-                    <button type="submit"><i class="ph ph-funnel"></i> Filter</button>
-                    <a href="nps_feedback.php" style="padding:8px 16px;border-radius:8px;background:rgba(15,23,42,0.06);color:#0f172a;text-decoration:none;font-size:.85rem;font-weight:600;">Clear</a>
+                    <div class="filter-bar-actions">
+                        <button type="submit"><i class="ph ph-funnel"></i> Filter</button>
+                        <a href="nps_feedback.php" class="filter-clear">Clear</a>
+                    </div>
                 </form>
 
                 <!-- KPI Cards -->
@@ -230,7 +271,7 @@ try {
                 </div>
 
                 <!-- Score Distribution -->
-                <div style="background:#fff;border:1px solid rgba(15,23,42,0.08);border-radius:12px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                <div class="card-box">
                     <div style="font-weight:700;font-size:1rem;color:#0f172a;margin-bottom:4px;">Score Distribution</div>
                     <div class="legend">
                         <span><span class="legend-dot" style="background:#059669"></span> Promoter (9-10)</span>
@@ -254,17 +295,19 @@ try {
                 </div>
 
                 <!-- Feedback Table -->
-                <div style="background:#fff;border:1px solid rgba(15,23,42,0.08);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);overflow:hidden;">
-                    <div style="padding:16px 20px;border-bottom:1px solid rgba(15,23,42,0.08);background:#f8fafc;">
+                <div class="card-box">
+                    <div class="card-box-header" style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-weight:700;font-size:1rem;color:#0f172a;">All Feedback</span>
-                        <span style="font-size:.82rem;color:rgba(15,23,42,0.45);margin-left:8px;">Showing <?= number_format($offset+1) ?>–<?= min($offset+$perPage, $totalCount) ?> of <?= number_format($totalCount) ?></span>
+                        <span style="font-size:.82rem;color:rgba(15,23,42,0.45);">Showing <?= number_format($offset+1) ?>–<?= min($offset+$perPage, $totalCount) ?> of <?= number_format($totalCount) ?></span>
                     </div>
+                    <div class="card-box-body">
                     <?php if (empty($feedback)): ?>
                     <div style="padding:48px;text-align:center;color:rgba(15,23,42,0.3);">
                         <i class="ph ph-smiley" style="font-size:3rem;display:block;margin-bottom:12px;"></i>
                         <p>No feedback submissions yet.</p>
                     </div>
                     <?php else: ?>
+                    <div class="fb-table-wrap">
                     <table class="fb-table">
                         <thead>
                             <tr>
@@ -293,6 +336,8 @@ try {
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                    </div>
+                    </div>
 
                     <?php if ($totalPages > 1): ?>
                     <div class="pager">
@@ -312,5 +357,9 @@ try {
             </div>
         </main>
     </div>
+<script>
+document.getElementById('mobile-menu-btn').addEventListener('click',function(){document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show');});
+document.getElementById('sidebar-overlay').addEventListener('click',function(){document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');});
+</script>
 </body>
 </html>

@@ -140,13 +140,46 @@ $stat_trial = $pdo->query("SELECT COUNT(*) FROM partners WHERE status = 'trial'"
         .form-group.full { grid-column: 1 / -1; }
         .form-group label { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;}
         .form-group input, .form-group select { padding: 10px; font-size: 0.9rem; border: 1px solid var(--border-color); border-radius: 8px; background: #fff;}
+
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #0f172a; padding: 4px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+
+        @media(max-width:768px){
+            .sidebar{transform:translateX(-100%);z-index:100;transition:transform 0.3s ease}
+            .sidebar.open{transform:translateX(0)}
+            .sidebar-overlay.show{display:block}
+            .main-content{margin-left:0}
+            .mobile-menu-btn{display:block}
+            .topbar{height:auto;min-height:56px;padding:10px 12px;justify-content:space-between;flex-wrap:wrap}
+            .content-area{padding:12px}
+            .page-header{flex-direction:column;align-items:flex-start;gap:10px}
+            .page-header h2{font-size:1.3rem}
+            .page-header p{font-size:0.82rem}
+            .btn-primary{width:100%;justify-content:center}
+            .search-box{width:100%}
+            table{min-width:600px}
+            .modal-content{padding:20px;width:95%}
+            .form-grid{grid-template-columns:1fr}
+            .form-group.full{grid-column:auto}
+            .modal-footer-actions{flex-direction:column;gap:8px}
+            .modal-footer-actions button{width:100%;justify-content:center}
+            .msg-alert{font-size:0.85rem;padding:10px 14px}
+            .stat-cards-row{flex-direction:column;gap:10px}
+            .stat-cards-row>div{width:100%}
+        }
+
+        @media(max-width:480px){
+            .page-header h2{font-size:1.1rem}
+        }
     </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="admin-layout">
     <?php include 'sidebar.php'; ?>
     <main class="main-content">
         <header class="topbar">
+            <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div class="user-profile">
                 <span><?php echo htmlspecialchars($_SESSION['admin_username'] ?? 'Admin'); ?></span>
             </div>
@@ -164,8 +197,8 @@ $stat_trial = $pdo->query("SELECT COUNT(*) FROM partners WHERE status = 'trial'"
             <div class="msg-alert"><i class="ph ph-info"></i> <?php echo htmlspecialchars($_GET['msg']); ?></div>
             <?php endif; ?>
 
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center;">
-                <div style="display:flex; gap:15px;">
+            <div class="stat-cards-row" style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center; gap:12px; flex-wrap:wrap;">
+                <div style="display:flex; gap:15px; flex-wrap:wrap;">
                     <div style="background:#fff; border:1px solid var(--border-color); padding:10px 20px; border-radius:8px;">
                         <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Active Partners</div>
                         <div style="font-size:1.5rem; font-weight:800; color:#0B2447;"><?php echo number_format($stat_active); ?></div>
@@ -306,7 +339,7 @@ $stat_trial = $pdo->query("SELECT COUNT(*) FROM partners WHERE status = 'trial'"
                 </div>
             </div>
             
-            <div style="margin-top:24px; text-align:right; border-top:1px solid var(--border-color); padding-top:15px;">
+            <div class="modal-footer-actions" style="margin-top:24px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-color); padding-top:15px;">
                 <button type="button" class="btn-action" style="padding:10px 20px;" onclick="closeModal()">Cancel</button>
                 <button type="submit" class="btn-primary" style="margin-left:10px;">Save Partner</button>
             </div>
@@ -354,6 +387,15 @@ function editPartner(p) {
 // Enable the select on submit if disabled
 document.querySelector('#partnerModal form').addEventListener('submit', function() {
     document.getElementById('partner_college_id').disabled = false;
+});
+
+document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('show');
+});
+document.getElementById('sidebar-overlay').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.remove('open');
+    this.classList.remove('show');
 });
 </script>
 </body>

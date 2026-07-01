@@ -122,13 +122,19 @@ $total = array_sum($counts);
         .action-form select, .action-form input { padding: 6px; font-size: 0.85rem; border: 1px solid var(--border-color); border-radius: 4px; }
         .btn-small { padding: 6px 12px; font-size: 0.85rem; background: var(--primary); color: #fff; border: none; border-radius: 4px; cursor: pointer; }
         .btn-small:hover { opacity: 0.9; }
+        .mobile-menu-btn{display:none;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#0f172a;padding:4px}
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:90}
+        @media(max-width:768px){.sidebar{transform:translateX(-100%);z-index:100;transition:transform .3s}.sidebar.open{transform:translateX(0)}.sidebar-overlay.show{display:block}.main-content{margin-left:0}.mobile-menu-btn{display:block}.topbar{height:auto;min-height:56px;padding:10px 12px;justify-content:space-between}.content-area{padding:12px}.page-header{flex-direction:column;align-items:flex-start;gap:8px}.page-header h2{font-size:1.3rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.filter-bar{gap:4px}.filter-bar form{width:100%}.search-box{width:100%}.search-box input{width:100%}table{min-width:600px}}
+        @media(max-width:480px){.stats-grid{grid-template-columns:1fr}}
     </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="admin-layout">
     <?php include 'sidebar.php'; ?>
     <main class="main-content">
         <header class="topbar">
+            <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div class="user-profile">
                 <span><?php echo htmlspecialchars($_SESSION['admin_username'] ?? 'Admin'); ?></span>
             </div>
@@ -261,5 +267,9 @@ $total = array_sum($counts);
         </div>
     </main>
 </div>
+<script>
+document.getElementById('mobile-menu-btn').addEventListener('click',function(){document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show');});
+document.getElementById('sidebar-overlay').addEventListener('click',function(){document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');});
+</script>
 </body>
 </html>

@@ -25,14 +25,68 @@ $logs = $pdo->query("SELECT l.*, c.campaign_name
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h2{font-size:2rem;font-weight:800}.panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}.panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}tr:hover{background:rgba(0,0,0,.015)}.badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700}.sub-links{display:flex;gap:8px;margin-bottom:20px}.sub-link{font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .2s}.sub-link:hover,.sub-link.active{background:rgba(0,0,0,.05);color:var(--primary)}.pagination{display:flex;gap:5px;margin-top:20px;justify-content:center}.pagination a{padding:6px 12px;border:1px solid var(--border-color);border-radius:6px;text-decoration:none;color:var(--text-color)}.pagination a.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+        body{background:var(--bg-light);margin:0}
+        .admin-layout{display:flex;min-height:100vh}
+        .sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto;z-index:100;transition:transform .3s ease}
+        .sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}
+        .sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}
+        .sidebar-nav{padding:24px 0;flex:1}
+        .sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s;text-decoration:none}
+        .sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}
+        .main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;min-width:0;padding-bottom:60px}
+        .topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}
+        .content-area{padding:32px}
+        .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:12px;flex-wrap:wrap}
+        .page-header h2{font-size:2rem;font-weight:800}
+        .panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px;overflow:hidden}
+        .panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}
+        .panel-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+        .panel-body{margin-top:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+        table{width:100%;border-collapse:collapse;font-size:.88rem}
+        th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-color)}
+        th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;background:#f8fafc}
+        tr:hover{background:rgba(0,0,0,.015)}
+        .badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700;display:inline-block;white-space:nowrap}
+        .sub-links{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+        .sub-link{font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .2s}
+        .sub-link:hover,.sub-link.active{background:var(--primary);color:#fff}
+        .pagination{display:flex;gap:6px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+        .pagination a{padding:6px 12px;border-radius:6px;border:1px solid var(--border-color);text-decoration:none;color:var(--text-dark);font-size:.85rem;font-weight:600}
+        .pagination a.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+        .mobile-menu-btn{display:none;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#0f172a;padding:4px}
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:90}
+
+        @media(max-width:768px){
+            .sidebar{transform:translateX(-100%)}
+            .sidebar.open{transform:translateX(0)}
+            .sidebar-overlay.show{display:block}
+            .main-content{margin-left:0}
+            .mobile-menu-btn{display:block}
+            .topbar{height:auto;min-height:56px;padding:10px 12px;justify-content:space-between}
+            .content-area{padding:12px}
+            .page-header{flex-direction:column;align-items:flex-start}
+            .page-header h2{font-size:1.3rem}
+            .panel{padding:14px;border-radius:12px}
+            .panel-header{flex-direction:column;align-items:flex-start}
+            .panel h3{font-size:1rem}
+            th,td{padding:8px 10px;font-size:.8rem}
+        }
+        @media(max-width:480px){
+            .content-area{padding:8px}
+            .page-header h2{font-size:1.1rem}
+            .panel{padding:12px}
+            th,td{padding:6px 8px;font-size:.75rem}
+        }
     </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="admin-layout">
     <?php include 'sidebar.php'; ?>
     <main class="main-content">
         <header class="topbar">
+            <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div class="user-profile">
                 <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
                 <a href="logout.php" style="margin-left:16px;color:#19376d;"><i class="ph ph-sign-out" style="font-size:1.5rem;"></i></a>
@@ -55,11 +109,11 @@ $logs = $pdo->query("SELECT l.*, c.campaign_name
             </div>
 
             <div class="panel">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3 style="border:none; margin:0;">All Logs (<?php echo number_format($total_logs); ?> total)</h3>
+                <div class="panel-header">
+                    <h3>All Logs (<?php echo number_format($total_logs); ?> total)</h3>
                 </div>
-                <div style="margin-top:20px; overflow-x:auto;">
-                    <table>
+                <div class="panel-body">
+                    <table style="min-width:580px;">
                         <thead><tr><th>User ID</th><th>Campaign</th><th>Channel</th><th>Status</th><th>Error Message</th><th>Time</th></tr></thead>
                         <tbody>
                             <?php foreach($logs as $l): ?>
@@ -108,5 +162,9 @@ $logs = $pdo->query("SELECT l.*, c.campaign_name
         </div>
     </main>
 </div>
+<script>
+document.getElementById('mobile-menu-btn').addEventListener('click',function(){document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show');});
+document.getElementById('sidebar-overlay').addEventListener('click',function(){document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');});
+</script>
 </body>
 </html>

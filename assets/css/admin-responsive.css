@@ -1,4 +1,4 @@
-html, body { overflow-x: auto !important; }
+html, body { overflow-x: hidden !important; }
 .main-content { min-width: 0; }
 .content-area { box-sizing: border-box; }
 .mobile-menu-btn { display: none; }
@@ -18,7 +18,7 @@ html, body { overflow-x: auto !important; }
     .sidebar-overlay.show { display: block; }
     .main-content { margin-left: 0; }
     .mobile-menu-btn { display: block; }
-    .topbar { height: 56px; padding: 0 12px; justify-content: space-between; }
+    .topbar { height: auto; min-height: 56px; padding: 10px 12px; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
     .content-area { padding: 10px; }
     .page-header h2 { font-size: 1.2rem; gap: 8px; }
     .panel { padding: 14px; }

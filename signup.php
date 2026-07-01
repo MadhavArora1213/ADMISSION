@@ -9,16 +9,55 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 1. Rate Limiting
-if (!isset($_SESSION['rate_limit'])) {
-    $_SESSION['rate_limit'] = [
-        'attempts' => 0,
-        'first_attempt' => time()
-    ];
+// Security headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+
+$ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+
+// 1. IP-based rate limiting (file-based)
+function rl_key(string $action, string $identifier): string {
+    return sys_get_temp_dir() . '/admission_rl_' . md5($action . '_' . $identifier);
 }
-if (time() - $_SESSION['rate_limit']['first_attempt'] > 60) {
-    $_SESSION['rate_limit']['attempts'] = 0;
-    $_SESSION['rate_limit']['first_attempt'] = time();
+
+function rl_check(string $action, string $id, int $max, int $window): array {
+    $key = rl_key($action, $id);
+    $now = time();
+    $attempts = [];
+    if (file_exists($key)) {
+        $data = json_decode(file_get_contents($key), true);
+        if (is_array($data)) {
+            $attempts = array_filter($data, fn($ts) => ($now - $ts) < $window);
+        }
+    }
+    $count = count($attempts);
+    $blocked = $count >= $max;
+    return ['blocked' => $blocked, 'remaining' => max(0, $max - $count)];
+}
+
+function rl_record(string $action, string $id, int $window): void {
+    $key = rl_key($action, $id);
+    $now = time();
+    $attempts = [];
+    if (file_exists($key)) {
+        $data = json_decode(file_get_contents($key), true);
+        if (is_array($data)) {
+            $attempts = array_filter($data, fn($ts) => ($now - $ts) < $window);
+        }
+    }
+    $attempts[] = $now;
+    file_put_contents($key, json_encode(array_values($attempts)), LOCK_EX);
+}
+
+// Check rate limit
+$rate = rl_check('signup_ip', $ip, 10, 3600);
+if ($rate['blocked']) {
+    $rateLimited = true;
+} else {
+    $rateLimited = false;
 }
 
 // 2. Generate CSRF Token
@@ -34,6 +73,13 @@ require_once __DIR__ . '/includes/phone_email_config.php';
 if (isset($_GET['ajax'])) {
     header('Content-Type: application/json');
     $action = $_GET['ajax'];
+    
+    // Check IP rate limit before processing
+    $rate = rl_check('signup_ip', $ip, 10, 3600);
+    if ($rate['blocked']) {
+        echo json_encode(['success' => false, 'error' => 'Too many attempts. Please try again later.']);
+        exit;
+    }
     
     // Validate CSRF token for AJAX requests
     $post_token = $_POST['csrf_token'] ?? '';
@@ -87,6 +133,7 @@ if (isset($_GET['ajax'])) {
             $stmtCheck = $pdo->prepare("SELECT id FROM users WHERE email = ? OR phone = ? LIMIT 1");
             $stmtCheck->execute([$email, $verified_phone]);
             if ($stmtCheck->fetch()) {
+                rl_record('signup_ip', $ip, 3600);
                 echo json_encode(['success' => false, 'error' => 'An account with this email or phone number already exists.']);
                 exit;
             }

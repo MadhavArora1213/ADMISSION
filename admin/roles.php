@@ -85,55 +85,78 @@ $roles = $stmt->fetchAll();
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body { background-color: var(--bg-light); }
-        .admin-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 280px; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; }
-        .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-header .logo { font-size: 1.3rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
-        .sidebar-nav { padding: 24px 0; flex: 1; }
-        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 16px 24px; color: #f8fafc; transition: all 0.3s ease; text-decoration: none;}
-        .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary); }
-        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; }
-        .topbar { height: 80px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
-        .content-area { padding: 32px; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .page-header h2 { font-size: 2rem; font-weight: 800; }
-        
-        .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 24px;}
-        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: top;}
-        th { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; background: #F8FAFC; }
-        tr:hover { background-color: rgba(0,0,0,0.015); }
-        
-        .msg-alert { padding: 14px 20px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 20px; border: 1px solid rgba(11,36,71,0.04); }
-        
-        .btn-primary { padding: 10px 20px; font-size: 0.9rem; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;}
-        .btn-primary:hover { opacity: 0.9; }
-        .btn-action { padding: 6px 10px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; color: var(--text-dark); text-decoration: none;}
-        .btn-action:hover { background: #F8FAFC; }
-        .btn-danger:hover { background: rgba(15,23,42,0.06); color: #0F172A; border-color: rgba(15,23,42,0.06); }
-        
-        /* Modal */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: #fff; padding: 30px; border-radius: 12px; width: 600px; max-width: 90%; max-height: 90vh; overflow-y: auto;}
-        .modal-header { font-size: 1.25rem; font-weight: 800; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
-        
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;}
-        .form-group input[type="text"] { width: 100%; padding: 10px; font-size: 0.9rem; border: 1px solid var(--border-color); border-radius: 8px; }
-        
-        .perm-grid { display: grid; grid-template-columns: 1fr auto; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px;}
-        .perm-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--border-color);}
-        .perm-checks { display: flex; gap: 15px; }
-        .perm-checks label { display: flex; align-items: center; gap: 4px; font-size: 0.85rem; text-transform: capitalize; font-weight: 400; color: var(--text-dark);}
+        body{background:var(--bg-light);margin:0}
+        .admin-layout{display:flex;min-height:100vh}
+        .sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto;z-index:100;transition:transform .3s ease}
+        .sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}
+        .sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}
+        .sidebar-nav{padding:24px 0;flex:1}
+        .sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s;text-decoration:none}
+        .sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}
+        .main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;min-width:0;padding-bottom:60px}
+        .topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}
+        .content-area{padding:32px}
+        .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:12px;flex-wrap:wrap}
+        .page-header h2{font-size:2rem;font-weight:800}
+        .panel{background:#f8fafc;border-radius:16px;border:1px solid var(--border-color);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:24px}
+        .panel-body{margin-top:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+        table{width:100%;border-collapse:collapse;font-size:.88rem}
+        th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--border-color);vertical-align:top}
+        th{font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.75rem;letter-spacing:.05em;background:#f8fafc}
+        tr:hover{background:rgba(0,0,0,.015)}
+        .msg-alert{padding:14px 20px;border-radius:8px;background:rgba(11,36,71,.04);color:#0B2447;margin-bottom:20px;border:1px solid rgba(11,36,71,.04)}
+        .btn-primary{padding:10px 20px;font-size:.9rem;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+        .btn-primary:hover{opacity:.9}
+        .btn-action{padding:6px 10px;font-size:.8rem;border-radius:4px;border:1px solid var(--border-color);background:#fff;cursor:pointer;color:var(--text-dark);text-decoration:none;white-space:nowrap}
+        .btn-action:hover{background:#F8FAFC}
+        .btn-danger:hover{background:rgba(15,23,42,.06);color:#0F172A;border-color:rgba(15,23,42,.06)}
+        .modal{display:none;position:fixed;z-index:100;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,.5);align-items:center;justify-content:center}
+        .modal.active{display:flex}
+        .modal-content{background:#fff;padding:30px;border-radius:12px;width:600px;max-width:90%;max-height:90vh;overflow-y:auto;box-sizing:border-box}
+        .modal-header{font-size:1.25rem;font-weight:800;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+        .form-group{margin-bottom:16px}
+        .form-group label{display:block;font-size:.85rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase}
+        .form-group input[type="text"]{width:100%;padding:10px;font-size:.9rem;border:1px solid var(--border-color);border-radius:8px;box-sizing:border-box}
+        .perm-grid{display:grid;grid-template-columns:1fr auto;gap:10px;border-top:1px solid var(--border-color);padding-top:10px;margin-top:10px}
+        .perm-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed var(--border-color);flex-wrap:wrap;gap:8px}
+        .perm-checks{display:flex;gap:15px;flex-wrap:wrap}
+        .perm-checks label{display:flex;align-items:center;gap:4px;font-size:.85rem;text-transform:capitalize;font-weight:400;color:var(--text-dark)}
+
+        .mobile-menu-btn{display:none;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#0f172a;padding:4px}
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:90}
+
+        @media(max-width:768px){
+            .sidebar{transform:translateX(-100%)}
+            .sidebar.open{transform:translateX(0)}
+            .sidebar-overlay.show{display:block}
+            .main-content{margin-left:0}
+            .mobile-menu-btn{display:block}
+            .topbar{height:auto;min-height:56px;padding:10px 12px;justify-content:space-between}
+            .content-area{padding:12px}
+            .page-header{flex-direction:column;align-items:flex-start}
+            .page-header h2{font-size:1.3rem}
+            .panel{padding:0;border-radius:12px}
+            th,td{padding:8px 10px;font-size:.8rem}
+            .modal-content{padding:20px;width:95%}
+            .perm-grid{grid-template-columns:1fr}
+            .perm-row{flex-direction:column;align-items:flex-start}
+            .perm-checks{gap:10px}
+        }
+        @media(max-width:480px){
+            .content-area{padding:8px}
+            .page-header h2{font-size:1.1rem}
+            th,td{padding:6px 8px;font-size:.75rem}
+            .modal-content{padding:16px}
+        }
     </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="admin-layout">
     <?php include 'sidebar.php'; ?>
     <main class="main-content">
         <header class="topbar">
+            <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div class="user-profile">
                 <span><?php echo htmlspecialchars($_SESSION['admin_username'] ?? 'Admin'); ?></span>
             </div>
@@ -155,8 +178,8 @@ $roles = $stmt->fetchAll();
                 <?php if(empty($roles)): ?>
                     <p style="color:var(--text-muted); text-align:center; padding:40px;">No roles defined.</p>
                 <?php else: ?>
-                <div style="overflow-x:auto;">
-                    <table>
+                <div class="panel-body">
+                    <table style="min-width:480px;">
                         <thead>
                             <tr>
                                 <th>Role Name</th>
@@ -278,6 +301,10 @@ function editRole(id, name, permsJson) {
         }
     } catch(e) {}
 }
+</script>
+<script>
+document.getElementById('mobile-menu-btn').addEventListener('click',function(){document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show');});
+document.getElementById('sidebar-overlay').addEventListener('click',function(){document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');});
 </script>
 </body>
 </html>

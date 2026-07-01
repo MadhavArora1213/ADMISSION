@@ -72,12 +72,20 @@ $files = $pdo->query("SELECT mf.*, u.full_name as uploader FROM media_files mf L
     <style>
         body{background:var(--bg-light)}.admin-layout{display:flex;min-height:100vh}.sidebar{width:280px;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;overflow-y:auto}.sidebar-header{padding:24px;border-bottom:1px solid rgba(255,255,255,0.1)}.sidebar-header .logo{font-size:1.3rem;color:#f8fafc;display:flex;align-items:center;gap:8px}.sidebar-nav{padding:24px 0;flex:1}.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:16px 24px;color:#f8fafc;transition:all .3s}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.05);border-left:4px solid var(--primary)}.main-content{flex:1;margin-left:280px;display:flex;flex-direction:column;padding-bottom:60px}.topbar{height:80px;background:#f8fafc;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;position:sticky;top:0;z-index:10}.content-area{padding:32px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h2{font-size:2rem;font-weight:800}.panel{background:#f8fafc;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}.filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}.tab-link{padding:7px 14px;font-weight:600;color:var(--text-muted);border-radius:8px;border:1px solid var(--border-color);background:#f8fafc;font-size:.85rem;text-decoration:none;transition:all .2s}.tab-link:hover,.tab-link.active{background:var(--primary);color:#fff;border-color:var(--primary)}.media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}.media-card{background:#fff;border:1px solid var(--border-color);border-radius:10px;overflow:hidden;transition:box-shadow .2s}.media-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}.media-thumb{width:100%;height:130px;object-fit:cover;display:block;background:#F8FAFC}.media-thumb-icon{height:130px;display:flex;align-items:center;justify-content:center;background:#F8FAFC;font-size:3rem;color:var(--text-muted)}.media-info{padding:10px}.media-info .name{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-dark)}.media-info .meta{font-size:.72rem;color:var(--text-muted);margin-top:3px}.media-actions{display:flex;gap:4px;margin-top:8px}.msg-alert{padding:14px 20px;border-radius:8px;background:rgba(11,36,71,0.04);color:#0B2447;border:1px solid rgba(11,36,71,0.04);margin-bottom:20px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.form-group{margin-bottom:14px}.form-group label{display:block;font-weight:600;margin-bottom:6px;font-size:.88rem;color:var(--text-muted)}.form-control{width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:8px;font-family:inherit;font-size:.95rem;box-sizing:border-box}.badge{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:700}
     </style>
+    <style>
+        .mobile-menu-btn{display:none;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#0f172a;padding:4px}
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:90}
+        @media(max-width:768px){.sidebar{transform:translateX(-100%);z-index:100;transition:transform .3s}.sidebar.open{transform:translateX(0)}.sidebar-overlay.show{display:block}.main-content{margin-left:0}.mobile-menu-btn{display:block}.topbar{height:auto;min-height:56px;padding:10px 12px;justify-content:space-between}.content-area{padding:12px}.page-header{flex-direction:column;align-items:flex-start;gap:8px}.page-header h2{font-size:1.3rem}.media-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}.filter-bar{gap:4px}.tab-link{padding:5px 10px;font-size:.8rem}}
+        @media(max-width:480px){.media-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
+    </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="admin-layout">
     <?php include 'sidebar.php'; ?>
     <main class="main-content">
         <header class="topbar">
+            <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div class="user-profile">
                 <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
                 <a href="logout.php" style="margin-left:16px;color:#19376d;"><i class="ph ph-sign-out" style="font-size:1.5rem;"></i></a>
@@ -168,5 +176,9 @@ $files = $pdo->query("SELECT mf.*, u.full_name as uploader FROM media_files mf L
         </form>
     </div>
 </div>
+<script>
+document.getElementById('mobile-menu-btn').addEventListener('click',function(){document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show');});
+document.getElementById('sidebar-overlay').addEventListener('click',function(){document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');});
+</script>
 </body>
 </html>

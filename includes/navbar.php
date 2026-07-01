@@ -170,7 +170,6 @@ if (!isset($navColleges)) {
 
       <div class="pro-nav-right">
         <a href="<?= $navBase ?>/saved_colleges.php" class="pro-icon-btn" title="Saved"><i class="ph ph-heart"></i></a>
-        <a href="#" class="pro-icon-btn" title="Notifications"><i class="ph ph-bell"></i></a>
         <a href="<?= $navBase ?>/college/login.php" class="pro-icon-btn" title="College Login" style="font-size:.75rem;width:auto;padding:0 10px;display:flex;align-items:center;gap:4px;text-decoration:none;color:#64748b"><i class="ph ph-graduation-cap"></i> <span style="display:inline">College Login</span></a>
         <?php if (isset($_SESSION['user_id'])): ?>
           <div class="pro-user-dropdown">

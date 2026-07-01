@@ -71,7 +71,7 @@ $stat_pending = $pdo->query("SELECT COUNT(*) FROM partner_content_requests WHERE
         .page-header h2 { font-size: 2rem; font-weight: 800; }
         
         .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;}
-        .tab-link { padding: 10px 20px; font-weight: 600; color: var(--text-muted); font-size: 0.9rem; text-decoration: none; transition: all 0.2s; border-bottom: 3px solid transparent; display:flex; align-items:center; gap:8px;}
+        .tab-link { padding: 10px 20px; font-weight: 600; color: var(--text-muted); font-size: 0.9rem; text-decoration: none; transition: all 0.2s; border-bottom: 3px solid transparent; display:flex; align-items:center; gap:8px; white-space:nowrap; flex-shrink:0;}
         .tab-link:hover { color: var(--primary); }
         .tab-link.active { color: var(--primary); border-bottom-color: var(--primary); }
         
@@ -100,19 +100,51 @@ $stat_pending = $pdo->query("SELECT COUNT(*) FROM partner_content_requests WHERE
         .search-box input { border: none; outline: none; font-size: 0.9rem; width: 100%; }
         
         .json-viewer { background:rgba(15,23,42,0.9); color:rgba(11,36,71,0.06); padding:15px; border-radius:8px; font-family:monospace; font-size:0.8rem; white-space:pre-wrap; max-height:200px; overflow-y:auto; margin-top:10px; border:1px solid #0f172a;}
-        
+
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #0f172a; padding: 4px; }
+
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+
         /* Modal */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
         .modal.active { display: flex; }
         .modal-content { background: #fff; padding: 30px; border-radius: 12px; width: 800px; max-width: 90%; max-height: 90vh; overflow-y: auto;}
         .modal-header { font-size: 1.25rem; font-weight: 800; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
+
+        @media(max-width:768px){
+            .sidebar{transform:translateX(-100%);z-index:100;transition:transform 0.3s ease}
+            .sidebar.open{transform:translateX(0)}
+            .sidebar-overlay.show{display:block}
+            .main-content{margin-left:0}
+            .mobile-menu-btn{display:block}
+            .topbar{height:auto;min-height:56px;padding:10px 12px;justify-content:space-between;flex-wrap:wrap}
+            .content-area{padding:12px}
+            .page-header{flex-direction:column;align-items:flex-start;gap:8px}
+            .page-header h2{font-size:1.3rem}
+            .page-header p{font-size:0.82rem}
+            .filter-bar{flex-wrap:nowrap;overflow-x:auto;flex-shrink:0;border-bottom:none;gap:4px;padding-bottom:0}
+            .filter-wrapper{flex-direction:column;align-items:stretch}
+            .tab-link{padding:8px 14px;font-size:0.82rem;white-space:nowrap;flex-shrink:0}
+            .search-box{width:100%}
+            table{min-width:500px}
+            .modal-content{padding:20px;width:95%}
+            .json-viewer{font-size:0.72rem;max-height:160px}
+            .msg-alert{font-size:0.85rem;padding:10px 14px}
+        }
+
+        @media(max-width:480px){
+            .page-header h2{font-size:1.1rem}
+            .tab-link{padding:6px 10px;font-size:0.78rem}
+        }
     </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="admin-layout">
     <?php include 'sidebar.php'; ?>
     <main class="main-content">
         <header class="topbar">
+            <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div class="user-profile">
                 <span><?php echo htmlspecialchars($_SESSION['admin_username'] ?? 'Admin'); ?></span>
             </div>
@@ -129,7 +161,7 @@ $stat_pending = $pdo->query("SELECT COUNT(*) FROM partner_content_requests WHERE
             <div class="msg-alert"><i class="ph ph-check-circle"></i> <?php echo htmlspecialchars($_GET['msg']); ?></div>
             <?php endif; ?>
 
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="filter-wrapper" style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
                 <div class="filter-bar" style="margin-bottom:0; border-bottom:none;">
                     <a href="?tab=pending" class="tab-link <?php echo $tab=='pending'?'active':''; ?>">
                         Pending Review
@@ -265,6 +297,15 @@ function openReviewModal(r) {
 function closeModal() {
     document.getElementById('reviewModal').classList.remove('active');
 }
+
+document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('show');
+});
+document.getElementById('sidebar-overlay').addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.remove('open');
+    this.classList.remove('show');
+});
 </script>
 </body>
 </html>
