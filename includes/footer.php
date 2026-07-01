@@ -108,3 +108,55 @@ function fName($text) {
     </div>
   </div>
 </footer>
+
+<!-- Structured Data - ItemList (Top Colleges) -->
+<?php if (!empty($fColleges)): ?>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Top Colleges in India",
+  "description": "List of top-rated colleges and universities in India",
+  "numberOfItems": <?= count($fColleges) ?>,
+  "itemListElement": [
+    <?php foreach ($fColleges as $i => $fc): ?>
+    {
+      "@type": "ListItem",
+      "position": <?= $i + 1 ?>,
+      "item": {
+        "@type": "CollegeOrUniversity",
+        "name": <?= json_encode($fc['name']) ?>,
+        "url": "https://localhost/ADMISSION/college/<?= urlencode($fc['slug']) ?>"
+      }
+    }<?= $i < count($fColleges) - 1 ? ',' : '' ?>
+    <?php endforeach; ?>
+  ]
+}
+</script>
+<?php endif; ?>
+
+<!-- Structured Data - ItemList (Top Exams) -->
+<?php if (!empty($fExams)): ?>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Top Entrance Exams in India",
+  "description": "List of major entrance examinations in India",
+  "numberOfItems": <?= count($fExams) ?>,
+  "itemListElement": [
+    <?php foreach ($fExams as $i => $fe): ?>
+    {
+      "@type": "ListItem",
+      "position": <?= $i + 1 ?>,
+      "item": {
+        "@type": "EducationalOccupationalProgram",
+        "name": <?= json_encode($fe['exam_name']) ?>,
+        "url": "https://localhost/ADMISSION/exam/<?= urlencode($fe['exam_slug']) ?>"
+      }
+    }<?= $i < count($fExams) - 1 ? ',' : '' ?>
+    <?php endforeach; ?>
+  ]
+}
+</script>
+<?php endif; ?>

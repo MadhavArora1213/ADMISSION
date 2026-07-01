@@ -170,7 +170,7 @@ if (!isset($navColleges)) {
 
       <div class="pro-nav-right">
         <a href="<?= $navBase ?>/saved_colleges.php" class="pro-icon-btn" title="Saved"><i class="ph ph-heart"></i></a>
-        <a href="<?= $navBase ?>/college/login.php" class="pro-icon-btn" title="College Login" style="font-size:.75rem;width:auto;padding:0 10px;display:flex;align-items:center;gap:4px;text-decoration:none;color:#64748b"><i class="ph ph-graduation-cap"></i> <span style="display:inline">College Login</span></a>
+        <a href="<?= $navBase ?>/college/login.php" class="pro-icon-btn pro-college-login-desktop" title="College Login" style="font-size:.75rem;width:auto;padding:0 10px;display:flex;align-items:center;gap:4px;text-decoration:none;color:#64748b"><i class="ph ph-graduation-cap"></i> <span style="display:inline">College Login</span></a>
         <?php if (isset($_SESSION['user_id'])): ?>
           <div class="pro-user-dropdown">
             <button class="pro-user-avatar" id="userMenuBtn" onclick="toggleUserMenu()">
@@ -184,11 +184,17 @@ if (!isset($navColleges)) {
             </div>
           </div>
         <?php else: ?>
-          <a href="/ADMISSION/login.php" class="pro-user-btn" title="Login"><i class="ph-fill ph-user-plus"></i></a>
+          <div class="pro-login-dropdown-wrapper" id="loginDropdownWrapper">
+            <button class="pro-user-btn pro-login-trigger" id="loginTrigger" onclick="toggleLoginDropdown()" title="Login"><i class="ph-fill ph-user-plus"></i></button>
+            <div class="pro-login-dropdown" id="loginDropdown">
+              <a href="/ADMISSION/login.php" class="pro-login-dropdown-item"><i class="ph ph-user"></i> User Login</a>
+              <a href="<?= $navBase ?>/college/login.php" class="pro-login-dropdown-item"><i class="ph ph-graduation-cap"></i> College Login</a>
+            </div>
+          </div>
         <?php endif; ?>
 
         <button class="pro-hamburger" id="proHamburger" onclick="toggleMobileNav()" aria-label="Menu">
-          <span></span><span></span><span></span>
+          <i class="ph ph-list" id="hamburgerIcon"></i>
         </button>
       </div>
     </div>
@@ -567,7 +573,7 @@ if (!isset($navColleges)) {
       <span>AdmissionSeason</span>
     </a>
     <button class="pro-hamburger active" onclick="toggleMobileNav()" aria-label="Close">
-      <span></span><span></span><span></span>
+      <i class="ph ph-x"></i>
     </button>
   </div>
 
@@ -598,8 +604,17 @@ if (!isset($navColleges)) {
     <a href="<?= $navBase ?>/colleges.php" class="pro-mobile-link pro-has-sub"><i class="ph ph-buildings"></i> Colleges <i class="ph ph-caret-right pro-mobile-arrow"></i></a>
     <div class="pro-mobile-sub" id="mobileSubColleges">
       <a href="<?= $navBase ?>/colleges.php">All Colleges</a>
+      <div class="pro-mobile-sub-title">Top Courses</div>
+      <?php foreach($navPopularCourses ?? [] as $navCrs): ?>
+      <a href="<?= courseUrl($navCrs['course_slug'] ?? '') ?>"><?=htmlspecialchars((string)($navCrs['course_name'] ?? ''))?></a>
+      <?php endforeach; ?>
+      <div class="pro-mobile-sub-title" style="margin-top:10px">Top Locations</div>
       <?php foreach($navStates ?? [] as $st): ?>
       <a href="<?= $navBase ?>/colleges.php?state=<?= (int)$st['id'] ?>"><?=htmlspecialchars($st['name'])?></a>
+      <?php endforeach; ?>
+      <div class="pro-mobile-sub-title" style="margin-top:10px">Top Colleges</div>
+      <?php foreach($navColleges ?? [] as $navClg): ?>
+      <a href="<?= collegeUrl($navClg['slug'] ?? '') ?>"><?=htmlspecialchars((string)($navClg['name'] ?? ''))?></a>
       <?php endforeach; ?>
     </div>
 
@@ -656,20 +671,35 @@ function toggleUserMenu() {
   if (menu) menu.classList.toggle('open');
 }
 
+function toggleLoginDropdown() {
+  const dd = document.getElementById('loginDropdown');
+  if (dd) dd.classList.toggle('show');
+}
+document.addEventListener('click', function(e) {
+  const wrapper = document.getElementById('loginDropdownWrapper');
+  const dd = document.getElementById('loginDropdown');
+  if (wrapper && dd && !wrapper.contains(e.target)) {
+    dd.classList.remove('show');
+  }
+});
+
 function toggleMobileNav() {
   const drawer = document.getElementById('proMobileDrawer');
   const overlay = document.getElementById('proMobileOverlay');
   const burger = document.getElementById('proHamburger');
+  const icon = document.getElementById('hamburgerIcon');
   const isOpen = drawer.classList.contains('open');
   if (isOpen) {
     drawer.classList.remove('open');
     overlay.classList.remove('open');
     burger.classList.remove('active');
+    if (icon) icon.className = 'ph ph-list';
     document.body.style.overflow = '';
   } else {
     drawer.classList.add('open');
     overlay.classList.add('open');
     burger.classList.add('active');
+    if (icon) icon.className = 'ph ph-x';
     document.body.style.overflow = 'hidden';
   }
 }
@@ -711,6 +741,16 @@ document.querySelectorAll('.pro-mobile-link.pro-has-sub').forEach(function(link)
   });
 });
 
+// Hide hamburger on desktop (>768px)
+function handleHamburgerVisibility() {
+  var hb = document.getElementById('proHamburger');
+  if (hb) {
+    hb.style.display = window.innerWidth > 768 ? 'none' : '';
+  }
+}
+handleHamburgerVisibility();
+window.addEventListener('resize', handleHamburgerVisibility);
+
 // ═══ MORE MEGA MENU HOVER LOGIC ═══
 document.querySelectorAll('.more-sidebar-item').forEach(function(item) {
   item.addEventListener('mouseenter', function() {
@@ -740,6 +780,17 @@ if (moreWrap) {
 }
 </script>
 <style>
+/* Hide hamburger on desktop */
+@media(min-width: 769px) {
+  .pro-hamburger { display: none !important; }
+  .pro-hamburger.active { display: none !important; }
+}
+
+/* Hamburger on mobile - plain, no bg */
+@media(max-width: 768px) {
+  .pro-hamburger { display: flex !important; background: none !important; border: none !important; box-shadow: none !important; }
+  .pro-hamburger i { font-size: 1.4rem; color: #0B2447; }
+}
 /* Custom Counseling subdropdown mega-menu */
 .cns-dropdown-menu {
   width: 700px !important;

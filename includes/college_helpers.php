@@ -47,7 +47,6 @@ function collegeTabs(): array {
         'gallery'        => 'Gallery',
         'infrastructure' => 'Infrastructure',
         'faculty'        => 'Faculty',
-        'compare'        => 'Compare',
         'qna'            => 'Q&A',
         'news'           => 'News',
     ];

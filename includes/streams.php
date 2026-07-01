@@ -51,16 +51,60 @@
       ['name'=>'Medical','slug'=>'medical'],
       ['name'=>'Law','slug'=>'law'],
       ['name'=>'Science','slug'=>'science'],
-      ['name'=>'Arts & Design','slug'=>'arts'],
+      ['name'=>'Arts','slug'=>'arts'],
       ['name'=>'Commerce','slug'=>'commerce'],
+      ['name'=>'Design','slug'=>'design'],
     ];
-    if (!empty($categories)): ?>
-      <?php foreach ($categories as $i=>$cat):
+
+    // Collect all category names already covered by streamMap
+    $coveredCats = [];
+    foreach ($streamMap as $sd) {
+      foreach ($sd['categories'] as $cn) $coveredCats[strtolower($cn)] = true;
+    }
+
+    // Filter categories: skip invalid, empty-count, or already-covered names; limit to 8
+    $validCategories = [];
+    if (!empty($categories)):
+      foreach ($categories as $cat):
+        $name = trim($cat['category_name'] ?? $cat['name'] ?? '');
+        $slug = strtolower($cat['category_slug'] ?? $cat['slug'] ?? '');
+        if (strlen($name) < 3) continue;
+        if (isset($coveredCats[strtolower($name)])) continue; // already part of another stream card
+        $sd = $streamData[$slug] ?? null;
+        if (!$sd) {
+          $cntStmt2 = $pdo->prepare("SELECT COUNT(*) as cnt FROM courses WHERE status='active' AND course_category = ?");
+          $cntStmt2->execute([$name]);
+          $c = $cntStmt2->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0;
+          if ($c == 0) continue;
+        } elseif (($streamCounts[$slug] ?? 0) == 0) {
+          continue;
+        }
+        $validCategories[] = $cat;
+        if (count($validCategories) >= 8) break;
+      endforeach;
+    endif;
+
+    // Pad with fallback entries that have real course data
+    if (count($validCategories) < 8):
+      foreach ($streamFallback as $fb):
+        if (count($validCategories) >= 8) break;
+        $fbSlug = $fb['slug'];
+        if (($streamCounts[$fbSlug] ?? 0) == 0) continue;
+        $already = false;
+        foreach ($validCategories as $vc):
+          $vcSlug = strtolower($vc['category_slug'] ?? $vc['slug'] ?? '');
+          if ($vcSlug === $fbSlug) { $already = true; break; }
+        endforeach;
+        if (!$already) $validCategories[] = ['category_name'=>$fb['name'],'category_slug'=>$fb['slug'],'name'=>$fb['name'],'slug'=>$fb['slug']];
+      endforeach;
+    endif;
+
+    if (!empty($validCategories)): ?>
+      <?php foreach ($validCategories as $i=>$cat):
         $name = $cat['category_name'] ?? $cat['name'] ?? '';
         $slug = strtolower($cat['category_slug'] ?? $cat['slug'] ?? '');
         $sd = $streamData[$slug] ?? null;
         if (!$sd) {
-            // Dynamic fallback for unknown categories
             $cntStmt = $pdo->prepare("SELECT COUNT(*) as cnt FROM courses WHERE status='active' AND course_category = ?");
             $cntStmt->execute([$name]);
             $c = $cntStmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0;

@@ -182,6 +182,40 @@ if (isset($_SESSION['user_id'])) {
     .college-tabs-wrapper .shiksha-tabs::-webkit-scrollbar {
       display: none;
     }
+    /* Right-edge scroll hint */
+    .college-tabs-wrapper.has-scroll::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      right: 0;
+      width: 48px;
+      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.95) 50%, #fff 100%);
+      pointer-events: none;
+      z-index: 5;
+      transition: opacity 0.3s;
+    }
+    .college-tabs-wrapper.scroll-end::after {
+      opacity: 0;
+    }
+    @media (max-width: 768px) {
+      .college-tabs-wrapper.has-scroll .tab-arrow { display: flex !important; }
+      .college-tabs-wrapper .tab-arrow { opacity: 1 !important; pointer-events: auto !important; }
+      .college-tabs-wrapper .tab-arrow-left { padding-left: 4px; }
+      .college-tabs-wrapper .tab-arrow-right { padding-right: 4px; }
+      .college-tabs-wrapper .tab-arrow i { width: 26px; height: 26px; font-size: .85rem; }
+      .college-tabs-wrapper .shiksha-tabs { padding: 8px 36px; }
+      .college-tabs-wrapper.has-scroll::after { display: none; }
+    }
+
+    /* Review modal responsive */
+    @media (max-width: 480px) {
+      #reviewModal > div { border-radius: 16px; margin: 0 8px; }
+      #reviewModal > div > div:first-child { padding: 16px 18px 0; }
+      #reviewModal > div > div:first-child h3 { font-size: 1.05rem; gap: 6px; }
+      #reviewModal > div > div:last-child { padding: 16px 18px 24px; }
+      #reviewModal .star-rating-group i { font-size: 1.5rem !important; }
+      #reviewModal [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; gap: 10px !important; }
+    }
     .tab-arrow {
       position: absolute;
       top: 0;
@@ -475,7 +509,7 @@ if (isset($_SESSION['user_id'])) {
             <div class="tab-empty-state"><i class="ph ph-book-open"></i><p>No courses listed yet for this college.</p></div>
             <?php else: ?>
             <div class="college-table-wrap">
-              <table class="college-data-table">
+              <table class="college-data-table courses-table">
                 <thead><tr><th>Course Name</th><th>Level</th><th>Duration</th><th>Seats</th><th>Annual Fee</th><th>EMI</th></tr></thead>
                 <tbody>
                 <?php foreach ($courses as $co):
@@ -484,7 +518,7 @@ if (isset($_SESSION['user_id'])) {
                   $levelClass = $levelMap[$lvl] ?? 'level-ug';
                 ?>
                 <tr>
-                  <td>
+                  <td data-label="Course">
                     <strong><?= htmlspecialchars($co['course_name'] ?? '—') ?></strong>
                     <?php if (!empty($co['specializations'])): ?>
                       <br><small style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px"><?php
@@ -500,11 +534,11 @@ if (isset($_SESSION['user_id'])) {
                     <?php endif; ?>
                     <?php if (!empty($co['eligibility_criteria'])): ?><br><small style="color:rgba(15,23,42,0.4)">Eligibility: <?= htmlspecialchars($co['eligibility_criteria']) ?></small><?php endif; ?>
                   </td>
-                  <td><span class="course-level-badge <?= $levelClass ?>"><?= htmlspecialchars($co['course_level'] ?? '—') ?></span></td>
-                  <td><?= $co['duration_years'] ? htmlspecialchars((string)$co['duration_years']) . ' yrs' : '—' ?></td>
-                  <td><?= htmlspecialchars((string)($co['seats_available'] ?? $co['seats'] ?? '—')) ?></td>
-                  <td><strong style="color:#0B2447"><?= formatFee(isset($co['annual_fee']) ? (float)$co['annual_fee'] : null) ?></strong></td>
-                  <td><?= !empty($co['emi_available']) ? '<span style="color:#0B2447;font-weight:700">✓ EMI</span>' : '<span style="color:rgba(15,23,42,0.4)">—</span>' ?></td>
+                  <td data-label="Level"><span class="course-level-badge <?= $levelClass ?>"><?= htmlspecialchars($co['course_level'] ?? '—') ?></span></td>
+                  <td data-label="Duration"><?= $co['duration_years'] ? htmlspecialchars((string)$co['duration_years']) . ' yrs' : '—' ?></td>
+                  <td data-label="Seats"><?= htmlspecialchars((string)($co['seats_available'] ?? $co['seats'] ?? '—')) ?></td>
+                  <td data-label="Fee"><strong style="color:#0B2447"><?= formatFee(isset($co['annual_fee']) ? (float)$co['annual_fee'] : null) ?></strong></td>
+                  <td data-label="EMI"><?= !empty($co['emi_available']) ? '<span style="color:#0B2447;font-weight:700">✓ EMI</span>' : '<span style="color:rgba(15,23,42,0.4)">—</span>' ?></td>
                 </tr>
                 <?php endforeach; ?>
                 </tbody>
@@ -521,16 +555,16 @@ if (isset($_SESSION['user_id'])) {
             <div class="tab-empty-state"><i class="ph ph-currency-inr"></i><p>Fee details not available.</p></div>
             <?php else: ?>
             <div class="college-table-wrap">
-              <table class="college-data-table">
+              <table class="college-data-table fees-table">
                 <thead><tr><th>Course</th><th>Annual Fee</th><th>Semester Fee</th><th>Total Fee</th><th>Application Fee</th></tr></thead>
                 <tbody>
                 <?php foreach ($courses as $co): ?>
                 <tr>
-                  <td><strong><?= htmlspecialchars($co['course_name'] ?? '—') ?></strong></td>
-                  <td><strong style="color:#0B2447"><?= formatFee(isset($co['annual_fee']) ? (float)$co['annual_fee'] : null) ?></strong></td>
-                  <td><?= formatFee(isset($co['semester_fee']) ? (float)$co['semester_fee'] : null) ?></td>
-                  <td><?= formatFee(isset($co['total_fee']) ? (float)$co['total_fee'] : null) ?></td>
-                  <td><?= formatFee(isset($co['application_fee']) ? (float)$co['application_fee'] : null) ?></td>
+                  <td data-label="Course"><strong><?= htmlspecialchars($co['course_name'] ?? '—') ?></strong></td>
+                  <td data-label="Annual Fee"><strong style="color:#0B2447"><?= formatFee(isset($co['annual_fee']) ? (float)$co['annual_fee'] : null) ?></strong></td>
+                  <td data-label="Sem Fee"><?= formatFee(isset($co['semester_fee']) ? (float)$co['semester_fee'] : null) ?></td>
+                  <td data-label="Total Fee"><?= formatFee(isset($co['total_fee']) ? (float)$co['total_fee'] : null) ?></td>
+                  <td data-label="App Fee"><?= formatFee(isset($co['application_fee']) ? (float)$co['application_fee'] : null) ?></td>
                 </tr>
                 <?php endforeach; ?>
                 </tbody>
@@ -638,17 +672,17 @@ if (isset($_SESSION['user_id'])) {
             </div>
             <?php endif; ?>
             <div class="college-table-wrap">
-              <table class="college-data-table">
+              <table class="college-data-table placements-table">
                 <thead><tr><th>Year</th><th>Avg Package</th><th>Highest</th><th>Median</th><th>Placed %</th><th>Students Placed</th></tr></thead>
                 <tbody>
                 <?php foreach ($placements as $pl): ?>
                 <tr>
-                  <td><strong><?= htmlspecialchars((string)($pl['placement_year'] ?? '—')) ?></strong></td>
-                  <td><?= formatLpa(isset($pl['avg_package_lpa']) ? (float)$pl['avg_package_lpa'] : null) ?></td>
-                  <td><?= formatLpa(isset($pl['highest_package_lpa']) ? (float)$pl['highest_package_lpa'] : null) ?></td>
-                  <td><?= formatLpa(isset($pl['median_package_lpa']) ? (float)$pl['median_package_lpa'] : null) ?></td>
-                  <td><?= !empty($pl['placement_percentage']) ? number_format((float)$pl['placement_percentage'],1).'%' : '—' ?></td>
-                  <td><?= htmlspecialchars((string)($pl['students_placed'] ?? '—')) ?></td>
+                  <td data-label="Year"><strong><?= htmlspecialchars((string)($pl['placement_year'] ?? '—')) ?></strong></td>
+                  <td data-label="Avg Package"><?= formatLpa(isset($pl['avg_package_lpa']) ? (float)$pl['avg_package_lpa'] : null) ?></td>
+                  <td data-label="Highest"><?= formatLpa(isset($pl['highest_package_lpa']) ? (float)$pl['highest_package_lpa'] : null) ?></td>
+                  <td data-label="Median"><?= formatLpa(isset($pl['median_package_lpa']) ? (float)$pl['median_package_lpa'] : null) ?></td>
+                  <td data-label="Placed %"><?= !empty($pl['placement_percentage']) ? number_format((float)$pl['placement_percentage'],1).'%' : '—' ?></td>
+                  <td data-label="Students"><?= htmlspecialchars((string)($pl['students_placed'] ?? '—')) ?></td>
                 </tr>
                 <?php endforeach; ?>
                 </tbody>
@@ -674,18 +708,18 @@ if (isset($_SESSION['user_id'])) {
             <div class="tab-empty-state"><i class="ph ph-scissors"></i><p>Cutoff data not available for this college.</p></div>
             <?php else: ?>
             <div class="college-table-wrap">
-              <table class="college-data-table">
+              <table class="college-data-table cutoffs-table">
                 <thead><tr><th>Exam</th><th>Course</th><th>Year</th><th>Category</th><th>Round</th><th>Opening Rank</th><th>Closing Rank</th></tr></thead>
                 <tbody>
                 <?php foreach ($cutoffs as $cu): ?>
                 <tr>
-                  <td><strong><?= htmlspecialchars($cu['exam_name'] ?? '—') ?></strong></td>
-                  <td><?= htmlspecialchars($cu['course_name'] ?? '—') ?></td>
-                  <td><?= htmlspecialchars((string)($cu['cutoff_year'] ?? '—')) ?></td>
-                  <td><span class="college-tag" style="font-size:.72rem"><?= htmlspecialchars($cu['category'] ?? '—') ?></span></td>
-                  <td><?= htmlspecialchars((string)($cu['round_number'] ?? '—')) ?></td>
-                  <td><?= htmlspecialchars((string)($cu['opening_rank'] ?? '—')) ?></td>
-                  <td><strong><?= htmlspecialchars((string)($cu['closing_rank'] ?? '—')) ?></strong></td>
+                  <td data-label="Exam"><strong><?= htmlspecialchars($cu['exam_name'] ?? '—') ?></strong></td>
+                  <td data-label="Course"><?= htmlspecialchars($cu['course_name'] ?? '—') ?></td>
+                  <td data-label="Year"><?= htmlspecialchars((string)($cu['cutoff_year'] ?? '—')) ?></td>
+                  <td data-label="Category"><span class="college-tag" style="font-size:.72rem"><?= htmlspecialchars($cu['category'] ?? '—') ?></span></td>
+                  <td data-label="Round"><?= htmlspecialchars((string)($cu['round_number'] ?? '—')) ?></td>
+                  <td data-label="Opening"><?= htmlspecialchars((string)($cu['opening_rank'] ?? '—')) ?></td>
+                  <td data-label="Closing"><strong><?= htmlspecialchars((string)($cu['closing_rank'] ?? '—')) ?></strong></td>
                 </tr>
                 <?php endforeach; ?>
                 </tbody>
@@ -1362,8 +1396,15 @@ function updateTabArrows() {
     wrapper.classList.toggle('has-scroll', canScroll);
   }
   
-  if (left) left.classList.toggle('hidden', !canScroll || tabs.scrollLeft <= 5);
-  if (right) right.classList.toggle('hidden', !canScroll || tabs.scrollLeft + tabs.clientWidth >= tabs.scrollWidth - 5);
+    if (left) {
+      const atStart = !canScroll || tabs.scrollLeft <= 5;
+      left.classList.toggle('hidden', window.innerWidth > 768 && atStart);
+    }
+    if (right) {
+      const atEnd = !canScroll || tabs.scrollLeft + tabs.clientWidth >= tabs.scrollWidth - 5;
+      right.classList.toggle('hidden', window.innerWidth > 768 && atEnd);
+    }
+    if (wrapper) wrapper.classList.toggle('scroll-end', canScroll && tabs.scrollLeft + tabs.clientWidth >= tabs.scrollWidth - 5);
 }
 document.addEventListener('DOMContentLoaded', () => {
   const tabs = document.getElementById('collegeTabs');

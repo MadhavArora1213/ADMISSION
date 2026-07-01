@@ -2598,7 +2598,7 @@ select {
 .marquee-track {
   display: flex;
   width: max-content;
-  animation: marquee 35s linear infinite;
+  animation: marquee 50s linear infinite;
 }
 
 .marquee-track:hover {
@@ -3118,6 +3118,50 @@ select {
   box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
 }
 
+/* Login dropdown (combined user + college login) */
+.pro-login-dropdown-wrapper {
+  position: relative;
+}
+.pro-login-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #fff;
+  border: 1px solid rgba(15,23,42,0.08);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+  min-width: 200px;
+  z-index: 200;
+  overflow: hidden;
+  animation: dropIn 0.2s ease;
+}
+.pro-login-dropdown.show { display: block; }
+.pro-login-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.pro-login-dropdown-item:hover {
+  background: rgba(15,23,42,0.04);
+}
+.pro-login-dropdown-item i {
+  font-size: 1rem;
+  color: #19376D;
+}
+.pro-college-login-desktop { display: flex; }
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* User dropdown */
 .pro-user-dropdown {
   position: relative;
@@ -3544,7 +3588,7 @@ select {
 }
 
 .nh-title {
-  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
   font-weight: 900;
   line-height: 1.08;
   letter-spacing: -0.03em;
@@ -4044,7 +4088,6 @@ select {
     max-height: 360px;
   }
   .nh-trust-inner {
-    flex-wrap: wrap;
     gap: 16px 28px;
     justify-content: center;
   }
@@ -4059,6 +4102,7 @@ select {
   }
   .nh-sub {
     font-size: 0.95rem;
+    text-align: center;
   }
   .nh-badge {
     font-size: 0.75rem;
@@ -4068,12 +4112,14 @@ select {
     padding: 12px 8px;
     font-size: 0.82rem;
     gap: 6px;
+    flex: 0 0 auto;
   }
   .nh-search-tabs button i {
     font-size: 0.95rem;
   }
   .nh-trust-inner {
     gap: 12px 20px;
+    justify-content: center;
   }
   .nh-trust-item {
     font-size: 0.78rem;
@@ -4083,6 +4129,7 @@ select {
 @media (max-width: 480px) {
   .nh {
     padding: 44px 0 0;
+    min-height: auto;
   }
   .nh-title {
     font-size: 1.65rem;
@@ -4091,8 +4138,49 @@ select {
     font-size: 0.88rem;
     margin-bottom: 24px;
   }
+  .nh-search {
+    border-radius: 14px;
+    margin-bottom: 16px;
+  }
+  .nh-search-tabs {
+    border-radius: 14px 14px 0 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nh-search-tabs::-webkit-scrollbar { display: none; }
+  .nh-search-tabs button {
+    padding: 10px 8px;
+    font-size: 0.7rem;
+    gap: 3px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+  .nh-search-tabs button i {
+    font-size: 0.8rem;
+  }
+  .nh-search-row {
+    padding: 6px;
+    gap: 6px;
+    border-radius: 0 0 14px 14px;
+  }
+  .nh-search-row input {
+    font-size: 0.88rem;
+    padding: 8px 0;
+  }
+  .nh-search-row i {
+    display: none;
+  }
+  .nh-search-btn {
+    padding: 10px 16px;
+    font-size: 0.82rem;
+    border-radius: 10px;
+  }
+  .nh-search-btn i {
+    display: none;
+  }
   .nh-quick {
     gap: 6px;
+    margin-top: 8px;
   }
   .nh-quick-link {
     padding: 5px 10px;
@@ -4103,35 +4191,38 @@ select {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
+  .nh-trust-item {
+    font-size: 0.72rem;
+    justify-content: center;
+  }
 }
 
 /* ═══ HAMBURGER BUTTON ═══ */
 .pro-hamburger {
-  display: none;
-  flex-direction: column;
+  display: none !important;
   justify-content: center;
   align-items: center;
-  gap: 5px;
   width: 40px;
   height: 40px;
-  background: rgba(241, 245, 249, 0.65);
-  border: 1px solid rgba(15, 23, 42, 0.03);
+  background: transparent;
+  border: none;
   border-radius: 10px;
   cursor: pointer;
   padding: 0;
   z-index: 1100;
+  transition: background 0.2s;
 }
-.pro-hamburger span {
-  display: block;
-  width: 18px;
-  height: 2px;
-  background: #0B2447;
-  border-radius: 2px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.pro-hamburger:hover {
+  background: rgba(15, 23, 42, 0.05);
 }
-.pro-hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.pro-hamburger.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-.pro-hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.pro-hamburger i {
+  font-size: 1.4rem;
+  color: #0B2447;
+  line-height: 1;
+}
+.pro-hamburger.active i {
+  font-size: 1.4rem;
+}
 
 /* ═══ MOBILE OVERLAY ═══ */
 .pro-mobile-overlay {
@@ -4265,7 +4356,7 @@ select {
   overflow: hidden;
   transition: max-height 0.35s ease, padding 0.3s ease;
 }
-.pro-mobile-sub.open { display: block; max-height: 600px; padding-bottom: 8px; }
+.pro-mobile-sub.open { display: block; max-height: 50vh; overflow-y: auto; padding-bottom: 8px; }
 .pro-mobile-sub-title {
   font-size: 0.72rem;
   font-weight: 800;
@@ -4287,17 +4378,16 @@ select {
 }
 .pro-mobile-sub a:hover { background: rgba(59, 130, 246, 0.06); color: #19376D; }
 
-@media(max-width: 1150px) {
+@media(max-width: 768px) {
   .pro-nav-search { display: flex; max-width: 100%; order: 10; margin-top: 8px; flex: 1; }
   .pro-nav-right .pro-nav-link { display: none; }
-  .pro-hamburger { display: flex; }
+  .pro-hamburger { display: flex !important; justify-content: center; align-items: center; background: none !important; border: none !important; box-shadow: none !important; padding: 4px; }
+  .pro-hamburger i { font-size: 1.4rem; color: #0B2447; }
   .pro-nav-sub-desktop { display: none; }
   .pro-mobile-drawer { display: block; }
   .pro-nav-main { flex-wrap: wrap; }
   .pro-nav-flex { flex-wrap: wrap; }
   .nav-search-dropdown { min-width: 100%; left: 0; right: 0; }
-
-  .pro-icon-btn[title="Notifications"] { display: none; }
   .pro-nav-right { gap: 8px; }
 }
 
@@ -4309,10 +4399,11 @@ select {
   .pro-icon-btn { width: 36px; height: 36px; font-size: 1.1rem; }
   .pro-user-avatar { width: 34px; height: 34px; font-size: 0.8rem; }
   .pro-user-btn { width: 36px; height: 36px; font-size: 1rem; }
-  .pro-hamburger { width: 36px; height: 36px; }
-  .pro-hamburger span { width: 16px; }
-
+  .pro-hamburger { background: none !important; border: none !important; box-shadow: none !important; padding: 4px; }
+  .pro-hamburger i { font-size: 1.4rem; color: #0B2447; }
   .pro-mobile-drawer { width: 300px; }
+  .pro-college-login-desktop { display: none !important; }
+  .pro-login-dropdown { right: auto; left: -60px; }
 }
 
 @media(min-width: 1151px) and (max-width: 1300px) {
@@ -5755,7 +5846,7 @@ select {
     padding: 24px 0;
   }
   .marquee-track {
-    animation-duration: 25s;
+    animation-duration: 40s;
   }
   .m-chip {
     padding: 8px 16px;
@@ -5822,6 +5913,37 @@ select {
     width: 44px;
     height: 44px;
     font-size: 1.2rem
+  }
+
+  /* Footer */
+  .footer {
+    padding: 40px 0 0;
+  }
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .footer-brand {
+    text-align: center;
+    grid-column: 1 / -1;
+  }
+  .footer-brand p {
+    max-width: 100%;
+    margin: 0 auto 16px;
+  }
+  .fsocial {
+    justify-content: center;
+  }
+  .footer-col {
+    text-align: center;
+  }
+  .footer-col ul {
+    align-items: center;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
   }
   .sc-badge {
     font-size: .65rem;
@@ -6037,24 +6159,32 @@ select {
     gap: 24px;
   }
   .footer-brand {
-    text-align: left;
+    text-align: center;
+  }
+  .flogo {
+    justify-content: center;
+    margin: 0 auto 16px;
   }
   .footer-brand p {
     max-width: 100%;
-    margin: 0 0 16px;
+    margin: 0 auto 16px;
+    text-align: center;
   }
   .fsocial {
-    justify-content: flex-start;
+    justify-content: center;
   }
   .footer-col {
-    text-align: left;
+    text-align: center;
+  }
+  .footer-col ul {
+    align-items: center;
   }
   .footer-col h4 {
     margin-bottom: 12px;
   }
   .footer-bottom {
     flex-direction: column;
-    text-align: left;
+    text-align: center;
     gap: 10px;
     padding: 16px 0;
   }
@@ -6075,7 +6205,7 @@ select {
   .ne-side-img{width:76px;height:60px}
   .section-link{padding:7px 14px;font-size:.78rem}
   .marquee-track {
-    animation-duration: 20s;
+    animation-duration: 35s;
   }
   .marquee-inner {
     gap: 10px;
@@ -6163,6 +6293,7 @@ select {
   }
   .tool-card-left {
     gap: 12px;
+    justify-content: center;
   }
   .tool-icon {
     width: 40px;
@@ -6294,4 +6425,82 @@ select {
   .marquee-wrap{margin-top:-8px;padding:12px 0}
   .m-chip{padding:5px 12px;font-size:.72rem}
   .section-link{padding:6px 12px;font-size:.72rem}
+
+  /* ── Hero New ── */
+  .nh-layout{flex-direction:column;gap:24px}
+  .nh-right{display:none}
+  .nh-title{font-size:2rem}
+  .nh-badge{font-size:.75rem}
+  .nh-search-row{flex-direction:column}
+  .nh-search{max-width:100%}
+  .nh-quick{flex-wrap:wrap;gap:8px;justify-content:center}
+  .nh-trust-inner{flex-wrap:wrap;justify-content:center;gap:10px;text-align:center}
+  .nh-trust-item{font-size:.72rem;justify-content:center}
+  .nh-center-visual{display:none}
+  .nh-card{padding:16px}
+  .nh-card-icon{width:40px;height:40px;font-size:1.1rem}
+
+  /* ── Stats Banner ── */
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .stats-banner{padding:24px 0}
+
+  /* ── Streams ── */
+  .stream-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .sc{padding:14px 12px;gap:10px}
+  .sc-name{font-size:.85rem}
+
+  /* ── Ranked List ── */
+  .rank-list{flex-direction:column}
+  .rank-item{flex-direction:column;align-items:flex-start;gap:8px;padding:14px}
+  .r-rank{font-size:1.4rem}
+  .r-col{flex-direction:row;gap:8px;align-items:center}
+  .r-meta{flex-direction:row;gap:12px;flex-wrap:wrap}
+
+  /* ── Featured Colleges Grid ── */
+  .uni-grid{grid-template-columns:1fr;gap:16px}
+  .uc-card-stats{flex-wrap:wrap;gap:8px}
+  .uc-card-stat-val{font-size:1.1rem}
+
+  /* ── Tools Grid ── */
+  .tools-grid{grid-template-columns:1fr;gap:12px}
+  .tool-card{flex-direction:column;text-align:center;gap:12px;padding:24px 16px;align-items:center}
+  .tool-cta{width:100%;justify-content:center}
+
+  /* ── Exams Grid ── */
+  .exams-grid{grid-template-columns:1fr;gap:12px}
+  .xm-card{border-radius:12px}
+  .xm-header{min-height:60px}
+  .xm-body{padding:12px}
+  .xm-footer{flex-wrap:wrap}
+
+  /* ── Courses Grid ── */
+  .courses-grid{grid-template-columns:1fr;gap:12px}
+
+  /* ── Reviews Grid ── */
+  .rev-grid{grid-template-columns:1fr;gap:12px}
+  .rev-card{padding:20px 16px}
+  .rev-quote{font-size:.88rem}
+
+  /* ── News Layout ── */
+  .ne-layout{flex-direction:column;gap:20px}
+  .ne-side{display:grid;grid-template-columns:1fr;gap:12px}
+  .ne-hero-content{padding:20px 16px}
+  .ne-hero h2{font-size:1.3rem}
+
+  /* ── Footer ── */
+  .footer-grid{grid-template-columns:1fr;gap:24px}
+  .footer-brand{text-align:center}
+  .flogo{justify-content:center;margin:0 auto 16px}
+  .footer-brand p{text-align:center;max-width:100%;margin:0 auto 16px}
+  .fsocial{justify-content:center}
+  .footer-col{text-align:center}
+  .footer-col ul{align-items:center}
+  .footer-bottom{flex-direction:column;gap:12px;text-align:center}
+  .footer-badges{justify-content:center}
+
+  /* ── Section Adjustments ── */
+  .section{padding:40px 0}
+  .section-dark{padding:40px 0}
+  .section-hdr h2,.section-hdr-flex h2{font-size:1.3rem}
+  .section-hdr p,.section-hdr-flex p{font-size:.85rem}
 }

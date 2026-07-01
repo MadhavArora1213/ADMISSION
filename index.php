@@ -110,15 +110,115 @@ $fExams = [
 $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.featured_image_url as img, a.publish_at as date, c.category_name as cat FROM articles a LEFT JOIN article_categories c ON a.category_id=c.id WHERE a.status='published' ORDER BY a.publish_at DESC LIMIT 4");
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<!-- Primary SEO -->
 <title>AdmissionSeason – Top Colleges, Exams & Courses in India 2026</title>
-<meta name="description" content="India's leading college discovery platform. Find top colleges, exams, courses, fees, rankings, and admission updates.">
+<meta name="description" content="India's leading college discovery platform. Find 500+ top colleges, 100+ courses, 20+ entrance exams with fees, rankings, placements & admission details. Compare and shortlist your dream college.">
+<meta name="keywords" content="colleges in India, top colleges, engineering colleges, medical colleges, MBA colleges, entrance exams, JEE, NEET, CUET, college fees, college rankings, NIRF rankings, college admissions, course comparison, college predictor">
+<meta name="author" content="AdmissionSeason">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="googlebot" content="index, follow">
+<link rel="canonical" href="https://localhost/ADMISSION/">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://localhost/ADMISSION/">
+<meta property="og:title" content="AdmissionSeason – Top Colleges, Exams & Courses in India 2026">
+<meta property="og:description" content="India's leading college discovery platform. Find 500+ top colleges, 100+ courses, 20+ entrance exams with fees, rankings, placements & admission details.">
+<meta property="og:image" content="https://localhost/ADMISSION/assets/images/og-homepage.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="AdmissionSeason - Find Your Dream College in India">
+<meta property="og:site_name" content="AdmissionSeason">
+<meta property="og:locale" content="en_IN">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AdmissionSeason – Top Colleges, Exams & Courses in India 2026">
+<meta name="twitter:description" content="India's leading college discovery platform. Find 500+ top colleges, 100+ courses, 20+ entrance exams with fees, rankings, placements & admission details.">
+<meta name="twitter:image" content="https://localhost/ADMISSION/assets/images/og-homepage.jpg">
+<meta name="twitter:image:alt" content="AdmissionSeason - Find Your Dream College in India">
+
+<!-- Additional Meta -->
+<meta name="theme-color" content="#0B2447">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="alternate" hreflang="en-in" href="https://localhost/ADMISSION/">
+
+<!-- Structured Data - WebSite -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "AdmissionSeason",
+  "url": "https://localhost/ADMISSION/",
+  "description": "India's leading college discovery platform. Find top colleges, exams, courses, fees, rankings, and admission updates.",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://localhost/ADMISSION/colleges.php?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<!-- Structured Data - Organization -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "@id": "https://localhost/ADMISSION/#organization",
+  "name": "AdmissionSeason",
+  "url": "https://localhost/ADMISSION/",
+  "logo": "https://localhost/ADMISSION/assets/images/logo.png",
+  "description": "India's leading college discovery platform helping students find the right college, course, and career path.",
+  "foundingDate": "2024",
+  "areaServed": {
+    "@type": "Country",
+    "name": "India"
+  },
+  "sameAs": [
+    "https://facebook.com/admissionseason",
+    "https://twitter.com/admissionseason",
+    "https://instagram.com/admissionseason",
+    "https://linkedin.com/company/admissionseason",
+    "https://youtube.com/@admissionseason"
+  ]
+}
+</script>
+
+<!-- Structured Data - BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Home",
+    "item": "https://localhost/ADMISSION/"
+  }]
+}
+</script>
+
+<!-- Performance Hints -->
+<link rel="icon" type="image/svg+xml" href="/ADMISSION/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/ADMISSION/favicon.ico">
+<link rel="apple-touch-icon" href="/ADMISSION/assets/images/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://unpkg.com">
+
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=15">
+  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=<?= time() ?>">
 </head>
 <body>
 
