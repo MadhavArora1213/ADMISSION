@@ -1767,7 +1767,7 @@ select {
 }
 
 .footer-logo-img {
-  height: 48px;
+  height: 60px;
   width: auto;
   object-fit: contain;
 }
@@ -2835,7 +2835,7 @@ select {
 }
 
 .pro-logo-img {
-  height: 56px;
+  height: 70px;
   width: auto;
   object-fit: contain;
 }
@@ -4398,7 +4398,7 @@ select {
 
 @media(max-width: 640px) {
   .pro-nav-main { padding: 10px 0; }
-  .pro-logo-img { height: 40px; }
+  .pro-logo-img { height: 50px; }
   .pro-nav-right { gap: 6px; }
   .pro-icon-btn { width: 36px; height: 36px; font-size: 1.1rem; }
   .pro-user-avatar { width: 34px; height: 34px; font-size: 0.8rem; }
