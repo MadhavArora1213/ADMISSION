@@ -10,6 +10,9 @@ Options +FollowSymLinks
     RewriteEngine On
     RewriteBase /ADMISSION/
 
+    # ── Sitemap → sitemap.php ──
+    RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
     # Force HTTPS
     RewriteCond %{HTTPS} off
     RewriteCond %{HTTP_HOST} !^localhost$ [NC]
