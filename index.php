@@ -11,6 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/includes/college_helpers.php';
 require_once __DIR__ . '/includes/exam_helpers.php';
 require_once __DIR__ . '/includes/course_helpers.php';
+require_once __DIR__ . '/includes/news_seo_helpers.php';
 
 // ─── SIMPLE ROUTER ───
 $route = trim($_GET['url'] ?? '/', '/');
@@ -108,6 +109,8 @@ $fExams = [
 ];
 
 $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.featured_image_url as img, a.publish_at as date, c.category_name as cat FROM articles a LEFT JOIN article_categories c ON a.category_id=c.id WHERE a.status='published' ORDER BY a.publish_at DESC LIMIT 4");
+
+$siteBase = getBaseUrl();
 ?>
 <!DOCTYPE html>
 <html lang="en" prefix="og: https://ogp.me/ns#">
@@ -123,14 +126,14 @@ $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.feat
 <meta name="author" content="AdmissionSeason">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <meta name="googlebot" content="index, follow">
-<link rel="canonical" href="https://localhost/ADMISSION/">
+<link rel="canonical" href="<?= $siteBase ?>/">
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://localhost/ADMISSION/">
+<meta property="og:url" content="<?= $siteBase ?>/">
 <meta property="og:title" content="AdmissionSeason – Top Colleges, Exams & Courses in India 2026">
 <meta property="og:description" content="India's leading college discovery platform. Find 500+ top colleges, 100+ courses, 20+ entrance exams with fees, rankings, placements & admission details.">
-<meta property="og:image" content="https://localhost/ADMISSION/assets/images/og-homepage.jpg">
+<meta property="og:image" content="<?= $siteBase ?>/assets/images/og-homepage.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="AdmissionSeason - Find Your Dream College in India">
@@ -141,14 +144,14 @@ $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.feat
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="AdmissionSeason – Top Colleges, Exams & Courses in India 2026">
 <meta name="twitter:description" content="India's leading college discovery platform. Find 500+ top colleges, 100+ courses, 20+ entrance exams with fees, rankings, placements & admission details.">
-<meta name="twitter:image" content="https://localhost/ADMISSION/assets/images/og-homepage.jpg">
+<meta name="twitter:image" content="<?= $siteBase ?>/assets/images/og-homepage.jpg">
 <meta name="twitter:image:alt" content="AdmissionSeason - Find Your Dream College in India">
 
 <!-- Additional Meta -->
 <meta name="theme-color" content="#0B2447">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="alternate" hreflang="en-in" href="https://localhost/ADMISSION/">
+<link rel="alternate" hreflang="en-in" href="<?= $siteBase ?>/">
 
 <!-- Structured Data - WebSite -->
 <script type="application/ld+json">
@@ -156,13 +159,13 @@ $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.feat
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "AdmissionSeason",
-  "url": "https://localhost/ADMISSION/",
+  "url": "<?= $siteBase ?>/",
   "description": "India's leading college discovery platform. Find top colleges, exams, courses, fees, rankings, and admission updates.",
   "potentialAction": {
     "@type": "SearchAction",
     "target": {
       "@type": "EntryPoint",
-      "urlTemplate": "https://localhost/ADMISSION/colleges.php?q={search_term_string}"
+      "urlTemplate": "<?= $siteBase ?>/colleges.php?q={search_term_string}"
     },
     "query-input": "required name=search_term_string"
   }
@@ -174,10 +177,10 @@ $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.feat
 {
   "@context": "https://schema.org",
   "@type": "EducationalOrganization",
-  "@id": "https://localhost/ADMISSION/#organization",
+  "@id": "<?= $siteBase ?>/#organization",
   "name": "AdmissionSeason",
-  "url": "https://localhost/ADMISSION/",
-  "logo": "https://localhost/ADMISSION/assets/images/logo.png",
+  "url": "<?= $siteBase ?>/",
+  "logo": "<?= $siteBase ?>/assets/images/logo.png",
   "description": "India's leading college discovery platform helping students find the right college, course, and career path.",
   "foundingDate": "2024",
   "areaServed": {
@@ -203,7 +206,7 @@ $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.feat
     "@type": "ListItem",
     "position": 1,
     "name": "Home",
-    "item": "https://localhost/ADMISSION/"
+    "item": "<?= $siteBase ?>/"
   }]
 }
 </script>

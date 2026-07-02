@@ -3,6 +3,7 @@ declare(strict_types=1);
 error_reporting(E_ALL);
 ini_set('display_errors', '0');
 require_once __DIR__ . '/admin/db.php';
+require_once __DIR__ . '/includes/news_seo_helpers.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -10,6 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $success_msg = '';
 $error_msg = '';
+$siteBase = getBaseUrl();
 
 // Get fallback user ID if not logged in
 $user_id = $_SESSION['user_id'] ?? 'user-1234-uuid';
@@ -1549,16 +1551,16 @@ function getCategoryIcon($cat) {
                     <i class="ph ph-share-network"></i> Share
                   </button>
                   <div class="share-dropdown">
-                    <a class="share-opt" href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode('https://localhost/ADMISSION/question/' . ($q['slug'] ?? $q['id'])) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                    <a class="share-opt" href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode('$siteBase/question/' . ($q['slug'] ?? $q['id'])) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
                       <i class="ph-fill ph-facebook-logo"></i> Facebook
                     </a>
-                    <a class="share-opt" href="https://twitter.com/intent/tweet?url=<?= urlencode('https://localhost/ADMISSION/question/' . ($q['slug'] ?? $q['id'])) ?>&text=<?= urlencode($q['question_text']) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                    <a class="share-opt" href="https://twitter.com/intent/tweet?url=<?= urlencode('$siteBase/question/' . ($q['slug'] ?? $q['id'])) ?>&text=<?= urlencode($q['question_text']) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
                       <i class="ph-fill ph-twitter-logo"></i> Twitter
                     </a>
-                    <a class="share-opt" href="https://www.linkedin.com/sharing/share-offsite/?url=<?= urlencode('https://localhost/ADMISSION/question/' . ($q['slug'] ?? $q['id'])) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                    <a class="share-opt" href="https://www.linkedin.com/sharing/share-offsite/?url=<?= urlencode('$siteBase/question/' . ($q['slug'] ?? $q['id'])) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
                       <i class="ph-fill ph-linkedin-logo"></i> LinkedIn
                     </a>
-                    <a class="share-opt" href="https://plus.google.com/share?url=<?= urlencode('https://localhost/ADMISSION/question/' . ($q['slug'] ?? $q['id'])) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                    <a class="share-opt" href="https://plus.google.com/share?url=<?= urlencode('$siteBase/question/' . ($q['slug'] ?? $q['id'])) ?>" target="_blank" rel="noopener" onclick="event.stopPropagation()">
                       <i class="ph-fill ph-google-logo"></i> Google
                     </a>
                   </div>

@@ -6,7 +6,52 @@ Disallow: /api/
 Disallow: /logs/
 Disallow: /assets/css/
 Disallow: /assets/js/
+Disallow: /debug_*
+Disallow: /test_*
+Disallow: /fix_*
+Disallow: /check_*
+Disallow: /seed_*
+Disallow: /run_*
+Disallow: /update_*
+Disallow: /force_*
+Disallow: /diff.txt
+Disallow: /DEPLOY.txt
+Disallow: /README.md
+Disallow: /nimhans.html
+Disallow: /out.html
+Disallow: /h.html
+Disallow: /temp_index.html
+Disallow: /test_*.html
+Disallow: /test_full.html
+Disallow: /127_0_0_1.sql
+Disallow: /admission.sql
+Disallow: /admission_export.sql
+Disallow: /admission_hostinger.sql
+Disallow: /hostinger_final.sql
+Disallow: /seed_*.sql
+Disallow: /.env*
+Disallow: /logs/
+Disallow: /*.sql$
+Disallow: /*.log$
+Disallow: /*.env$
 
-Sitemap: https://localhost/ADMISSION/sitemap.xml
+# Sitemaps
+Sitemap: https://admissionseason.com/sitemap.xml
+Sitemap: https://admissionseason.com/sitemap-news.xml
+Sitemap: https://admissionseason.com/news/rss
+
+# Google News - allow crawling of news articles
+User-agent: Googlebot
+Allow: /news_details.php*
+Allow: /news.php*
+Allow: /news/rss
+
+User-agent: Googlebot-News
+Allow: /
+Disallow: /admin/
+Disallow: /includes/
+Disallow: /api/
+Disallow: /debug_*
+Disallow: /test_*
 
 # AdmissionSeason - India's leading college discovery platform

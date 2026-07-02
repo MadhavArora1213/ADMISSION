@@ -2,8 +2,12 @@
 if (!isset($pdo)) {
     require_once __DIR__ . '/../admin/db.php';
 }
+if (!function_exists('getBaseUrl')) {
+    require_once __DIR__ . '/news_seo_helpers.php';
+}
 
 $navBase = '/ADMISSION';
+$siteBase = getBaseUrl();
 
 try {
     $fColleges = $pdo->query("SELECT name, slug FROM colleges ORDER BY is_featured DESC, name ASC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
@@ -126,7 +130,7 @@ function fName($text) {
       "item": {
         "@type": "CollegeOrUniversity",
         "name": <?= json_encode($fc['name']) ?>,
-        "url": "https://localhost/ADMISSION/college/<?= urlencode($fc['slug']) ?>"
+        "url": "$siteBase/college/<?= urlencode($fc['slug']) ?>"
       }
     }<?= $i < count($fColleges) - 1 ? ',' : '' ?>
     <?php endforeach; ?>
@@ -152,7 +156,7 @@ function fName($text) {
       "item": {
         "@type": "EducationalOccupationalProgram",
         "name": <?= json_encode($fe['exam_name']) ?>,
-        "url": "https://localhost/ADMISSION/exam/<?= urlencode($fe['exam_slug']) ?>"
+        "url": "$siteBase/exam/<?= urlencode($fe['exam_slug']) ?>"
       }
     }<?= $i < count($fExams) - 1 ? ',' : '' ?>
     <?php endforeach; ?>

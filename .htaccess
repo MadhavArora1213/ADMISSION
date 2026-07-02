@@ -1,32 +1,34 @@
 # =============================================
 # AdmissionSeason - Root .htaccess
-# Hostinger Compatible
+# Hostinger Shared Hosting Compatible
 # =============================================
 
 Options -Indexes
-Options +FollowSymLinks
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Hostinger subfolder ke liye RewriteBase
     RewriteBase /ADMISSION/
 
-    # ── Sitemap → sitemap.php ──
-    RewriteRule ^sitemap\.xml$ sitemap.php [L]
-
-    # Force HTTPS
+    # ── Force HTTPS (skip localhost) ──
     RewriteCond %{HTTPS} off
     RewriteCond %{HTTP_HOST} !^localhost$ [NC]
     RewriteCond %{HTTP_HOST} !^127\.0\.0\.1$ [NC]
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
-    # Redirect www to non-www
+    # ── Redirect www to non-www ──
     RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
     RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 
-    # ── Static files pass through ──
+    # ── Static files & existing PHP files pass through ──
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
+
+    # ── Sitemaps ──
+    RewriteRule ^sitemap\.xml$ sitemap.php [L,QSA]
+    RewriteRule ^sitemap-news\.xml$ sitemap-news.php [L,QSA]
 
     # ── Counselling ──
     RewriteRule ^counselling/?$ counselling.php [L,QSA]
@@ -72,7 +74,8 @@ Options +FollowSymLinks
     RewriteRule ^career/([^\s]+?)/?$ career_details.php?slug=$1 [L,QSA]
 
     # ── News / Questions ──
-    RewriteRule ^news/([^\s]+)/?$ news_details.php?id=$1 [L,QSA]
+    RewriteRule ^news/rss/?$ news/rss.php [L,QSA]
+    RewriteRule ^news/([^\s]+)/?$ news_details.php?slug=$1 [L,QSA]
     RewriteRule ^question/([^\s]+)/?$ question_detail.php?id=$1 [L,QSA]
 
     # ── Rankings / Predictor / Compare ──
@@ -87,7 +90,7 @@ Options +FollowSymLinks
     RewriteRule ^logout/?$ logout.php [L,QSA]
     RewriteRule ^news/?$ news.php [L,QSA]
 
-    # ── Catch-all ──
+    # ── Catch-all (sirf non-existent paths ke liye) ──
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.+)$ index.php?url=$1 [L,QSA]
