@@ -84,13 +84,13 @@ $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
     .course-btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0,0,0,0.2); background: #f8fafc; color: #0f172a; }
 
     .course-tabs-sticky { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.97); border-bottom: 1px solid var(--cp-border); box-shadow: 0 4px 20px rgba(0,0,0,0.04); backdrop-filter: blur(10px); }
-    .shiksha-tabs-nav ul { display: flex; list-style: none; padding: 0; margin: 0; overflow-x: auto; gap: 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .shiksha-tabs-nav ul { display: flex; list-style: none; padding: 0; margin: 0; overflow-x: auto; gap: 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; max-width: 100%; }
     .shiksha-tabs-nav ul::-webkit-scrollbar { display: none; }
     .shiksha-tabs-nav li a { display: flex; align-items: center; gap: 6px; padding: 14px 18px; color: rgba(15,23,42,0.45); font-weight: 700; text-decoration: none; border-bottom: 2px solid transparent; transition: all 0.3s ease; white-space: nowrap; font-size: 0.85rem; }
     .shiksha-tabs-nav li a:hover { color: var(--cp-blue); background: rgba(11,36,71,0.02); }
     .shiksha-tabs-nav li a.active { color: var(--cp-blue); border-bottom-color: var(--cp-blue); }
 
-    .tab-content { padding: 32px 0; min-height: 40vh; }
+    .tab-content { padding-top: 32px; padding-bottom: 32px; min-height: 40vh; }
 
     .info-card { background: #fff; border-radius: 14px; padding: 24px; border: 1px solid var(--cp-border); box-shadow: 0 4px 20px rgba(0,0,0,0.02); margin-bottom: 20px; position: relative; overflow: hidden; }
     .info-card::before { content:''; position:absolute; left:0; top:0; width:4px; height:100%; background: linear-gradient(to bottom, var(--cp-blue), #19376D); border-radius: 14px 0 0 14px; }
@@ -162,6 +162,7 @@ $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
     .empty-state p { font-size: 0.9rem; color: rgba(15,23,42,0.4); }
 
     @media (max-width: 768px) {
+      .container { padding-left: 16px !important; padding-right: 16px !important; }
       .course-hero { padding: 50px 0 30px; }
       .course-hero-inner { flex-direction: column; gap: 16px; }
       .course-hero-title { font-size: 1.5rem; }
@@ -170,7 +171,7 @@ $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
       .shiksha-tabs-nav ul { gap: 0; }
       .shiksha-tabs-nav li a { padding: 12px 12px; font-size: 0.78rem; gap: 4px; }
       .shiksha-tabs-nav li a i { font-size: 0.95rem; }
-      .tab-content { padding: 20px 0; }
+      .tab-content { padding-top: 20px; padding-bottom: 20px; }
       .info-card { padding: 18px; }
       .highlight-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
       .highlight-box { padding: 14px; }

@@ -66,12 +66,12 @@ $tabIcons = [
     .exam-btn-primary { background: #fff; color: var(--cp-blue); padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; text-align: center; transition: var(--cp-trans); }
     .exam-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
     .exam-tabs-sticky { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 1px solid var(--cp-border); box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-    .shiksha-tabs-nav ul { display: flex; list-style: none; padding: 0; margin: 0; overflow-x: auto; gap: 30px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .shiksha-tabs-nav ul { display: flex; list-style: none; padding: 0; margin: 0; overflow-x: auto; gap: 30px; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; max-width: 100%; }
     .shiksha-tabs-nav ul::-webkit-scrollbar { display: none; }
     .shiksha-tabs-nav li a { display: flex; align-items: center; gap: 8px; padding: 18px 0; color: var(--cp-muted); font-weight: 600; text-decoration: none; border-bottom: 3px solid transparent; transition: var(--cp-trans); white-space: nowrap; font-size: 0.95rem; }
     .shiksha-tabs-nav li a:hover { color: var(--cp-blue); }
     .shiksha-tabs-nav li a.active { color: var(--cp-blue); border-bottom-color: var(--cp-blue); }
-    .tab-content { padding: 40px 0; min-height: 50vh; }
+    .tab-content { padding-top: 40px; padding-bottom: 40px; min-height: 50vh; }
     .info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 24px; }
     .info-card { background: #fff; border: 1px solid var(--cp-border); border-radius: 14px; padding: 20px; display: flex; align-items: flex-start; gap: 16px; }
     .info-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--cp-light); display: flex; align-items: center; justify-content: center; color: var(--cp-blue); font-size: 1.5rem; flex-shrink: 0; }
@@ -83,6 +83,7 @@ $tabIcons = [
     .timeline-date { font-weight: 700; color: var(--cp-blue); font-size: 0.9rem; margin-bottom: 4px; }
     .timeline-event { font-size: 1.1rem; font-weight: 600; color: var(--cp-text); margin: 0; }
     @media(max-width:768px){
+      .container { padding-left: 16px !important; padding-right: 16px !important; }
       .exam-hero{padding:50px 0 30px}
       .exam-hero-inner{flex-direction:column;gap:16px}
       .exam-hero-title{font-size:1.5rem}
