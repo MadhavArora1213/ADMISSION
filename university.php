@@ -117,8 +117,8 @@ if ($placements) {
     .college-tabs-wrapper.has-scroll::after { display:none }
   }
   @media(max-width:768px) {
-    .college-hero{padding:80px 0 0;min-height:auto}
-    .college-hero-inner{padding:16px 0}
+    .college-hero{padding:40px 0 0;min-height:auto}
+    .college-hero-inner{padding:12px 0}
     .college-hero-card{display:flex;flex-direction:column;align-items:stretch}
     .college-hero-main{flex-direction:column;gap:12px}
     .college-hero-actions{justify-content:flex-start;border-top:none;padding-top:0;margin-top:12px}
@@ -130,6 +130,8 @@ if ($placements) {
     .college-hero-chips span{padding:5px 10px;font-size:.72rem}
   }
   @media(max-width:480px) {
+    .college-hero{padding:20px 0 0}
+    .college-hero-inner{padding:8px 0 14px}
     .college-hero-inner.container{padding-left:16px;padding-right:16px}
     .college-hero-title{font-size:1.15rem;line-height:1.3}
     .college-hero-sub{font-size:.75rem;line-height:1.4}

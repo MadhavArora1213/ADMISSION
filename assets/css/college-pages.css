@@ -827,10 +827,11 @@ body.bg-light{background:var(--cp-bg)}
 @media(max-width:480px){
   /* Hero detail page */
   .college-hero{min-height:auto}
-  .college-hero-inner{padding:16px 0 20px}
+  .college-hero-inner{padding:8px 0 16px}
   .college-hero-inner.container{padding-left:16px;padding-right:16px}
   .college-hero-main{flex-direction:column;gap:12px}
   .college-hero-logo{width:48px;height:48px;border-radius:10px}
+  .college-hero-card{margin-top:10px}
   .college-hero-title{font-size:1.15rem;line-height:1.3}
   .college-hero-sub{font-size:.75rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .college-hero-chips{gap:5px}
@@ -958,10 +959,10 @@ body.bg-light{background:var(--cp-bg)}
   .placements-table thead{display:none}
   .placements-table tbody{display:grid;gap:12px}
   .placements-table tr{display:grid;grid-template-columns:1fr 1fr;gap:0;background:#fff;border:1px solid var(--cp-border,#e2e8f0);border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
-  .placements-table td{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.04);font-size:.82rem;gap:8px}
+  .placements-table td{display:flex;flex-direction:column;align-items:flex-start;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.04);font-size:.82rem;gap:2px}
   .placements-table td:last-child,.placements-table td:nth-child(5),.placements-table td:nth-child(6){border-bottom:none}
-  .placements-table td::before{content:attr(data-label);font-weight:700;font-size:.7rem;text-transform:uppercase;color:rgba(15,23,42,.4);flex-shrink:0}
-  .placements-table td[data-label="Year"]{grid-column:1/-1;flex-direction:column;align-items:flex-start;gap:6px;font-size:.9rem;border-bottom:1px solid rgba(0,0,0,.04)}
+  .placements-table td::before{content:attr(data-label);font-weight:700;font-size:.65rem;text-transform:uppercase;color:rgba(15,23,42,.4)}
+  .placements-table td[data-label="Year"]{grid-column:1/-1;font-size:.9rem;border-bottom:1px solid rgba(0,0,0,.04)}
   .placements-table td[data-label="Year"]::before{display:none}
 
   /* Cutoffs card layout */
@@ -1082,7 +1083,7 @@ body.bg-light{background:var(--cp-bg)}
 
   /* College detail page mobile fixes */
   .container{padding:0 16px}
-  .college-hero-inner{padding:14px 0 18px}
+  .college-hero-inner{padding:8px 0 16px}
   .college-hero-main{gap:10px}
   .college-hero-logo{width:44px;height:44px;border-radius:8px;margin-top:0}
   .college-hero-title{font-size:1.05rem;margin-bottom:4px}
@@ -1193,9 +1194,9 @@ body.bg-light{background:var(--cp-bg)}
   .fees-table td{font-size:.78rem;padding:7px 0}
   .fees-table td[data-label="Course"]{font-size:.82rem}
   .fees-table tr{padding:12px}
-  .placements-table td{font-size:.78rem;padding:7px 0}
+  .placements-table td{font-size:.78rem;padding:6px 0}
   .placements-table td[data-label="Year"]{font-size:.82rem}
-  .placements-table tr{padding:12px;grid-template-columns:1fr 1fr}
+  .placements-table tr{padding:12px;grid-template-columns:1fr}
   .cutoffs-table td{font-size:.78rem;padding:7px 0}
   .cutoffs-table td[data-label="Exam"]{font-size:.82rem}
   .cutoffs-table tr{padding:12px}
