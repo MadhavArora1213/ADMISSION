@@ -7,8 +7,8 @@ require_once __DIR__ . '/university_helpers.php';
 require_once __DIR__ . '/exam_helpers.php';
 require_once __DIR__ . '/course_helpers.php';
 
-// Auto-detect: hosted pe doc root = ADMISSION folder, localhost pe /ADMISSION/ subfolder
-$navBase = (realpath($_SERVER['DOCUMENT_ROOT'] ?? '') === realpath(__DIR__)) ? '' : '/ADMISSION';
+// Use BASE_URL from config.php (already included by db.php before this file)
+$navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
 
 // --- NAVBAR DATA ---
 if (!isset($navColleges)) {

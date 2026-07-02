@@ -6,7 +6,7 @@ if (!function_exists('getBaseUrl')) {
     require_once __DIR__ . '/news_seo_helpers.php';
 }
 
-$navBase = '/ADMISSION';
+$navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
 $siteBase = getBaseUrl();
 
 try {

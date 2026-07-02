@@ -7,7 +7,7 @@ require_once __DIR__ . '/includes/college_helpers.php';
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-$navBase = '/ADMISSION';
+$navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
 
 $id1 = $_GET['id1'] ?? '';
 $id2 = $_GET['id2'] ?? '';

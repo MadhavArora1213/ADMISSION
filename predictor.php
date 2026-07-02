@@ -5,7 +5,7 @@ ini_set('display_errors', '0');
 require_once __DIR__ . '/admin/db.php';
 require_once __DIR__ . '/includes/college_helpers.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
-$navBase = '/ADMISSION';
+$navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
 
 $exams = $pdo->query("SELECT e.id, e.exam_name FROM exams e ORDER BY e.exam_name")->fetchAll(PDO::FETCH_ASSOC);
 $states = $pdo->query("SELECT id, name FROM states ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);

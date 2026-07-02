@@ -9,7 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $q = trim($_GET['q'] ?? '');
-$navBase = '/ADMISSION';
+$navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
 
 function searchRelevance(string $text, string $query): int {
     $lower = mb_strtolower($text);

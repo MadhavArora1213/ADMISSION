@@ -164,7 +164,7 @@ function timeAgo($datetime) {
     return 'just now';
 }
 
-$navBase = '/ADMISSION';
+$navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
 $isLoggedIn = isset($_SESSION['user_id']);
 $shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . BASE_URL . '/' . $sharePath;
 ?>
