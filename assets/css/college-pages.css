@@ -85,6 +85,16 @@ body.bg-light{background:var(--cp-bg)}
 .shiksha-widget-title{font-size:.88rem;font-weight:700;text-transform:uppercase;
   letter-spacing:.5px;color:var(--cp-muted);margin-bottom:12px}
 .shiksha-widget-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:2px}
+.shiksha-widget-list li{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 10px;border-radius:8px;font-size:.85rem;
+}
+.shiksha-widget-list li span{
+  font-size:.78rem;color:var(--cp-muted);font-weight:500;
+}
+.shiksha-widget-list li strong{
+  font-size:.85rem;color:var(--cp-text);text-align:right;
+}
 .shiksha-widget-list li a{
   display:flex;justify-content:space-between;align-items:center;
   padding:8px 10px;border-radius:8px;font-size:.85rem;color:var(--cp-text);
@@ -409,6 +419,39 @@ body.bg-light{background:var(--cp-bg)}
 .college-data-table tr:last-child td{border-bottom:none}
 .college-data-table tr:hover td{background:#F8FAFC}
 
+/* Tab empty state */
+.tab-empty-state{
+  text-align:center;padding:48px 24px;
+  background:var(--cp-light);border-radius:14px;
+  border:2px dashed var(--cp-border);
+}
+.tab-empty-state i{
+  font-size:2.5rem;color:rgba(15,23,42,.12);display:block;margin-bottom:12px;
+}
+.tab-empty-state p{color:var(--cp-muted);font-size:.92rem;margin:0}
+
+/* Placement highlight */
+.placement-highlight{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+  margin-bottom:24px;
+}
+.ph-stat{
+  background:linear-gradient(135deg,#f8fafc,#eef2ff);
+  border:1px solid var(--cp-border);border-radius:14px;
+  padding:20px;text-align:center;
+  box-shadow:0 1px 4px rgba(0,0,0,.04);
+  transition:all .2s;
+}
+.ph-stat:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(11,36,71,.1)}
+.ph-stat strong{
+  display:block;font-size:1.35rem;font-weight:800;
+  color:var(--cp-text);line-height:1.2;margin-bottom:4px;
+}
+.ph-stat span{
+  font-size:.72rem;color:var(--cp-muted);text-transform:uppercase;
+  letter-spacing:.5px;font-weight:600;
+}
+
 /* Empty state */
 .college-empty{
   color:var(--cp-muted);padding:40px 24px;text-align:center;
@@ -573,6 +616,9 @@ body.bg-light{background:var(--cp-bg)}
   transform:translateY(-2px);
 }
 .college-facility-item i{font-size:1.35rem;color:var(--cp-blue)}
+.college-facility-item div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.college-facility-item strong{font-size:.88rem;color:var(--cp-text);font-weight:700}
+.college-facility-item span{font-size:.75rem;color:var(--cp-muted);font-weight:500}
 
 /* Infrastructure section cards (Sports, Labs) */
 .infra-section-card{

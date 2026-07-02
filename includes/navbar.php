@@ -3,6 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once __DIR__ . '/college_helpers.php';
+require_once __DIR__ . '/university_helpers.php';
 require_once __DIR__ . '/exam_helpers.php';
 require_once __DIR__ . '/course_helpers.php';
 
@@ -12,6 +13,7 @@ $navBase = '/ADMISSION';
 if (!isset($navColleges)) {
     $navColleges = cAll($pdo, "SELECT name,slug FROM colleges WHERE status='active' ORDER BY is_featured DESC, overall_rating_avg DESC, ranking_nirf ASC LIMIT 50");
     $navStates = cAll($pdo, "SELECT s.id, s.name, COUNT(c.id) as college_count FROM states s LEFT JOIN colleges c ON c.state_id = s.id AND c.status = 'active' GROUP BY s.id, s.name ORDER BY college_count DESC, s.name ASC LIMIT 50");
+    $navUniversities = cAll($pdo, "SELECT name,slug,university_type,ranking_nirf,naac_grade FROM universities WHERE status='active' ORDER BY is_featured DESC, ranking_nirf ASC LIMIT 30");
     $navPopularCourses = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE status='active' ORDER BY is_popular DESC, total_colleges_offering DESC LIMIT 50");
     $navExamsUg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams WHERE status='active' AND (exam_name LIKE '%JEE%' OR exam_name LIKE '%NEET%' OR exam_name LIKE '%CLAT%' OR exam_name LIKE '%CUET%') ORDER BY applicants_last_year DESC LIMIT 10");
     $navExamsPg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams WHERE status='active' AND (exam_name LIKE '%GATE%' OR exam_name LIKE '%CAT%' OR exam_name LIKE '%GMAT%' OR exam_name LIKE '%XAT%' OR exam_name LIKE '%MAT%') ORDER BY applicants_last_year DESC LIMIT 10");
@@ -229,6 +231,20 @@ if (!isset($navColleges)) {
               <ul>
                 <?php foreach($navColleges ?? [] as $navClg): ?>
                 <li><a href="<?= collegeUrl($navClg['slug'] ?? '') ?>"><?=htmlspecialchars((string)($navClg['name'] ?? ''))?></a></li>
+                <?php endforeach; ?>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="pro-has-mega">
+          <a href="<?= universitiesUrl() ?>">Universities <i class="ph ph-caret-down"></i></a>
+          <div class="pro-mega-menu">
+            <div class="mega-col">
+              <h4>Top Universities</h4>
+              <ul>
+                <?php foreach($navUniversities ?? [] as $navUni): ?>
+                <li><a href="<?= universityUrl($navUni['slug'] ?? '') ?>"><?=htmlspecialchars($navUni['name'] ?? '')?></a></li>
                 <?php endforeach; ?>
               </ul>
             </div>
@@ -615,6 +631,14 @@ if (!isset($navColleges)) {
       <div class="pro-mobile-sub-title" style="margin-top:10px">Top Colleges</div>
       <?php foreach($navColleges ?? [] as $navClg): ?>
       <a href="<?= collegeUrl($navClg['slug'] ?? '') ?>"><?=htmlspecialchars((string)($navClg['name'] ?? ''))?></a>
+      <?php endforeach; ?>
+    </div>
+
+    <a href="<?= universitiesUrl() ?>" class="pro-mobile-link pro-has-sub"><i class="ph ph-graduation-cap"></i> Universities <i class="ph ph-caret-right pro-mobile-arrow"></i></a>
+    <div class="pro-mobile-sub" id="mobileSubUniversities">
+      <a href="<?= universitiesUrl() ?>">All Universities</a>
+      <?php foreach($navUniversities ?? [] as $navUni): ?>
+      <a href="<?= universityUrl($navUni['slug'] ?? '') ?>"><?=htmlspecialchars($navUni['name'] ?? '')?></a>
       <?php endforeach; ?>
     </div>
 
