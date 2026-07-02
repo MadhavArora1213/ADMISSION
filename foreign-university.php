@@ -7,12 +7,12 @@ require_once __DIR__ . '/admin/db.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 $slug = $_GET['slug'] ?? '';
-if (!$slug) { header('Location: /ADMISSION/study-abroad'); exit; }
+if (!$slug) { header('Location: ' . BASE_URL . '/study-abroad'); exit; }
 
 $stmt = $pdo->prepare("SELECT * FROM foreign_universities WHERE university_slug = ? OR id = ? LIMIT 1");
 $stmt->execute([$slug, $slug]);
 $uni = $stmt->fetch(PDO::FETCH_ASSOC);
-if (!$uni) { header('Location: /ADMISSION/study-abroad'); exit; }
+if (!$uni) { header('Location: ' . BASE_URL . '/study-abroad'); exit; }
 
 $metaDesc = 'Details about ' . $uni['university_name'] . ' including tuition, eligibility, rankings, and admission requirements.';
 ?>
@@ -25,7 +25,7 @@ $metaDesc = 'Details about ' . $uni['university_name'] . ' including tuition, el
   <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/ADMISSION/assets/css/style.css?v=8">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css?v=8">
   <style>
     :root { --oxford-navy:#0B2447; --yale-blue:#19376D; --snow-pearl:#F8FAFC; --ink-black:#0F172A; --border-color-alt:#e2e8f0; --text-muted-alt:#64748b; }
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -98,7 +98,7 @@ $metaDesc = 'Details about ' . $uni['university_name'] . ' including tuition, el
 
 <section class="uni-hero">
   <div class="uni-hero-inner">
-    <a href="/ADMISSION/study-abroad" class="uni-back"><i class="ph ph-arrow-left"></i> Back to Study Abroad</a>
+    <a href="<?= BASE_URL ?>/study-abroad" class="uni-back"><i class="ph ph-arrow-left"></i> Back to Study Abroad</a>
   </div>
   <div class="uni-hero-inner" style="margin-top:-10px">
     <img src="<?= htmlspecialchars($uni['logo_url'] ?: 'https://images.unsplash.com/photo-1592280771190-3e2e4d571952?w=150&h=150&fit=crop') ?>" alt="logo" class="uni-hero-logo">
@@ -215,7 +215,7 @@ $metaDesc = 'Details about ' . $uni['university_name'] . ' including tuition, el
         </a>
         <?php endif; ?>
 
-        <a href="/ADMISSION/counselling" class="cta-btn" style="margin-top:10px;background:var(--yale-blue)">
+        <a href="<?= BASE_URL ?>/counselling" class="cta-btn" style="margin-top:10px;background:var(--yale-blue)">
           <i class="ph ph-headset"></i> Get Free Counselling
         </a>
       </div>

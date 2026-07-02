@@ -110,7 +110,7 @@ $tabIcons = [
 <!-- HERO -->
 <div class="exam-hero">
   <div class="container exam-hero-inner">
-    <a href="/ADMISSION/exams" style="position:absolute; top:18px; left:20px; color:rgba(255,255,255,0.85); text-decoration:none; font-size:0.88rem; font-weight:600; display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,0.1); padding:7px 16px; border-radius:100px; border:1px solid rgba(255,255,255,0.2); transition:all 0.2s; z-index:2;"><i class="ph ph-arrow-left"></i> Back to Exams</a>
+    <a href="<?= BASE_URL ?>/exams" style="position:absolute; top:18px; left:20px; color:rgba(255,255,255,0.85); text-decoration:none; font-size:0.88rem; font-weight:600; display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,0.1); padding:7px 16px; border-radius:100px; border:1px solid rgba(255,255,255,0.2); transition:all 0.2s; z-index:2;"><i class="ph ph-arrow-left"></i> Back to Exams</a>
     <img src="<?= cImg($exam['conducting_body_logo']) ?>" class="exam-hero-logo" alt="<?= htmlspecialchars($exam['exam_abbreviation'] ?? $exam['exam_name'] ?? '') ?>">
     <div>
       <h1 class="exam-hero-title"><?= htmlspecialchars($exam['exam_name']) ?><?= !empty($exam['exam_abbreviation']) ? ' (' . htmlspecialchars($exam['exam_abbreviation']) . ')' : '' ?></h1>

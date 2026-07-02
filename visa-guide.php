@@ -7,13 +7,13 @@ require_once __DIR__ . '/admin/db.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 $slug = $_GET['slug'] ?? '';
-if (!$slug) { header('Location: /ADMISSION/study-abroad?tab=visas'); exit; }
+if (!$slug) { header('Location: ' . BASE_URL . '/study-abroad?tab=visas'); exit; }
 
 $stmt = $pdo->prepare("SELECT * FROM visa_guides WHERE LOWER(REPLACE(REPLACE(REPLACE(country, ' ', '-'), '.', ''), ',', '')) = ? OR id = ? LIMIT 1");
 $normalizedSlug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $slug), '-'));
 $stmt->execute([$normalizedSlug, $slug]);
 $visa = $stmt->fetch(PDO::FETCH_ASSOC);
-if (!$visa) { header('Location: /ADMISSION/study-abroad?tab=visas'); exit; }
+if (!$visa) { header('Location: ' . BASE_URL . '/study-abroad?tab=visas'); exit; }
 
 $countryFlags = [
     'United States' => '🇺🇸', 'United Kingdom' => '🇬🇧', 'Canada' => '🇨🇦',
@@ -35,7 +35,7 @@ $metaDesc = $visa['country'] . ' student visa guide 2026: ' . $visa['visa_type']
   <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/ADMISSION/assets/css/style.css?v=8">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css?v=8">
   <style>
     :root { --oxford-navy:#0B2447; --yale-blue:#19376D; --snow-pearl:#F8FAFC; --ink-black:#0F172A; --border-color-alt:#e2e8f0; --text-muted-alt:#64748b; }
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -263,7 +263,7 @@ $metaDesc = $visa['country'] . ' student visa guide 2026: ' . $visa['visa_type']
 
 <section class="visa-hero">
   <div class="visa-hero-inner">
-    <a href="/ADMISSION/study-abroad?tab=visas" class="visa-back">
+    <a href="<?= BASE_URL ?>/study-abroad?tab=visas" class="visa-back">
       <i class="ph ph-arrow-left"></i> Back to Visa Guides
     </a>
     <div class="visa-hero-row">
@@ -392,10 +392,10 @@ $metaDesc = $visa['country'] . ' student visa guide 2026: ' . $visa['visa_type']
         <div class="sidebar-card">
           <h3><i class="ph ph-headset"></i> Need Help?</h3>
           <p style="font-size:0.85rem; color:var(--text-muted-alt); margin-bottom:12px; line-height:1.5;">Get personalized guidance from verified <?= htmlspecialchars($visa['country']) ?> visa consultants.</p>
-          <a href="/ADMISSION/counselling" class="sidebar-cta">
+          <a href="<?= BASE_URL ?>/counselling" class="sidebar-cta">
             <i class="ph-fill ph-headset"></i> Free Visa Counselling
           </a>
-          <a href="/ADMISSION/study-abroad?tab=universities" class="sidebar-cta secondary">
+          <a href="<?= BASE_URL ?>/study-abroad?tab=universities" class="sidebar-cta secondary">
             <i class="ph ph-graduation-cap"></i> Explore Universities
           </a>
         </div>
@@ -410,7 +410,7 @@ $metaDesc = $visa['country'] . ' student visa guide 2026: ' . $visa['visa_type']
               $ovSlug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $ov['country']), '-'));
               $ovFlag = $countryFlags[$ov['country']] ?? '🌍';
             ?>
-              <a href="/ADMISSION/visa-guide/<?= htmlspecialchars($ovSlug) ?>" class="other-visa-link">
+              <a href="<?= BASE_URL ?>/visa-guide/<?= htmlspecialchars($ovSlug) ?>" class="other-visa-link">
                 <span><?= $ovFlag ?></span> <?= htmlspecialchars($ov['country']) ?>
               </a>
             <?php endforeach; ?>

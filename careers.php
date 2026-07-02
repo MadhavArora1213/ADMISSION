@@ -656,7 +656,7 @@ if ($stream === 'Science') {
       </div>
       <h3>Science Stream</h3>
       <p>Engineering, Medicine, Computer Science, Aviation, Biotechnology, Physics, and Tech-oriented research paths.</p>
-      <a href="/ADMISSION/careers?stream=Science" class="stream-btn">Explore Science</a>
+      <a href="<?= BASE_URL ?>/careers?stream=Science" class="stream-btn">Explore Science</a>
     </div>
 
     <div class="stream-card">
@@ -665,7 +665,7 @@ if ($stream === 'Science') {
       </div>
       <h3>Commerce Stream</h3>
       <p>Finance, Auditing, Investment Banking, Cost Accounting, General Management, Corporate Law, and Marketing.</p>
-      <a href="/ADMISSION/careers?stream=Commerce" class="stream-btn">Explore Commerce</a>
+      <a href="<?= BASE_URL ?>/careers?stream=Commerce" class="stream-btn">Explore Commerce</a>
     </div>
 
     <div class="stream-card">
@@ -674,7 +674,7 @@ if ($stream === 'Science') {
       </div>
       <h3>Humanities & Arts</h3>
       <p>Corporate Law, Hospitality, Hotel Operations, Graphic & Digital Design, Journalism, Media, and Civil Services.</p>
-      <a href="/ADMISSION/careers?stream=Humanities" class="stream-btn">Explore Humanities</a>
+      <a href="<?= BASE_URL ?>/careers?stream=Humanities" class="stream-btn">Explore Humanities</a>
     </div>
 
   </div>
@@ -688,7 +688,7 @@ if ($stream === 'Science') {
   <div class="wizard-main">
     <div class="stream-nav-header">
       <span class="stream-badge"><i class="ph ph-sparkles"></i> <?= htmlspecialchars($stream) ?> Stream</span>
-      <a href="/ADMISSION/careers" class="change-stream-btn"><i class="ph ph-arrow-left"></i> Change Stream</a>
+      <a href="<?= BASE_URL ?>/careers" class="change-stream-btn"><i class="ph ph-arrow-left"></i> Change Stream</a>
     </div>
 
     <h2>What are your interests?</h2>
@@ -827,7 +827,7 @@ if ($stream === 'Science') {
             <p>${c.short_description || ''}</p>
             <div class="career-meta-row">
               <span class="salary-pill"><i class="ph ph-currency-inr"></i> ${c.salary_range || 'N/A'}</span>
-              <a href="/ADMISSION/career/${c.slug}" class="explore-link">Explore Path <i class="ph ph-arrow-right"></i></a>
+              <a href="<?= BASE_URL ?>/career/${c.slug}" class="explore-link">Explore Path <i class="ph ph-arrow-right"></i></a>
             </div>
           </div>
         `;

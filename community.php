@@ -1606,7 +1606,7 @@ function getCategoryIcon($cat) {
               <?php endif; ?>
 
               <?php if ((int)$q['answer_count'] > 1): ?>
-                <a class="q-view-all-link" href="/ADMISSION/question/<?= urlencode($q['slug'] ?? $q['id']) ?>" onclick="event.stopPropagation()">
+                <a class="q-view-all-link" href="<?= BASE_URL ?>/question/<?= urlencode($q['slug'] ?? $q['id']) ?>" onclick="event.stopPropagation()">
                   View All <?= number_format((int)$q['answer_count']) ?> Answers
                 </a>
               <?php endif; ?>
@@ -1741,7 +1741,7 @@ function getCategoryIcon($cat) {
           </div>
         <?php endforeach; ?>
       <?php endif; ?>
-      <a href="/ADMISSION/experts" style="display:block; text-align:center; padding:12px; background:rgba(25,55,109,0.04); border-radius:10px; color:var(--yale-blue); font-size:0.85rem; font-weight:700; margin-top:12px; text-decoration:none; border:1px solid rgba(25,55,109,0.1); transition:all 0.2s;">
+      <a href="<?= BASE_URL ?>/experts" style="display:block; text-align:center; padding:12px; background:rgba(25,55,109,0.04); border-radius:10px; color:var(--yale-blue); font-size:0.85rem; font-weight:700; margin-top:12px; text-decoration:none; border:1px solid rgba(25,55,109,0.1); transition:all 0.2s;">
         <i class="ph ph-arrow-right"></i> View All Experts
       </a>
     </div>

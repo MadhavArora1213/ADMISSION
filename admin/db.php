@@ -5,6 +5,9 @@
  * NEVER commit real credentials to version control.
  */
 
+// Load base URL config first
+require_once __DIR__ . '/../config.php';
+
 // Load from .env file if it exists
 $env_file = __DIR__ . '/../.env';
 if (file_exists($env_file)) {

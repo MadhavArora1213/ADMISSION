@@ -68,7 +68,7 @@ if (!move_uploaded_file($file['tmp_name'], $dest)) {
 }
 
 // Base URL matches existing convention (project root = /ADMISSION/)
-$base = '/ADMISSION/uploads/';
+$base = BASE_URL . '/uploads/';
 $url  = $base . $safeName;
 
 echo json_encode([

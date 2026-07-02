@@ -16,6 +16,6 @@ if (ini_get("session.use_cookies")) {
 
 session_destroy();
 
-$redirect = $_GET['redirect'] ?? '/ADMISSION/index.php';
+$redirect = $_GET['redirect'] ?? BASE_URL . '/index.php';
 header('Location: ' . $redirect);
 exit;

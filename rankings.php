@@ -78,7 +78,7 @@ $rkStates = $pdo->query("SELECT id, name FROM states ORDER BY name ASC")->fetchA
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <link rel="stylesheet" href="/ADMISSION/assets/css/style.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">
     <style>
         .rkp{max-width:1100px;margin:0 auto;padding:30px 20px 60px}
         .rkp-hero{text-align:center;margin-bottom:40px}
@@ -165,7 +165,7 @@ $rkStates = $pdo->query("SELECT id, name FROM states ORDER BY name ASC")->fetchA
         ?>
         <div class="pod-item" style="order:<?= $pos ?>">
             <div class="pod-medal <?= $podMedal[$idx] ?>"><?= $podPos[$idx] ?></div>
-            <div class="pod-name"><a href="/ADMISSION/college/<?= htmlspecialchars($pc['slug']) ?>"><?= htmlspecialchars($pc['name']) ?></a></div>
+            <div class="pod-name"><a href="<?= BASE_URL ?>/college/<?= htmlspecialchars($pc['slug']) ?>"><?= htmlspecialchars($pc['name']) ?></a></div>
             <div class="pod-loc"><i class="ph ph-map-pin"></i> <?= htmlspecialchars(($pc['city_name']?:'') . (($pc['city_name']&&$pc['state_name'])?', ':'') . ($pc['state_name']?:'')) ?></div>
             <div class="pod-stats">
                 <?php if(!empty($pc['avg_package'])): ?><div class="pod-stat"><strong>₹<?= number_format((float)$pc['avg_package'],1) ?>L</strong><span>Avg Package</span></div><?php endif; ?>
@@ -220,7 +220,7 @@ $rkStates = $pdo->query("SELECT id, name FROM states ORDER BY name ASC")->fetchA
                 <tr>
                     <td><span class="rk-td-rank<?= $rkRank<=3?' top3':'' ?>">#<?= str_pad((string)$rkRank,2,'0',STR_PAD_LEFT) ?></span></td>
                     <td class="rk-td-name">
-                        <a href="/ADMISSION/college/<?= htmlspecialchars($rc['slug']) ?>">
+                        <a href="<?= BASE_URL ?>/college/<?= htmlspecialchars($rc['slug']) ?>">
                             <div>
                                 <div><?= htmlspecialchars($rc['name']) ?></div>
                                 <div class="rk-td-loc"><i class="ph ph-map-pin"></i> <?= htmlspecialchars(($rc['city_name']?:'').(($rc['city_name']&&$rc['state_name'])?', ':'').($rc['state_name']?:'')) ?></div>

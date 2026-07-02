@@ -206,7 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
             if (empty($canonical_url)) {
                 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
                 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-                $canonical_url = $protocol . $host . '/ADMISSION/college.php?id=' . $collegeId;
+                $canonical_url = $protocol . $host . BASE_URL . '/college.php?id=' . $collegeId;
             }
 
             // 2. Auto OG Image
@@ -796,7 +796,7 @@ if ($tab === 'compare' && !empty($_GET['compare_id'])) {
 <title>College Dashboard – AdmissionSeason</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
-<link rel="stylesheet" href="/ADMISSION/assets/css/style.css?v=15">
+<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css?v=15">
 <!-- jQuery and Trumbowyg -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/ui/trumbowyg.min.css">
@@ -1283,7 +1283,7 @@ tr:hover td {
   <h1><i class="ph-fill ph-graduation-cap"></i><span class="h1-text">AdmissionSeason Dashboard</span></h1>
   <div class="dash-user">
     <span class="inst-name"><?=htmlspecialchars($account['institute_name'])?></span>
-    <a href="/ADMISSION/college/logout.php" class="logout-btn"><i class="ph ph-sign-out"></i><span class="logout-text">Logout</span></a>
+    <a href="<?= BASE_URL ?>/college/logout.php" class="logout-btn"><i class="ph ph-sign-out"></i><span class="logout-text">Logout</span></a>
   </div>
 </div>
 <div class="dash-layout">
@@ -1566,7 +1566,7 @@ tr:hover td {
             document.getElementById('city_id').innerHTML = '<option value="">Select City</option>';
             return;
         }
-        fetch('/ADMISSION/api/cities.php?state_id=' + stateId)
+        fetch(BASE_URL + '/api/cities.php?state_id=' + stateId)
             .then(res => res.json())
             .then(data => {
                 let html = '<option value="">Select City</option>';
@@ -2425,7 +2425,7 @@ tr:hover td {
         <thead><tr><th>Photo</th><th>Name</th><th>Designation</th><th>Department</th><th>Qualification</th><th>Actions</th></tr></thead>
         <tbody>
             <?php foreach($faculty as $f): 
-                $photo = $f['photo_url'] ? '../' . $f['photo_url'] : '/ADMISSION/assets/images/faculty_placeholder.png';
+                $photo = $f['photo_url'] ? '../' . $f['photo_url'] : BASE_URL . '/assets/images/faculty_placeholder.png';
             ?>
             <tr>
                 <td><img src="<?=htmlspecialchars($photo)?>" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"></td>

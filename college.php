@@ -1255,26 +1255,26 @@ document.getElementById('facultyModal')?.addEventListener('click', function(e) {
                   </div>
                   <h4>
                     <?php if (!empty($up['article_slug'])): ?>
-                      <a href="/ADMISSION/news_details.php?slug=<?= urlencode($up['article_slug']) ?>"><?= htmlspecialchars($up['title']) ?></a>
+                      <a href="<?= BASE_URL ?>/news_details.php?slug=<?= urlencode($up['article_slug']) ?>"><?= htmlspecialchars($up['title']) ?></a>
                     <?php elseif (!empty($up['action_url'])): ?>
                       <a href="<?= htmlspecialchars($up['action_url']) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($up['title']) ?></a>
                     <?php elseif (!empty($up['slug'])): ?>
-                      <a href="/ADMISSION/news/<?= urlencode($up['slug']) ?>"><?= htmlspecialchars($up['title']) ?></a>
+                      <a href="<?= BASE_URL ?>/news/<?= urlencode($up['slug']) ?>"><?= htmlspecialchars($up['title']) ?></a>
                     <?php elseif (!empty($up['id'])): ?>
-                      <a href="/ADMISSION/news/<?= urlencode($up['id']) ?>"><?= htmlspecialchars($up['title']) ?></a>
+                      <a href="<?= BASE_URL ?>/news/<?= urlencode($up['id']) ?>"><?= htmlspecialchars($up['title']) ?></a>
                     <?php else: ?>
                       <?= htmlspecialchars($up['title']) ?>
                     <?php endif; ?>
                   </h4>
                   <?php if ($up['description']): ?><p><?= nl2br(htmlspecialchars(mb_strimwidth($up['description'], 0, 180, '...'))) ?></p><?php endif; ?>
                   <?php if (!empty($up['article_slug'])): ?>
-                    <a href="/ADMISSION/news_details.php?slug=<?= urlencode($up['article_slug']) ?>">Read more <i class="ph ph-arrow-right"></i></a>
+                    <a href="<?= BASE_URL ?>/news_details.php?slug=<?= urlencode($up['article_slug']) ?>">Read more <i class="ph ph-arrow-right"></i></a>
                   <?php elseif (!empty($up['action_url'])): ?>
                     <a href="<?= htmlspecialchars($up['action_url']) ?>" target="_blank" rel="noopener">Read more <i class="ph ph-arrow-right"></i></a>
                   <?php elseif (!empty($up['slug'])): ?>
-                    <a href="/ADMISSION/news/<?= urlencode($up['slug']) ?>">Read more <i class="ph ph-arrow-right"></i></a>
+                    <a href="<?= BASE_URL ?>/news/<?= urlencode($up['slug']) ?>">Read more <i class="ph ph-arrow-right"></i></a>
                   <?php elseif (!empty($up['id'])): ?>
-                    <a href="/ADMISSION/news/<?= urlencode($up['id']) ?>">Read more <i class="ph ph-arrow-right"></i></a>
+                    <a href="<?= BASE_URL ?>/news/<?= urlencode($up['id']) ?>">Read more <i class="ph ph-arrow-right"></i></a>
                   <?php endif; ?>
                 </div>
               </article>
@@ -1296,7 +1296,7 @@ document.getElementById('facultyModal')?.addEventListener('click', function(e) {
         <?php if (!empty($updates)): ?>
         <ul class="college-notify-list">
           <?php foreach (array_slice($updates, 0, 4) as $up): ?>
-          <li><a href="<?= !empty($up['article_slug']) ? '/ADMISSION/news_details.php?slug='.urlencode($up['article_slug']) : (!empty($up['slug']) ? '/ADMISSION/news/'.urlencode($up['slug']) : (!empty($up['id']) ? '/ADMISSION/news/'.urlencode($up['id']) : collegeUrl($slug, 'news'))) ?>"><?= htmlspecialchars($up['title']) ?></a></li>
+          <li><a href="<?= !empty($up['article_slug']) ? BASE_URL . '/news_details.php?slug='.urlencode($up['article_slug']) : (!empty($up['slug']) ? BASE_URL . '/news/'.urlencode($up['slug']) : (!empty($up['id']) ? BASE_URL . '/news/'.urlencode($up['id']) : collegeUrl($slug, 'news'))) ?>"><?= htmlspecialchars($up['title']) ?></a></li>
           <?php endforeach; ?>
         </ul>
         <?php else: ?>
@@ -1954,7 +1954,7 @@ function submitReview() {
     course_id: document.getElementById('reviewCourse').value
   };
 
-  fetch('/ADMISSION/api/submit_review.php', {
+  fetch(BASE_URL + '/api/submit_review.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'same-origin',

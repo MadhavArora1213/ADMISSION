@@ -8,7 +8,7 @@ header('X-Frame-Options: DENY');
 header('X-XSS-Protection: 1; mode=block');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 
-if (!empty($_SESSION['college_account_id'])) { header('Location: /ADMISSION/college/dashboard.php'); exit; }
+if (!empty($_SESSION['college_account_id'])) { header('Location: ' . BASE_URL . '/college/dashboard.php'); exit; }
 
 $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 $error = '';
@@ -302,7 +302,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;background:#0B2
 <div class="right">
 <div class="form-wrap">
   <div class="form-top">
-    <a href="/ADMISSION/" class="back"><i class="ph ph-arrow-left"></i></a>
+    <a href="<?= BASE_URL ?>/" class="back"><i class="ph ph-arrow-left"></i></a>
     <h2>Register Institute</h2>
   </div>
 
@@ -415,7 +415,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;background:#0B2
     </div>
   </form>
 
-  <div class="form-foot"><span>Already registered? </span><a href="/ADMISSION/college/login.php">Sign in</a></div>
+  <div class="form-foot"><span>Already registered? </span><a href="<?= BASE_URL ?>/college/login.php">Sign in</a></div>
   <?php endif; ?>
 </div>
 </div>

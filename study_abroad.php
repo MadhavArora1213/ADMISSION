@@ -41,7 +41,7 @@ if ($activeCountry !== '' && !in_array($activeCountry, $countries, true)) {
   <meta name="description" content="Explore world-class universities in US, UK, Canada, Australia, and Germany. View visa requirements, fees, and consult top verify overseas advisors.">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/ADMISSION/assets/css/style.css?v=8">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css?v=8">
   
   <style>
     :root {
@@ -766,7 +766,7 @@ if ($activeCountry !== '' && !in_array($activeCountry, $countries, true)) {
       <?php else: ?>
         <div class="uni-grid">
           <?php foreach ($universities as $uni): ?>
-            <a href="/ADMISSION/foreign-university/<?= htmlspecialchars($uni['university_slug'] ?? $uni['id']) ?>" class="uni-card" data-country="<?= htmlspecialchars($uni['country']) ?>">
+            <a href="<?= BASE_URL ?>/foreign-university/<?= htmlspecialchars($uni['university_slug'] ?? $uni['id']) ?>" class="uni-card" data-country="<?= htmlspecialchars($uni['country']) ?>">
               <span class="uni-badge-qs">QS #<?= htmlspecialchars((string)$uni['qs_rank']) ?></span>
               <div class="uni-header">
                 <img src="<?= htmlspecialchars($uni['logo_url'] ?: 'https://images.unsplash.com/photo-1592280771190-3e2e4d571952?w=100&h=100&fit=crop') ?>" alt="logo" class="uni-logo">
@@ -816,7 +816,7 @@ if ($activeCountry !== '' && !in_array($activeCountry, $countries, true)) {
             $flag = $countryFlags[$visa['country']] ?? '🌍';
             $docs = json_decode($visa['documents_required'] ?? '[]', true);
           ?>
-            <a href="/ADMISSION/visa-guide/<?= htmlspecialchars($slug) ?>" class="visa-card" data-country="<?= htmlspecialchars($visa['country']) ?>">
+            <a href="<?= BASE_URL ?>/visa-guide/<?= htmlspecialchars($slug) ?>" class="visa-card" data-country="<?= htmlspecialchars($visa['country']) ?>">
               <div class="visa-card-top">
                 <span class="visa-flag-icon"><?= $flag ?></span>
                 <div class="visa-card-country"><?= htmlspecialchars($visa['country']) ?></div>
@@ -874,7 +874,7 @@ if ($activeCountry !== '' && !in_array($activeCountry, $countries, true)) {
               $conCountries = json_decode($con['specialization_countries'] ?? '[]', true);
               $mode = strtolower($con['consultation_mode'] ?? 'both');
             ?>
-            <a href="/ADMISSION/consultant/<?= (int)$con['id'] ?>" class="cons-card" data-countries='<?= htmlspecialchars(json_encode($conCountries)) ?>'>
+            <a href="<?= BASE_URL ?>/consultant/<?= (int)$con['id'] ?>" class="cons-card" data-countries='<?= htmlspecialchars(json_encode($conCountries)) ?>'>
               <div class="cons-card-top">
                 <img src="<?= htmlspecialchars($con['logo_url'] ?: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=100&h=100&fit=crop') ?>" alt="logo" class="cons-avatar">
                 <div class="cons-name-wrap">

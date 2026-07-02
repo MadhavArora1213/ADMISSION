@@ -1,6 +1,7 @@
 # =============================================
-# AdmissionSeason - Root .htaccess
-# Hostinger Shared Hosting Compatible
+# AdmissionSeason - .htaccess
+# Hostinger: document root = ADMISSION folder
+# Localhost: access via /ADMISSION/
 # =============================================
 
 Options -Indexes
@@ -8,8 +9,8 @@ Options -Indexes
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Hostinger subfolder ke liye RewriteBase
-    RewriteBase /ADMISSION/
+    # Auto-detect: localhost pe /ADMISSION/, hosted pe /
+    RewriteBase /
 
     # ── Force HTTPS (skip localhost) ──
     RewriteCond %{HTTPS} off
@@ -21,7 +22,7 @@ Options -Indexes
     RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
     RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 
-    # ── Static files & existing PHP files pass through ──
+    # ── Existing files/dirs pass through ──
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
@@ -90,7 +91,7 @@ Options -Indexes
     RewriteRule ^logout/?$ logout.php [L,QSA]
     RewriteRule ^news/?$ news.php [L,QSA]
 
-    # ── Catch-all (sirf non-existent paths ke liye) ──
+    # ── Catch-all ──
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.+)$ index.php?url=$1 [L,QSA]

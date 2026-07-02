@@ -57,7 +57,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Require login
 if (!isset($_SESSION['user_id'])) {
-    header('Location: /ADMISSION/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+    header('Location: ' . BASE_URL . '/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
 
@@ -760,7 +760,7 @@ async function loadCities(stateId) {
     return;
   }
   try {
-    const res = await fetch('/ADMISSION/api/cities.php?state_id=' + stateId);
+    const res = await fetch(BASE_URL + '/api/cities.php?state_id=' + stateId);
     const data = await res.json();
     if (data.cities && data.cities.length > 0) {
       citySelect.innerHTML = '<option value="">-- Select City --</option>' +

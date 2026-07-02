@@ -3,7 +3,7 @@
   <div class="container">
     <div class="section-hdr-flex">
       <div><h2>Elite Rankings 2026</h2><p>The pinnacle of academic excellence curated for you</p></div>
-      <a href="/ADMISSION/rankings.php" class="section-link">View Full Leaderboard <i class="ph ph-arrow-right"></i></a>
+      <a href="<?= BASE_URL ?>/rankings.php" class="section-link">View Full Leaderboard <i class="ph ph-arrow-right"></i></a>
     </div>
 
     <div class="rank-list">

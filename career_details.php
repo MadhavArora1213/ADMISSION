@@ -640,7 +640,7 @@ $skills = array_filter(array_map('trim', explode(',', $career['skills_required']
       <ul class="link-list">
         <?php foreach ($relatedExams as $ex): ?>
           <li>
-            <a href="/ADMISSION/exam/<?= htmlspecialchars($ex['exam_slug']) ?>">
+            <a href="<?= BASE_URL ?>/exam/<?= htmlspecialchars($ex['exam_slug']) ?>">
               <?= htmlspecialchars($ex['exam_name']) ?> <i class="ph ph-arrow-right"></i>
             </a>
           </li>
@@ -655,7 +655,7 @@ $skills = array_filter(array_map('trim', explode(',', $career['skills_required']
         <div class="widget-college-card">
           <img src="<?= htmlspecialchars($clg['logo'] ?: 'https://images.unsplash.com/photo-1562774053-701939374585?w=60&h=60&fit=crop') ?>" alt="college logo" class="widget-college-logo">
           <div class="widget-college-info">
-            <h4><a href="/ADMISSION/college/<?= htmlspecialchars($clg['slug']) ?>"><?= htmlspecialchars($clg['name']) ?></a></h4>
+            <h4><a href="<?= BASE_URL ?>/college/<?= htmlspecialchars($clg['slug']) ?>"><?= htmlspecialchars($clg['name']) ?></a></h4>
             <div class="widget-rating">
               <i class="ph-fill ph-star"></i> <?= number_format((float)$clg['overall_rating_avg'], 1) ?> / 5.0
             </div>
@@ -668,7 +668,7 @@ $skills = array_filter(array_map('trim', explode(',', $career['skills_required']
     <div class="cns-cta-card">
       <h4>Speak to an Expert Advisor</h4>
       <p>Confused about career options or how to secure admission for <?= htmlspecialchars($career['name']) ?>? Get 1-on-1 expert guidance for free!</p>
-      <a href="/ADMISSION/counselling?prefill_career=<?= urlencode($career['name']) ?>&prefill_stream=<?= urlencode($career['stream']) ?>" class="cns-cta-btn">
+      <a href="<?= BASE_URL ?>/counselling?prefill_career=<?= urlencode($career['name']) ?>&prefill_stream=<?= urlencode($career['stream']) ?>" class="cns-cta-btn">
         <i class="ph-fill ph-headset"></i> Request Call Back
       </a>
     </div>
