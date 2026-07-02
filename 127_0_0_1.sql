@@ -18,10 +18,9 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `admission`
+-- Database: `u642624414_edusearch`
 --
-CREATE DATABASE IF NOT EXISTS `admission` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `admission`;
+USE `u642624414_edusearch`;
 
 -- --------------------------------------------------------
 

@@ -342,6 +342,17 @@ body.bg-light{background:var(--cp-bg)}
 .college-section h3{font-size:1rem;font-weight:700;color:var(--cp-text);margin-bottom:12px}
 .college-prose{color:rgba(15,23,42,0.65);line-height:1.8;font-size:.93rem}
 
+/* Overview stat grid (Quick Facts) */
+.overview-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.overview-stat{
+  background:var(--cp-light);border:1px solid var(--cp-border);
+  border-radius:var(--cp-radius);padding:18px 14px;text-align:center;
+  transition:all var(--cp-trans);
+}
+.overview-stat:hover{border-color:rgba(37,99,235,.2);box-shadow:0 2px 8px rgba(11,36,71,.06)}
+.overview-stat-val{font-size:1.3rem;font-weight:800;color:var(--cp-text);line-height:1.2}
+.overview-stat-lbl{font-size:.72rem;color:var(--cp-muted);text-transform:uppercase;letter-spacing:.4px;margin-top:4px}
+
 /* Highlight card */
 .college-highlights-card{
   background:linear-gradient(135deg,#f8fafc 0%,#eef2ff 100%);
@@ -1046,6 +1057,7 @@ body.bg-light{background:var(--cp-bg)}
     display:flex;position:fixed;bottom:20px;right:20px;z-index:150;
     box-shadow:0 4px 20px rgba(0,0,0,.2);border-radius:50px;padding:12px 20px;
   }
+  .clc-featured-badge{font-size:.6rem;padding:2px 7px;top:8px;right:8px}
 }
 
 @media(max-width:480px){
@@ -1056,6 +1068,9 @@ body.bg-light{background:var(--cp-bg)}
   .cl-stat-val{font-size:1.1rem}
 
   .shiksha-tabs a{padding:7px 10px;font-size:.72rem}
+  .col-type-btn{padding:7px 14px;font-size:.78rem}
+  .clc-featured-badge{font-size:.58rem;padding:2px 7px;top:8px;right:8px}
+  .col-filter-toggle{padding:10px 16px;font-size:.8rem}
 
   .college-search-form{gap:6px}
   .college-search-form input[type="text"]{padding:9px 12px;font-size:.85rem}

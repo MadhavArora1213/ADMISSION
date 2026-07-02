@@ -100,19 +100,48 @@ $pageTitle = 'Universities in India ' . date('Y') . ' — Courses, Fees, Placeme
   .col-type-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:0}
   .col-type-btn{padding:8px 20px;border-radius:100px;font-size:.83rem;font-weight:600;text-decoration:none;border:1.5px solid rgba(15,23,42,0.08);color:rgba(15,23,42,0.45);transition:all .2s;white-space:nowrap}
   .col-type-btn:hover,.col-type-btn.active{background:linear-gradient(135deg,#19376D,#19376D);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(37,99,235,.3)}
-  @media(max-width:768px){
-    .cl-stats-bar{grid-template-columns:repeat(2,1fr)}
-    .sort-result-count{display:none}
-    .shiksha-sidebar{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(0,0,0,.4);padding:0}
-    .shiksha-sidebar.open{display:flex;align-items:flex-end}
-    .shiksha-sidebar .shiksha-widget{position:static;border-radius:16px 16px 0 0;max-height:80vh;overflow-y:auto;width:100%;box-shadow:0 -4px 24px rgba(0,0,0,.15);animation:slideUp .3s ease}
-    .shiksha-sidebar .shiksha-widget-wrapper{display:flex;flex-direction:column;gap:0;background:#fff;padding:20px;border-radius:16px 16px 0 0}
-    .col-filter-close{display:flex}
-  }
-  @media(max-width:480px){.cl-stats-bar{grid-template-columns:1fr 1fr}}
   .col-filter-toggle{display:none;align-items:center;gap:6px;padding:10px 20px;border-radius:12px;border:1.5px solid rgba(15,23,42,.1);background:#fff;font-size:.85rem;font-weight:700;color:#0B2447;cursor:pointer;transition:all .2s}
   .col-filter-toggle:hover{border-color:#2563eb;color:#2563eb}
   .col-filter-close{display:none;position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:8px;background:rgba(15,23,42,.06);border:none;cursor:pointer;align-items:center;justify-content:center;font-size:1rem;color:#0f172a;z-index:1}
+  @media(max-width:768px){
+    .cl-stats-bar{grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
+    .cl-stat{padding:12px 14px}
+    .cl-stat-val{font-size:1.2rem}
+    .cl-stat-lbl{font-size:.68rem}
+    .sort-result-count{display:none}
+    .sort-bar{flex-direction:column;align-items:stretch;gap:8px;padding:12px 16px}
+    .sort-result-count{margin-left:0;font-size:.78rem}
+    .shiksha-sidebar{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(0,0,0,.5);padding:0;align-items:flex-end}
+    .shiksha-sidebar.open{display:flex}
+    .shiksha-sidebar .shiksha-widget-wrapper{
+      position:static;border-radius:16px 16px 0 0;max-height:85vh;overflow-y:auto;
+      width:100%;box-shadow:0 -4px 24px rgba(0,0,0,.2);animation:slideUp .3s ease;
+      background:#fff;padding:20px;display:flex;flex-direction:column;gap:16px
+    }
+    .shiksha-sidebar .shiksha-widget{margin:0;background:#f8fafc}
+    .col-filter-close{display:flex}
+    .col-filter-toggle{
+      display:flex;position:fixed;bottom:20px;right:20px;z-index:150;
+      box-shadow:0 4px 20px rgba(0,0,0,.2);border-radius:50px;padding:12px 20px;
+    }
+    .shiksha-main-wrapper{padding:16px 0 32px}
+    .college-pager{padding:16px;gap:4px}
+    .pager-link{padding:6px 12px;font-size:.8rem}
+    .shiksha-widget{padding:16px}
+    .shiksha-widget-title{font-size:.82rem;margin-bottom:10px}
+    .shiksha-widget-list li a{padding:8px 8px;font-size:.82rem}
+  }
+  @media(max-width:480px){
+    .cl-stats-bar{grid-template-columns:1fr 1fr;gap:8px}
+    .cl-stat{padding:10px 12px}
+    .cl-stat-val{font-size:1.1rem}
+    .shiksha-tabs a{padding:7px 10px;font-size:.72rem}
+    .college-list-card{padding:14px}
+    .clc-img{height:150px}
+    .clc-body h3{font-size:.92rem}
+    .clc-stats div{min-width:calc(50% - 1px);padding:7px 5px}
+    .clc-stats strong{font-size:.82rem}
+  }
   @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 </style>
 </head>
