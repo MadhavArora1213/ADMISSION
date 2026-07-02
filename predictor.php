@@ -14,6 +14,7 @@ $courseLevels = $pdo->query("SELECT DISTINCT course_level FROM college_courses W
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<?php include __DIR__ . '/includes/favicon.php'; ?>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>College Predictor – AdmissionSeason</title>

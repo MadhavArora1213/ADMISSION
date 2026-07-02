@@ -41,8 +41,7 @@ if (!isset($navColleges)) {
     <div class="container pro-nav-flex">
       <div class="pro-nav-left">
         <a href="<?= $navBase ?>/index.php" class="pro-logo">
-          <i class="ph-fill ph-student"></i>
-          <span>AdmissionSeason</span>
+          <img src="<?= $navBase ?>/assets/img/logo.png" alt="AdmissionSeason" class="pro-logo-img">
         </a>
       </div>
 
@@ -586,9 +585,8 @@ if (!isset($navColleges)) {
 <div class="pro-mobile-overlay" id="proMobileOverlay" onclick="toggleMobileNav()"></div>
 <nav class="pro-mobile-drawer" id="proMobileDrawer">
   <div class="pro-mobile-drawer-header">
-    <a href="<?= $navBase ?>/index.php" class="pro-logo" style="font-size:1.2rem">
-      <i class="ph-fill ph-student"></i>
-      <span>AdmissionSeason</span>
+    <a href="<?= $navBase ?>/index.php" class="pro-logo">
+      <img src="<?= $navBase ?>/assets/img/logo.png" alt="AdmissionSeason" class="pro-logo-img">
     </a>
     <button class="pro-hamburger active" onclick="toggleMobileNav()" aria-label="Close">
       <i class="ph ph-x"></i>

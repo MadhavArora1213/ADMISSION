@@ -171,6 +171,7 @@ $shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . BASE_URL . '/' . $sharePath;
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <?php include __DIR__ . '/includes/favicon.php'; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($qTitle) ?> | AdmissionSeason Q&A</title>

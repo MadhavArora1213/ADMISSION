@@ -29,6 +29,7 @@ $metaDesc = $visa['country'] . ' student visa guide 2026: ' . $visa['visa_type']
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <?php include __DIR__ . '/includes/favicon.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($visa['country']) ?> Visa Guide – <?= htmlspecialchars($visa['visa_type']) ?> | AdmissionSeason</title>

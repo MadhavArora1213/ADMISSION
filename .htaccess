@@ -27,6 +27,9 @@ Options -Indexes
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
+    # ── Favicon ──
+    RewriteRule ^favicon\.ico$ favicon.svg [L,NC]
+
     # ── Sitemaps ──
     RewriteRule ^sitemap\.xml$ sitemap.php [L,QSA]
     RewriteRule ^sitemap-news\.xml$ sitemap-news.php [L,QSA]
