@@ -1,0 +1,37 @@
+DEPLOYMENT GUIDE - AdmissionSeason
+====================================
+
+Hostinger Details:
+- Database: u642624414_edusearch
+- DB User: u642624414_db_user
+- DB Pass: z2|Km7;5
+
+STEPS:
+1. Login to hpanel.hostinger.com
+2. Go to File Manager → public_html
+3. Upload all files from this project (except .env, test files, logs)
+4. Go to Databases → phpMyAdmin
+5. Select u642624414_edusearch database
+6. Click Import → Upload admission_export.sql → Go
+7. Rename .env.production to .env on server
+8. Your site is live!
+
+FILES TO UPLOAD:
+- All .php files
+- assets/ folder
+- admin/ folder
+- api/ folder
+- includes/ folder
+- pages/ folder
+- uploads/ folder (if has data)
+- .htaccess
+- robots.txt
+- sitemap.xml
+
+DO NOT UPLOAD:
+- .env (use .env.production renamed)
+- admission_export.sql
+- test_*.php files
+- logs/ folder
+- scratch/ folder
+- seed_*.php files

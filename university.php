@@ -77,6 +77,13 @@ $loginUrl = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/login.php?redirect=
 $isLoggedIn = !empty($_SESSION['user_id']);
 $navBase = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 
+$userSavedThisUni = false;
+if ($isLoggedIn && $uid) {
+    $us = $pdo->prepare("SELECT id FROM saved_colleges WHERE user_id = ? AND university_id = ? LIMIT 1");
+    $us->execute([$_SESSION['user_id'], $uid]);
+    $userSavedThisUni = (bool)$us->fetch();
+}
+
 $pageTitle = $university['meta_title'] ?? ($universityName . ': Courses, Fees, Placements ' . date('Y'));
 $metaDesc = $university['meta_description'] ?? ('Explore ' . $universityName . ' — courses, fees, placements, cutoffs and admission details.');
 
@@ -180,9 +187,24 @@ if ($placements) {
         </div>
       </div>
       <div class="college-hero-actions">
+        <button type="button" class="college-btn-outline" id="saveUniBtn" title="Save to wishlist" onclick="toggleSaveUni()">
+          <?php if ($userSavedThisUni): ?>
+            <i class="ph-fill ph-heart" style="color:#e11d48"></i> Saved
+          <?php else: ?>
+            <i class="ph ph-heart"></i> Save
+          <?php endif; ?>
+        </button>
         <?php if (!empty($university['website_url'])): ?>
         <a href="<?= htmlspecialchars($university['website_url']) ?>" target="_blank" class="college-btn-primary"><i class="ph ph-globe"></i> Visit Website</a>
         <?php endif; ?>
+        <?php if (!empty($courses)): ?>
+        <button type="button" class="college-btn-primary" onclick="sendUniCourseList()" id="uniCourseListBtn">
+          <i class="ph ph-files"></i> Course List
+        </button>
+        <?php endif; ?>
+        <button type="button" class="college-btn-primary" onclick="openUniApplyModal()">
+          <i class="ph ph-paper-plane-tilt"></i> Apply Now
+        </button>
         <a href="<?= $navBase ?>/counselling?university=<?= urlencode($slug) ?>" class="college-btn-primary"><i class="ph ph-headset"></i> Get Counselling</a>
       </div>
     </div>
@@ -420,7 +442,17 @@ if ($placements) {
             <?php else: ?>
             <div class="college-faculty-grid">
               <?php foreach ($faculty as $f): ?>
-              <div class="college-faculty-card">
+              <div class="college-faculty-card" onclick="openFacultyModal(this.dataset)" style="cursor:pointer;"
+                data-faculty_name="<?= htmlspecialchars($f['faculty_name']) ?>"
+                data-designation="<?= htmlspecialchars($f['designation'] ?? '') ?>"
+                data-department="<?= htmlspecialchars($f['department'] ?? '') ?>"
+                data-qualification="<?= htmlspecialchars($f['qualification'] ?? '') ?>"
+                data-specialization="<?= htmlspecialchars($f['specialization'] ?? '') ?>"
+                data-phd_from="<?= htmlspecialchars($f['phd_from'] ?? '') ?>"
+                data-experience_years="<?= htmlspecialchars((string)($f['experience_years'] ?? '')) ?>"
+                data-research_papers="<?= htmlspecialchars((string)($f['research_papers'] ?? '')) ?>"
+                data-photo_url="<?= htmlspecialchars(cImg($f['photo_url'] ?? '')) ?>"
+                data-linkedin_url="<?= htmlspecialchars($f['linkedin_url'] ?? '') ?>">
                 <?php if (!empty($f['photo_url'])): ?>
                 <img src="<?= cImg($f['photo_url']) ?>" alt="<?= htmlspecialchars($f['faculty_name']) ?>">
                 <?php else: ?>
@@ -428,15 +460,92 @@ if ($placements) {
                 <?php endif; ?>
                 <div>
                   <strong><?= htmlspecialchars($f['faculty_name']) ?></strong>
-                  <span><?= htmlspecialchars($f['designation'] ?? '') ?><?= !empty($f['department']) ? ' — ' . htmlspecialchars($f['department']) : '' ?></span>
+                  <span><?= htmlspecialchars($f['designation'] ?? '') ?></span>
+                  <?php if (!empty($f['department'])): ?><small><?= htmlspecialchars($f['department']) ?></small><?php endif; ?>
                   <?php if (!empty($f['qualification'])): ?><small><?= htmlspecialchars($f['qualification']) ?></small><?php endif; ?>
-                  <?php if (!empty($f['specialization'])): ?><small>Specialization: <?= htmlspecialchars($f['specialization']) ?></small><?php endif; ?>
                 </div>
               </div>
               <?php endforeach; ?>
             </div>
             <?php endif; ?>
           </section>
+
+<!-- Faculty Detail Modal -->
+<div id="facultyModal" style="display:none;position:fixed;inset:0;z-index:10002;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);">
+  <div id="facultyModalBox" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;max-width:440px;width:calc(100% - 32px);max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.25);box-sizing:border-box;">
+    <div id="facultyModalBody"></div>
+  </div>
+</div>
+<script>
+function openFacultyModal(ds) {
+  var photo = ds.photo_url
+    ? '<img src="' + ds.photo_url + '" style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 4px 20px rgba(0,0,0,.15);">'
+    : '<div style="width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#e0e7ff,#c7d2fe);display:flex;align-items:center;justify-content:center;color:#4f46e5;font-size:2rem;border:4px solid #fff;box-shadow:0 4px 20px rgba(0,0,0,.1);"><i class="ph ph-user"></i></div>';
+
+  var html = ''
+    + '<div style="background:linear-gradient(135deg,#0B2447 0%,#19376D 60%,#1e40af 100%);height:100px;border-radius:16px 16px 0 0;position:relative;">'
+    + '<button onclick="closeFacultyModal()" style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.15);border:none;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:.85rem;backdrop-filter:blur(4px);" onmouseover="this.style.background=\'rgba(255,255,255,0.25)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.15)\'"><i class="ph ph-x"></i></button>'
+    + '<div style="position:absolute;bottom:-40px;left:50%;transform:translateX(-50%);">' + photo + '</div>'
+    + '</div>'
+    + '<div style="text-align:center;padding:52px 24px 16px;">'
+    + '<h3 style="margin:0;font-size:18px;font-weight:800;color:#0f172a;">' + (ds.faculty_name || '') + '</h3>'
+    + (ds.designation ? '<div style="font-size:13px;color:#19376D;font-weight:600;margin-top:4px;">' + ds.designation + '</div>' : '')
+    + (ds.department ? '<div style="font-size:12px;color:#64748b;margin-top:2px;"><i class="ph ph-buildings" style="font-size:.75rem;"></i> ' + ds.department + '</div>' : '')
+    + '</div>'
+    + '<div style="display:flex;justify-content:center;gap:0;margin:0 24px 16px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">';
+
+  var stats = [];
+  if (ds.experience_years) stats.push([ds.experience_years, 'Exp (Yrs)', '#0B2447']);
+  if (ds.research_papers && ds.research_papers !== '0') stats.push([ds.research_papers, 'Papers', '#19376D']);
+  if (ds.qualification) stats.push([ds.qualification.split(',')[0].trim(), 'Degree', '#0f172a']);
+
+  stats.forEach(function(s, i) {
+    html += '<div style="flex:1;text-align:center;padding:12px 8px;' + (i > 0 ? 'border-left:1px solid #e2e8f0;' : '') + '">'
+      + '<div style="font-size:15px;font-weight:800;color:' + s[2] + ';">' + s[0] + '</div>'
+      + '<div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-top:2px;">' + s[1] + '</div>'
+      + '</div>';
+  });
+
+  html += '</div>';
+
+  var details = [
+    ['ph-medal', 'Specialization', ds.specialization],
+    ['ph-read-cv-logo', 'PhD From', ds.phd_from],
+  ];
+
+  var hasDetails = details.some(function(d) { return d[2]; });
+  if (hasDetails) {
+    html += '<div style="margin:0 24px 16px;padding:16px;background:#f8fafc;border-radius:12px;border:1px solid #f1f5f9;">';
+    details.forEach(function(d) {
+      if (d[2]) {
+        html += '<div style="display:flex;align-items:center;gap:10px;' + (d !== details[details.length - 1] ? 'padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid #e2e8f0;' : '') + '">'
+          + '<div style="width:32px;height:32px;border-radius:8px;background:#fff;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+          + '<i class="ph ' + d[0] + '" style="font-size:.9rem;color:#19376D;"></i></div>'
+          + '<div><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;font-weight:600;">' + d[1] + '</div>'
+          + '<div style="font-size:13px;color:#0f172a;font-weight:600;margin-top:1px;">' + d[2] + '</div></div></div>';
+      }
+    });
+    html += '</div>';
+  }
+
+  if (ds.linkedin_url) {
+    html += '<div style="margin:0 24px 24px;">'
+      + '<a href="' + ds.linkedin_url + '" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px 16px;background:#0077b5;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;" onmouseover="this.style.background=\'#006097\'" onmouseout="this.style.background=\'#0077b5\'">'
+      + '<i class="ph ph-linkedin-logo" style="font-size:1rem;"></i> View LinkedIn Profile</a></div>';
+  }
+
+  document.getElementById('facultyModalBody').innerHTML = html;
+  document.getElementById('facultyModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+function closeFacultyModal() {
+  document.getElementById('facultyModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.getElementById('facultyModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeFacultyModal();
+});
+</script>
 
         <!-- ── SCHOLARSHIPS ────────────────────────────────────── -->
         <?php elseif ($tab === 'scholarships'): ?>
@@ -591,5 +700,190 @@ document.addEventListener('DOMContentLoaded', () => {
 document.querySelectorAll('.college-faq-item summary').forEach(s => {
   s.addEventListener('click', () => { const icon = s.querySelector('i'); if (icon) icon.style.transform = s.parentElement.open ? '' : 'rotate(90deg)'; });
 });
+
+/* ── Save University ── */
+let userSavedThisUni = <?= $userSavedThisUni ? 'true' : 'false' ?>;
+const uniId = '<?= htmlspecialchars($uid) ?>';
+
+function toggleSaveUni() {
+  const btn = document.getElementById('saveUniBtn');
+  if (!btn) return;
+  btn.disabled = true;
+  const action = userSavedThisUni ? 'unsave' : 'save';
+  fetch('<?= $navBase ?>/api/save_university.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ university_id: uniId, action: action })
+  })
+  .then(r => r.json())
+  .then(data => {
+    btn.disabled = false;
+    if (data.ok) {
+      userSavedThisUni = data.saved;
+      btn.innerHTML = userSavedThisUni
+        ? '<i class="ph-fill ph-heart" style="color:#e11d48"></i> Saved'
+        : '<i class="ph ph-heart"></i> Save';
+    } else if (data.error === 'login_required') {
+      openUniLoginPrompt();
+    } else {
+      alert(data.msg || 'Something went wrong.');
+    }
+  })
+  .catch(() => { btn.disabled = false; });
+}
+
+/* ── Login Prompt ── */
+function openUniLoginPrompt() {
+  const m = document.getElementById('uniLoginPrompt');
+  if (m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+}
+function closeUniLoginPrompt() {
+  const m = document.getElementById('uniLoginPrompt');
+  if (m) { m.style.display = 'none'; document.body.style.overflow = ''; }
+}
+document.getElementById('uniLoginPrompt')?.addEventListener('click', function(e) { if (e.target === this) closeUniLoginPrompt(); });
+
+/* ── Apply Modal ── */
+function openUniApplyModal() {
+  const m = document.getElementById('uniApplyModal');
+  if (m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+}
+function closeUniApplyModal() {
+  const m = document.getElementById('uniApplyModal');
+  if (m) { m.style.display = 'none'; document.body.style.overflow = ''; }
+}
+document.getElementById('uniApplyModal')?.addEventListener('click', function(e) { if (e.target === this) closeUniApplyModal(); });
+
+function submitUniApplication(e) {
+  e.preventDefault();
+  const form = document.getElementById('uniApplyForm');
+  const btn = document.getElementById('uniApplyBtn');
+  const msg = document.getElementById('uniApplyMsg');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ph ph-spinner" style="animation:spin 1s linear infinite"></i> Submitting...';
+  fetch('<?= $navBase ?>/apply.php', { method: 'POST', body: new FormData(form) })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      msg.style.cssText = 'text-align:center;margin-top:12px;font-size:.85rem;display:block;color:#0B2447;background:rgba(11,36,71,0.06);padding:12px;border-radius:10px;';
+      msg.innerHTML = '<i class="ph-fill ph-check-circle"></i> ' + data.msg + '<br><strong>App No: ' + data.app_number + '</strong>';
+      btn.innerHTML = '<i class="ph ph-check"></i> Submitted!';
+      btn.style.background = '#059669';
+      form.reset();
+    } else {
+      msg.style.cssText = 'text-align:center;margin-top:12px;font-size:.85rem;display:block;color:#dc2626;background:rgba(220,38,38,0.06);padding:12px;border-radius:10px;';
+      msg.innerHTML = data.msg;
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Submit Application';
+      if (data.redirect) setTimeout(() => { window.location.href = data.redirect; }, 1500);
+    }
+  })
+  .catch(() => {
+    msg.style.cssText = 'text-align:center;margin-top:12px;font-size:.85rem;display:block;color:#dc2626;';
+    msg.innerHTML = 'Network error. Please try again.';
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Submit Application';
+  });
+}
+
+/* ── Course List Email ── */
+function sendUniCourseList() {
+  const btn = document.getElementById('uniCourseListBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ph ph-spinner" style="animation:spin 1s linear infinite"></i> Sending...'; }
+  const fd = new FormData();
+  fd.append('university_id', uniId);
+  fetch('<?= $navBase ?>/send_brochure.php', { method: 'POST', body: fd })
+  .then(r => r.json())
+  .then(data => {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ph ph-files"></i> Course List'; }
+    if (data.ok) {
+      alert('Course list has been emailed to ' + (data.email || 'your address.'));
+    } else if (data.redirect) { window.location.href = data.redirect; }
+    else { alert(data.msg || 'Failed to send.'); }
+  })
+  .catch(() => {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ph ph-files"></i> Course List'; }
+    alert('Network error.');
+  });
+}
 </script>
+
+<!-- Login Prompt Modal -->
+<div id="uniLoginPrompt" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;max-width:400px;width:90%;box-shadow:0 25px 60px rgba(0,0,0,0.2);position:relative;overflow:hidden;">
+    <button onclick="closeUniLoginPrompt()" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:rgba(15,23,42,0.4);z-index:1;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.background='rgba(15,23,42,0.06)'" onmouseout="this.style.background='none'"><i class="ph ph-x"></i></button>
+    <div style="padding:36px 32px 28px;text-align:center;">
+      <div style="width:64px;height:64px;border-radius:50%;background:rgba(11,36,71,0.06);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <i class="ph-fill ph-lock" style="font-size:1.8rem;color:#19376D;"></i>
+      </div>
+      <h3 style="font-size:1.15rem;font-weight:800;color:#0f172a;margin:0 0 8px;">Login Required</h3>
+      <p style="font-size:.88rem;color:rgba(15,23,42,0.5);margin:0 0 24px;line-height:1.6;">You need to login first to access this feature.</p>
+      <a href="<?= $loginUrl ?>" style="display:inline-flex;align-items:center;gap:8px;padding:13px 32px;background:#0B2447;color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;text-decoration:none;width:100%;justify-content:center;box-sizing:border-box;">
+        <i class="ph ph-arrow-right"></i> Login to Continue
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Apply Modal -->
+<div id="uniApplyModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;max-width:520px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.2);position:relative;">
+    <button onclick="closeUniApplyModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:rgba(15,23,42,0.4);z-index:1;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.background='rgba(15,23,42,0.06)'" onmouseout="this.style.background='none'"><i class="ph ph-x"></i></button>
+    <div style="padding:32px 32px 24px;">
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:rgba(11,36,71,0.06);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.5rem;color:#19376D;"><i class="ph-fill ph-paper-plane-tilt"></i></div>
+        <h2 style="font-size:1.3rem;font-weight:800;color:#0f172a;margin:0 0 4px;">Apply to <?= $universityName ?></h2>
+        <p style="font-size:.85rem;color:rgba(15,23,42,0.5);margin:0;">Fill in your details to submit your application</p>
+      </div>
+      <form id="uniApplyForm" onsubmit="submitUniApplication(event)">
+        <input type="hidden" name="university_id" value="<?= htmlspecialchars($uid) ?>">
+        <div style="margin-bottom:16px;">
+          <label style="display:block;font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.6);margin-bottom:6px;">Full Name *</label>
+          <input type="text" name="full_name" required placeholder="Enter your full name" style="width:100%;padding:12px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;outline:none;box-sizing:border-box;">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <label style="display:block;font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.6);margin-bottom:6px;">Email *</label>
+            <input type="email" name="email" required placeholder="you@example.com" style="width:100%;padding:12px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;outline:none;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block;font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.6);margin-bottom:6px;">Phone *</label>
+            <input type="tel" name="phone" required placeholder="+91 XXXXX XXXXX" style="width:100%;padding:12px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;outline:none;box-sizing:border-box;">
+          </div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="display:block;font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.6);margin-bottom:6px;">Course Interested In</label>
+          <select name="course_id" style="width:100%;padding:12px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;outline:none;background:#fff;cursor:pointer;box-sizing:border-box;">
+            <option value="">Select a course</option>
+            <?php foreach($courses as $co): ?>
+            <option value="<?= htmlspecialchars($co['id'] ?? '') ?>"><?= htmlspecialchars($co['course_name'] ?? '') ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <label style="display:block;font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.6);margin-bottom:6px;">Exam Score</label>
+            <input type="text" name="exam_score" placeholder="e.g. JEE: 98.5" style="width:100%;padding:12px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;outline:none;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block;font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.6);margin-bottom:6px;">Target Year</label>
+            <select name="target_year" style="width:100%;padding:12px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;outline:none;background:#fff;cursor:pointer;box-sizing:border-box;">
+              <option value="<?= date('Y') ?>"><?= date('Y') ?></option>
+              <option value="<?= date('Y')+1 ?>"><?= date('Y')+1 ?></option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="display:block;font-size:.8rem;font-weight:600;color:rgba(15,23,42,0.6);margin-bottom:6px;">Additional Notes</label>
+          <textarea name="notes" rows="3" placeholder="Any specific queries..." style="width:100%;padding:12px 14px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;outline:none;resize:vertical;box-sizing:border-box;font-family:inherit;"></textarea>
+        </div>
+        <button type="submit" id="uniApplyBtn" style="width:100%;padding:14px;background:#0B2447;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="ph ph-paper-plane-tilt"></i> Submit Application
+        </button>
+        <p id="uniApplyMsg" style="text-align:center;margin-top:12px;font-size:.85rem;display:none;"></p>
+      </form>
+    </div>
+  </div>
+</div>
+
 <?php include __DIR__ . '/includes/footer.php'; ?>

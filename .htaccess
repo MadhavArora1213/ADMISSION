@@ -1,19 +1,16 @@
 # =============================================
 # AdmissionSeason - Root .htaccess
-# Hostinger Compatible (PHP-FPM safe)
+# Hostinger Compatible
 # =============================================
 
 Options -Indexes
 Options +FollowSymLinks
 
-# -------------------------------------------------
-# Rewrite Engine
-# -------------------------------------------------
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /ADMISSION/
+    RewriteBase /
 
-    # Force HTTPS (skip on local XAMPP)
+    # Force HTTPS
     RewriteCond %{HTTPS} off
     RewriteCond %{HTTP_HOST} !^localhost$ [NC]
     RewriteCond %{HTTP_HOST} !^127\.0\.0\.1$ [NC]
@@ -23,134 +20,77 @@ Options +FollowSymLinks
     RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
     RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 
-# Route requests to index.php if file/dir doesn't exist
+    # ── Static files pass through ──
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # ── Counselling ──
+    RewriteRule ^counselling/?$ counselling.php [L,QSA]
+    RewriteRule ^counseling/?$ counselling.php [L,QSA]
+
+    # ── Study Abroad ──
+    RewriteRule ^study-abroad/?$ study_abroad.php [L,QSA]
+    RewriteRule ^foreign-university/([^\s]+)/?$ foreign-university.php?slug=$1 [L,QSA]
+    RewriteRule ^visa-guide/([^\s]+)/?$ visa-guide.php?slug=$1 [L,QSA]
+
+    # ── Consultants ──
+    RewriteRule ^consultant/([0-9]+)/?$ consultant.php?id=$1 [L,QSA]
+    RewriteRule ^experts/?$ experts.php [L,QSA]
+
+    # ── Universities ──
+    RewriteRule ^universities/?$ universities.php [L,QSA]
+    RewriteRule ^university/([^\s]+?)/([^\s]+?)/?$ university.php?slug=$1&tab=$2 [L,QSA]
+    RewriteRule ^university/([^\s]+?)/?$ university.php?slug=$1 [L,QSA]
+
+    # ── Community ──
+    RewriteRule ^community/?$ community.php [L,QSA]
+    RewriteRule ^discussions/?$ community.php?tab=discussions [L,QSA]
+    RewriteRule ^ask-question/?$ ask-question.php [L,QSA]
+
+    # ── Colleges ──
+    RewriteRule ^colleges/?$ colleges.php [L,QSA]
+    RewriteRule ^college/([^\s]+?)/([^\s]+?)/?$ college.php?slug=$1&tab=$2 [L,QSA]
+    RewriteRule ^college/([^\s]+?)/?$ college.php?slug=$1 [L,QSA]
+
+    # ── Exams ──
+    RewriteRule ^exams/?$ exams.php [L,QSA]
+    RewriteRule ^exam/([^\s]+?)/([^\s]+?)/?$ exam.php?slug=$1&tab=$2 [L,QSA]
+    RewriteRule ^exam/([^\s]+?)/?$ exam.php?slug=$1 [L,QSA]
+
+    # ── Courses ──
+    RewriteRule ^courses/?$ courses.php [L,QSA]
+    RewriteRule ^course/([^\s]+?)/([^\s]+?)/?$ course.php?slug=$1&tab=$2 [L,QSA]
+    RewriteRule ^course/([^\s]+?)/?$ course.php?slug=$1 [L,QSA]
+
+    # ── Careers ──
+    RewriteRule ^careers/?$ careers.php [L,QSA]
+    RewriteRule ^career/?$ careers.php [L,QSA]
+    RewriteRule ^career/([^\s]+?)/?$ career_details.php?slug=$1 [L,QSA]
+
+    # ── News / Questions ──
+    RewriteRule ^news/([^\s]+)/?$ news_details.php?id=$1 [L,QSA]
+    RewriteRule ^question/([^\s]+)/?$ question_detail.php?id=$1 [L,QSA]
+
+    # ── Rankings / Predictor / Compare ──
+    RewriteRule ^rankings/?$ rankings.php [L,QSA]
+    RewriteRule ^predictor/?$ predictor.php [L,QSA]
+    RewriteRule ^compare/?$ compare.php [L,QSA]
+    RewriteRule ^saved/?$ saved_colleges.php [L,QSA]
+    RewriteRule ^search/?$ search.php [L,QSA]
+    RewriteRule ^profile/?$ profile.php [L,QSA]
+    RewriteRule ^login/?$ login.php [L,QSA]
+    RewriteRule ^signup/?$ signup.php [L,QSA]
+    RewriteRule ^logout/?$ logout.php [L,QSA]
+    RewriteRule ^news/?$ news.php [L,QSA]
+
+    # ── Catch-all ──
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^counselling/?$ counselling.php [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^counseling/?$ counselling.php [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^counsellling/?$ counselling.php [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^study-abroad/?$ study_abroad.php [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^foreign-university/([a-zA-Z0-9_-]+)/?$ foreign-university.php?slug=$1 [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^visa-guide/([a-zA-Z0-9_-]+)/?$ visa-guide.php?slug=$1 [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^consultant/([0-9]+)/?$ consultant.php?id=$1 [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^experts/?$ experts.php [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^universities/?$ universities.php [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^community/?$ community.php [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^discussions/?$ community.php?tab=discussions [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^ask-question/?$ community.php?tab=ask [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^colleges/?$ colleges.php [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^college/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/?$ college.php?slug=$1&tab=$2 [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^college/([a-zA-Z0-9_-]+)/?$ college.php?slug=$1 [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^university/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/?$ university.php?slug=$1&tab=$2 [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^university/([a-zA-Z0-9_-]+)/?$ university.php?slug=$1 [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^exams/?$ exams.php [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^exam/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/?$ exam.php?slug=$1&tab=$2 [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^exam/([a-zA-Z0-9_-]+)/?$ exam.php?slug=$1 [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^courses/?$ courses.php [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^careers/?$ careers.php [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^career/?$ careers.php [QSA,L]
-
-    RewriteRule ^career/careers\.php$ /ADMISSION/careers [R=301,L]
-    RewriteRule ^career/careers/?$ /ADMISSION/careers [R=301,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^career/([a-zA-Z0-9_-]+)/?$ career_details.php?slug=$1 [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^question/([a-zA-Z0-9_-]+)/?$ question_detail.php?id=$1 [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^news/([a-zA-Z0-9_-]+)/?$ college_update_detail.php?id=$1 [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^career_details\.php$ career_details.php [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^course/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/?$ course.php?slug=$1&tab=$2 [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^course/([a-zA-Z0-9_-]+)/?$ course.php?slug=$1 [QSA,L]
-
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+    RewriteRule ^(.+)$ index.php?url=$1 [L,QSA]
 </IfModule>
 
-# -------------------------------------------------
-# Security Headers
-# -------------------------------------------------
+# ── Security Headers ──
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-Frame-Options "SAMEORIGIN"
@@ -158,33 +98,18 @@ Options +FollowSymLinks
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
-# -------------------------------------------------
-# Block access to sensitive files
-# -------------------------------------------------
-<FilesMatch "\.(sql|log|env|sh|bak|git)$">
+# ── Block sensitive files ──
+<FilesMatch "\.(sql|log|env|sh|bak)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
-<Files ".htaccess">
-    Order allow,deny
-    Deny from all
-</Files>
-
-# -------------------------------------------------
-# MIME Types & Compression
-# -------------------------------------------------
-<IfModule mod_mime.c>
-    AddType image/svg+xml .svg
-    AddType image/svg+xml .svgz
-</IfModule>
+# ── Compression ──
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/css application/javascript text/javascript application/json
 </IfModule>
 
-# -------------------------------------------------
-# Browser Caching
-# -------------------------------------------------
+# ── Caching ──
 <IfModule mod_expires.c>
     ExpiresActive On
     ExpiresByType text/css "access plus 1 month"
