@@ -84,7 +84,8 @@ $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
     .course-btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0,0,0,0.2); background: #f8fafc; color: #0f172a; }
 
     .course-tabs-sticky { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.97); border-bottom: 1px solid var(--cp-border); box-shadow: 0 4px 20px rgba(0,0,0,0.04); backdrop-filter: blur(10px); }
-    .shiksha-tabs-nav ul { display: flex; list-style: none; padding: 0; margin: 0; overflow-x: auto; gap: 0; }
+    .shiksha-tabs-nav ul { display: flex; list-style: none; padding: 0; margin: 0; overflow-x: auto; gap: 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .shiksha-tabs-nav ul::-webkit-scrollbar { display: none; }
     .shiksha-tabs-nav li a { display: flex; align-items: center; gap: 6px; padding: 14px 18px; color: rgba(15,23,42,0.45); font-weight: 700; text-decoration: none; border-bottom: 2px solid transparent; transition: all 0.3s ease; white-space: nowrap; font-size: 0.85rem; }
     .shiksha-tabs-nav li a:hover { color: var(--cp-blue); background: rgba(11,36,71,0.02); }
     .shiksha-tabs-nav li a.active { color: var(--cp-blue); border-bottom-color: var(--cp-blue); }

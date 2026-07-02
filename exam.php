@@ -66,7 +66,8 @@ $tabIcons = [
     .exam-btn-primary { background: #fff; color: var(--cp-blue); padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; text-align: center; transition: var(--cp-trans); }
     .exam-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
     .exam-tabs-sticky { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 1px solid var(--cp-border); box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-    .shiksha-tabs-nav ul { display: flex; list-style: none; padding: 0; margin: 0; overflow-x: auto; gap: 30px; }
+    .shiksha-tabs-nav ul { display: flex; list-style: none; padding: 0; margin: 0; overflow-x: auto; gap: 30px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .shiksha-tabs-nav ul::-webkit-scrollbar { display: none; }
     .shiksha-tabs-nav li a { display: flex; align-items: center; gap: 8px; padding: 18px 0; color: var(--cp-muted); font-weight: 600; text-decoration: none; border-bottom: 3px solid transparent; transition: var(--cp-trans); white-space: nowrap; font-size: 0.95rem; }
     .shiksha-tabs-nav li a:hover { color: var(--cp-blue); }
     .shiksha-tabs-nav li a.active { color: var(--cp-blue); border-bottom-color: var(--cp-blue); }
