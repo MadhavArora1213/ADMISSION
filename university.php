@@ -79,14 +79,33 @@ $isLoggedIn = !empty($_SESSION['user_id']);
 $navBase = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 
 $userSavedThisUni = false;
+$userAlreadyAppliedUni = null;
 if ($isLoggedIn && $uid) {
     $us = $pdo->prepare("SELECT id FROM saved_colleges WHERE user_id = ? AND university_id = ? LIMIT 1");
     $us->execute([$_SESSION['user_id'], $uid]);
     $userSavedThisUni = (bool)$us->fetch();
+
+    // Check if already applied to this university
+    try {
+        $ua = $pdo->prepare("SELECT counsellor_notes FROM leads WHERE user_id = ? AND source_page = 'university_apply' AND counsellor_notes LIKE ? LIMIT 1");
+        $ua->execute([$_SESSION['user_id'], '%' . $uid . '%']);
+        $row = $ua->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            preg_match('/Application:\s*(UAPP-[^\n]+)/', $row['counsellor_notes'] ?? '', $mApp);
+            $userAlreadyAppliedUni = ['application_number' => $mApp[1] ?? 'Applied'];
+        }
+    } catch (Exception $e) {}
 }
 
 $pageTitle = $university['meta_title'] ?? ($universityName . ': Courses, Fees, Placements ' . date('Y'));
-$metaDesc = $university['meta_description'] ?? ('Explore ' . $universityName . ' — courses, fees, placements, cutoffs and admission details.');
+$metaDesc = $university['meta_description'] ?? ('Explore ' . $universityName . ' — courses, fees, placements, cutoffs and admission details. ' . $location . '. Check NIRF ranking, NAAC grade, admission process and more.');
+$metaKeywords = strtolower($universityName) . ', ' . strtolower($universityName) . ' courses, ' . strtolower($universityName) . ' fees, ' . strtolower($universityName) . ' placements, ' . strtolower($universityName) . ' admission ' . date('Y') . ', ' . ($university['university_type'] ?? 'university') . ' in ' . ($university['city_name'] ?? 'India');
+
+$siteBase = defined('BASE_URL') ? BASE_URL : rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$canonicalUrl = $siteBase . '/university/' . urlencode($slug);
+$ogTitle = $pageTitle;
+$ogDesc = $metaDesc;
+$ogImage = !empty($university['logo_url']) ? cImg($university['logo_url']) : ($siteBase . '/assets/img/logo.png');
 
 $best = null;
 if ($placements) {
@@ -99,8 +118,76 @@ if ($placements) {
 <?php include __DIR__ . '/includes/favicon.php'; ?>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?= $pageTitle ?></title>
+<title><?= htmlspecialchars($pageTitle) ?></title>
 <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+<meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" href="<?= $canonicalUrl ?>">
+<meta name="author" content="AdmissionSeason">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="<?= $canonicalUrl ?>">
+<meta property="og:title" content="<?= htmlspecialchars($ogTitle) ?>">
+<meta property="og:description" content="<?= htmlspecialchars($ogDesc) ?>">
+<meta property="og:image" content="<?= $ogImage ?>">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="AdmissionSeason">
+<meta property="og:locale" content="en_IN">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="<?= $canonicalUrl ?>">
+<meta name="twitter:title" content="<?= htmlspecialchars($ogTitle) ?>">
+<meta name="twitter:description" content="<?= htmlspecialchars($ogDesc) ?>">
+<meta name="twitter:image" content="<?= $ogImage ?>">
+<meta name="twitter:site" content="@AdmissionSeason">
+<meta name="twitter:creator" content="@AdmissionSeason">
+
+<!-- Structured Data: University -->
+<script type="application/ld+json">
+<?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'CollegeOrUniversity',
+    'name' => $universityName,
+    'url' => $canonicalUrl,
+    'logo' => !empty($university['logo_url']) ? cImg($university['logo_url']) : null,
+    'description' => mb_strimwidth(strip_tags($university['about_text'] ?? $metaDesc), 0, 300, '...'),
+    'address' => !empty($university['address']) ? [
+        '@type' => 'PostalAddress',
+        'streetAddress' => $university['address'],
+        'addressLocality' => $university['city_name'] ?? '',
+        'addressRegion' => $university['state_name'] ?? '',
+        'addressCountry' => 'IN',
+    ] : null,
+    'telephone' => $university['phone'] ?? null,
+    'email' => $university['email'] ?? null,
+    'website' => $university['website_url'] ?? null,
+    'foundingDate' => !empty($year) ? (string)$year : null,
+    'numberOfStudents' => !empty($university['total_students']) ? [
+        '@type' => 'QuantitativeValue',
+        'value' => (int)$university['total_students'],
+    ] : null,
+    'sameAs' => array_filter([
+        $university['website_url'] ?? null,
+    ]),
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+</script>
+
+<!-- Structured Data: BreadcrumbList -->
+<script type="application/ld+json">
+<?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+        ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+        ['@type' => 'ListItem', 'position' => 2, 'name' => 'Universities', 'item' => "$siteBase/universities"],
+        ['@type' => 'ListItem', 'position' => 3, 'name' => $universityName, 'item' => $canonicalUrl],
+    ]
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+</script>
+
 <link rel="stylesheet" href="<?= $navBase ?>/assets/css/style.css?v=<?= time() ?>">
 <link rel="stylesheet" href="<?= $navBase ?>/assets/css/college-pages.css?v=<?= time() ?>">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -206,9 +293,17 @@ if ($placements) {
           <i class="ph ph-files"></i> Course List
         </button>
         <?php endif; ?>
+        <?php if ($userAlreadyAppliedUni): ?>
+        <div class="college-applied-badge" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.2);border-radius:10px;color:#16a34a;font-weight:700;font-size:.88rem;">
+          <i class="ph-fill ph-check-circle"></i>
+          <span>Already Applied</span>
+          <span style="font-size:.75rem;font-weight:600;opacity:.7;margin-left:4px;"><?= htmlspecialchars($userAlreadyAppliedUni['application_number']) ?></span>
+        </div>
+        <?php else: ?>
         <button type="button" class="college-btn-primary" onclick="openUniApplyModal()">
           <i class="ph ph-paper-plane-tilt"></i> Apply Now
         </button>
+        <?php endif; ?>
         <a href="<?= $navBase ?>/counselling?university=<?= urlencode($slug) ?>" class="college-btn-primary"><i class="ph ph-headset"></i> Get Counselling</a>
       </div>
     </div>
@@ -707,6 +802,7 @@ document.querySelectorAll('.college-faq-item summary').forEach(s => {
 
 /* ── Save University ── */
 let userSavedThisUni = <?= $userSavedThisUni ? 'true' : 'false' ?>;
+const isLoggedIn = <?= $isLoggedIn ? 'true' : 'false' ?>;
 const uniId = '<?= htmlspecialchars($uid) ?>';
 
 function toggleSaveUni() {
@@ -749,6 +845,7 @@ document.getElementById('uniLoginPrompt')?.addEventListener('click', function(e)
 
 /* ── Apply Modal ── */
 function openUniApplyModal() {
+  if (!isLoggedIn) { openUniLoginPrompt(); return; }
   const m = document.getElementById('uniApplyModal');
   if (m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
 }
@@ -769,14 +866,26 @@ function submitUniApplication(e) {
   .then(r => r.json())
   .then(data => {
     if (data.ok) {
-      msg.style.cssText = 'text-align:center;margin-top:12px;font-size:.85rem;display:block;color:#0B2447;background:rgba(11,36,71,0.06);padding:12px;border-radius:10px;';
+      msg.style.cssText = 'text-align:center;margin-top:12px;font-size:.85rem;display:block;color:#16a34a;background:rgba(22,163,74,0.06);padding:12px;border-radius:10px;border:1px solid rgba(22,163,74,0.15);';
       msg.innerHTML = '<i class="ph-fill ph-check-circle"></i> ' + data.msg + '<br><strong>App No: ' + data.app_number + '</strong>';
       btn.innerHTML = '<i class="ph ph-check"></i> Submitted!';
       btn.style.background = '#059669';
       form.reset();
+      // Replace Apply Now button with Already Applied badge after short delay
+      setTimeout(() => {
+        const applyBtn = document.querySelector('.college-hero-actions .college-btn-primary[onclick="openUniApplyModal()"]');
+        if (applyBtn) {
+          applyBtn.outerHTML = '<div class="college-applied-badge" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.2);border-radius:10px;color:#16a34a;font-weight:700;font-size:.88rem;"><i class="ph-fill ph-check-circle"></i><span>Already Applied</span><span style="font-size:.75rem;font-weight:600;opacity:.7;margin-left:4px;">' + data.app_number + '</span></div>';
+        }
+      }, 2000);
     } else {
-      msg.style.cssText = 'text-align:center;margin-top:12px;font-size:.85rem;display:block;color:#dc2626;background:rgba(220,38,38,0.06);padding:12px;border-radius:10px;';
-      msg.innerHTML = data.msg;
+      if (data.already_applied) {
+        msg.style.cssText = 'text-align:center;margin-top:12px;font-size:.85rem;display:block;color:#92400e;background:rgba(251,191,36,0.1);padding:12px;border-radius:10px;border:1px solid rgba(251,191,36,0.3);';
+        msg.innerHTML = '<i class="ph-fill ph-warning-circle"></i> ' + data.msg;
+      } else {
+        msg.style.cssText = 'text-align:center;margin-top:12px;font-size:.85rem;display:block;color:#dc2626;background:rgba(220,38,38,0.06);padding:12px;border-radius:10px;';
+        msg.innerHTML = data.msg;
+      }
       btn.disabled = false;
       btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Submit Application';
       if (data.redirect) setTimeout(() => { window.location.href = data.redirect; }, 1500);
@@ -792,6 +901,7 @@ function submitUniApplication(e) {
 
 /* ── Course List Email ── */
 function sendUniCourseList() {
+  if (!isLoggedIn) { openUniLoginPrompt(); return; }
   const btn = document.getElementById('uniCourseListBtn');
   if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ph ph-spinner" style="animation:spin 1s linear infinite"></i> Sending...'; }
   const fd = new FormData();

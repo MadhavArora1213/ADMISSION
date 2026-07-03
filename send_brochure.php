@@ -23,9 +23,11 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $college_id = trim($_POST['college_id'] ?? '');
-if ($college_id === '') {
+$university_id = trim($_POST['university_id'] ?? '');
+
+if ($college_id === '' && $university_id === '') {
     http_response_code(400);
-    echo json_encode(['ok' => false, 'msg' => 'Invalid college.']);
+    echo json_encode(['ok' => false, 'msg' => 'Invalid institution.']);
     exit;
 }
 
@@ -38,34 +40,55 @@ if (!$user || empty($user['email'])) {
     exit;
 }
 
-// Get college + courses
-try {
-    $s = $pdo->prepare("SELECT * FROM colleges WHERE id = ? LIMIT 1");
-    $s->execute([$college_id]);
-    $college = $s->fetch(PDO::FETCH_ASSOC);
-} catch (Exception $e) {
-    $college = null;
-}
-if (!$college) {
-    echo json_encode(['ok' => false, 'msg' => 'College not found.']);
-    exit;
-}
+$isUniversity = !empty($university_id);
+$baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/ADMISSION';
 
-$collegeName = $college['name'];
-$collegeSlug = $college['slug'] ?? '';
+if ($isUniversity) {
+    // University flow
+    try {
+        $s = $pdo->prepare("SELECT * FROM universities WHERE id = ? AND status = 'active' LIMIT 1");
+        $s->execute([$university_id]);
+        $uni = $s->fetch(PDO::FETCH_ASSOC);
+    } catch (Exception $e) { $uni = null; }
+    if (!$uni) {
+        echo json_encode(['ok' => false, 'msg' => 'University not found.']);
+        exit;
+    }
 
-$stmt = $pdo->prepare("SELECT * FROM college_courses WHERE college_id = ? ORDER BY course_level ASC, course_name ASC");
-$stmt->execute([$college_id]);
-$courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $institutionName = $uni['name'];
+    $institutionSlug = $uni['slug'] ?? '';
+    $institutionUrl = $baseUrl . '/university/' . urlencode($institutionSlug);
+
+    $stmt = $pdo->prepare("SELECT * FROM university_courses WHERE university_id = ? ORDER BY course_level ASC, course_name ASC");
+    $stmt->execute([$university_id]);
+    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    // College flow
+    try {
+        $s = $pdo->prepare("SELECT * FROM colleges WHERE id = ? LIMIT 1");
+        $s->execute([$college_id]);
+        $college = $s->fetch(PDO::FETCH_ASSOC);
+    } catch (Exception $e) { $college = null; }
+    if (!$college) {
+        echo json_encode(['ok' => false, 'msg' => 'College not found.']);
+        exit;
+    }
+
+    $institutionName = $college['name'];
+    $institutionSlug = $college['slug'] ?? '';
+    $institutionUrl = $baseUrl . '/college/' . urlencode($institutionSlug);
+
+    $stmt = $pdo->prepare("SELECT * FROM college_courses WHERE college_id = ? ORDER BY course_level ASC, course_name ASC");
+    $stmt->execute([$college_id]);
+    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 if (empty($courses)) {
-    echo json_encode(['ok' => false, 'msg' => 'No courses found for this college.']);
+    echo json_encode(['ok' => false, 'msg' => 'No courses found for this institution.']);
     exit;
 }
 
 // Build HTML email
-$baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/ADMISSION';
-$collegeUrl = $baseUrl . '/college/' . htmlspecialchars($collegeSlug);
 $userName = htmlspecialchars($user['full_name'] ?? 'Student');
 $emailTo = $user['email'];
 $courseCount = count($courses);
@@ -130,7 +153,7 @@ $htmlEmail = <<<HTML
       <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:12px">AdmissionSeason</div>
       <h1 style="margin:0;color:#fff;font-size:24px;font-weight:800;line-height:1.3">Course List</h1>
       <div style="width:40px;height:2px;background:rgba(255,255,255,0.25);margin:16px auto;border-radius:1px"></div>
-      <p style="margin:0;color:rgba(255,255,255,0.65);font-size:14px;font-weight:500">{$collegeName}</p>
+      <p style="margin:0;color:rgba(255,255,255,0.65);font-size:14px;font-weight:500">{$institutionName}</p>
       <p style="margin:6px 0 0;color:rgba(255,255,255,0.4);font-size:13px">{$courseCount} courses</p>
     </td>
   </tr>
@@ -139,7 +162,7 @@ $htmlEmail = <<<HTML
   <tr>
     <td style="padding:32px 48px 8px">
       <p style="margin:0;font-size:15px;color:#0f172a">Hello <strong>{$userName}</strong>,</p>
-      <p style="margin:10px 0 0;font-size:14px;color:#64748b;line-height:1.6">Here is the complete course information for <strong style="color:#0f172a">{$collegeName}</strong> as requested.</p>
+      <p style="margin:10px 0 0;font-size:14px;color:#64748b;line-height:1.6">Here is the complete course information for <strong style="color:#0f172a">{$institutionName}</strong> as requested.</p>
     </td>
   </tr>
 
@@ -161,7 +184,7 @@ $htmlEmail = <<<HTML
   <!-- CTA -->
   <tr>
     <td style="padding:0 48px 36px;text-align:center">
-      <a href="{$collegeUrl}" style="display:inline-block;background:#0B2447;color:#fff;padding:14px 40px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;letter-spacing:0.3px">View Complete Details</a>
+      <a href="{$institutionUrl}" style="display:inline-block;background:#0B2447;color:#fff;padding:14px 40px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;letter-spacing:0.3px">View Complete Details</a>
       <p style="margin:14px 0 0;font-size:12px;color:#94a3b8">Explore fees, placements, cutoffs and more</p>
     </td>
   </tr>
@@ -197,7 +220,7 @@ if (empty($apiKey)) {
 $payload = [
     'sender' => ['email' => $senderEmail, 'name' => $senderName],
     'to' => [['email' => $emailTo, 'name' => $userName]],
-    'subject' => "{$collegeName} - Course Details for {$courseCount} Courses",
+    'subject' => "{$institutionName} - Course Details for {$courseCount} Courses",
     'htmlContent' => $htmlEmail,
 ];
 
@@ -225,7 +248,7 @@ if ($response === false) {
 }
 
 if ($httpCode >= 200 && $httpCode < 300) {
-    echo json_encode(['ok' => true, 'msg' => "Course list for {$collegeName} has been emailed to {$emailTo}.", 'email' => $emailTo, 'college_id' => $college_id, 'college_name' => $collegeName, 'college_slug' => $collegeSlug]);
+    echo json_encode(['ok' => true, 'msg' => "Course list for {$institutionName} has been emailed to {$emailTo}.", 'email' => $emailTo]);
 } else {
     $err = json_decode($response, true);
     $errMsg = $err['message'] ?? ('Failed to send email (HTTP ' . $httpCode . '). Please try again.');

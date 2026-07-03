@@ -235,8 +235,17 @@ $counsellors = $counselStmt->fetchAll();
                                 </td>
                                 <td class="hide-mobile"><?php echo $l['lead_type'] ? '<span class="badge" style="background:rgba(11,36,71,0.06);color:#19376D;">'.ucfirst($l['lead_type']).'</span>' : '-'; ?></td>
                                 <td>
-                                    <div style="font-size:0.85rem; font-weight:600;"><?php echo htmlspecialchars($l['college_name'] ?: '-'); ?></div>
-                                    <div style="font-size:0.78rem; color:var(--text-muted);"><?php echo htmlspecialchars($l['course_name'] ?: ''); ?></div>
+                                    <?php
+                                    $instName = $l['college_name'] ?: '';
+                                    $instLabel = 'college';
+                                    if (empty($instName) && $l['source_page'] === 'university_apply') {
+                                        preg_match('/University:\s*(.+?)\s*\(ID:/', $l['counsellor_notes'] ?? '', $mUni);
+                                        $instName = $mUni[1] ?? 'University';
+                                        $instLabel = 'university';
+                                    }
+                                    ?>
+                                    <div style="font-size:0.85rem; font-weight:600;"><?php echo htmlspecialchars($instName ?: '-'); ?></div>
+                                    <div style="font-size:0.72rem;color:rgba(15,23,42,.4);text-transform:uppercase;letter-spacing:.03em;font-weight:600;"><?php echo htmlspecialchars($l['course_name'] ?: $instLabel); ?></div>
                                 </td>
                                 <td><span class="badge s-<?php echo $l['lead_status']; ?>"><?php echo ucfirst($l['lead_status']); ?></span></td>
                                 <td class="hide-mobile"><span class="badge p-<?php echo $l['priority']; ?>"><?php echo ucfirst($l['priority']); ?></span></td>

@@ -1770,6 +1770,7 @@ select {
   height: 60px;
   width: auto;
   object-fit: contain;
+  filter: brightness(0) invert(1);
 }
 
 .flogo i {
