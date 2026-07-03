@@ -128,7 +128,7 @@ if (!empty($collegeImage) && !str_starts_with($collegeImage, 'http')) {
 $minFee = '';
 foreach ($courses as $co) {
     if (!empty($co['annual_fee']) && $co['annual_fee'] > 0) {
-        $minFee = '₹' . number_format($co['annual_fee']) . '/year';
+        $minFee = '₹' . number_format((float)$co['annual_fee']) . '/year';
         break;
     }
 }
