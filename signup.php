@@ -278,7 +278,13 @@ $other_courses = [
     ['id' => 'Other', 'course_name' => 'Other']
 ];
 
-
+$js_courses = [];
+foreach ($popular_courses as $c) { if ($c['id'] !== 'Other') $js_courses[] = ['id' => $c['id'], 'name' => $c['course_name'], 'group' => 'Popular Courses']; }
+foreach ($ug_courses as $c) { if ($c['id'] !== 'Other') $js_courses[] = ['id' => $c['id'], 'name' => $c['course_name'], 'group' => 'Bachelor Courses']; }
+foreach ($pg_courses as $c) { if ($c['id'] !== 'Other') $js_courses[] = ['id' => $c['id'], 'name' => $c['course_name'], 'group' => 'Master Courses']; }
+foreach ($phd_courses as $c) { if ($c['id'] !== 'Other') $js_courses[] = ['id' => $c['id'], 'name' => $c['course_name'], 'group' => 'Doctorate Courses']; }
+foreach ($diploma_courses as $c) { if ($c['id'] !== 'Other') $js_courses[] = ['id' => $c['id'], 'name' => $c['course_name'], 'group' => 'Diploma Courses']; }
+$js_courses[] = ['id' => 'Other', 'name' => 'Other', 'group' => 'Other Options'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -970,6 +976,90 @@ $other_courses = [
       padding: 16px;
       text-align: center;
     }
+    /* Course Autocomplete Dropdown Styles */
+    .course-autocomplete-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    
+    .course-suggestions-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(11, 36, 71, 0.1);
+      border-radius: 12px;
+      max-height: 280px;
+      overflow-y: auto;
+      z-index: 999;
+      box-shadow: 0 10px 30px rgba(11, 36, 71, 0.1);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(11, 36, 71, 0.2) transparent;
+      text-align: left;
+    }
+    
+    .course-suggestions-dropdown::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .course-suggestions-dropdown::-webkit-scrollbar-thumb {
+      background: rgba(11, 36, 71, 0.15);
+      border-radius: 4px;
+    }
+    
+    .course-group-header {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--oxford-navy);
+      opacity: 0.85;
+      background: rgba(11, 36, 71, 0.05);
+      padding: 8px 16px;
+      letter-spacing: 0.05em;
+    }
+    
+    .course-item {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--ink-black);
+      padding: 10px 18px 10px 36px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .course-item i {
+      font-size: 1.1rem;
+      color: var(--oxford-navy);
+      opacity: 0.6;
+      transition: all 0.2s ease;
+    }
+    
+    .course-item:hover {
+      background: rgba(11, 36, 71, 0.04);
+      color: var(--oxford-navy);
+      padding-left: 40px;
+    }
+    
+    .course-item:hover i {
+      color: #19376D;
+      opacity: 1;
+    }
+    
+    .no-courses-found {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--ink-black);
+      opacity: 0.5;
+      padding: 16px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -1043,51 +1133,22 @@ $other_courses = [
             </div>
             
             <div class="form-group-custom">
-              <select name="course" class="input-card" id="course_select" onchange="toggleOtherCourseInput()">
-                <option value="" disabled selected>Course</option>
-                <?php if (!empty($popular_courses)): ?>
-                  <optgroup label="Popular Courses">
-                    <?php foreach ($popular_courses as $c): ?>
-                      <option value="<?= htmlspecialchars($c['id']) ?>" <?= (($_POST['course'] ?? '') === $c['id']) ? 'selected' : '' ?>><?= htmlspecialchars($c['course_name']) ?></option>
-                    <?php endforeach; ?>
-                  </optgroup>
-                <?php endif; ?>
-                <?php if (!empty($ug_courses)): ?>
-                  <optgroup label="Bachelor Courses">
-                    <?php foreach ($ug_courses as $c): ?>
-                      <option value="<?= htmlspecialchars($c['id']) ?>" <?= (($_POST['course'] ?? '') === $c['id']) ? 'selected' : '' ?>><?= htmlspecialchars($c['course_name']) ?></option>
-                    <?php endforeach; ?>
-                  </optgroup>
-                <?php endif; ?>
-                <?php if (!empty($pg_courses)): ?>
-                  <optgroup label="Master Courses">
-                    <?php foreach ($pg_courses as $c): ?>
-                      <option value="<?= htmlspecialchars($c['id']) ?>" <?= (($_POST['course'] ?? '') === $c['id']) ? 'selected' : '' ?>><?= htmlspecialchars($c['course_name']) ?></option>
-                    <?php endforeach; ?>
-                  </optgroup>
-                <?php endif; ?>
-                <?php if (!empty($phd_courses)): ?>
-                  <optgroup label="Doctorate Courses">
-                    <?php foreach ($phd_courses as $c): ?>
-                      <option value="<?= htmlspecialchars($c['id']) ?>" <?= (($_POST['course'] ?? '') === $c['id']) ? 'selected' : '' ?>><?= htmlspecialchars($c['course_name']) ?></option>
-                    <?php endforeach; ?>
-                  </optgroup>
-                <?php endif; ?>
-                <?php if (!empty($diploma_courses)): ?>
-                  <optgroup label="Diploma Courses">
-                    <?php foreach ($diploma_courses as $c): ?>
-                      <option value="<?= htmlspecialchars($c['id']) ?>" <?= (($_POST['course'] ?? '') === $c['id']) ? 'selected' : '' ?>><?= htmlspecialchars($c['course_name']) ?></option>
-                    <?php endforeach; ?>
-                  </optgroup>
-                <?php endif; ?>
-                <?php if (!empty($other_courses)): ?>
-                  <optgroup label="Other Courses">
-                    <?php foreach ($other_courses as $c): ?>
-                      <option value="<?= htmlspecialchars($c['id']) ?>" <?= (($_POST['course'] ?? '') === $c['id']) ? 'selected' : '' ?>><?= htmlspecialchars($c['course_name']) ?></option>
-                    <?php endforeach; ?>
-                  </optgroup>
-                <?php endif; ?>
-              </select>
+              <div class="course-autocomplete-wrapper">
+                <?php
+                  $initialCourseName = '';
+                  if (!empty($_POST['course'])) {
+                      foreach ($js_courses as $jc) {
+                          if ($jc['id'] === $_POST['course']) {
+                              $initialCourseName = $jc['name'];
+                              break;
+                          }
+                      }
+                  }
+                ?>
+                <input type="text" id="course_input" class="input-card" placeholder="Course" autocomplete="off" value="<?= htmlspecialchars($initialCourseName) ?>" required>
+                <input type="hidden" name="course" id="course_id_input" value="<?= htmlspecialchars($_POST['course'] ?? '') ?>">
+                <div class="course-suggestions-dropdown" id="course_suggestions" style="display: none;"></div>
+              </div>
             </div>
             
             <div class="form-group-custom" id="other_course_wrapper" style="display: <?= (($_POST['course'] ?? '') === 'Other') ? 'block' : 'none' ?>;">
@@ -1208,6 +1269,7 @@ function switchFormMode(mode) {
     // Set required attributes dynamically
     document.getElementsByName('name')[0].setAttribute('required', 'required');
     document.getElementsByName('email')[0].setAttribute('required', 'required');
+    if (document.getElementById('course_input')) document.getElementById('course_input').setAttribute('required', 'required');
     document.getElementsByName('course')[0].setAttribute('required', 'required');
     document.getElementsByName('city')[0].setAttribute('required', 'required');
     
@@ -1223,6 +1285,7 @@ function switchFormMode(mode) {
     // Remove required attributes from hidden fields
     document.getElementsByName('name')[0].removeAttribute('required');
     document.getElementsByName('email')[0].removeAttribute('required');
+    if (document.getElementById('course_input')) document.getElementById('course_input').removeAttribute('required');
     document.getElementsByName('course')[0].removeAttribute('required');
     document.getElementsByName('city')[0].removeAttribute('required');
     
@@ -1239,11 +1302,11 @@ function switchFormMode(mode) {
 }
 
 function toggleOtherCourseInput() {
-  const courseSelect = document.getElementById('course_select');
+  const courseIdInput = document.getElementById('course_id_input');
   const otherWrapper = document.getElementById('other_course_wrapper');
   const otherInput = document.getElementById('other_course_name');
-  if (courseSelect && otherWrapper && otherInput) {
-    if (courseSelect.value === 'Other') {
+  if (courseIdInput && otherWrapper && otherInput) {
+    if (courseIdInput.value === 'Other') {
       otherWrapper.style.display = 'block';
       otherInput.setAttribute('required', 'required');
     } else {
@@ -1389,6 +1452,126 @@ if (cityInput) {
   document.addEventListener('click', (e) => {
     if (!cityInput.contains(e.target) && !citySuggestions.contains(e.target)) {
       citySuggestions.style.display = 'none';
+    }
+  });
+}
+
+// Course Autocomplete Suggest Controller
+const coursesData = <?= json_encode($js_courses) ?>;
+
+const courseInput = document.getElementById('course_input');
+const courseIdInput = document.getElementById('course_id_input');
+const courseSuggestions = document.getElementById('course_suggestions');
+
+function renderCourseSuggestions(query = '') {
+  courseSuggestions.innerHTML = '';
+  
+  // Group courses by Category/Group
+  const groups = {};
+  coursesData.forEach(c => {
+    if (!groups[c.group]) groups[c.group] = [];
+    groups[c.group].push(c);
+  });
+  
+  if (query.trim() === '') {
+    // Show all groups
+    Object.keys(groups).forEach(groupName => {
+      if (groups[groupName].length > 0) {
+        const groupHeader = document.createElement('div');
+        groupHeader.className = 'course-group-header';
+        groupHeader.innerText = groupName;
+        courseSuggestions.appendChild(groupHeader);
+        
+        groups[groupName].forEach(course => {
+          const courseItem = document.createElement('div');
+          courseItem.className = 'course-item';
+          courseItem.innerHTML = `<i class="ph ph-graduation-cap"></i> <span>${course.name}</span>`;
+          courseItem.onclick = () => selectCourse(course.id, course.name);
+          courseSuggestions.appendChild(courseItem);
+        });
+      }
+    });
+  } else {
+    // Filter matching courses
+    const lowerQuery = query.toLowerCase();
+    const matches = coursesData.filter(c => c.name.toLowerCase().includes(lowerQuery));
+    
+    if (matches.length === 0) {
+      const noFound = document.createElement('div');
+      noFound.className = 'no-courses-found';
+      noFound.innerText = 'No courses found';
+      courseSuggestions.appendChild(noFound);
+    } else {
+      // Group matched courses
+      const groupedMatches = {};
+      matches.forEach(c => {
+        if (!groupedMatches[c.group]) groupedMatches[c.group] = [];
+        groupedMatches[c.group].push(c);
+      });
+      
+      Object.keys(groupedMatches).forEach(groupName => {
+        if (groupedMatches[groupName].length > 0) {
+          const groupHeader = document.createElement('div');
+          groupHeader.className = 'course-group-header';
+          groupHeader.innerText = groupName;
+          courseSuggestions.appendChild(groupHeader);
+          
+          groupedMatches[groupName].forEach(course => {
+            const courseItem = document.createElement('div');
+            courseItem.className = 'course-item';
+            
+            const idx = course.name.toLowerCase().indexOf(lowerQuery);
+            if (idx >= 0) {
+              const before = course.name.substring(0, idx);
+              const matchText = course.name.substring(idx, idx + lowerQuery.length);
+              const after = course.name.substring(idx + lowerQuery.length);
+              courseItem.innerHTML = `<i class="ph ph-graduation-cap"></i> <span>${before}<strong>${matchText}</strong>${after}</span>`;
+            } else {
+              courseItem.innerHTML = `<i class="ph ph-graduation-cap"></i> <span>${course.name}</span>`;
+            }
+            
+            courseItem.onclick = () => selectCourse(course.id, course.name);
+            courseSuggestions.appendChild(courseItem);
+          });
+        }
+      });
+    }
+  }
+}
+
+function selectCourse(courseId, courseName) {
+  courseInput.value = courseName;
+  courseIdInput.value = courseId;
+  courseSuggestions.style.display = 'none';
+  
+  const otherWrapper = document.getElementById('other_course_wrapper');
+  const otherInput = document.getElementById('other_course_name');
+  if (otherWrapper && otherInput) {
+    if (courseId === 'Other') {
+      otherWrapper.style.display = 'block';
+      otherInput.setAttribute('required', 'required');
+    } else {
+      otherWrapper.style.display = 'none';
+      otherInput.removeAttribute('required');
+      otherInput.value = '';
+    }
+  }
+}
+
+if (courseInput) {
+  courseInput.addEventListener('focus', () => {
+    renderCourseSuggestions(courseInput.value);
+    courseSuggestions.style.display = 'block';
+  });
+  
+  courseInput.addEventListener('input', (e) => {
+    renderCourseSuggestions(e.target.value);
+  });
+  
+  // Close suggestions when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!courseInput.contains(e.target) && !courseSuggestions.contains(e.target)) {
+      courseSuggestions.style.display = 'none';
     }
   });
 }
