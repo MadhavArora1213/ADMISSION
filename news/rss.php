@@ -1,8 +1,8 @@
 <?php
 /**
- * AdmissionSeason - News RSS Feed
- * Compliant with Google News RSS requirements
- * https://news.google.com/publications
+ * AdmissionSeason - Dynamic RSS Feed
+ * Supports category/type filtering like sitemap
+ * Usage: /news/rss, /news/rss?type=news, /news/rss?type=blog&category=engineering
  */
 
 header('Content-Type: application/rss+xml; charset=utf-8');
@@ -15,30 +15,37 @@ require_once __DIR__ . '/../includes/news_seo_helpers.php';
 
 $baseUrl  = getBaseUrl();
 $siteName = 'AdmissionSeason';
-$description = 'Latest college and university news, exam updates, admission alerts, and education tips from AdmissionSeason - India\'s leading college discovery platform.';
 
-// cImg helper for image URLs
-if (!function_exists('cImg')) {
-    function cImg(?string $url = ''): string {
-        global $baseUrl;
-        if (!$url) return $baseUrl . '/assets/img/logo.png';
-        if (str_starts_with($url, 'http') || str_starts_with($url, '//')) return $url;
-        return $baseUrl . '/' . ltrim($url, '/');
-    }
-}
+// Filter parameters
+$type = trim($_GET['type'] ?? '');
+$category = trim($_GET['category'] ?? '');
+$validTypes = ['all', 'news', 'blog', 'guide', 'exam_update', 'opinion', 'ranking'];
+if (!in_array($type, $validTypes)) $type = '';
 
-// Fetch ALL published articles for RSS feed
-$articles = $pdo->query("
-    SELECT a.id, a.article_title, a.article_slug, a.article_type, a.excerpt,
+// Build query
+$query = "SELECT a.id, a.article_title, a.article_slug, a.article_type, a.excerpt,
            a.featured_image_url, a.publish_at, a.updated_at, a.content_body,
            a.custom_author_name, a.tags,
            c.category_name, c.category_slug
     FROM articles a
     LEFT JOIN article_categories c ON a.category_id = c.id
-    WHERE a.status = 'published'
-    ORDER BY a.publish_at DESC
-    LIMIT 100
-")->fetchAll(PDO::FETCH_ASSOC);
+    WHERE a.status = 'published'";
+$params = [];
+
+if ($type !== '') {
+    $query .= " AND a.article_type = :type";
+    $params[':type'] = $type;
+}
+if ($category !== '') {
+    $query .= " AND c.category_slug = :category";
+    $params[':category'] = $category;
+}
+
+$query .= " ORDER BY a.publish_at DESC LIMIT 100";
+
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
+$articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch tag names for each article
 foreach ($articles as &$art) {
@@ -58,7 +65,17 @@ foreach ($articles as &$art) {
 }
 unset($art);
 
-// Determine the last build date
+// Dynamic feed title/description based on filters
+$typeLabels = ['news'=>'College News','blog'=>'Education Blog','guide'=>'Student Guides','exam_update'=>'Exam Updates','opinion'=>'Expert Opinions','ranking'=>'College Rankings'];
+$feedTitle = $siteName . ' - ' . ($typeLabels[$type] ?? 'Education News');
+$feedDesc = $type !== '' 
+    ? 'Latest ' . strtolower($typeLabels[$type] ?? 'articles') . ' from AdmissionSeason.'
+    : 'Latest college and university news, exam updates, admission alerts, and education tips from AdmissionSeason.';
+$feedLink = $baseUrl . '/news';
+if ($type !== '') $feedLink .= '?type=' . urlencode($type);
+if ($category !== '') $feedLink .= ($type !== '' ? '&' : '?') . 'category=' . urlencode($category);
+
+// Last build date
 $lastBuildDate = !empty($articles[0]['publish_at'])
     ? date('r', strtotime($articles[0]['publish_at']))
     : date('r');
@@ -71,15 +88,15 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
      xmlns:atom="http://www.w3.org/2005/Atom"
      xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel>
-  <title><?= htmlspecialchars($siteName) ?> - Education News</title>
-  <link><?= $baseUrl ?>/news.php</link>
-  <description><?= htmlspecialchars($description) ?></description>
+  <title><?= htmlspecialchars($feedTitle) ?></title>
+  <link><?= $feedLink ?></link>
+  <description><?= htmlspecialchars($feedDesc) ?></description>
   <language>en-in</language>
   <copyright>&amp;copy; <?= date('Y') ?> <?= htmlspecialchars($siteName) ?>. All rights reserved.</copyright>
   <lastBuildDate><?= $lastBuildDate ?></lastBuildDate>
   <pubDate><?= $lastBuildDate ?></pubDate>
   <ttl>60</ttl>
-  <atom:link href="<?= $baseUrl ?>/news/rss" rel="self" type="application/rss+xml"/>
+  <atom:link href="<?= $baseUrl ?>/news/rss<?= !empty($_SERVER['QUERY_STRING']) ? '?' . htmlspecialchars($_SERVER['QUERY_STRING']) : '' ?>" rel="self" type="application/rss+xml"/>
   <image>
     <url><?= $baseUrl ?>/assets/img/logo.png</url>
     <title><?= htmlspecialchars($siteName) ?></title>
@@ -91,7 +108,9 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 <?php foreach ($articles as $art):
   $artUrl = $baseUrl . '/news/' . urlencode($art['article_slug']);
   $artDate = !empty($art['publish_at']) ? date('r', strtotime($art['publish_at'])) : date('r');
-  $artImage = cImg($art['featured_image_url']);
+  $artImage = !empty($art['featured_image_url']) 
+      ? (str_starts_with($art['featured_image_url'], 'http') ? $art['featured_image_url'] : $baseUrl . '/' . ltrim($art['featured_image_url'], '/'))
+      : $baseUrl . '/assets/img/logo.png';
   $artDesc = mb_strimwidth(strip_tags($art['excerpt'] ?? $art['content_body'] ?? ''), 0, 300, '...');
   $categoryName = $art['category_name'] ?? 'News';
   $authorName = $art['custom_author_name'] ?: 'AdmissionSeason Desk';
