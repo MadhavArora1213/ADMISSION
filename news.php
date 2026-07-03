@@ -161,7 +161,7 @@ $tabLabel = $type === 'all' ? 'All News' : ucwords(str_replace('_', ' ', $type))
   <meta property="og:url" content="<?= $canonicalUrl ?>">
   <meta property="og:title" content="<?= htmlspecialchars($ogTitle) ?>">
   <meta property="og:description" content="<?= htmlspecialchars($ogDesc) ?>">
-  <meta property="og:image" content="$siteBase/assets/images/og-news.jpg">
+  <meta property="og:image" content="<?= $siteBase ?>/assets/images/og-news.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:site_name" content="AdmissionSeason">
@@ -172,7 +172,7 @@ $tabLabel = $type === 'all' ? 'All News' : ucwords(str_replace('_', ' ', $type))
   <meta name="twitter:url" content="<?= $canonicalUrl ?>">
   <meta name="twitter:title" content="<?= htmlspecialchars($ogTitle) ?>">
   <meta name="twitter:description" content="<?= htmlspecialchars($ogDesc) ?>">
-  <meta name="twitter:image" content="$siteBase/assets/images/og-news.jpg">
+  <meta name="twitter:image" content="<?= $siteBase ?>/assets/images/og-news.jpg">
   <meta name="twitter:site" content="@AdmissionSeason">
   <meta name="twitter:creator" content="@AdmissionSeason">
 
@@ -184,7 +184,7 @@ $tabLabel = $type === 'all' ? 'All News' : ucwords(str_replace('_', ' ', $type))
   <meta name="language" content="English">
 
   <!-- RSS Feed -->
-  <link rel="alternate" type="application/rss+xml" title="<?= htmlspecialchars($pageTitle) ?> RSS" href="$siteBase/news/rss">
+  <link rel="alternate" type="application/rss+xml" title="<?= htmlspecialchars($pageTitle) ?> RSS" href="<?= $siteBase ?>/news/rss">
 
   <!-- Structured Data: CollectionPage -->
   <script type="application/ld+json">
@@ -197,10 +197,10 @@ $tabLabel = $type === 'all' ? 'All News' : ucwords(str_replace('_', ' ', $type))
     'publisher' => [
       '@type' => 'Organization',
       'name' => 'AdmissionSeason',
-      'url' => '$siteBase',
+      'url' => "$siteBase",
       'logo' => [
         '@type' => 'ImageObject',
-        'url' => '$siteBase/assets/images/logo.png',
+        'url' => "$siteBase/assets/images/logo.png",
         'width' => 600,
         'height' => 60
       ],
@@ -215,7 +215,7 @@ $tabLabel = $type === 'all' ? 'All News' : ucwords(str_replace('_', ' ', $type))
     'isPartOf' => [
       '@type' => 'WebSite',
       'name' => 'AdmissionSeason',
-      'url' => '$siteBase'
+      'url' => "$siteBase"
     ],
     'about' => [
       '@type' => 'Thing',
@@ -236,8 +236,8 @@ $tabLabel = $type === 'all' ? 'All News' : ucwords(str_replace('_', ' ', $type))
     '@context' => 'https://schema.org',
     '@type' => 'BreadcrumbList',
     'itemListElement' => array_values(array_filter([
-      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => '$siteBase/'],
-      ['@type' => 'ListItem', 'position' => 2, 'name' => 'News', 'item' => '$siteBase/news.php'],
+      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+      ['@type' => 'ListItem', 'position' => 2, 'name' => 'News', 'item' => "$siteBase/news.php"],
       ($type !== 'all' || !empty($categoryLabel))
         ? ['@type' => 'ListItem', 'position' => 3, 'name' => !empty($categoryLabel) ? $categoryLabel : $tabLabel]
         : null,
@@ -256,7 +256,7 @@ $tabLabel = $type === 'all' ? 'All News' : ucwords(str_replace('_', ' ', $type))
     'url' => $canonicalUrl,
     'numberOfItems' => count($articles),
     'itemListElement' => array_map(function($art, $i) {
-        $url = '$siteBase/news_details.php?slug=' . urlencode($art['article_slug']);
+        $url = "$siteBase/news_details.php?slug=" . urlencode($art['article_slug']);
         $desc = mb_strimwidth(strip_tags($art['excerpt'] ?? ''), 0, 160, '...');
         return [
             '@type' => 'ListItem',
@@ -271,7 +271,7 @@ $tabLabel = $type === 'all' ? 'All News' : ucwords(str_replace('_', ' ', $type))
                 'publisher' => [
                     '@type' => 'Organization',
                     'name' => 'AdmissionSeason',
-                    'logo' => ['@type' => 'ImageObject', 'url' => '$siteBase/assets/images/logo.png']
+                    'logo' => ['@type' => 'ImageObject', 'url' => "$siteBase/assets/images/logo.png"]
                 ],
                 'image' => cImg($art['featured_image_url']),
                 'articleSection' => $art['category_name'] ?? 'News',
