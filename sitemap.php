@@ -1,4 +1,6 @@
 <?php
+error_reporting(0);
+ini_set('display_errors', '0');
 header('Content-Type: application/xml; charset=utf-8');
 header('X-Robots-Tag: noindex');
 
@@ -226,7 +228,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
   </url>
 
   <!-- Dynamic: State-wise College Pages -->
-<?php
+<?php try {
 $statesList = $pdo->query("SELECT s.id, s.name, COUNT(c.id) AS cnt FROM states s LEFT JOIN colleges c ON c.state_id = s.id AND c.status='active' GROUP BY s.id, s.name HAVING cnt > 0 ORDER BY cnt DESC, s.name ASC")->fetchAll(PDO::FETCH_ASSOC);
 foreach ($statesList as $sl):
 ?>
@@ -236,7 +238,8 @@ foreach ($statesList as $sl):
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-<?php endforeach; ?>
+<?php endforeach;
+} catch (Throwable $e) {} ?>
 
   <url>
     <loc><?= $baseUrl ?>/study-abroad</loc>
@@ -324,7 +327,7 @@ foreach ($statesList as $sl):
   </url>
 
 <!-- Dynamic: Question Pages -->
-<?php
+<?php try {
 $questions = $pdo->query("SELECT slug, created_at FROM questions WHERE status IN ('open','answered','resolved') AND slug IS NOT NULL AND slug != '' ORDER BY created_at DESC LIMIT 500")->fetchAll(PDO::FETCH_ASSOC);
 foreach ($questions as $q):
   $mod = !empty($q['created_at']) ? date('Y-m-d', strtotime($q['created_at'])) : $today;
@@ -335,7 +338,8 @@ foreach ($questions as $q):
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
-<?php endforeach; ?>
+<?php endforeach;
+} catch (Throwable $e) {} ?>
 
   <url>
     <loc><?= $baseUrl ?>/counselling</loc>
@@ -345,7 +349,7 @@ foreach ($questions as $q):
   </url>
 
   <!-- Dynamic: Colleges -->
-<?php
+<?php try {
 $colleges = $pdo->query("SELECT slug, updated_at FROM colleges WHERE status='active' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 foreach ($colleges as $c):
   $mod = !empty($c['updated_at']) ? date('Y-m-d', strtotime($c['updated_at'])) : $today;
@@ -356,10 +360,11 @@ foreach ($colleges as $c):
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-<?php endforeach; ?>
+<?php endforeach;
+} catch (Throwable $e) {} ?>
 
   <!-- Dynamic: Universities -->
-<?php
+<?php try {
 $universities = $pdo->query("SELECT slug, updated_at FROM universities WHERE status='active' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 foreach ($universities as $u):
   $mod = !empty($u['updated_at']) ? date('Y-m-d', strtotime($u['updated_at'])) : $today;
@@ -370,10 +375,11 @@ foreach ($universities as $u):
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-<?php endforeach; ?>
+<?php endforeach;
+} catch (Throwable $e) {} ?>
 
   <!-- Dynamic: Courses -->
-<?php
+<?php try {
 $courses = $pdo->query("SELECT slug, updated_at FROM courses WHERE status='active' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 foreach ($courses as $co):
   $mod = !empty($co['updated_at']) ? date('Y-m-d', strtotime($co['updated_at'])) : $today;
@@ -384,10 +390,11 @@ foreach ($courses as $co):
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
-<?php endforeach; ?>
+<?php endforeach;
+} catch (Throwable $e) {} ?>
 
 <!-- Dynamic: Course Category Pages -->
-<?php
+<?php try {
 $courseCats = $pdo->query("SELECT DISTINCT course_category FROM courses WHERE status='active' AND course_category IS NOT NULL AND course_category != '' ORDER BY course_category ASC")->fetchAll(PDO::FETCH_COLUMN);
 foreach ($courseCats as $ccat):
 ?>
@@ -397,10 +404,11 @@ foreach ($courseCats as $ccat):
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
-<?php endforeach; ?>
+<?php endforeach;
+} catch (Throwable $e) {} ?>
 
   <!-- Dynamic: Exams -->
-<?php
+<?php try {
 $exams = $pdo->query("SELECT slug, updated_at FROM exams WHERE status='active' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 foreach ($exams as $ex):
   $mod = !empty($ex['updated_at']) ? date('Y-m-d', strtotime($ex['updated_at'])) : $today;
@@ -411,10 +419,11 @@ foreach ($exams as $ex):
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
-<?php endforeach; ?>
+<?php endforeach;
+} catch (Throwable $e) {} ?>
 
 <!-- Dynamic: News Articles -->
-<?php
+<?php try {
 $newsArticles = $pdo->query("SELECT article_slug, publish_at, updated_at, category_slug FROM articles WHERE status='published' ORDER BY publish_at DESC LIMIT 1000")->fetchAll(PDO::FETCH_ASSOC);
 foreach ($newsArticles as $na):
   $mod = !empty($na['updated_at']) ? date('Y-m-d', strtotime($na['updated_at'])) : (!empty($na['publish_at']) ? date('Y-m-d', strtotime($na['publish_at'])) : $today);
@@ -425,10 +434,11 @@ foreach ($newsArticles as $na):
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
-<?php endforeach; ?>
+<?php endforeach;
+} catch (Throwable $e) {} ?>
 
 <!-- Dynamic: News Category Pages -->
-<?php
+<?php try {
 $newsCats = $pdo->query("SELECT category_slug, category_name FROM article_categories ORDER BY category_name")->fetchAll(PDO::FETCH_ASSOC);
 foreach ($newsCats as $nc):
 ?>
@@ -438,10 +448,11 @@ foreach ($newsCats as $nc):
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
-<?php endforeach; ?>
+<?php endforeach;
+} catch (Throwable $e) {} ?>
 
 <!-- Dynamic: Career Pages -->
-<?php
+<?php try {
 $careers = $pdo->query("SELECT career_slug, updated_at FROM careers WHERE status='active' ORDER BY career_name")->fetchAll(PDO::FETCH_ASSOC);
 foreach ($careers as $cr):
   $mod = !empty($cr['updated_at']) ? date('Y-m-d', strtotime($cr['updated_at'])) : $today;
@@ -452,10 +463,11 @@ foreach ($careers as $cr):
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-<?php endforeach; ?>
+<?php endforeach;
+} catch (Throwable $e) {} ?>
 
 <!-- Dynamic: Foreign Universities -->
-<?php
+<?php try {
 $foreignUnis = $pdo->query("SELECT slug, updated_at FROM foreign_universities WHERE status='active' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 foreach ($foreignUnis as $fu):
   $mod = !empty($fu['updated_at']) ? date('Y-m-d', strtotime($fu['updated_at'])) : $today;
@@ -466,10 +478,11 @@ foreach ($foreignUnis as $fu):
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
-<?php endforeach; ?>
+<?php endforeach;
+} catch (Throwable $e) {} ?>
 
 <!-- Dynamic: Visa Guides -->
-<?php
+<?php try {
 $visaGuides = $pdo->query("SELECT slug, updated_at FROM visa_guides WHERE status='active' ORDER BY country_name")->fetchAll(PDO::FETCH_ASSOC);
 foreach ($visaGuides as $vg):
   $mod = !empty($vg['updated_at']) ? date('Y-m-d', strtotime($vg['updated_at'])) : $today;
@@ -480,6 +493,7 @@ foreach ($visaGuides as $vg):
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-<?php endforeach; ?>
+<?php endforeach;
+} catch (Throwable $e) {} ?>
 
 </urlset>
