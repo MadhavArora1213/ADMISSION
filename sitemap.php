@@ -319,12 +319,6 @@ foreach ($statesList as $sl):
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
-  <url>
-    <loc><?= $baseUrl ?>/community?tab=discussions</loc>
-    <lastmod><?= $today ?></lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
 
 <!-- Dynamic: Question Pages -->
 <?php try {
