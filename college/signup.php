@@ -262,7 +262,53 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;background:#0B2
   .nav-btns{grid-template-columns:1fr}
   .steps-nav button{font-size:.65rem;padding:8px 0}
 }
-</style>
+    /* State Autocomplete Dropdown Styles */
+    .state-autocomplete-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    
+    .state-suggestions-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      width: 100%;
+      background: #fff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 999;
+      box-shadow: 0 10px 25px rgba(11, 36, 71, 0.08);
+      scrollbar-width: thin;
+      text-align: left;
+    }
+    
+    .state-item {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #334155;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .state-item:hover {
+      background: #f1f5f9;
+      color: #19376D;
+    }
+    
+    .no-states-found {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #94a3b8;
+      padding: 12px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
 <div class="page">
@@ -332,7 +378,26 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;background:#0B2
 
       <div class="fg"><label>Institute Name <span class="r">*</span></label><input type="text" name="institute_name" placeholder="e.g. Indian Institute of Technology Delhi" data-req="1" value="<?=htmlspecialchars($_POST['institute_name']??'')?>"></div>
       <div class="row2">
-        <div class="fg"><label>State</label><select name="state_id"><option value="">Select</option><?php foreach($states as $s):?><option value="<?=$s['id']?>" <?=((int)($_POST['state_id']??0)==$s['id'])?'selected':''?>><?=htmlspecialchars($s['name'])?></option><?php endforeach;?></select></div>
+        <div class="fg">
+          <label>State</label>
+          <div class="state-autocomplete-wrapper">
+            <?php
+              $initialStateName = '';
+              if (!empty($_POST['state_id'])) {
+                  foreach ($states as $s) {
+                      if ((int)$s['id'] === (int)$_POST['state_id']) {
+                          $initialStateName = $s['name'];
+                          break;
+                      }
+                  }
+              }
+            ?>
+            <input type="text" id="state_input" placeholder="Select State" autocomplete="off" value="<?= htmlspecialchars($initialStateName) ?>" style="padding-right:32px;">
+            <input type="hidden" name="state_id" id="state_id_input" value="<?= htmlspecialchars($_POST['state_id'] ?? '') ?>">
+            <i class="ph ph-caret-down" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #64748b; font-size: 0.95rem;"></i>
+            <div class="state-suggestions-dropdown" id="state_suggestions" style="display: none;"></div>
+          </div>
+        </div>
         <div class="fg"><label>City</label><input type="text" name="city" placeholder="New Delhi" value="<?=htmlspecialchars($_POST['city']??'')?>"></div>
       </div>
       <div class="row2">
@@ -465,6 +530,81 @@ document.querySelector('input[name="aadhar_number"]')?.addEventListener('input',
   let v=this.value.replace(/\D/g,'').substring(0,12);
   this.value=v.replace(/(\d{4})(?=\d)/g,'$1 ');
 });
+
+// State Autocomplete Suggest Controller
+const statesData = <?= json_encode($states) ?>;
+
+const stateInput = document.getElementById('state_input');
+const stateIdInput = document.getElementById('state_id_input');
+const stateSuggestions = document.getElementById('state_suggestions');
+
+function renderStateSuggestions(query = '') {
+  stateSuggestions.innerHTML = '';
+  
+  if (query.trim() === '') {
+    // Show all states
+    statesData.forEach(state => {
+      const stateItem = document.createElement('div');
+      stateItem.className = 'state-item';
+      stateItem.innerHTML = `<i class="ph ph-map-pin"></i> <span>${state.name}</span>`;
+      stateItem.onclick = () => selectState(state.id, state.name);
+      stateSuggestions.appendChild(stateItem);
+    });
+  } else {
+    // Filter matching states
+    const lowerQuery = query.toLowerCase();
+    const matches = statesData.filter(s => s.name.toLowerCase().includes(lowerQuery));
+    
+    if (matches.length === 0) {
+      const noFound = document.createElement('div');
+      noFound.className = 'no-states-found';
+      noFound.innerText = 'No matching states';
+      stateSuggestions.appendChild(noFound);
+    } else {
+      matches.forEach(state => {
+        const stateItem = document.createElement('div');
+        stateItem.className = 'state-item';
+        
+        const idx = state.name.toLowerCase().indexOf(lowerQuery);
+        if (idx >= 0) {
+          const before = state.name.substring(0, idx);
+          const matchText = state.name.substring(idx, idx + lowerQuery.length);
+          const after = state.name.substring(idx + lowerQuery.length);
+          stateItem.innerHTML = `<i class="ph ph-map-pin"></i> <span>${before}<strong>${matchText}</strong>${after}</span>`;
+        } else {
+          stateItem.innerHTML = `<i class="ph ph-map-pin"></i> <span>${state.name}</span>`;
+        }
+        
+        stateItem.onclick = () => selectState(state.id, state.name);
+        stateSuggestions.appendChild(stateItem);
+      });
+    }
+  }
+}
+
+function selectState(stateId, stateName) {
+  stateInput.value = stateName;
+  stateIdInput.value = stateId;
+  stateSuggestions.style.display = 'none';
+}
+
+if (stateInput) {
+  stateInput.addEventListener('focus', () => {
+    renderStateSuggestions(stateInput.value);
+    stateSuggestions.style.display = 'block';
+  });
+  
+  stateInput.addEventListener('input', (e) => {
+    renderStateSuggestions(e.target.value);
+  });
+  
+  // Close suggestions when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!stateInput.contains(e.target) && !stateSuggestions.contains(e.target)) {
+      stateSuggestions.style.display = 'none';
+    }
+  });
+}
 </script>
 </body>
 </html>
