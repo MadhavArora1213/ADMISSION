@@ -24,7 +24,13 @@ $flag = $countryFlags[$visa['country']] ?? '🌍';
 
 $docs = json_decode($visa['documents_required'] ?? '[]', true);
 
-$metaDesc = $visa['country'] . ' student visa guide 2026: ' . $visa['visa_type'] . ' fees, processing time, documents required, post-study work visa, and expert tips.';
+$siteBase = defined('BASE_URL') ? BASE_URL : rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$canonicalUrl = $siteBase . '/visa-guide/' . urlencode($slug);
+
+$pageTitle = $visa['country'] . ' Student Visa Guide ' . date('Y') . ' - ' . $visa['visa_type'] . ' | AdmissionSeason';
+$metaDesc = $visa['country'] . ' student visa guide ' . date('Y') . ': ' . $visa['visa_type'] . ' fees ($' . number_format((float)$visa['visa_fee_usd']) . '), processing time (' . $visa['processing_time_days'] . ' days), documents required, post-study work visa and expert tips.';
+$metaKeywords = strtolower($visa['country']) . ' student visa ' . date('Y') . ', ' . strtolower($visa['visa_type']) . ' ' . strtolower($visa['country']) . ', ' . strtolower($visa['country']) . ' visa fees, ' . strtolower($visa['country']) . ' visa processing, ' . strtolower($visa['country']) . ' study visa, ' . strtolower($visa['country']) . ' work visa, ' . strtolower($visa['country']) . ' visa documents';
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -32,8 +38,40 @@ $metaDesc = $visa['country'] . ' student visa guide 2026: ' . $visa['visa_type']
   <?php include __DIR__ . '/includes/favicon.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= htmlspecialchars($visa['country']) ?> Visa Guide – <?= htmlspecialchars($visa['visa_type']) ?> | AdmissionSeason</title>
+  <title><?= htmlspecialchars($pageTitle) ?></title>
   <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="<?= $canonicalUrl ?>">
+  <meta name="author" content="AdmissionSeason">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<?= $canonicalUrl ?>">
+  <meta property="og:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta property="og:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta property="og:image" content="<?= $siteBase ?>/assets/img/logo.png">
+  <meta property="og:site_name" content="AdmissionSeason">
+  <meta property="og:locale" content="en_IN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="<?= $canonicalUrl ?>">
+  <meta name="twitter:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta name="twitter:description" content="<?= htmlspecialchars($metaDesc) ?>">
+
+  <!-- Structured Data: BreadcrumbList -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+      ['@type' => 'ListItem', 'position' => 2, 'name' => 'Study Abroad', 'item' => "$siteBase/study-abroad"],
+      ['@type' => 'ListItem', 'position' => 3, 'name' => $visa['country'] . ' Visa Guide', 'item' => $canonicalUrl],
+    ]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css?v=8">

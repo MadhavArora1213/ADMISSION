@@ -85,6 +85,16 @@ if ($stream === 'Science') {
         ]
     ];
 }
+
+$siteBase = defined('BASE_URL') ? BASE_URL : rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$canonicalUrl = $siteBase . '/careers';
+if ($stream !== '') $canonicalUrl .= '?stream=' . urlencode($stream);
+
+$streamLabel = $stream !== '' ? $stream . ' ' : '';
+$pageTitle = $streamLabel . 'Career Options & Paths ' . date('Y') . ' | AdmissionSeason';
+$metaDesc = 'Explore ' . strtolower($streamLabel) . 'career options in India for ' . date('Y') . '. Find detailed career paths, salary ranges, required skills, exams, and top colleges for ' . strtolower($streamLabel) . 'students.';
+$metaKeywords = strtolower($streamLabel) . 'career options, ' . strtolower($streamLabel) . 'career paths, career after 12th ' . strtolower($stream) . ', jobs after ' . strtolower($stream) . ', salary, skills, top careers india ' . date('Y');
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -92,8 +102,54 @@ if ($stream === 'Science') {
   <?php include __DIR__ . '/includes/favicon.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Career Exploration Wizard | AdmissionSeason</title>
-  <meta name="description" content="Discover your ideal career path. Take our interactive career selection assessment matching your streams and interests.">
+  <title><?= htmlspecialchars($pageTitle) ?></title>
+  <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="<?= $canonicalUrl ?>">
+  <meta name="author" content="AdmissionSeason">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<?= $canonicalUrl ?>">
+  <meta property="og:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta property="og:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta property="og:image" content="<?= $siteBase ?>/assets/img/logo.png">
+  <meta property="og:site_name" content="AdmissionSeason">
+  <meta property="og:locale" content="en_IN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="<?= $canonicalUrl ?>">
+  <meta name="twitter:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta name="twitter:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="twitter:image" content="<?= $siteBase ?>/assets/img/logo.png">
+
+  <!-- Structured Data: CollectionPage -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'CollectionPage',
+    'name' => $pageTitle,
+    'description' => $metaDesc,
+    'url' => $canonicalUrl,
+    'publisher' => ['@type' => 'Organization', 'name' => 'AdmissionSeason', 'url' => "$siteBase"],
+    'isPartOf' => ['@type' => 'WebSite', 'name' => 'AdmissionSeason', 'url' => "$siteBase"],
+    'inLanguage' => 'en-IN',
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+
+  <!-- Structured Data: BreadcrumbList -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+      ['@type' => 'ListItem', 'position' => 2, 'name' => 'Careers', 'item' => "$siteBase/careers"],
+    ]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=8">

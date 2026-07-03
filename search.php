@@ -102,13 +102,23 @@ if (mb_strlen($q) >= 1) {
 
 $totalResults = array_sum(array_map('count', $results));
 ?>
+$siteBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
+$canonicalUrl = $siteBase . '/search.php?q=' . urlencode($q);
+$pageTitle = 'Search Results for "' . $q . '" - AdmissionSeason';
+$metaDesc = 'Search results for "' . $q . '" on AdmissionSeason. Find colleges, exams, courses, careers and more.';
+$metaKeywords = $q . ', search ' . $q . ', AdmissionSeason search, find ' . $q;
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <?php include __DIR__ . '/includes/favicon.php'; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Results for "<?= htmlspecialchars($q) ?>" - AdmissionSeason</title>
+    <title><?= htmlspecialchars($pageTitle) ?></title>
+    <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+    <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="<?= $canonicalUrl ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>

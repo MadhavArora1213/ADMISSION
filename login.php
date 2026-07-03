@@ -295,6 +295,12 @@ foreach ($pg_courses as $c) { if ($c['id'] !== 'Other') $js_courses[] = ['id' =>
 foreach ($phd_courses as $c) { if ($c['id'] !== 'Other') $js_courses[] = ['id' => $c['id'], 'name' => $c['course_name'], 'group' => 'Doctorate Courses']; }
 foreach ($diploma_courses as $c) { if ($c['id'] !== 'Other') $js_courses[] = ['id' => $c['id'], 'name' => $c['course_name'], 'group' => 'Diploma Courses']; }
 $js_courses[] = ['id' => 'Other', 'name' => 'Other', 'group' => 'Other Options'];
+
+$siteBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
+$canonicalUrl = $siteBase . '/login.php';
+$pageTitle = 'Login & Sign Up - Save Colleges, Apply & Get Counselling | AdmissionSeason';
+$metaDesc = 'Login or sign up on AdmissionSeason to save favorite colleges, apply for admissions, get free counselling and track your application status. Join 5M+ students.';
+$metaKeywords = 'AdmissionSeason login, sign up, college admission login, student login, apply college, save colleges, free counselling, admission application, student portal';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -302,7 +308,12 @@ $js_courses[] = ['id' => 'Other', 'name' => 'Other', 'group' => 'Other Options']
   <?php include __DIR__ . '/includes/favicon.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login & Register | AdmissionSeason</title>
+  <title><?= htmlspecialchars($pageTitle) ?></title>
+  <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="<?= $canonicalUrl ?>">
+  <meta name="author" content="AdmissionSeason">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
   <style>

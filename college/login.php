@@ -69,6 +69,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+$siteBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
+$canonicalUrl = $siteBase . '/college/login.php';
+$pageTitle = 'College/Institute Login - Admission Dashboard | AdmissionSeason';
+$metaDesc = 'Login to your AdmissionSeason college dashboard. Manage applications, view leads, update course listings, track student inquiries and monitor campus engagement.';
+$metaKeywords = 'college login, institute login, college dashboard, admission management, college admin panel, manage applications, student leads, AdmissionSeason college';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -76,7 +81,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php include __DIR__ . '/../includes/favicon.php'; ?>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Institute Login – AdmissionSeason</title>
+<title><?= htmlspecialchars($pageTitle) ?></title>
+<meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+<meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="<?= $canonicalUrl ?>">
+<meta name="author" content="AdmissionSeason">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>

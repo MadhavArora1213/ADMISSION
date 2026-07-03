@@ -237,6 +237,27 @@ function getCategoryIcon($cat) {
         default: return 'ph ph-hash';
     }
 }
+
+$canonicalUrl = $siteBase . '/community';
+if ($tab !== 'qna') $canonicalUrl .= '?tab=' . urlencode($tab);
+if (!empty($tag)) $canonicalUrl .= ($tab !== 'qna' ? '&' : '?') . 'tag=' . urlencode($tag);
+
+$tabLabels = ['qna'=>'Q&A Forum','discussions'=>'Discussions','unanswered'=>'Unanswered Questions','ask'=>'Ask a Question'];
+$tabDescriptions = [
+    'qna' => 'Join India\'s largest educational Q&A community. Ask career questions, get verified expert responses on colleges, courses, exams, fees and placements.',
+    'discussions' => 'Browse trending education discussions. Talk about MBA, BTech, NEET, placements, fees, hostel life and more with students and experts.',
+    'unanswered' => 'Help students by answering unanswered questions about college admissions, courses, exams and career guidance.',
+    'ask' => 'Ask any question about college admissions, courses, exams, fees, placements or career guidance. Get answers from experts and verified counselors.',
+];
+$pageTitle = $tabLabels[$tab] ?? 'Community' . ' | AdmissionSeason';
+$metaDesc = $tabDescriptions[$tab] ?? $tabDescriptions['qna'];
+$metaKeywords = 'education community, ' . strtolower($tabLabels[$tab] ?? 'Q&A') . ', college questions, career guidance, ask expert, admission help, student community india, ' . date('Y');
+
+if (!empty($tag)) {
+    $pageTitle = '#' . $tag . ' ' . ($tabLabels[$tab] ?? '') . ' | AdmissionSeason';
+    $metaDesc = 'Browse #' . $tag . ' questions and discussions in our education community. Get answers about ' . $tag . ' from experts and students.';
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -244,8 +265,55 @@ function getCategoryIcon($cat) {
   <?php include __DIR__ . '/includes/favicon.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Q&A Community Forum | AdmissionSeason</title>
-  <meta name="description" content="Join India's largest educational community. Ask career questions, get verified expert responses, and participate in admissions discussions.">
+  <title><?= htmlspecialchars($pageTitle) ?></title>
+  <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="<?= $canonicalUrl ?>">
+  <meta name="author" content="AdmissionSeason">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<?= $canonicalUrl ?>">
+  <meta property="og:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta property="og:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta property="og:image" content="<?= $siteBase ?>/assets/img/logo.png">
+  <meta property="og:site_name" content="AdmissionSeason">
+  <meta property="og:locale" content="en_IN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="<?= $canonicalUrl ?>">
+  <meta name="twitter:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta name="twitter:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="twitter:image" content="<?= $siteBase ?>/assets/img/logo.png">
+
+  <!-- Structured Data: DiscussionForumPosting -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'CollectionPage',
+    'name' => $pageTitle,
+    'description' => $metaDesc,
+    'url' => $canonicalUrl,
+    'publisher' => ['@type' => 'Organization', 'name' => 'AdmissionSeason', 'url' => "$siteBase"],
+    'isPartOf' => ['@type' => 'WebSite', 'name' => 'AdmissionSeason', 'url' => "$siteBase"],
+    'inLanguage' => 'en-IN',
+    'mainEntity' => ['@type' => 'ItemList', 'name' => $pageTitle, 'numberOfItems' => $statTotalQuestions]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+
+  <!-- Structured Data: BreadcrumbList -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+      ['@type' => 'ListItem', 'position' => 2, 'name' => 'Community', 'item' => "$siteBase/community"],
+    ]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/trumbowyg/dist/ui/trumbowyg.min.css">

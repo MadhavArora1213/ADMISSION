@@ -93,6 +93,16 @@ try {
 
 // Split skills comma list into array
 $skills = array_filter(array_map('trim', explode(',', $career['skills_required'] ?: '')));
+
+$siteBase = defined('BASE_URL') ? BASE_URL : rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$canonicalUrl = $siteBase . '/career/' . urlencode($slug);
+
+$pageTitle = $career['name'] . ' ' . date('Y') . ': Salary, Skills, Qualification & Career Path';
+$metaDesc = 'Learn how to become a ' . $career['name'] . '. Explore salary (₹' . ($career['salary_range'] ?? 'N/A') . '), required skills, qualification, step-by-step career path and top colleges in India.';
+$metaKeywords = strtolower($career['name'] ?? '') . ', ' . strtolower($career['name'] ?? '') . ' salary, ' . strtolower($career['name'] ?? '') . ' skills, ' . strtolower($career['name'] ?? '') . ' qualification, how to become ' . strtolower($career['name'] ?? '') . ', ' . strtolower($career['name'] ?? '') . ' career path, ' . strtolower($career['stream'] ?? '') . ' careers';
+
+$ogImage = !empty($career['image_url']) ? $career['image_url'] : ($siteBase . '/assets/img/logo.png');
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -100,8 +110,61 @@ $skills = array_filter(array_map('trim', explode(',', $career['skills_required']
   <?php include __DIR__ . '/includes/favicon.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= htmlspecialchars($career['name']) ?> Job Profile | AdmissionSeason</title>
-  <meta name="description" content="Learn how to become a <?= htmlspecialchars($career['name']) ?>. Explore job profiles, salary trends, step-by-step career path guidelines, and key skills.">
+  <title><?= htmlspecialchars($pageTitle) ?></title>
+  <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="<?= $canonicalUrl ?>">
+  <meta name="author" content="AdmissionSeason">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<?= $canonicalUrl ?>">
+  <meta property="og:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta property="og:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta property="og:image" content="<?= $ogImage ?>">
+  <meta property="og:site_name" content="AdmissionSeason">
+  <meta property="og:locale" content="en_IN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="<?= $canonicalUrl ?>">
+  <meta name="twitter:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta name="twitter:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="twitter:image" content="<?= $ogImage ?>">
+
+  <!-- Structured Data: Occupation -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'Occupation',
+    'name' => $career['name'],
+    'description' => mb_strimwidth(strip_tags($career['description'] ?? $metaDesc), 0, 300, '...'),
+    'url' => $canonicalUrl,
+    'occupationLocation' => ['@type' => 'Country', 'name' => 'India'],
+    'estimatedSalary' => !empty($career['salary_range']) ? [
+      '@type' => 'MonetaryAmountDistribution',
+      'name' => 'salary',
+      'currency' => 'INR',
+    ] : null,
+    'skills' => !empty($skills) ? implode(', ', array_slice($skills, 0, 5)) : null,
+    'image' => !empty($career['image_url']) ? $career['image_url'] : null,
+    'sameAs' => null,
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+
+  <!-- Structured Data: BreadcrumbList -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+      ['@type' => 'ListItem', 'position' => 2, 'name' => 'Careers', 'item' => "$siteBase/careers"],
+      ['@type' => 'ListItem', 'position' => 3, 'name' => $career['name'], 'item' => $canonicalUrl],
+    ]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=8">

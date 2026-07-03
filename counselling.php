@@ -168,6 +168,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+$siteBase = defined('BASE_URL') ? BASE_URL : rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$canonicalUrl = $siteBase . '/counselling';
+$pageTitle = 'Free Career & College Counselling ' . date('Y') . ' | AdmissionSeason';
+$metaDesc = 'Get free 1-on-1 expert admission counselling from AdmissionSeason. Get personalized guidance on top colleges, courses, exams, fees, placements and career paths. Register now for free counselling.';
+$metaKeywords = 'free counselling, college counselling, career guidance, admission counselling india, college admission help, expert counsellor, free career counselling, education counsellor, college selection guidance, ' . date('Y');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -175,8 +181,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <?php include __DIR__ . '/includes/favicon.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Free Career & College Counselling 2026 | AdmissionSeason</title>
-  <meta name="description" content="Register for free 1-on-1 expert admission counselling and get guidance on top colleges, courses, exams, fees, and placements.">
+  <title><?= htmlspecialchars($pageTitle) ?></title>
+  <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="<?= $canonicalUrl ?>">
+  <meta name="author" content="AdmissionSeason">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<?= $canonicalUrl ?>">
+  <meta property="og:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta property="og:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta property="og:image" content="<?= $siteBase ?>/assets/img/logo.png">
+  <meta property="og:site_name" content="AdmissionSeason">
+  <meta property="og:locale" content="en_IN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="<?= $canonicalUrl ?>">
+  <meta name="twitter:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta name="twitter:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="twitter:image" content="<?= $siteBase ?>/assets/img/logo.png">
+
+  <!-- Structured Data: Service -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'Service',
+    'name' => 'Free Career & College Counselling',
+    'description' => $metaDesc,
+    'url' => $canonicalUrl,
+    'provider' => ['@type' => 'Organization', 'name' => 'AdmissionSeason', 'url' => "$siteBase"],
+    'areaServed' => 'IN',
+    'serviceType' => 'Education Counselling',
+    'offers' => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'INR', 'description' => 'Free Counselling'],
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+
+  <!-- Structured Data: BreadcrumbList -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+      ['@type' => 'ListItem', 'position' => 2, 'name' => 'Counselling', 'item' => "$siteBase/counselling"],
+    ]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=8">

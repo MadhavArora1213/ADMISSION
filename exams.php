@@ -41,14 +41,98 @@ $stats = [
 
 $levelLabels = ['national'=>'National Level','state'=>'State Level','university'=>'University Level','institute'=>'Institute Level'];
 
+$siteBase = defined('BASE_URL') ? BASE_URL : rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$canonicalUrl = $siteBase . '/exams';
+if ($level !== 'all') $canonicalUrl .= '?level=' . urlencode($level);
+if ($mode !== 'all') $canonicalUrl .= ($level !== 'all' ? '&' : '?') . 'mode=' . urlencode($mode);
+
+$levelLabel = $level !== 'all' ? ($levelLabels[$level] ?? ucfirst($level)) . ' ' : '';
+$pageTitle = $levelLabel . 'Top Entrance Exams in India ' . date('Y') . ' - AdmissionSeason';
+$metaDesc = 'Explore ' . strtolower($levelLabel) . 'entrance exams in India for ' . date('Y') . '. Check JEE, NEET, CUET, CAT, GATE, CLAT and more. Get exam dates, eligibility, pattern, syllabus and preparation tips.';
+$metaKeywords = 'entrance exams india ' . date('Y') . ', JEE exam, NEET exam, CUET exam, CAT exam, GATE exam, CLAT exam, engineering exams, medical exams, management exams, law exams, ' . strtolower($levelLabel) . 'exams, exam dates, exam eligibility, exam pattern';
+
+if ($level !== 'all' || $mode !== 'all') {
+    $pageTitle = $levelLabel . ($mode !== 'all' ? ucfirst($mode) . ' ' : '') . 'Entrance Exams in India ' . date('Y') . ' - AdmissionSeason';
+    $metaDesc = 'Browse ' . strtolower($levelLabel) . ($mode !== 'all' ? strtolower($mode) . ' ' : '') . 'entrance exams in India. ' . count($exams) . ' exams listed with dates, eligibility, pattern and syllabus.';
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Top Entrance Exams in India 2026 - AdmissionSeason</title>
-  <meta name="description" content="List of top entrance exams in India 2026 for Engineering, Medical, Management, Law and more. Check exam dates, eligibility, pattern and syllabus.">
+  <title><?= htmlspecialchars($pageTitle) ?></title>
+  <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="<?= $canonicalUrl ?>">
+  <meta name="author" content="AdmissionSeason">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<?= $canonicalUrl ?>">
+  <meta property="og:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta property="og:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta property="og:image" content="<?= $siteBase ?>/assets/img/logo.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="AdmissionSeason">
+  <meta property="og:locale" content="en_IN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="<?= $canonicalUrl ?>">
+  <meta name="twitter:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta name="twitter:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="twitter:image" content="<?= $siteBase ?>/assets/img/logo.png">
+  <meta name="twitter:site" content="@AdmissionSeason">
+  <meta name="twitter:creator" content="@AdmissionSeason">
+
+  <!-- Structured Data: CollectionPage -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'CollectionPage',
+    'name' => $pageTitle,
+    'description' => $metaDesc,
+    'url' => $canonicalUrl,
+    'publisher' => [
+      '@type' => 'Organization',
+      'name' => 'AdmissionSeason',
+      'url' => "$siteBase",
+      'logo' => [
+        '@type' => 'ImageObject',
+        'url' => "$siteBase/assets/img/logo.png",
+        'width' => 600,
+        'height' => 60
+      ]
+    ],
+    'isPartOf' => [
+      '@type' => 'WebSite',
+      'name' => 'AdmissionSeason',
+      'url' => "$siteBase"
+    ],
+    'inLanguage' => 'en-IN',
+    'mainEntity' => [
+      '@type' => 'ItemList',
+      'name' => $pageTitle,
+      'numberOfItems' => count($exams),
+    ]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+
+  <!-- Structured Data: BreadcrumbList -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+      ['@type' => 'ListItem', 'position' => 2, 'name' => 'Exams', 'item' => "$siteBase/exams"],
+    ]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">

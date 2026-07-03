@@ -42,6 +42,11 @@ $stmt->execute([$userId]);
 $colleges = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $pageTitle = 'Saved Colleges — My Wishlist';
+
+$siteBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
+$canonicalUrl = $siteBase . '/saved_colleges.php';
+$metaDesc = 'View and manage your saved colleges wishlist. Compare shortlisted colleges, track application status and get personalized recommendations.';
+$metaKeywords = 'saved colleges, my wishlist, college wishlist, shortlisted colleges, saved colleges list, compare saved colleges, AdmissionSeason';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -50,6 +55,11 @@ $pageTitle = 'Saved Colleges — My Wishlist';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?> - AdmissionSeason</title>
+  <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="<?= $canonicalUrl ?>">
+  <meta name="author" content="AdmissionSeason">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">

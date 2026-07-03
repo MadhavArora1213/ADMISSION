@@ -68,6 +68,14 @@ $rkTop3Stmt->execute($rkBindings);
 $rkTop3 = $rkTop3Stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $rkStates = $pdo->query("SELECT id, name FROM states ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+$siteBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
+$canonicalUrl = $siteBase . '/rankings';
+$typeLabels = ['all'=>'','govt'=>'Government','private'=>'Private','deemed'=>'Deemed','autonomous'=>'Autonomous'];
+$typeLabel = $rkType !== 'all' ? ($typeLabels[$rkType] ?? '') . ' ' : '';
+$pageTitle = $typeLabel . 'College Rankings ' . date('Y') . ' - NIRF, Ratings | AdmissionSeason';
+$metaDesc = 'Check the latest ' . strtolower($typeLabel) . 'college rankings for ' . date('Y') . '. View NIRF rankings, ratings, placements and compare top colleges in India. ' . $rkTotal . ' colleges listed.';
+$metaKeywords = 'college rankings ' . date('Y') . ', NIRF ranking, top colleges india, ' . strtolower($typeLabel) . 'college ranking, best engineering colleges, best medical colleges, college rating, college comparison';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -75,7 +83,12 @@ $rkStates = $pdo->query("SELECT id, name FROM states ORDER BY name ASC")->fetchA
     <?php include __DIR__ . '/includes/favicon.php'; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>College Rankings 2026 - AdmissionSeason</title>
+    <title><?= htmlspecialchars($pageTitle) ?></title>
+    <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+    <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <link rel="canonical" href="<?= $canonicalUrl ?>">
+    <meta name="author" content="AdmissionSeason">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>

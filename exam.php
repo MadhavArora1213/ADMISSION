@@ -32,8 +32,15 @@ $dates = getExamDates($pdo, $exam_id);
 $syllabus = getExamSyllabus($pdo, $exam_id);
 $cutoffs = getExamCutoffs($pdo, $exam_id);
 
-$pageTitle = ($exam['exam_abbreviation'] ?: $exam['exam_name']) . ': Dates, Syllabus, Pattern, Registration';
-$metaDesc = 'Complete details for ' . $exam['exam_name'] . ' including exam dates, syllabus, exam pattern, eligibility, and cutoffs.';
+$pageTitle = ($exam['exam_abbreviation'] ?: $exam['exam_name']) . ': Dates, Syllabus, Pattern, Registration ' . date('Y');
+$metaDesc = 'Get complete details for ' . $exam['exam_name'] . ' (' . ($exam['exam_abbreviation'] ?? '') . ') including exam dates, syllabus, exam pattern, eligibility, application fees and previous year cutoffs. Conducted by ' . ($exam['conducting_body'] ?: 'TBA') . '.';
+$metaKeywords = strtolower($exam['exam_name'] ?? '') . ', ' . strtolower($exam['exam_abbreviation'] ?? '') . ', ' . strtolower($exam['exam_name'] ?? '') . ' ' . date('Y') . ', ' . strtolower($exam['exam_name'] ?? '') . ' exam dates, ' . strtolower($exam['exam_name'] ?? '') . ' syllabus, ' . strtolower($exam['exam_name'] ?? '') . ' pattern, ' . strtolower($exam['exam_name'] ?? '') . ' eligibility, ' . strtolower($exam['exam_name'] ?? '') . ' application form, ' . strtolower($exam['exam_name'] ?? '') . ' cutoff';
+
+$siteBase = defined('BASE_URL') ? BASE_URL : rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$canonicalUrl = $siteBase . '/exam/' . urlencode($slug);
+$ogTitle = $pageTitle;
+$ogDesc = $metaDesc;
+$ogImage = !empty($exam['conducting_body_logo']) ? cImg($exam['conducting_body_logo']) : ($siteBase . '/assets/img/logo.png');
 
 $tabIcons = [
     'info'=>'ph-info', 'dates'=>'ph-calendar-blank', 'pattern'=>'ph-grid-four',
@@ -49,6 +56,67 @@ $tabIcons = [
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?> - AdmissionSeason</title>
   <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="<?= $canonicalUrl ?>">
+  <meta name="author" content="AdmissionSeason">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<?= $canonicalUrl ?>">
+  <meta property="og:title" content="<?= htmlspecialchars($ogTitle) ?>">
+  <meta property="og:description" content="<?= htmlspecialchars($ogDesc) ?>">
+  <meta property="og:image" content="<?= $ogImage ?>">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="AdmissionSeason">
+  <meta property="og:locale" content="en_IN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="<?= $canonicalUrl ?>">
+  <meta name="twitter:title" content="<?= htmlspecialchars($ogTitle) ?>">
+  <meta name="twitter:description" content="<?= htmlspecialchars($ogDesc) ?>">
+  <meta name="twitter:image" content="<?= $ogImage ?>">
+  <meta name="twitter:site" content="@AdmissionSeason">
+  <meta name="twitter:creator" content="@AdmissionSeason">
+
+  <!-- Structured Data: EducationalOccupationalProgram -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'EducationalOccupationalProgram',
+    'name' => $exam['exam_name'],
+    'alternateName' => $exam['exam_abbreviation'] ?? null,
+    'url' => $canonicalUrl,
+    'description' => mb_strimwidth(strip_tags($metaDesc), 0, 300, '...'),
+    'educationalLevel' => ucfirst($exam['exam_level'] ?? 'National'),
+    'provider' => [
+      '@type' => 'Organization',
+      'name' => $exam['conducting_body'] ?? 'TBA',
+    ],
+    'timeRequired' => !empty($exam['duration_minutes']) ? $exam['duration_minutes'] . 'M' : null,
+    'occupationalCategory' => 'Entrance Examination',
+    'image' => !empty($exam['conducting_body_logo']) ? cImg($exam['conducting_body_logo']) : null,
+    'sameAs' => array_filter([
+      $exam['official_website'] ?? null,
+      $exam['application_url'] ?? null,
+    ]),
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+
+  <!-- Structured Data: BreadcrumbList -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+      ['@type' => 'ListItem', 'position' => 2, 'name' => 'Exams', 'item' => "$siteBase/exams"],
+      ['@type' => 'ListItem', 'position' => 3, 'name' => $exam['exam_name'], 'item' => $canonicalUrl],
+    ]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">

@@ -32,8 +32,13 @@ $course_id = $course['id'];
 $specs = getCourseSpecializations($pdo, $course_id);
 $careers = getCourseCareers($pdo, $course_id);
 
-$pageTitle = $course['course_name'] . ' 2026: Scope, Fees, Specializations, Jobs & Top Colleges';
-$metaDesc = 'Details about ' . $course['course_name'] . ' including average salary, eligibility, specializations, career paths and top colleges in India.';
+$pageTitle = $course['course_name'] . ' ' . date('Y') . ': Scope, Fees, Specializations, Jobs & Top Colleges';
+$metaDesc = 'Get complete details about ' . $course['course_name'] . ' including average salary (₹' . ($course['avg_salary_lpa'] ?? 'N/A') . ' LPA), eligibility, specializations, career paths and ' . number_format((int)($course['total_colleges_offering'] ?? 0)) . '+ top colleges in India.';
+$metaKeywords = strtolower($course['course_name'] ?? '') . ', ' . strtolower($course['course_name'] ?? '') . ' ' . date('Y') . ', ' . strtolower($course['course_name'] ?? '') . ' fees, ' . strtolower($course['course_name'] ?? '') . ' scope, ' . strtolower($course['course_name'] ?? '') . ' eligibility, ' . strtolower($course['course_name'] ?? '') . ' salary, ' . strtolower($course['course_name'] ?? '') . ' specializations, ' . strtolower($course['course_name'] ?? '') . ' career, top colleges for ' . strtolower($course['course_name'] ?? '');
+
+$siteBase = defined('BASE_URL') ? BASE_URL : rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$canonicalUrl = $siteBase . '/course/' . urlencode($slug);
+$ogImage = !empty($course['course_icon_url']) ? cImg($course['course_icon_url']) : ($siteBase . '/assets/img/logo.png');
 
 $tabIcons = [
     'basic'           => 'ph-info',
@@ -66,6 +71,60 @@ $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?> - AdmissionSeason</title>
   <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="<?= $canonicalUrl ?>">
+  <meta name="author" content="AdmissionSeason">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<?= $canonicalUrl ?>">
+  <meta property="og:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta property="og:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta property="og:image" content="<?= $ogImage ?>">
+  <meta property="og:site_name" content="AdmissionSeason">
+  <meta property="og:locale" content="en_IN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="<?= $canonicalUrl ?>">
+  <meta name="twitter:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta name="twitter:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="twitter:image" content="<?= $ogImage ?>">
+
+  <!-- Structured Data: Course -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'Course',
+    'name' => $course['course_name'],
+    'description' => mb_strimwidth(strip_tags($course['description'] ?? $metaDesc), 0, 300, '...'),
+    'url' => $canonicalUrl,
+    'educationalLevel' => $course['course_level'] ?? 'UG',
+    'timeRequired' => !empty($course['duration_years']) ? $course['duration_years'] . ' Years' : null,
+    'provider' => ['@type' => 'Organization', 'name' => 'AdmissionSeason', 'url' => "$siteBase"],
+    'occupationalCategory' => $course['course_category'] ?? null,
+    'offers' => [
+      '@type' => 'Offer',
+      'category' => $course['course_level'] ?? 'UG',
+      'description' => 'Course at ' . number_format((int)($course['total_colleges_offering'] ?? 0)) . '+ colleges',
+    ],
+    'image' => !empty($course['course_icon_url']) ? cImg($course['course_icon_url']) : null,
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+
+  <!-- Structured Data: BreadcrumbList -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+      ['@type' => 'ListItem', 'position' => 2, 'name' => 'Courses', 'item' => "$siteBase/courses"],
+      ['@type' => 'ListItem', 'position' => 3, 'name' => $course['course_name'], 'item' => $canonicalUrl],
+    ]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">

@@ -120,6 +120,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 }
 $states=$pdo->query("SELECT id,name FROM states ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+$siteBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
+$canonicalUrl = $siteBase . '/college/signup.php';
+$pageTitle = 'Register Your College/Institute - Free Listing | AdmissionSeason';
+$metaDesc = 'Register your college or institute on AdmissionSeason for free. Get listed, attract students, manage applications and grow your campus visibility across India.';
+$metaKeywords = 'register college, college registration, list college online, institute registration, college listing india, add college AdmissionSeason, free college listing, college marketing';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -127,7 +132,12 @@ $states=$pdo->query("SELECT id,name FROM states ORDER BY name")->fetchAll(PDO::F
 <?php include __DIR__ . '/../includes/favicon.php'; ?>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Register Institute – AdmissionSeason</title>
+<title><?= htmlspecialchars($pageTitle) ?></title>
+<meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+<meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" href="<?= $canonicalUrl ?>">
+<meta name="author" content="AdmissionSeason">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>

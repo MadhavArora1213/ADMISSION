@@ -14,6 +14,12 @@ $id2 = $_GET['id2'] ?? '';
 
 $courseLevels = $pdo->query("SELECT DISTINCT course_level FROM college_courses WHERE course_level IS NOT NULL AND course_level != '' ORDER BY course_level")->fetchAll(PDO::FETCH_COLUMN);
 $allCourses = $pdo->query("SELECT id, course_name, course_level FROM college_courses WHERE course_level IS NOT NULL ORDER BY course_level, course_name")->fetchAll(PDO::FETCH_ASSOC);
+
+$siteBase = defined('BASE_URL') ? BASE_URL : rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$canonicalUrl = $siteBase . '/compare';
+$pageTitle = 'Compare Colleges Side-by-Side ' . date('Y') . ' - Fees, Placements, Ratings | AdmissionSeason';
+$metaDesc = 'Compare top colleges in India side-by-side on fees, placements, ratings, rankings, cutoffs and more. Make informed decisions with our free college comparison tool.';
+$metaKeywords = 'compare colleges, college comparison tool, compare engineering colleges, compare medical colleges, college fees comparison, placement comparison, college ranking comparison india ' . date('Y');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,8 +27,55 @@ $allCourses = $pdo->query("SELECT id, course_name, course_level FROM college_cou
 <?php include __DIR__ . '/includes/favicon.php'; ?>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Compare Colleges – AdmissionSeason</title>
-<meta name="description" content="Compare top colleges side-by-side on fees, placements, ratings, rankings and more.">
+<title><?= htmlspecialchars($pageTitle) ?></title>
+<meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+<meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" href="<?= $canonicalUrl ?>">
+<meta name="author" content="AdmissionSeason">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="<?= $canonicalUrl ?>">
+<meta property="og:title" content="<?= htmlspecialchars($pageTitle) ?>">
+<meta property="og:description" content="<?= htmlspecialchars($metaDesc) ?>">
+<meta property="og:image" content="<?= $siteBase ?>/assets/img/logo.png">
+<meta property="og:site_name" content="AdmissionSeason">
+<meta property="og:locale" content="en_IN">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="<?= $canonicalUrl ?>">
+<meta name="twitter:title" content="<?= htmlspecialchars($pageTitle) ?>">
+<meta name="twitter:description" content="<?= htmlspecialchars($metaDesc) ?>">
+<meta name="twitter:image" content="<?= $siteBase ?>/assets/img/logo.png">
+
+<!-- Structured Data: SoftwareApplication -->
+<script type="application/ld+json">
+<?= json_encode([
+  '@context' => 'https://schema.org',
+  '@type' => 'SoftwareApplication',
+  'name' => 'College Comparison Tool',
+  'description' => $metaDesc,
+  'url' => $canonicalUrl,
+  'applicationCategory' => 'EducationalApplication',
+  'operatingSystem' => 'Web',
+  'offers' => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'INR'],
+  'provider' => ['@type' => 'Organization', 'name' => 'AdmissionSeason', 'url' => "$siteBase"],
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+</script>
+
+<!-- Structured Data: BreadcrumbList -->
+<script type="application/ld+json">
+<?= json_encode([
+  '@context' => 'https://schema.org',
+  '@type' => 'BreadcrumbList',
+  'itemListElement' => [
+    ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+    ['@type' => 'ListItem', 'position' => 2, 'name' => 'Compare Colleges', 'item' => "$siteBase/compare"],
+  ]
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+</script>
 <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= $navBase ?>/assets/css/style.css?v=<?= time() ?>">

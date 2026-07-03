@@ -35,6 +35,12 @@ foreach ($experts as $e) {
     $spec = $e['specialization'] ?: 'General';
     $specializations[$spec][] = $e;
 }
+
+$siteBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
+$canonicalUrl = $siteBase . '/experts.php';
+$pageTitle = 'Education Experts & Counselors Panel | AdmissionSeason';
+$metaDesc = 'Meet our verified panel of ' . $totalExperts . ' education experts and counselors. Get expert guidance on college admissions, career planning, study abroad and exam preparation.';
+$metaKeywords = 'education experts, college counselors, admission experts, career guidance experts, study abroad counselors, expert panel, verified counselors india, education advisors';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,7 +48,12 @@ foreach ($experts as $e) {
     <?php include __DIR__ . '/includes/favicon.php'; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Panel of Experts | AdmissionSeason</title>
+    <title><?= htmlspecialchars($pageTitle) ?></title>
+    <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+    <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <link rel="canonical" href="<?= $canonicalUrl ?>">
+    <meta name="author" content="AdmissionSeason">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">

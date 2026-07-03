@@ -1,0 +1,25 @@
+# Block PHP execution in uploads directory
+<FilesMatch "\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+<FilesMatch "\.php5$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+<FilesMatch "\.phtml$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Block sensitive files
+<FilesMatch "\.(sql|log|env|sh|bak|ini|htaccess)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Allow image and document files
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|pdf|mp4|webm|mov|doc|docx|xls|xlsx)$">
+    Order allow,deny
+    Allow from all
+</FilesMatch>

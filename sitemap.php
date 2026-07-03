@@ -91,10 +91,64 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
     <priority>0.9</priority>
   </url>
   <url>
+    <loc><?= $baseUrl ?>/courses?level=UG</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/courses?level=PG</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/courses?level=Diploma</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/courses?level=PhD</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc><?= $baseUrl ?>/exams</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/exams?level=national</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/exams?level=state</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/exams?level=university</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/exams?mode=online</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/exams?mode=offline</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc><?= $baseUrl ?>/rankings</loc>
@@ -189,6 +243,24 @@ foreach ($statesList as $sl):
     <priority>0.7</priority>
   </url>
   <url>
+    <loc><?= $baseUrl ?>/study-abroad?tab=universities</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/study-abroad?tab=visas</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/study-abroad?tab=consultants</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc><?= $baseUrl ?>/reviews</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>weekly</changefreq>
@@ -201,17 +273,68 @@ foreach ($statesList as $sl):
     <priority>0.7</priority>
   </url>
   <url>
+    <loc><?= $baseUrl ?>/careers?stream=Science</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/careers?stream=Commerce</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/careers?stream=Humanities</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc><?= $baseUrl ?>/community</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/discussions</loc>
+    <loc><?= $baseUrl ?>/community?tab=qna</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
+  <url>
+    <loc><?= $baseUrl ?>/community?tab=discussions</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/community?tab=unanswered</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/community?tab=discussions</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+<!-- Dynamic: Question Pages -->
+<?php
+$questions = $pdo->query("SELECT slug, created_at FROM questions WHERE status IN ('open','answered','resolved') AND slug IS NOT NULL AND slug != '' ORDER BY created_at DESC LIMIT 500")->fetchAll(PDO::FETCH_ASSOC);
+foreach ($questions as $q):
+  $mod = !empty($q['created_at']) ? date('Y-m-d', strtotime($q['created_at'])) : $today;
+?>
+  <url>
+    <loc><?= $baseUrl ?>/question/<?= htmlspecialchars($q['slug']) ?></loc>
+    <lastmod><?= $mod ?></lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+<?php endforeach; ?>
+
   <url>
     <loc><?= $baseUrl ?>/counselling</loc>
     <lastmod><?= $today ?></lastmod>
@@ -259,6 +382,19 @@ foreach ($courses as $co):
   <url>
     <loc><?= $baseUrl ?>/course/<?= htmlspecialchars($co['slug']) ?></loc>
     <lastmod><?= $mod ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+<?php endforeach; ?>
+
+<!-- Dynamic: Course Category Pages -->
+<?php
+$courseCats = $pdo->query("SELECT DISTINCT course_category FROM courses WHERE status='active' AND course_category IS NOT NULL AND course_category != '' ORDER BY course_category ASC")->fetchAll(PDO::FETCH_COLUMN);
+foreach ($courseCats as $ccat):
+?>
+  <url>
+    <loc><?= $baseUrl ?>/courses?category=<?= urlencode($ccat) ?></loc>
+    <lastmod><?= $today ?></lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

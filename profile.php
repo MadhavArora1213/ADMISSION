@@ -19,6 +19,12 @@ if (!$user) {
 $stmtProfile = $pdo->prepare("SELECT city, preferred_courses FROM student_profiles WHERE user_id = ?");
 $stmtProfile->execute([$userId]);
 $profile = $stmtProfile->fetch(PDO::FETCH_ASSOC);
+
+$siteBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
+$canonicalUrl = $siteBase . '/profile.php';
+$pageTitle = 'My Profile - AdmissionSeason';
+$metaDesc = 'Manage your AdmissionSeason profile. Update personal details, preferences and track your college applications.';
+$metaKeywords = 'student profile, my account, AdmissionSeason profile, manage profile';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,7 +32,11 @@ $profile = $stmtProfile->fetch(PDO::FETCH_ASSOC);
   <?php include __DIR__ . '/includes/favicon.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Profile | AdmissionSeason</title>
+  <title><?= htmlspecialchars($pageTitle) ?></title>
+  <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="<?= $canonicalUrl ?>">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">

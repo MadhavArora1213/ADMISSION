@@ -14,7 +14,13 @@ $stmt->execute([$slug, $slug]);
 $uni = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$uni) { header('Location: ' . BASE_URL . '/study-abroad'); exit; }
 
-$metaDesc = 'Details about ' . $uni['university_name'] . ' including tuition, eligibility, rankings, and admission requirements.';
+$metaDesc = 'Get complete details about ' . $uni['university_name'] . ' including tuition ($' . number_format((float)($uni['tuition_usd_annual'] ?? 0)) . '/yr), acceptance rate (' . ($uni['acceptance_rate'] ?? 'N/A') . '%), QS ranking (#' . ($uni['qs_rank'] ?? 'N/A') . '), IELTS requirement and admission requirements.';
+$metaKeywords = strtolower($uni['university_name'] ?? '') . ', ' . strtolower($uni['university_name'] ?? '') . ' admission, ' . strtolower($uni['university_name'] ?? '') . ' tuition, ' . strtolower($uni['university_name'] ?? '') . ' ranking, ' . strtolower($uni['country'] ?? '') . ' university, ' . strtolower($uni['city'] ?? '') . ' university, study in ' . strtolower($uni['country'] ?? ''), QS ranking university';
+
+$siteBase = defined('BASE_URL') ? BASE_URL : rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$canonicalUrl = $siteBase . '/foreign-university/' . urlencode($slug);
+$ogImage = !empty($uni['logo_url']) ? $uni['logo_url'] : ($siteBase . '/assets/img/logo.png');
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,8 +28,59 @@ $metaDesc = 'Details about ' . $uni['university_name'] . ' including tuition, el
   <?php include __DIR__ . '/includes/favicon.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= htmlspecialchars($uni['university_name']) ?> - Details | AdmissionSeason</title>
+  <title><?= htmlspecialchars($uni['university_name']) ?> - Admission, Tuition, Ranking | AdmissionSeason</title>
   <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="<?= $canonicalUrl ?>">
+  <meta name="author" content="AdmissionSeason">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<?= $canonicalUrl ?>">
+  <meta property="og:title" content="<?= htmlspecialchars($uni['university_name'] ?? '') ?> - AdmissionSeason">
+  <meta property="og:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta property="og:image" content="<?= $ogImage ?>">
+  <meta property="og:site_name" content="AdmissionSeason">
+  <meta property="og:locale" content="en_IN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="<?= $canonicalUrl ?>">
+  <meta name="twitter:title" content="<?= htmlspecialchars($uni['university_name'] ?? '') ?> - AdmissionSeason">
+  <meta name="twitter:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="twitter:image" content="<?= $ogImage ?>">
+
+  <!-- Structured Data: CollegeOrUniversity -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'CollegeOrUniversity',
+    'name' => $uni['university_name'],
+    'url' => $canonicalUrl,
+    'logo' => !empty($uni['logo_url']) ? $uni['logo_url'] : null,
+    'description' => mb_strimwidth(strip_tags($uni['description'] ?? $metaDesc), 0, 300, '...'),
+    'address' => [
+      '@type' => 'PostalAddress',
+      'addressLocality' => $uni['city'] ?? '',
+      'addressCountry' => $uni['country'] ?? '',
+    ],
+    'sameAs' => array_filter([$uni['website_url'] ?? null, $uni['application_url'] ?? null]),
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+
+  <!-- Structured Data: BreadcrumbList -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+      ['@type' => 'ListItem', 'position' => 2, 'name' => 'Study Abroad', 'item' => "$siteBase/study-abroad"],
+      ['@type' => 'ListItem', 'position' => 3, 'name' => $uni['university_name'], 'item' => $canonicalUrl],
+    ]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css?v=8">

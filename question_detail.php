@@ -175,13 +175,59 @@ $shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . BASE_URL . '/' . $sharePath;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($qTitle) ?> | AdmissionSeason Q&A</title>
-    <meta name="description" content="<?= htmlspecialchars(mb_substr($qTitle, 0, 160)) ?>">
+    <meta name="description" content="<?= htmlspecialchars(mb_substr($qTitle . ' - Get expert answers and community responses on AdmissionSeason.', 0, 160)) ?>">
+    <meta name="keywords" content="<?= htmlspecialchars(strtolower($qTitle) . ', ' . ($question['question_category'] ?? 'education') . ', college admission, career guidance, AdmissionSeason Q&A') ?>">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <link rel="canonical" href="<?= $shareUrl ?>">
+    <meta name="author" content="<?= htmlspecialchars($question['asker_name'] ?? 'AdmissionSeason') ?>">
+
+    <!-- Open Graph -->
     <meta property="og:type" content="article">
     <meta property="og:url" content="<?= $shareUrl ?>">
     <meta property="og:title" content="<?= htmlspecialchars($qTitle) ?>">
-    <meta property="og:description" content="<?= htmlspecialchars(mb_substr($qTitle, 0, 160)) ?>">
+    <meta property="og:description" content="<?= htmlspecialchars(mb_substr($qTitle . ' - Get expert answers on AdmissionSeason.', 0, 160)) ?>">
     <meta property="og:site_name" content="AdmissionSeason">
+    <meta property="og:locale" content="en_IN">
+    <meta property="article:published_time" content="<?= $question['created_at'] ? date('c', strtotime($question['created_at'])) : '' ?>">
+    <meta property="article:author" content="<?= htmlspecialchars($question['asker_name'] ?? '') ?>">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:url" content="<?= $shareUrl ?>">
+    <meta name="twitter:title" content="<?= htmlspecialchars($qTitle) ?>">
+    <meta name="twitter:description" content="<?= htmlspecialchars(mb_substr($qTitle . ' - Get expert answers on AdmissionSeason.', 0, 160)) ?>">
+
+    <!-- Structured Data: QAPage -->
+    <script type="application/ld+json">
+    <?= json_encode([
+      '@context' => 'https://schema.org',
+      '@type' => 'QAPage',
+      'mainEntity' => [
+        '@type' => 'Question',
+        'name' => $qTitle,
+        'text' => $question['question_text'] ?? $qTitle,
+        'dateCreated' => $question['created_at'] ? date('c', strtotime($question['created_at'])) : null,
+        'author' => ['@type' => 'Person', 'name' => $question['asker_name'] ?? 'Anonymous'],
+        'answerCount' => count($answers),
+        'isAnswered' => !empty($answers),
+        'upvoteCount' => (int)($question['views'] ?? 0),
+        'commentCount' => count($answers),
+      ]
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+    </script>
+
+    <!-- Structured Data: BreadcrumbList -->
+    <script type="application/ld+json">
+    <?= json_encode([
+      '@context' => 'https://schema.org',
+      '@type' => 'BreadcrumbList',
+      'itemListElement' => [
+        ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => BASE_URL . '/'],
+        ['@type' => 'ListItem', 'position' => 2, 'name' => 'Community', 'item' => BASE_URL . '/community'],
+        ['@type' => 'ListItem', 'position' => 3, 'name' => mb_strimwidth($qTitle, 0, 50, '...'), 'item' => $shareUrl],
+      ]
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+    </script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/trumbowyg/dist/ui/trumbowyg.min.css">
