@@ -154,7 +154,7 @@
       });
       html += '</div>';
     });
-    html += '<div class="nh-search-footer"><a href="/ADMISSION/search.php?q=' + encodeURIComponent(q) + '" class="nh-view-all">View all results for "' + q.replace(/</g,'&lt;') + '" <i class="ph ph-arrow-right"></i></a></div>';
+    html += '<div class="nh-search-footer"><a href="<?= BASE_URL ?>/search.php?q=' + encodeURIComponent(q) + '" class="nh-view-all">View all results for "' + q.replace(/</g,'&lt;') + '" <i class="ph ph-arrow-right"></i></a></div>';
     dd.innerHTML = html;
     dd.style.display = 'block';
     activeIdx = -1;
@@ -173,7 +173,7 @@
     showLoading(q);
     timer = setTimeout(() => {
       abortCtrl = new AbortController();
-      fetch('/ADMISSION/api/global_search.php?q=' + encodeURIComponent(q), { signal: abortCtrl.signal })
+      fetch(BASE_URL + '/api/global_search.php?q=' + encodeURIComponent(q), { signal: abortCtrl.signal })
         .then(r => r.json())
         .then(data => { if (data.ok) render(data.results, q); })
         .catch(e => { if (e.name !== 'AbortError') dd.style.display = 'none'; });
@@ -203,7 +203,7 @@
         items[0].click();
       } else {
         const val = input.value.trim();
-        if (val) window.location.href = '/ADMISSION/search.php?q=' + encodeURIComponent(val);
+        if (val) window.location.href = BASE_URL + '/search.php?q=' + encodeURIComponent(val);
       }
     } else if (e.key === 'Escape') {
       dd.style.display = 'none';
@@ -222,7 +222,7 @@
   if (btn) {
     btn.addEventListener('click', function() {
       const q = input.value.trim();
-      if (q) window.location.href = '/ADMISSION/search.php?q=' + encodeURIComponent(q);
+      if (q) window.location.href = BASE_URL + '/search.php?q=' + encodeURIComponent(q);
     });
   }
 

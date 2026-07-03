@@ -9,7 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $q = trim($_GET['q'] ?? '');
-$navBase = '/ADMISSION';
+$navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
 
 function searchRelevance(string $text, string $query): int {
     $lower = mb_strtolower($text);
@@ -105,6 +105,7 @@ $totalResults = array_sum(array_map('count', $results));
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <?php include __DIR__ . '/includes/favicon.php'; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Results for "<?= htmlspecialchars($q) ?>" - AdmissionSeason</title>

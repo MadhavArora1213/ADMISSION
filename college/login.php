@@ -8,7 +8,7 @@ header('X-Frame-Options: DENY');
 header('X-XSS-Protection: 1; mode=block');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 
-if (!empty($_SESSION['college_account_id'])) { header('Location: /ADMISSION/college/dashboard.php'); exit; }
+if (!empty($_SESSION['college_account_id'])) { header('Location: ' . BASE_URL . '/college/dashboard.php'); exit; }
 
 $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 $error = '';
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $upd = $pdo->prepare("UPDATE college_accounts SET last_login=NOW() WHERE id=?");
                 $upd->execute([$account['id']]);
                 @unlink($rlKey);
-                header('Location: /ADMISSION/college/dashboard.php');
+                header('Location: ' . BASE_URL . '/college/dashboard.php');
                 exit;
             }
         }
@@ -73,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<?php include __DIR__ . '/../includes/favicon.php'; ?>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Institute Login – AdmissionSeason</title>
@@ -187,7 +188,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;background:#0B2
 <div class="right">
 <div class="form-wrap">
   <div class="form-top">
-    <a href="/ADMISSION/" class="back"><i class="ph ph-arrow-left"></i></a>
+    <a href="<?= BASE_URL ?>/" class="back"><i class="ph ph-arrow-left"></i></a>
     <h2>Institute Login</h2>
   </div>
 
@@ -204,7 +205,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;background:#0B2
   </form>
 
   <div class="divider"><span>New to AdmissionSeason?</span></div>
-  <div class="form-foot"><a href="/ADMISSION/college/signup.php">Create institute account &rarr;</a></div>
+  <div class="form-foot"><a href="<?= BASE_URL ?>/college/signup.php">Create institute account &rarr;</a></div>
 </div>
 </div>
 </div>

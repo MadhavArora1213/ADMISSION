@@ -7,7 +7,7 @@ require_once __DIR__ . '/includes/college_helpers.php';
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-$navBase = '/ADMISSION';
+$navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
 
 $id1 = $_GET['id1'] ?? '';
 $id2 = $_GET['id2'] ?? '';
@@ -18,6 +18,7 @@ $allCourses = $pdo->query("SELECT id, course_name, course_level FROM college_cou
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<?php include __DIR__ . '/includes/favicon.php'; ?>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Compare Colleges – AdmissionSeason</title>

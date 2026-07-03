@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/db.php';
-if (empty($_SESSION['admin_id'])) { header('Location: /ADMISSION/admin/index.php'); exit; }
+if (empty($_SESSION['admin_id'])) { header('Location: ' . BASE_URL . '/admin/index.php'); exit; }
 
 $msg = '';
 
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
         $toName = $acc['contact_person'] ?: $acc['institute_name'];
-        $loginUrl = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/ADMISSION/college/login.php';
+        $loginUrl = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . BASE_URL . '/college/login.php';
         $safeInstitute = htmlspecialchars($acc['institute_name'] ?? 'Your Institute');
         $safeEmail = htmlspecialchars($acc['email'] ?? '');
         $safePass = htmlspecialchars($loginPassword);
@@ -342,7 +342,7 @@ td{padding:12px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
 <div class="detail-panel">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
     <h2 style="font-size:1.1rem;font-weight:700;color:#0B2447"><?=htmlspecialchars($detail['institute_name'])?></h2>
-    <a href="/ADMISSION/admin/college_accounts.php" style="font-size:.78rem;color:#64748b;text-decoration:none"><i class="ph ph-x"></i> Close</a>
+    <a href="<?= BASE_URL ?>/admin/college_accounts.php" style="font-size:.78rem;color:#64748b;text-decoration:none"><i class="ph ph-x"></i> Close</a>
   </div>
 
   <div class="detail-grid">
@@ -372,28 +372,28 @@ td{padding:12px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
     <div class="doc-grid">
       <div class="doc-card">
         <?php if($detail['pan_doc']): ?>
-        <a href="/ADMISSION/uploads/college_docs/<?=htmlspecialchars($detail['pan_doc'])?>" target="_blank"><i class="ph ph-identification-card"></i><p>PAN Card</p><small>Click to view</small></a>
+        <a href="<?= BASE_URL ?>/uploads/college_docs/<?=htmlspecialchars($detail['pan_doc'])?>" target="_blank"><i class="ph ph-identification-card"></i><p>PAN Card</p><small>Click to view</small></a>
         <?php else: ?>
         <i class="ph ph-x-circle" style="color:#dc2626"></i><p style="color:#dc2626">Not uploaded</p>
         <?php endif; ?>
       </div>
       <div class="doc-card">
         <?php if($detail['aadhar_doc']): ?>
-        <a href="/ADMISSION/uploads/college_docs/<?=htmlspecialchars($detail['aadhar_doc'])?>" target="_blank"><i class="ph ph-card"></i><p>Aadhar Card</p><small>Click to view</small></a>
+        <a href="<?= BASE_URL ?>/uploads/college_docs/<?=htmlspecialchars($detail['aadhar_doc'])?>" target="_blank"><i class="ph ph-card"></i><p>Aadhar Card</p><small>Click to view</small></a>
         <?php else: ?>
         <i class="ph ph-x-circle" style="color:#dc2626"></i><p style="color:#dc2626">Not uploaded</p>
         <?php endif; ?>
       </div>
       <div class="doc-card">
         <?php if($detail['gst_doc']): ?>
-        <a href="/ADMISSION/uploads/college_docs/<?=htmlspecialchars($detail['gst_doc'])?>" target="_blank"><i class="ph ph-receipt"></i><p>GST Certificate</p><small>Click to view</small></a>
+        <a href="<?= BASE_URL ?>/uploads/college_docs/<?=htmlspecialchars($detail['gst_doc'])?>" target="_blank"><i class="ph ph-receipt"></i><p>GST Certificate</p><small>Click to view</small></a>
         <?php else: ?>
         <i class="ph ph-minus-circle" style="color:#94a3b8"></i><p style="color:#94a3b8">Optional</p>
         <?php endif; ?>
       </div>
       <div class="doc-card">
         <?php if($detail['affiliation_doc']): ?>
-        <a href="/ADMISSION/uploads/college_docs/<?=htmlspecialchars($detail['affiliation_doc'])?>" target="_blank"><i class="ph ph-certificate"></i><p>Affiliation Proof</p><small>Click to view</small></a>
+        <a href="<?= BASE_URL ?>/uploads/college_docs/<?=htmlspecialchars($detail['affiliation_doc'])?>" target="_blank"><i class="ph ph-certificate"></i><p>Affiliation Proof</p><small>Click to view</small></a>
         <?php else: ?>
         <i class="ph ph-minus-circle" style="color:#94a3b8"></i><p style="color:#94a3b8">Optional</p>
         <?php endif; ?>
@@ -427,10 +427,10 @@ td{padding:12px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
 <?php else: ?>
 
 <div class="filters">
-  <a href="/ADMISSION/admin/college_accounts.php" class="<?=!$filterStatus?'active':''?>">All</a>
-  <a href="/ADMISSION/admin/college_accounts.php?status=pending" class="<?=$filterStatus==='pending'?'active':''?>">Pending</a>
-  <a href="/ADMISSION/admin/college_accounts.php?status=approved" class="<?=$filterStatus==='approved'?'active':''?>">Approved</a>
-  <a href="/ADMISSION/admin/college_accounts.php?status=rejected" class="<?=$filterStatus==='rejected'?'active':''?>">Rejected</a>
+  <a href="<?= BASE_URL ?>/admin/college_accounts.php" class="<?=!$filterStatus?'active':''?>">All</a>
+  <a href="<?= BASE_URL ?>/admin/college_accounts.php?status=pending" class="<?=$filterStatus==='pending'?'active':''?>">Pending</a>
+  <a href="<?= BASE_URL ?>/admin/college_accounts.php?status=approved" class="<?=$filterStatus==='approved'?'active':''?>">Approved</a>
+  <a href="<?= BASE_URL ?>/admin/college_accounts.php?status=rejected" class="<?=$filterStatus==='rejected'?'active':''?>">Rejected</a>
 </div>
 
 <div class="card">
@@ -451,7 +451,7 @@ td{padding:12px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
   <td><span class="badge <?=($a['status']==='approved'?'badge-green':($a['status']==='rejected'?'badge-red':($a['status']==='pending'?'badge-yellow':'badge-blue')))?>"><?=ucfirst($a['status'])?></span></td>
   <td style="font-size:.72rem"><?=date('d M Y', strtotime($a['created_at']))?></td>
   <td>
-    <a href="/ADMISSION/admin/college_accounts.php?view=<?=$a['id']?>" class="btn btn-ghost btn-sm"><i class="ph ph-eye"></i> View</a>
+    <a href="<?= BASE_URL ?>/admin/college_accounts.php?view=<?=$a['id']?>" class="btn btn-ghost btn-sm"><i class="ph ph-eye"></i> View</a>
     <?php if($a['status']==='pending'): ?>
     <form method="POST" style="display:inline"><input type="hidden" name="action" value="approve"><input type="hidden" name="account_id" value="<?=$a['id']?>"><button class="btn btn-green btn-sm"><i class="ph ph-check"></i></button></form>
     <?php endif; ?>

@@ -11,7 +11,7 @@ require_once __DIR__ . '/admin/db.php';
 
 $questionId = $_GET['id'] ?? '';
 if ($questionId === '') {
-    header('Location: /ADMISSION/community');
+    header('Location: ' . BASE_URL . '/community');
     exit;
 }
 
@@ -26,7 +26,7 @@ $stmt->execute([$questionId, $questionId]);
 $question = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$question) {
-    header('Location: /ADMISSION/community');
+    header('Location: ' . BASE_URL . '/community');
     exit;
 }
 
@@ -164,13 +164,14 @@ function timeAgo($datetime) {
     return 'just now';
 }
 
-$navBase = '/ADMISSION';
+$navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
 $isLoggedIn = isset($_SESSION['user_id']);
-$shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/' . $sharePath;
+$shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . BASE_URL . '/' . $sharePath;
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <?php include __DIR__ . '/includes/favicon.php'; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($qTitle) ?> | AdmissionSeason Q&A</title>
@@ -327,7 +328,7 @@ $shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/' . $sharePath;
     <?php include __DIR__ . '/includes/navbar.php'; ?>
 
     <div class="qd-page">
-        <a href="/ADMISSION/community" class="qd-back-link"><i class="ph ph-arrow-left"></i> Back to Q&A</a>
+        <a href="<?= BASE_URL ?>/community" class="qd-back-link"><i class="ph ph-arrow-left"></i> Back to Q&A</a>
 
         <div class="qd-breadcrumb">
             <a href="<?= $navBase ?>/">Home</a><span>/</span>
@@ -579,7 +580,7 @@ $shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/' . $sharePath;
             <h3 style="justify-content:center; margin-bottom:8px;">Login Required</h3>
             <p style="font-size:.9rem; color:var(--text-muted); margin-bottom:24px; line-height:1.5;" id="loginRequiredMsg">Please login to continue.</p>
             <div class="qd-modal-actions" style="justify-content:center; gap:12px;">
-                <a href="/ADMISSION/login.php?redirect=<?= urlencode($sharePath) ?>" style="padding:10px 28px; border-radius:8px; background:var(--yale-blue); color:#fff; font-size:.9rem; font-weight:600; cursor:pointer; text-decoration:none; border:none; display:inline-block;">Login / Sign Up</a>
+                <a href="<?= BASE_URL ?>/login.php?redirect=<?= urlencode($sharePath) ?>" style="padding:10px 28px; border-radius:8px; background:var(--yale-blue); color:#fff; font-size:.9rem; font-weight:600; cursor:pointer; text-decoration:none; border:none; display:inline-block;">Login / Sign Up</a>
                 <button class="qd-modal-cancel" onclick="closeModal('loginRequiredModal')">Cancel</button>
             </div>
         </div>
@@ -595,7 +596,7 @@ $shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/' . $sharePath;
             document.getElementById('loginRequiredMsg').textContent = msg || 'Please login to continue.';
             const loginLink = document.querySelector('#loginRequiredModal a[href*="login.php"]');
             if (loginLink) {
-                loginLink.href = '/ADMISSION/login.php?redirect=' + encodeURIComponent(window.location.href);
+                loginLink.href = BASE_URL + '/login.php?redirect=' + encodeURIComponent(window.location.href);
             }
             openModal('loginRequiredModal');
             return false;
@@ -638,7 +639,7 @@ $shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/' . $sharePath;
     async function toggleFollow() {
         const btn = document.getElementById('qd-follow-btn');
         try {
-            const res = await fetch('/ADMISSION/api/community_actions.php', {
+            const res = await fetch(BASE_URL + '/api/community_actions.php', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'toggle_follow', type: 'question', id: '<?= $questionId ?>' })
             });
@@ -664,7 +665,7 @@ $shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/' . $sharePath;
     // Vote Answer (up/down)
     async function voteAnswer(ansId, voteType, btn) {
         try {
-            const res = await fetch('/ADMISSION/api/community_actions.php', {
+            const res = await fetch(BASE_URL + '/api/community_actions.php', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'vote_answer', id: ansId, vote_type: voteType })
             });
@@ -698,7 +699,7 @@ $shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/' . $sharePath;
         btn.textContent = 'Loading...';
         btn.disabled = true;
         try {
-            const res = await fetch('/ADMISSION/api/community_actions.php', {
+            const res = await fetch(BASE_URL + '/api/community_actions.php', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'load_comments', answer_id: ansId, offset: offset })
             });
@@ -738,7 +739,7 @@ $shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/' . $sharePath;
         const text = input.value.trim();
         if (text.length < 2) { alert('Comment must be at least 2 characters.'); return; }
         try {
-            const res = await fetch('/ADMISSION/api/community_actions.php', {
+            const res = await fetch(BASE_URL + '/api/community_actions.php', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'submit_comment', answer_id: ansId, comment_text: text })
             });
@@ -774,7 +775,7 @@ $shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/' . $sharePath;
     // Vote Comment
     async function voteComment(commentId, voteType, btn) {
         try {
-            const res = await fetch('/ADMISSION/api/community_actions.php', {
+            const res = await fetch(BASE_URL + '/api/community_actions.php', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'vote_comment', comment_id: commentId, vote_type: voteType })
             });
@@ -817,7 +818,7 @@ $shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/' . $sharePath;
         if (reasons.length === 0 && !otherText) { alert('Please select at least one reason.'); return; }
         if (otherText && !reasons.includes('other')) reasons.push('other');
         try {
-            const res = await fetch('/ADMISSION/api/community_actions.php', {
+            const res = await fetch(BASE_URL + '/api/community_actions.php', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'report_abuse', report_type: type, report_id: id, reasons: reasons, other_text: otherText })
             });
@@ -840,7 +841,7 @@ $shareUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/' . $sharePath;
         fd.append('answer_text', editor.trumbowyg('html'));
         fd.append('action', 'submit_answer');
         try {
-            const res = await fetch('/ADMISSION/api/community_actions.php', { method: 'POST', body: fd });
+            const res = await fetch(BASE_URL + '/api/community_actions.php', { method: 'POST', body: fd });
             const data = await res.json();
             if (data.status === 'success') window.location.reload();
             else alert(data.message || 'Error posting answer.');

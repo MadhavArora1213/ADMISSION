@@ -57,7 +57,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Require login
 if (!isset($_SESSION['user_id'])) {
-    header('Location: /ADMISSION/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+    header('Location: ' . BASE_URL . '/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
 
@@ -172,6 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <?php include __DIR__ . '/includes/favicon.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Free Career & College Counselling 2026 | AdmissionSeason</title>
@@ -760,7 +761,7 @@ async function loadCities(stateId) {
     return;
   }
   try {
-    const res = await fetch('/ADMISSION/api/cities.php?state_id=' + stateId);
+    const res = await fetch(BASE_URL + '/api/cities.php?state_id=' + stateId);
     const data = await res.json();
     if (data.cities && data.cities.length > 0) {
       citySelect.innerHTML = '<option value="">-- Select City --</option>' +

@@ -1760,13 +1760,16 @@ select {
 }
 
 .flogo {
-  font-size: 1.2rem;
-  font-weight: 800;
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 16px;
-  color: #fff
+}
+
+.footer-logo-img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
 }
 
 .flogo i {
@@ -2824,15 +2827,17 @@ select {
 }
 
 .pro-logo {
-  font-size: 1.55rem;
-  font-weight: 900;
-  color: #0b2447;
-  letter-spacing: -0.03em;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-family: var(--font);
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pro-logo-img {
+  height: 70px;
+  width: auto;
+  object-fit: contain;
 }
 
 .pro-logo span {
@@ -3411,7 +3416,7 @@ select {
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.6);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
   gap: 24px;
   padding: 24px;
   visibility: hidden;
@@ -4393,8 +4398,7 @@ select {
 
 @media(max-width: 640px) {
   .pro-nav-main { padding: 10px 0; }
-  .pro-logo span { font-size: 1.1rem; }
-  .pro-logo i { font-size: 1.4rem; }
+  .pro-logo-img { height: 50px; }
   .pro-nav-right { gap: 6px; }
   .pro-icon-btn { width: 36px; height: 36px; font-size: 1.1rem; }
   .pro-user-avatar { width: 34px; height: 34px; font-size: 0.8rem; }

@@ -7,12 +7,12 @@ require_once __DIR__ . '/admin/db.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 $id = (int)($_GET['id'] ?? 0);
-if (!$id) { header('Location: /ADMISSION/study-abroad?tab=consultants'); exit; }
+if (!$id) { header('Location: ' . BASE_URL . '/study-abroad?tab=consultants'); exit; }
 
 $stmt = $pdo->prepare("SELECT * FROM consultants WHERE id = ? LIMIT 1");
 $stmt->execute([$id]);
 $con = $stmt->fetch(PDO::FETCH_ASSOC);
-if (!$con) { header('Location: /ADMISSION/study-abroad?tab=consultants'); exit; }
+if (!$con) { header('Location: ' . BASE_URL . '/study-abroad?tab=consultants'); exit; }
 
 $conCountries = json_decode($con['specialization_countries'] ?? '[]', true);
 $mode = strtolower($con['consultation_mode'] ?? 'both');
@@ -28,13 +28,14 @@ $countryFlags = [
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <?php include __DIR__ . '/includes/favicon.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($con['consultant_name']) ?> – Consultant Profile | AdmissionSeason</title>
   <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/ADMISSION/assets/css/style.css?v=8">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css?v=8">
   <style>
     :root { --oxford-navy:#0B2447; --yale-blue:#19376D; --snow-pearl:#F8FAFC; --ink-black:#0F172A; --border-color-alt:#e2e8f0; --text-muted-alt:#64748b; }
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -221,7 +222,7 @@ $countryFlags = [
 
 <section class="con-hero">
   <div class="con-hero-inner">
-    <a href="/ADMISSION/study-abroad?tab=consultants" class="con-back">
+    <a href="<?= BASE_URL ?>/study-abroad?tab=consultants" class="con-back">
       <i class="ph ph-arrow-left"></i> Back to Consultants
     </a>
     <div class="con-hero-row">
@@ -353,7 +354,7 @@ $countryFlags = [
               <i class="ph-fill ph-envelope"></i> Send Email
             </a>
           <?php endif; ?>
-          <a href="/ADMISSION/counselling" class="sidebar-cta secondary" style="margin-top:10px">
+          <a href="<?= BASE_URL ?>/counselling" class="sidebar-cta secondary" style="margin-top:10px">
             <i class="ph-fill ph-headset"></i> Free Counselling
           </a>
         </div>
@@ -366,7 +367,7 @@ $countryFlags = [
             $otherCons = $pdo->query("SELECT id, consultant_name, logo_url, consultant_rating, city FROM consultants WHERE id != " . (int)$con['id'] . " ORDER BY consultant_rating DESC LIMIT 4")->fetchAll(PDO::FETCH_ASSOC);
             foreach ($otherCons as $oc):
             ?>
-              <a href="/ADMISSION/consultant/<?= (int)$oc['id'] ?>" class="other-con-link">
+              <a href="<?= BASE_URL ?>/consultant/<?= (int)$oc['id'] ?>" class="other-con-link">
                 <img src="<?= htmlspecialchars($oc['logo_url'] ?: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=80&h=80&fit=crop') ?>" alt="logo">
                 <div class="oc-info">
                   <strong><?= htmlspecialchars($oc['consultant_name']) ?></strong>

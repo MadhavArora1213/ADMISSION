@@ -160,7 +160,7 @@ $total_uni = $pdo->query("SELECT count(*) FROM foreign_universities")->fetchColu
                             <?php foreach($universities as $uni): ?>
                             <tr>
                                 <td>
-                                    <a href="/ADMISSION/foreign-university/<?php echo htmlspecialchars($uni['university_slug']); ?>" target="_blank" style="text-decoration:none; color:var(--text-dark);">
+                                    <a href="<?= BASE_URL ?>/foreign-university/<?php echo htmlspecialchars($uni['university_slug']); ?>" target="_blank" style="text-decoration:none; color:var(--text-dark);">
                                         <div style="font-weight:600; color:var(--primary);">
                                             <?php echo htmlspecialchars($uni['university_name']); ?>
                                         </div>

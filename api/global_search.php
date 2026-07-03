@@ -60,7 +60,7 @@ try {
             'title' => $r['name'],
             'subtitle' => $meta,
             'badge' => $badge,
-            'url' => '/ADMISSION/college/' . $r['slug'],
+            'url' => BASE_URL . '/college/' . $r['slug'],
             'relevance' => $rel,
         ];
         $total++;
@@ -89,7 +89,7 @@ try {
             'title' => $r['exam_name'] . $abbr,
             'subtitle' => $subtitle,
             'badge' => $badge,
-            'url' => '/ADMISSION/exam/' . $r['exam_slug'],
+            'url' => BASE_URL . '/exam/' . $r['exam_slug'],
             'relevance' => $rel,
         ];
         $total++;
@@ -117,7 +117,7 @@ try {
             'title' => $r['course_name'],
             'subtitle' => $badge . ($meta ? ' · ' . $meta : ''),
             'badge' => $badge,
-            'url' => '/ADMISSION/course/' . $r['course_slug'],
+            'url' => BASE_URL . '/course/' . $r['course_slug'],
             'relevance' => $rel,
         ];
         $total++;
@@ -144,7 +144,7 @@ try {
             'title' => $r['name'],
             'subtitle' => $subtitle,
             'badge' => $badge,
-            'url' => '/ADMISSION/career/' . $r['slug'],
+            'url' => BASE_URL . '/career/' . $r['slug'],
             'relevance' => $rel,
         ];
         $total++;
@@ -172,7 +172,7 @@ try {
             'title' => $r['article_title'],
             'subtitle' => $typeLabel . ($date ? ' · ' . $date : ''),
             'badge' => $typeLabel,
-            'url' => '/ADMISSION/news_details.php?slug=' . $r['article_slug'],
+            'url' => BASE_URL . '/news_details.php?slug=' . $r['article_slug'],
             'relevance' => $rel,
         ];
         $total++;
@@ -200,7 +200,7 @@ try {
             'title' => $title,
             'subtitle' => $meta,
             'badge' => $r['question_category'] ?: 'Q&A',
-            'url' => '/ADMISSION/question/' . $r['slug'],
+            'url' => BASE_URL . '/question/' . $r['slug'],
             'relevance' => $rel,
         ];
         $total++;
@@ -227,7 +227,7 @@ try {
             'title' => $r['university_name'],
             'subtitle' => $subtitle,
             'badge' => $badge,
-            'url' => '/ADMISSION/foreign-university.php?slug=' . $r['university_slug'],
+            'url' => BASE_URL . '/foreign-university.php?slug=' . $r['university_slug'],
             'relevance' => $rel,
         ];
         $total++;

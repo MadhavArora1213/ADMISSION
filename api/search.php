@@ -29,7 +29,7 @@ try {
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $results[] = [
             'type' => 'college', 'label' => $r['name'],
-            'url' => '/ADMISSION/college/' . $r['slug'], 'icon' => 'ph-buildings',
+            'url' => BASE_URL . '/college/' . $r['slug'], 'icon' => 'ph-buildings',
             'title' => $r['name'], 'subtitle' => '', 'badge' => 'College',
             'relevance' => relevanceScore($r['name'], $q),
         ];
@@ -43,7 +43,7 @@ try {
         $abbr = $r['exam_abbreviation'] ? ' (' . $r['exam_abbreviation'] . ')' : '';
         $results[] = [
             'type' => 'exam', 'label' => $r['exam_name'] . $abbr,
-            'url' => '/ADMISSION/exam/' . $r['exam_slug'], 'icon' => 'ph-clipboard-text',
+            'url' => BASE_URL . '/exam/' . $r['exam_slug'], 'icon' => 'ph-clipboard-text',
             'title' => $r['exam_name'] . $abbr, 'subtitle' => '', 'badge' => $r['exam_abbreviation'] ?: 'Exam',
             'relevance' => relevanceScore($r['exam_name'], $q),
         ];
@@ -56,7 +56,7 @@ try {
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $results[] = [
             'type' => 'course', 'label' => $r['course_name'],
-            'url' => '/ADMISSION/course/' . $r['course_slug'], 'icon' => 'ph-books',
+            'url' => BASE_URL . '/course/' . $r['course_slug'], 'icon' => 'ph-books',
             'title' => $r['course_name'], 'subtitle' => '', 'badge' => 'Course',
             'relevance' => relevanceScore($r['course_name'], $q),
         ];
@@ -69,7 +69,7 @@ try {
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $results[] = [
             'type' => 'career', 'label' => $r['name'],
-            'url' => '/ADMISSION/career/' . $r['slug'], 'icon' => 'ph-briefcase',
+            'url' => BASE_URL . '/career/' . $r['slug'], 'icon' => 'ph-briefcase',
             'title' => $r['name'], 'subtitle' => '', 'badge' => 'Career',
             'relevance' => relevanceScore($r['name'], $q),
         ];

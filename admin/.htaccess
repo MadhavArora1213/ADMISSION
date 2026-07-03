@@ -3,7 +3,7 @@
 # Prevent directory listing
 Options -Indexes
 
-# Block access to sensitive files
+# Block access to sensitive files (Apache 2.4)
 <FilesMatch "\.(env|log|sql|bak|config|ini|sh|md)$">
     Require all denied
 </FilesMatch>
@@ -28,12 +28,4 @@ Options -Indexes
     Header always set X-XSS-Protection "1; mode=block"
     Header always set Referrer-Policy strict-origin-when-cross-origin
     Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
-</IfModule>
-
-# Rate limit login attempts (if mod_ratelimit is available)
-<IfModule mod_ratelimit.c>
-    <Location "/ADMISSION/admin/index.php">
-        SetOutputFilter RATE_LIMIT
-        SetEnv rate-limit 10
-    </Location>
 </IfModule>

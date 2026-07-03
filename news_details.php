@@ -3,6 +3,7 @@ declare(strict_types=1);
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 require_once __DIR__ . '/admin/db.php';
+require_once __DIR__ . '/includes/news_seo_helpers.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -261,10 +262,32 @@ $typeLabel    = ucwords(str_replace('_', ' ', $article['article_type']));
 $publishDate  = !empty($article['publish_at']) ? date('F d, Y', strtotime($article['publish_at'])) : '';
 $readingTime  = $article['reading_time_mins'] ?? max(1, (int)ceil(str_word_count(strip_tags($article['content_body'] ?? '')) / 200));
 
-$shareUrl   = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/news_details.php?slug=' . urlencode($slug);
-$shareImage = cImg($article['featured_image_url'] ?? '');
+$siteBase  = getBaseUrl();
+$shareUrl   = $siteBase . '/news/' . urlencode($slug);
+
+// Ensure OG image is always an absolute URL for social sharing
+$rawImage = $article['featured_image_url'] ?? '';
+if (!empty($rawImage) && !str_starts_with($rawImage, 'http') && !str_starts_with($rawImage, '//')) {
+    $shareImage = $siteBase . '/' . ltrim($rawImage, '/');
+} elseif (!empty($rawImage) && str_contains($rawImage, 'admissionseason.com')) {
+    $shareImage = $rawImage;
+} elseif (!empty($rawImage) && str_starts_with($rawImage, 'http')) {
+    // External image (Unsplash etc.) — X/Twitter can't reliably fetch these
+    // Download and use locally, or fall back to default
+    $localPath = 'uploads/' . basename(parse_url($rawImage, PHP_URL_PATH));
+    $localFile = __DIR__ . '/' . $localPath;
+    if (file_exists($localFile)) {
+        $shareImage = $siteBase . '/' . $localPath;
+    } else {
+        $shareImage = $siteBase . '/assets/img/logo.png';
+    }
+} else {
+    $shareImage = $siteBase . '/assets/img/logo.png';
+}
 $shareDesc  = mb_strimwidth(strip_tags($article['excerpt'] ?? $article['content_body'] ?? ''), 0, 160, '...');
 $siteName   = 'AdmissionSeason';
+$publishDateISO  = !empty($article['publish_at']) ? date('c', strtotime($article['publish_at'])) : '';
+$modifiedDateISO = !empty($article['updated_at']) ? date('c', strtotime($article['updated_at'])) : $publishDateISO;
 
 // Fetch real tag names from the tags table using IDs stored in articles.tags
 $tags = [];
@@ -277,6 +300,7 @@ if (!empty($article['tags'])) {
         $tags = $tagStmt->fetchAll(PDO::FETCH_COLUMN);
     }
 }
+$keywords = !empty($tags) ? implode(', ', array_slice($tags, 0, 10)) : $typeLabel . ', ' . ($article['category_name'] ?? 'News') . ', AdmissionSeason, college news, education updates';
 
 // Handle Comment Submission
 $comment_error = '';
@@ -310,12 +334,19 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <?php include __DIR__ . '/includes/favicon.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($article['article_title']) ?> - <?= $siteName ?></title>
   <meta name="description" content="<?= htmlspecialchars($shareDesc) ?>">
-  <meta name="robots" content="index, follow">
+  <meta name="keywords" content="<?= htmlspecialchars($keywords) ?>">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <link rel="canonical" href="<?= $shareUrl ?>">
+  <meta name="author" content="<?= htmlspecialchars($article['custom_author_name'] ?: 'AdmissionSeason') ?>">
+  <meta name="revisit-after" content="7 days">
+  <link rel="alternate" type="application/rss+xml" title="<?= htmlspecialchars($article['article_title']) ?> RSS Feed" href="<?= $siteBase ?>/news/rss">
+
+  <?= renderGeoMetaTags($article['article_title'], $article['content_body'], $article['excerpt']) ?>
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article">
@@ -325,14 +356,22 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
   <meta property="og:image" content="<?= $shareImage ?>">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="<?= htmlspecialchars($article['featured_image_alt'] ?? $article['article_title']) ?>">
   <meta property="og:site_name" content="<?= $siteName ?>">
   <meta property="og:locale" content="en_IN">
   <?php if (!empty($article['category_name'])): ?>
   <meta property="article:section" content="<?= htmlspecialchars($article['category_name']) ?>">
   <?php endif; ?>
-  <?php if ($publishDate): ?>
-  <meta property="article:published_time" content="<?= date('c', strtotime($article['publish_at'])) ?>">
+  <?php if ($publishDateISO): ?>
+  <meta property="article:published_time" content="<?= $publishDateISO ?>">
   <?php endif; ?>
+  <?php if ($modifiedDateISO && $modifiedDateISO !== $publishDateISO): ?>
+  <meta property="article:modified_time" content="<?= $modifiedDateISO ?>">
+  <?php endif; ?>
+  <meta property="article:publisher" content="https://www.facebook.com/admissionseason">
+  <?php foreach (array_slice($tags, 0, 5) as $tag): ?>
+  <meta property="article:tag" content="<?= htmlspecialchars($tag) ?>">
+  <?php endforeach; ?>
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
@@ -340,27 +379,109 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
   <meta name="twitter:title" content="<?= htmlspecialchars($article['article_title']) ?>">
   <meta name="twitter:description" content="<?= htmlspecialchars($shareDesc) ?>">
   <meta name="twitter:image" content="<?= $shareImage ?>">
+  <meta name="twitter:image:alt" content="<?= htmlspecialchars($article['featured_image_alt'] ?? $article['article_title']) ?>">
   <meta name="twitter:site" content="@AdmissionSeason">
+  <meta name="twitter:creator" content="@AdmissionSeason">
 
-  <!-- Structured Data -->
+  <!-- Structured Data: NewsArticle (Google News compliant) -->
   <script type="application/ld+json">
   <?= json_encode([
     '@context' => 'https://schema.org',
     '@type' => 'NewsArticle',
-    'headline' => $article['article_title'],
+    'mainEntityOfPage' => [
+      '@type' => 'WebPage',
+      '@id' => $shareUrl
+    ],
+    'headline' => mb_strlen($article['article_title']) > 110 ? mb_substr($article['article_title'], 0, 107) . '...' : $article['article_title'],
     'description' => $shareDesc,
-    'datePublished' => $article['publish_at'] ?? '',
-    'author' => ['@type' => 'Organization', 'name' => $article['custom_author_name'] ?: $siteName],
+    'datePublished' => $publishDateISO,
+    'dateModified' => $modifiedDateISO,
+    'author' => [
+      '@type' => 'Person',
+      'name' => $article['custom_author_name'] ?: 'AdmissionSeason Desk',
+      'url' => $siteBase . '/about'
+    ],
     'publisher' => [
       '@type' => 'Organization',
       'name' => $siteName,
-      'logo' => ['@type' => 'ImageObject', 'url' => 'https://images.unsplash.com/photo-1562774053-701939374585?w=200&q=80']
+      'url' => $siteBase,
+      'logo' => [
+        '@type' => 'ImageObject',
+        'url' => $siteBase . '/assets/img/logo.png',
+        'width' => 600,
+        'height' => 60
+      ],
+      'sameAs' => [
+        'https://www.facebook.com/admissionseason',
+        'https://twitter.com/AdmissionSeason',
+        'https://www.instagram.com/admissionseason',
+        'https://www.linkedin.com/company/admissionseason'
+      ]
     ],
-    'mainEntityOfPage' => $shareUrl,
-    'image' => $shareImage,
-    'articleSection' => $typeLabel,
+    'image' => [
+      '@type' => 'ImageObject',
+      'url' => $shareImage,
+      'width' => 1200,
+      'height' => 630,
+      'alt' => $article['featured_image_alt'] ?? $article['article_title']
+    ],
+    'url' => $shareUrl,
+    'articleSection' => $article['category_name'] ?? $typeLabel,
+    'keywords' => $keywords,
+    'wordCount' => str_word_count(strip_tags($article['content_body'] ?? '')),
+    'contentLocation' => getArticleContentLocation($article['article_title'], $article['content_body'], $article['excerpt']),
+    'isPartOf' => [
+      '@type' => 'WebSite',
+      'name' => $siteName,
+      'url' => $siteBase
+    ],
+    'inLanguage' => 'en-IN',
+    'about' => [
+      '@type' => 'Thing',
+      'name' => 'Education News India'
+    ],
+    'interactionStatistic' => [
+      '@type' => 'InteractionCounter',
+      'interactionType' => 'https://schema.org/ViewAction',
+      'userInteractionCount' => (int)($article['view_count'] ?? 0)
+    ]
   ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
   </script>
+
+  <!-- Structured Data: BreadcrumbList -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => array_filter([
+      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => $siteBase . '/'],
+      ['@type' => 'ListItem', 'position' => 2, 'name' => 'News', 'item' => $siteBase . '/news.php'],
+      !empty($article['category_name']) ? ['@type' => 'ListItem', 'position' => 3, 'name' => $article['category_name'], 'item' => $siteBase . '/news.php?category=' . urlencode($article['category_slug'])] : null,
+      ['@type' => 'ListItem', 'position' => !empty($article['category_name']) ? 4 : 3, 'name' => mb_strimwidth($article['article_title'], 0, 60, '...')],
+    ]),
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+
+  <!-- Structured Data: FAQPage (if article has FAQ-like content) -->
+  <?php if (!empty($article['content_body']) && preg_match_all('/<h[23][^>]*>(.*?)<\/h[23]>/i', $article['content_body'], $faqHeadings) && count($faqHeadings[0]) >= 2): ?>
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'FAQPage',
+    'mainEntity' => array_map(function($h) {
+        $text = strip_tags($h);
+        return [
+          '@type' => 'Question',
+          'name' => $text,
+          'acceptedAnswer' => [
+            '@type' => 'Answer',
+            'text' => 'For detailed information about ' . $text . ', please read the full article on AdmissionSeason.'
+          ]
+        ];
+    }, array_slice($faqHeadings[1], 0, 5))
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+  <?php endif; ?>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -7,7 +7,8 @@ require_once __DIR__ . '/university_helpers.php';
 require_once __DIR__ . '/exam_helpers.php';
 require_once __DIR__ . '/course_helpers.php';
 
-$navBase = '/ADMISSION';
+// Use BASE_URL from config.php (already included by db.php before this file)
+$navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
 
 // --- NAVBAR DATA ---
 if (!isset($navColleges)) {
@@ -33,14 +34,14 @@ if (!isset($navColleges)) {
     $navMoreTopColleges = cAll($pdo, "SELECT name, slug FROM colleges WHERE status='active' ORDER BY overall_rating_avg DESC, ranking_nirf ASC LIMIT 20");
 }
 ?>
+<script>window.BASE_URL = '<?= BASE_URL ?>';</script>
 <!-- ═══ PRO STYLE NAVBAR ═══ -->
 <header class="pro-header" id="header">
   <div class="pro-nav-main">
     <div class="container pro-nav-flex">
       <div class="pro-nav-left">
         <a href="<?= $navBase ?>/index.php" class="pro-logo">
-          <i class="ph-fill ph-student"></i>
-          <span>AdmissionSeason</span>
+          <img src="<?= $navBase ?>/assets/img/logo.png" alt="AdmissionSeason" class="pro-logo-img">
         </a>
       </div>
 
@@ -106,7 +107,7 @@ if (!isset($navColleges)) {
             });
             html += '</div>';
           });
-          html += '<div class="nav-search-footer"><a href="/ADMISSION/search.php?q=' + encodeURIComponent(q) + '" class="nav-view-all">View all results for "' + q.replace(/</g,'&lt;') + '" <i class="ph ph-arrow-right"></i></a></div>';
+          html += '<div class="nav-search-footer"><a href="<?= BASE_URL ?>/search.php?q=' + encodeURIComponent(q) + '" class="nav-view-all">View all results for "' + q.replace(/</g,'&lt;') + '" <i class="ph ph-arrow-right"></i></a></div>';
           dd.innerHTML = html;
           dd.style.display = 'block';
           activeIdx = -1;
@@ -125,7 +126,7 @@ if (!isset($navColleges)) {
           showLoading(q);
           timer = setTimeout(() => {
             abortCtrl = new AbortController();
-            fetch('/ADMISSION/api/global_search.php?q=' + encodeURIComponent(q), { signal: abortCtrl.signal })
+            fetch(BASE_URL + '/api/global_search.php?q=' + encodeURIComponent(q), { signal: abortCtrl.signal })
               .then(r => r.json())
               .then(data => { if (data.ok) render(data.results, q); })
               .catch(e => { if (e.name !== 'AbortError') dd.style.display = 'none'; });
@@ -152,7 +153,7 @@ if (!isset($navColleges)) {
             } else if (items.length) {
               items[0].click();
             } else if (this.value.trim()) {
-              window.location.href = '/ADMISSION/search.php?q=' + encodeURIComponent(this.value.trim());
+              window.location.href = BASE_URL + '/search.php?q=' + encodeURIComponent(this.value.trim());
             }
           } else if (e.key === 'Escape') {
             dd.style.display = 'none';
@@ -182,14 +183,14 @@ if (!isset($navColleges)) {
               <div class="pro-user-menu-header"><?= htmlspecialchars($_SESSION['user_name']) ?></div>
               <a href="<?= $navBase ?>/profile.php" class="pro-user-menu-item"><i class="ph ph-user"></i> My Profile</a>
               <div class="pro-user-menu-divider"></div>
-              <a href="/ADMISSION/logout.php?redirect=<?= urlencode($_SERVER['REQUEST_URI'] ?? '/') ?>" class="pro-user-menu-item logout"><i class="ph ph-sign-out"></i> Logout</a>
+              <a href="<?= BASE_URL ?>/logout.php?redirect=<?= urlencode($_SERVER['REQUEST_URI'] ?? '/') ?>" class="pro-user-menu-item logout"><i class="ph ph-sign-out"></i> Logout</a>
             </div>
           </div>
         <?php else: ?>
           <div class="pro-login-dropdown-wrapper" id="loginDropdownWrapper">
             <button class="pro-user-btn pro-login-trigger" id="loginTrigger" onclick="toggleLoginDropdown()" title="Login"><i class="ph-fill ph-user-plus"></i></button>
             <div class="pro-login-dropdown" id="loginDropdown">
-              <a href="/ADMISSION/login.php" class="pro-login-dropdown-item"><i class="ph ph-user"></i> User Login</a>
+              <a href="<?= BASE_URL ?>/login.php" class="pro-login-dropdown-item"><i class="ph ph-user"></i> User Login</a>
               <a href="<?= $navBase ?>/college/login.php" class="pro-login-dropdown-item"><i class="ph ph-graduation-cap"></i> College Login</a>
             </div>
           </div>
@@ -456,7 +457,7 @@ if (!isset($navColleges)) {
               <?php endforeach; ?>
               <?php foreach($moreStreams as $ns): ?>
               <div class="more-sidebar-item" data-cat="<?= $ns ?>">
-                <a href="<?= '/ADMISSION/careers.php?stream=' . urlencode($ns) ?>">
+                <a href="<?= BASE_URL . '/careers.php?stream=' . urlencode($ns) ?>">
                   <i class="ph <?= $streamIcons[$ns] ?? 'ph-compass' ?>"></i>
                   <?= $ns ?> Careers
                   <i class="ph ph-caret-right more-arrow"></i>
@@ -531,8 +532,8 @@ if (!isset($navColleges)) {
                   <div class="more-panel-col">
                     <h4>Careers in <?= $ns ?></h4>
                     <ul>
-                      <li><a href="<?= '/ADMISSION/careers.php?stream=' . urlencode($ns) ?>"><?= $ns ?> Careers Overview</a></li>
-                      <li><a href="<?= '/ADMISSION/careers.php?stream=' . urlencode($ns) ?>" class="more-view-all">> Explore All <?= $ns ?> Careers</a></li>
+                      <li><a href="<?= BASE_URL . '/careers.php?stream=' . urlencode($ns) ?>"><?= $ns ?> Careers Overview</a></li>
+                      <li><a href="<?= BASE_URL . '/careers.php?stream=' . urlencode($ns) ?>" class="more-view-all">> Explore All <?= $ns ?> Careers</a></li>
                     </ul>
                   </div>
                   <div class="more-panel-col">
@@ -584,9 +585,8 @@ if (!isset($navColleges)) {
 <div class="pro-mobile-overlay" id="proMobileOverlay" onclick="toggleMobileNav()"></div>
 <nav class="pro-mobile-drawer" id="proMobileDrawer">
   <div class="pro-mobile-drawer-header">
-    <a href="<?= $navBase ?>/index.php" class="pro-logo" style="font-size:1.2rem">
-      <i class="ph-fill ph-student"></i>
-      <span>AdmissionSeason</span>
+    <a href="<?= $navBase ?>/index.php" class="pro-logo">
+      <img src="<?= $navBase ?>/assets/img/logo.png" alt="AdmissionSeason" class="pro-logo-img">
     </a>
     <button class="pro-hamburger active" onclick="toggleMobileNav()" aria-label="Close">
       <i class="ph ph-x"></i>
@@ -610,7 +610,7 @@ if (!isset($navColleges)) {
   </div>
   <?php else: ?>
   <div class="pro-mobile-user">
-    <a href="/ADMISSION/login.php" class="pro-mobile-login-btn"><i class="ph-fill ph-user-plus"></i> Login / Sign Up</a>
+    <a href="<?= BASE_URL ?>/login.php" class="pro-mobile-login-btn"><i class="ph-fill ph-user-plus"></i> Login / Sign Up</a>
   </div>
   <?php endif; ?>
 
@@ -673,9 +673,9 @@ if (!isset($navColleges)) {
       <?php foreach($navMoreCategories ?? [] as $cat): ?>
       <a href="<?= coursesUrl(['category' => $cat['course_category']]) ?>"><?= htmlspecialchars($cat['course_category']) ?></a>
       <?php endforeach; ?>
-      <a href="/ADMISSION/careers.php?stream=Science">Science Careers</a>
-      <a href="/ADMISSION/careers.php?stream=Commerce">Commerce Careers</a>
-      <a href="/ADMISSION/careers.php?stream=Humanities">Humanities Careers</a>
+      <a href="<?= BASE_URL ?>/careers.php?stream=Science">Science Careers</a>
+      <a href="<?= BASE_URL ?>/careers.php?stream=Commerce">Commerce Careers</a>
+      <a href="<?= BASE_URL ?>/careers.php?stream=Humanities">Humanities Careers</a>
     </div>
     <a href="<?= $navBase ?>/news.php" class="pro-mobile-link"><i class="ph ph-newspaper"></i> News</a>
 
@@ -685,7 +685,7 @@ if (!isset($navColleges)) {
     <a href="<?= $navBase ?>/college/signup.php" class="pro-mobile-link"><i class="ph ph-buildings"></i> Register Your Institute</a>
     <a href="<?= $navBase ?>/saved_colleges.php" class="pro-mobile-link"><i class="ph ph-heart"></i> Saved Colleges</a>
     <?php if (isset($_SESSION['user_id'])): ?>
-    <a href="/ADMISSION/logout.php?redirect=<?= urlencode($_SERVER['REQUEST_URI'] ?? '/') ?>" class="pro-mobile-link" style="color:#DC2626"><i class="ph ph-sign-out"></i> Logout</a>
+    <a href="<?= BASE_URL ?>/logout.php?redirect=<?= urlencode($_SERVER['REQUEST_URI'] ?? '/') ?>" class="pro-mobile-link" style="color:#DC2626"><i class="ph ph-sign-out"></i> Logout</a>
     <?php endif; ?>
   </div>
 </nav>
@@ -802,6 +802,41 @@ if (moreWrap) {
     if (def) def.style.display = '';
   });
 }
+
+// ═══ VIEWPORT-AWARE MEGA MENU POSITIONING ═══
+document.querySelectorAll('.pro-has-mega').forEach(function(item) {
+  var menu = item.querySelector('.pro-mega-menu');
+  if (!menu) return;
+
+  item.addEventListener('mouseenter', function() {
+    // Reset to default centered position
+    menu.style.left = '50%';
+    menu.style.right = 'auto';
+    menu.style.transform = 'translateX(-50%) translateY(0)';
+
+    // Get bounding rects
+    var menuRect = menu.getBoundingClientRect();
+    var viewportW = window.innerWidth;
+
+    // If menu overflows right, shift it left
+    if (menuRect.right > viewportW - 16) {
+      var overBy = menuRect.right - viewportW + 16;
+      menu.style.left = 'calc(50% - ' + overBy + 'px)';
+    }
+
+    // If menu overflows left, shift it right
+    if (menuRect.left < 16) {
+      var overBy = 16 - menuRect.left;
+      menu.style.left = 'calc(50% + ' + overBy + 'px)';
+    }
+  });
+
+  item.addEventListener('mouseleave', function() {
+    menu.style.left = '';
+    menu.style.right = '';
+    menu.style.transform = '';
+  });
+});
 </script>
 <style>
 /* Hide hamburger on desktop */

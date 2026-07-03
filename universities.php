@@ -5,6 +5,7 @@ ini_set('display_errors', '0');
 require_once __DIR__ . '/admin/db.php';
 require_once __DIR__ . '/includes/college_helpers.php';
 require_once __DIR__ . '/includes/university_helpers.php';
+require_once __DIR__ . '/includes/news_seo_helpers.php';
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
@@ -72,15 +73,102 @@ $stats = [
 ];
 
 $navBase = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$siteBase = getBaseUrl();
+$canonicalUrl = $siteBase . '/universities';
+if ($type !== 'all') $canonicalUrl .= '?type=' . urlencode($type);
+
 $pageTitle = 'Universities in India ' . date('Y') . ' — Courses, Fees, Placements';
+$metaDesc = 'Explore ' . number_format($total) . '+ universities in India — compare courses, fees, NIRF rankings, placements, NAAC grades & admission details. Find government, private, deemed & autonomous universities.';
+$metaKeywords = 'universities in India, top universities India ' . date('Y') . ', best universities, university rankings, NIRF ranking, NAAC grade, university fees, college admissions, deemed university, private university, government university';
+$ogTitle = 'Universities in India ' . date('Y') . ' — Courses, Fees, Placements | AdmissionSeason';
+$ogDesc = 'Compare ' . number_format($total) . '+ universities across India. Filter by type, check fees, placements, rankings and admission process.';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<?php include __DIR__ . '/includes/favicon.php'; ?>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?= htmlspecialchars($pageTitle) ?> - AdmissionSeason</title>
-<meta name="description" content="Explore <?= number_format($total) ?>+ universities in India. Compare fees, rankings, placements and admission details.">
+<meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+<meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="googlebot" content="index, follow">
+<link rel="canonical" href="<?= $canonicalUrl ?>">
+<meta name="author" content="AdmissionSeason">
+<meta name="revisit-after" content="3 days">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="<?= $canonicalUrl ?>">
+<meta property="og:title" content="<?= htmlspecialchars($ogTitle) ?>">
+<meta property="og:description" content="<?= htmlspecialchars($ogDesc) ?>">
+<meta property="og:image" content="<?= $siteBase ?>/assets/img/logo.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="AdmissionSeason">
+<meta property="og:locale" content="en_IN">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="<?= $canonicalUrl ?>">
+<meta name="twitter:title" content="<?= htmlspecialchars($ogTitle) ?>">
+<meta name="twitter:description" content="<?= htmlspecialchars($ogDesc) ?>">
+<meta name="twitter:image" content="<?= $siteBase ?>/assets/img/logo.png">
+<meta name="twitter:site" content="@AdmissionSeason">
+<meta name="twitter:creator" content="@AdmissionSeason">
+
+<!-- GEO Meta Tags -->
+<meta name="geo.region" content="IN">
+<meta name="geo.placename" content="India">
+<meta name="geo.position" content="20.5937;78.9629">
+<meta name="ICBM" content="20.5937, 78.9629">
+<meta name="language" content="English">
+<link rel="alternate" hreflang="en-in" href="<?= $canonicalUrl ?>">
+
+<!-- Structured Data: CollectionPage -->
+<script type="application/ld+json">
+<?= json_encode([
+  '@context' => 'https://schema.org',
+  '@type' => 'CollectionPage',
+  'name' => $pageTitle,
+  'description' => $metaDesc,
+  'url' => $canonicalUrl,
+  'publisher' => [
+    '@type' => 'Organization',
+    'name' => 'AdmissionSeason',
+    'url' => $siteBase,
+    'logo' => ['@type' => 'ImageObject', 'url' => "$siteBase/assets/img/logo.png", 'width' => 600, 'height' => 60],
+    'sameAs' => [
+      'https://www.facebook.com/admissionseason',
+      'https://twitter.com/AdmissionSeason',
+      'https://www.instagram.com/admissionseason',
+      'https://www.linkedin.com/company/admissionseason'
+    ]
+  ],
+  'isPartOf' => ['@type' => 'WebSite', 'name' => 'AdmissionSeason', 'url' => $siteBase],
+  'inLanguage' => 'en-IN',
+  'about' => ['@type' => 'Thing', 'name' => 'Universities in India'],
+  'mainEntity' => [
+    '@type' => 'ItemList',
+    'name' => 'Universities in India',
+    'numberOfItems' => $total,
+  ]
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+</script>
+
+<!-- Structured Data: BreadcrumbList -->
+<script type="application/ld+json">
+<?= json_encode([
+  '@context' => 'https://schema.org',
+  '@type' => 'BreadcrumbList',
+  'itemListElement' => [
+    ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+    ['@type' => 'ListItem', 'position' => 2, 'name' => 'Universities', 'item' => $canonicalUrl],
+  ]
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">

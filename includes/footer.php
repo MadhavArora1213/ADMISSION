@@ -2,8 +2,12 @@
 if (!isset($pdo)) {
     require_once __DIR__ . '/../admin/db.php';
 }
+if (!function_exists('getBaseUrl')) {
+    require_once __DIR__ . '/news_seo_helpers.php';
+}
 
-$navBase = '/ADMISSION';
+$navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
+$siteBase = getBaseUrl();
 
 try {
     $fColleges = $pdo->query("SELECT name, slug FROM colleges ORDER BY is_featured DESC, name ASC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
@@ -34,7 +38,7 @@ function fName($text) {
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a href="<?= $navBase ?>/" class="flogo"><i class="ph-fill ph-graduation-cap"></i> Admission<span>Season</span></a>
+        <a href="<?= $navBase ?>/" class="flogo"><img src="<?= $navBase ?>/assets/img/logo.png" alt="AdmissionSeason" class="footer-logo-img"></a>
         <p>India's leading college discovery platform. Find detailed info on colleges, courses, exams, and get personalised admission assistance.</p>
         <div class="fsocial">
           <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
@@ -126,7 +130,7 @@ function fName($text) {
       "item": {
         "@type": "CollegeOrUniversity",
         "name": <?= json_encode($fc['name']) ?>,
-        "url": "https://localhost/ADMISSION/college/<?= urlencode($fc['slug']) ?>"
+        "url": "$siteBase/college/<?= urlencode($fc['slug']) ?>"
       }
     }<?= $i < count($fColleges) - 1 ? ',' : '' ?>
     <?php endforeach; ?>
@@ -152,7 +156,7 @@ function fName($text) {
       "item": {
         "@type": "EducationalOccupationalProgram",
         "name": <?= json_encode($fe['exam_name']) ?>,
-        "url": "https://localhost/ADMISSION/exam/<?= urlencode($fe['exam_slug']) ?>"
+        "url": "$siteBase/exam/<?= urlencode($fe['exam_slug']) ?>"
       }
     }<?= $i < count($fExams) - 1 ? ',' : '' ?>
     <?php endforeach; ?>

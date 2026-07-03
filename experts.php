@@ -39,12 +39,13 @@ foreach ($experts as $e) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <?php include __DIR__ . '/includes/favicon.php'; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Panel of Experts | AdmissionSeason</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/ADMISSION/assets/css/style.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         :root { --oxford-navy: #0B2447; --yale-blue: #19376D; --snow-pearl: #F8FAFC; --ink-black: #0F172A; --border-color-alt: #e2e8f0; --text-muted-alt: #64748b; --expert-badge-color: #0d9488; }
@@ -433,7 +434,7 @@ foreach ($experts as $e) {
                     </div>
 
                     <div class="exp-card-actions">
-                        <a href="/ADMISSION/community?tab=qna" class="exp-card-btn primary">
+                        <a href="<?= BASE_URL ?>/community?tab=qna" class="exp-card-btn primary">
                             <i class="ph ph-chat-text"></i> Ask Expert
                         </a>
                         <button class="exp-card-btn secondary exp-follow-btn <?= in_array($exp['id'], $followedExperts) ? 'active' : '' ?>" onclick="toggleExpertFollow('<?= $exp['id'] ?>', this)">
@@ -446,7 +447,7 @@ foreach ($experts as $e) {
                                 <i class="ph ph-linkedin-logo"></i> LinkedIn
                             </a>
                         <?php else: ?>
-                            <a href="/ADMISSION/community?tab=ask" class="exp-card-btn secondary">
+                            <a href="<?= BASE_URL ?>/community?tab=ask" class="exp-card-btn secondary">
                                 <i class="ph ph-paper-plane-right"></i> Post Query
                             </a>
                         <?php endif; ?>
@@ -460,7 +461,7 @@ foreach ($experts as $e) {
     <div class="exp-cta">
         <h3><i class="ph ph-question"></i> Have a Question?</h3>
         <p>Post your question and get answers from our verified experts within 24 hours.</p>
-        <a href="/ADMISSION/community?tab=ask" class="exp-cta-btn">
+        <a href="<?= BASE_URL ?>/community?tab=ask" class="exp-cta-btn">
             <i class="ph ph-paper-plane-right"></i> Ask Your Question
         </a>
     </div>

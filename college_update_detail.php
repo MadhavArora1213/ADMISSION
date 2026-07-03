@@ -33,7 +33,7 @@ $collegeSlug = $update['college_slug'] ?? '';
 $typeLabel = ucwords(str_replace('_', ' ', $update['update_type'] ?? 'news'));
 $eventDate = !empty($update['event_date']) ? date('F d, Y', strtotime($update['event_date'])) : '';
 
-$shareUrl   = 'https://' . $_SERVER['HTTP_HOST'] . '/ADMISSION/' . $sharePath;
+$shareUrl   = 'https://' . $_SERVER['HTTP_HOST'] . BASE_URL . '/' . $sharePath;
 $shareImage = cImg($update['cover_image_url'] ?? $update['logo_url'] ?? '');
 $shareDesc  = mb_strimwidth(strip_tags($update['description'] ?? $update['title']), 0, 160, '...');
 $siteName   = 'AdmissionSeason';
@@ -41,6 +41,7 @@ $siteName   = 'AdmissionSeason';
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <?php include __DIR__ . '/includes/favicon.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($update['title']) ?> - <?= htmlspecialchars($collegeName) ?> | <?= $siteName ?></title>
@@ -91,7 +92,7 @@ $siteName   = 'AdmissionSeason';
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <link rel="stylesheet" href="/ADMISSION/assets/css/style.css?v=<?= time() ?>">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css?v=<?= time() ?>">
   <style>
     .upd-wrap{max-width:780px;margin:0 auto;padding:30px 20px 60px}
     .upd-breadcrumb{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:28px;font-size:.85rem;color:rgba(15,23,42,.5)}
