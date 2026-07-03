@@ -20,6 +20,8 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
+
+  <!-- Colleges (main + filter variants) -->
   <url>
     <loc><?= $baseUrl ?>/colleges</loc>
     <lastmod><?= $today ?></lastmod>
@@ -27,10 +29,60 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
     <priority>0.9</priority>
   </url>
   <url>
+    <loc><?= $baseUrl ?>/colleges?type=govt</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/colleges?type=private</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/colleges?type=deemed</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/colleges?type=autonomous</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Universities (main + filter variants) -->
+  <url>
     <loc><?= $baseUrl ?>/universities</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/universities?type=govt</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/universities?type=private</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/universities?type=deemed</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/universities?type=autonomous</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc><?= $baseUrl ?>/courses</loc>
@@ -116,6 +168,20 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
     <changefreq>hourly</changefreq>
     <priority>0.6</priority>
   </url>
+
+  <!-- Dynamic: State-wise College Pages -->
+<?php
+$statesList = $pdo->query("SELECT s.id, s.name, COUNT(c.id) AS cnt FROM states s LEFT JOIN colleges c ON c.state_id = s.id AND c.status='active' GROUP BY s.id, s.name HAVING cnt > 0 ORDER BY cnt DESC, s.name ASC")->fetchAll(PDO::FETCH_ASSOC);
+foreach ($statesList as $sl):
+?>
+  <url>
+    <loc><?= $baseUrl ?>/colleges?state=<?= $sl['id'] ?></loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+<?php endforeach; ?>
+
   <url>
     <loc><?= $baseUrl ?>/study-abroad</loc>
     <lastmod><?= $today ?></lastmod>
@@ -145,6 +211,12 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
     <lastmod><?= $today ?></lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/counselling</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
 
   <!-- Dynamic: Colleges -->
@@ -241,6 +313,34 @@ foreach ($careers as $cr):
 ?>
   <url>
     <loc><?= $baseUrl ?>/career/<?= htmlspecialchars($cr['career_slug']) ?></loc>
+    <lastmod><?= $mod ?></lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+<?php endforeach; ?>
+
+<!-- Dynamic: Foreign Universities -->
+<?php
+$foreignUnis = $pdo->query("SELECT slug, updated_at FROM foreign_universities WHERE status='active' ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+foreach ($foreignUnis as $fu):
+  $mod = !empty($fu['updated_at']) ? date('Y-m-d', strtotime($fu['updated_at'])) : $today;
+?>
+  <url>
+    <loc><?= $baseUrl ?>/foreign-university/<?= htmlspecialchars($fu['slug']) ?></loc>
+    <lastmod><?= $mod ?></lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+<?php endforeach; ?>
+
+<!-- Dynamic: Visa Guides -->
+<?php
+$visaGuides = $pdo->query("SELECT slug, updated_at FROM visa_guides WHERE status='active' ORDER BY country_name")->fetchAll(PDO::FETCH_ASSOC);
+foreach ($visaGuides as $vg):
+  $mod = !empty($vg['updated_at']) ? date('Y-m-d', strtotime($vg['updated_at'])) : $today;
+?>
+  <url>
+    <loc><?= $baseUrl ?>/visa-guide/<?= htmlspecialchars($vg['slug']) ?></loc>
     <lastmod><?= $mod ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

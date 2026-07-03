@@ -4,6 +4,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', '0');
 require_once __DIR__ . '/admin/db.php';
 require_once __DIR__ . '/includes/college_helpers.php';
+require_once __DIR__ . '/includes/news_seo_helpers.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -108,6 +109,36 @@ if (isset($_SESSION['user_id'])) {
         $userSavedThisCollege = (bool)$us->fetch();
     } catch(Exception $e) {}
 }
+
+$siteBase = getBaseUrl();
+$canonicalUrl = $siteBase . '/college/' . $slug;
+
+// College image for OG
+$collegeImage = '';
+foreach ($gallery as $m) {
+    if (!empty($m['cover_image_url'])) { $collegeImage = $m['cover_image_url']; break; }
+    if (!empty($m['logo_url'])) { $collegeImage = $m['logo_url']; break; }
+}
+if (!empty($collegeImage) && !str_starts_with($collegeImage, 'http')) {
+    $collegeImage = $siteBase . '/' . ltrim($collegeImage, '/');
+} elseif (empty($collegeImage)) {
+    $collegeImage = $siteBase . '/assets/img/logo.png';
+}
+
+$minFee = '';
+foreach ($courses as $co) {
+    if (!empty($co['annual_fee']) && $co['annual_fee'] > 0) {
+        $minFee = '₹' . number_format($co['annual_fee']) . '/year';
+        break;
+    }
+}
+$maxPackage = '';
+foreach ($placements as $p) {
+    if (!empty($p['avg_package_lpa']) && $p['avg_package_lpa'] > 0) {
+        $maxPackage = '₹' . $p['avg_package_lpa'] . ' LPA';
+        break;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -117,6 +148,122 @@ if (isset($_SESSION['user_id'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?> - AdmissionSeason</title>
   <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($college['name']) ?>, <?= htmlspecialchars($typeLabel) ?>, <?= htmlspecialchars($location) ?>, college fees, placements, ranking, admission <?= date('Y') ?>">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow">
+  <link rel="canonical" href="<?= $canonicalUrl ?>">
+  <meta name="author" content="AdmissionSeason">
+  <meta name="revisit-after" content="7 days">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="university">
+  <meta property="og:url" content="<?= $canonicalUrl ?>">
+  <meta property="og:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta property="og:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta property="og:image" content="<?= $collegeImage ?>">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="AdmissionSeason">
+  <meta property="og:locale" content="en_IN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="<?= $canonicalUrl ?>">
+  <meta name="twitter:title" content="<?= htmlspecialchars($pageTitle) ?>">
+  <meta name="twitter:description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="twitter:image" content="<?= $collegeImage ?>">
+  <meta name="twitter:site" content="@AdmissionSeason">
+  <meta name="twitter:creator" content="@AdmissionSeason">
+
+  <!-- GEO Meta Tags -->
+  <meta name="geo.region" content="IN">
+  <meta name="geo.placename" content="<?= htmlspecialchars($location ?: 'India') ?>">
+  <meta name="language" content="English">
+  <link rel="alternate" hreflang="en-in" href="<?= $canonicalUrl ?>">
+
+  <!-- Structured Data: CollegeOrUniversity -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'CollegeOrUniversity',
+    'name' => $college['name'],
+    'url' => $canonicalUrl,
+    'description' => $metaDesc,
+    'image' => $collegeImage,
+    'address' => !empty($location) ? [
+      '@type' => 'PostalAddress',
+      'addressLocality' => $college['city_name'] ?? '',
+      'addressRegion' => $college['state_name'] ?? '',
+      'addressCountry' => 'IN'
+    ] : null,
+    'telephone' => $college['phone'] ?? null,
+    'email' => $college['email'] ?? null,
+    'foundingDate' => $college['established_year'] ? (string)$college['established_year'] : null,
+    'numberOfStudents' => !empty($college['total_students']) ? $college['total_students'] : null,
+    'hasCredential' => !empty($college['naac_grade']) ? 'NAAC ' . $college['naac_grade'] : null,
+    'aggregateRating' => $overallRating > 0 ? [
+      '@type' => 'AggregateRating',
+      'ratingValue' => number_format($overallRating, 1),
+      'bestRating' => '5',
+      'ratingCount' => $reviewCount,
+      'reviewCount' => $reviewCount,
+    ] : null,
+    'offers' => !empty($minFee) ? [
+      '@type' => 'Offer',
+      'price' => preg_replace('/[^0-9]/', '', $minFee),
+      'priceCurrency' => 'INR',
+      'description' => 'Annual Tuition Fee'
+    ] : null,
+    'sameAs' => array_filter([
+      $college['facebook_url'] ?? null,
+      $college['twitter_url'] ?? null,
+      $college['linkedin_url'] ?? null,
+      $college['youtube_url'] ?? null,
+      $college['instagram_url'] ?? null,
+    ]),
+    'publisher' => [
+      '@type' => 'Organization',
+      'name' => 'AdmissionSeason',
+      'url' => $siteBase,
+      'logo' => ['@type' => 'ImageObject', 'url' => "$siteBase/assets/img/logo.png", 'width' => 600, 'height' => 60]
+    ]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+
+  <!-- Structured Data: BreadcrumbList -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => array_values(array_filter([
+      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+      ['@type' => 'ListItem', 'position' => 2, 'name' => 'Colleges', 'item' => "$siteBase/colleges"],
+      !empty($college['state_name']) ? ['@type' => 'ListItem', 'position' => 3, 'name' => $college['state_name'], 'item' => "$siteBase/colleges?state=" . urlencode($college['state_id'] ?? '')] : null,
+      ['@type' => 'ListItem', 'position' => !empty($college['state_name']) ? 4 : 3, 'name' => $college['name']],
+    ]))
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+
+  <!-- Structured Data: FAQPage -->
+  <?php if (!empty($faqs)): ?>
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'FAQPage',
+    'mainEntity' => array_map(function($faq) {
+        return [
+          '@type' => 'Question',
+          'name' => $faq['question'],
+          'acceptedAnswer' => [
+            '@type' => 'Answer',
+            'text' => $faq['answer']
+          ]
+        ];
+    }, array_slice($faqs, 0, 10))
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+  <?php endif; ?>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">

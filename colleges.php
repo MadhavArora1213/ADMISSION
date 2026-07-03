@@ -4,6 +4,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', '0');
 require_once __DIR__ . '/admin/db.php';
 require_once __DIR__ . '/includes/college_helpers.php';
+require_once __DIR__ . '/includes/news_seo_helpers.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -95,6 +96,43 @@ $stats = [
 ];
 
 $pageTitle = 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions';
+$siteBase = getBaseUrl();
+$canonicalUrl = $siteBase . '/colleges';
+if ($type !== 'all') $canonicalUrl .= '?type=' . urlencode($type);
+if ($state > 0) $canonicalUrl .= ($type !== 'all' ? '&' : '?') . 'state=' . $state;
+if (!empty($search)) $canonicalUrl .= ($type !== 'all' || $state > 0 ? '&' : '?') . 'q=' . urlencode($search);
+if (!empty($course)) $canonicalUrl .= '&' . 'course=' . urlencode($course);
+
+// Dynamic state name
+$stateName = '';
+if ($state > 0) {
+    $stateRow = $pdo->prepare("SELECT name FROM states WHERE id = ?");
+    $stateRow->execute([$state]);
+    $stateName = $stateRow->fetchColumn() ?: '';
+}
+
+// Dynamic SEO based on filters
+if (!empty($stateName)) {
+    $stateLabel = ' in ' . $stateName;
+    $pageTitle = 'Colleges in ' . $stateName . ' ' . date('Y') . ' — Fees, Rankings, Admissions';
+    $metaDesc = 'Explore ' . number_format($total) . '+ top colleges in ' . $stateName . ' — compare fees, NIRF rankings, placements, NAAC grades & admission details for ' . date('Y') . '. Find best government, private, deemed & autonomous colleges in ' . $stateName . '.';
+    $metaKeywords = 'colleges in ' . $stateName . ', top colleges ' . $stateName . ' ' . date('Y') . ', best colleges ' . $stateName . ', engineering colleges ' . $stateName . ', medical colleges ' . $stateName . ', MBA colleges ' . $stateName . ', college fees ' . $stateName . ', college rankings ' . $stateName . ', NIRF ranking ' . $stateName . ', college admissions ' . $stateName;
+    $ogTitle = 'Colleges in ' . $stateName . ' ' . date('Y') . ' — Fees, Rankings, Admissions | AdmissionSeason';
+    $ogDesc = 'Compare ' . number_format($total) . '+ top colleges in ' . $stateName . '. Filter by type, check fees, placements, rankings and admission process.';
+} elseif ($type !== 'all') {
+    $typeLabel = ucwords($type) . ' ';
+    $pageTitle = $typeLabel . 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions';
+    $metaDesc = 'Explore ' . number_format($total) . '+ ' . strtolower($type) . ' colleges in India — compare fees, NIRF rankings, placements, NAAC grades & admission details for ' . date('Y') . '.';
+    $metaKeywords = strtolower($type) . ' colleges in India, ' . strtolower($type) . ' colleges ' . date('Y') . ', top ' . strtolower($type) . ' colleges, college fees, college rankings, NIRF ranking, NAAC grade, college admissions';
+    $ogTitle = $typeLabel . 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions | AdmissionSeason';
+    $ogDesc = 'Compare ' . number_format($total) . '+ ' . strtolower($type) . ' colleges across India. Check fees, placements, rankings and admission process.';
+} else {
+    $stateLabel = '';
+    $metaDesc = 'Explore ' . number_format($total) . '+ colleges in India — compare fees, NIRF rankings, placements, NAAC grades & admission details. Find government, private, deemed & autonomous colleges.';
+    $metaKeywords = 'colleges in India, top colleges India ' . date('Y') . ', engineering colleges, medical colleges, MBA colleges, college fees, college rankings, NIRF ranking, NAAC grade, college admissions, government colleges, private colleges, best colleges India';
+    $ogTitle = 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions | AdmissionSeason';
+    $ogDesc = 'Compare ' . number_format($total) . '+ colleges across India. Filter by type, state, course. Check fees, placements, rankings and admission process.';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -103,7 +141,85 @@ $pageTitle = 'Colleges in India ' . date('Y') . ' — Fees, Rankings, Admissions
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?> - AdmissionSeason</title>
-  <meta name="description" content="Explore <?= number_format($total) ?>+ colleges in India. Compare fees, rankings, placements and admission details.">
+  <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow">
+  <link rel="canonical" href="<?= $canonicalUrl ?>">
+  <meta name="author" content="AdmissionSeason">
+  <meta name="revisit-after" content="3 days">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<?= $canonicalUrl ?>">
+  <meta property="og:title" content="<?= htmlspecialchars($ogTitle) ?>">
+  <meta property="og:description" content="<?= htmlspecialchars($ogDesc) ?>">
+  <meta property="og:image" content="<?= $siteBase ?>/assets/img/logo.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="AdmissionSeason">
+  <meta property="og:locale" content="en_IN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="<?= $canonicalUrl ?>">
+  <meta name="twitter:title" content="<?= htmlspecialchars($ogTitle) ?>">
+  <meta name="twitter:description" content="<?= htmlspecialchars($ogDesc) ?>">
+  <meta name="twitter:image" content="<?= $siteBase ?>/assets/img/logo.png">
+  <meta name="twitter:site" content="@AdmissionSeason">
+  <meta name="twitter:creator" content="@AdmissionSeason">
+
+  <!-- GEO Meta Tags -->
+  <meta name="geo.region" content="IN">
+  <meta name="geo.placename" content="India">
+  <meta name="geo.position" content="20.5937;78.9629">
+  <meta name="ICBM" content="20.5937, 78.9629">
+  <meta name="language" content="English">
+  <link rel="alternate" hreflang="en-in" href="<?= $canonicalUrl ?>">
+
+  <!-- Structured Data: CollectionPage -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'CollectionPage',
+    'name' => $pageTitle,
+    'description' => $metaDesc,
+    'url' => $canonicalUrl,
+    'publisher' => [
+      '@type' => 'Organization',
+      'name' => 'AdmissionSeason',
+      'url' => $siteBase,
+      'logo' => ['@type' => 'ImageObject', 'url' => "$siteBase/assets/img/logo.png", 'width' => 600, 'height' => 60],
+      'sameAs' => [
+        'https://www.facebook.com/admissionseason',
+        'https://twitter.com/AdmissionSeason',
+        'https://www.instagram.com/admissionseason',
+        'https://www.linkedin.com/company/admissionseason'
+      ]
+    ],
+    'isPartOf' => ['@type' => 'WebSite', 'name' => 'AdmissionSeason', 'url' => $siteBase],
+    'inLanguage' => 'en-IN',
+    'about' => ['@type' => 'Thing', 'name' => 'Colleges in India'],
+    'mainEntity' => [
+      '@type' => 'ItemList',
+      'name' => 'Colleges in India',
+      'numberOfItems' => $total,
+    ]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+
+  <!-- Structured Data: BreadcrumbList -->
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
+      ['@type' => 'ListItem', 'position' => 2, 'name' => 'Colleges', 'item' => $canonicalUrl],
+    ]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
