@@ -1,2 +1,0 @@
-DROP DATABASE IF EXISTS admission;
-CREATE DATABASE admission;

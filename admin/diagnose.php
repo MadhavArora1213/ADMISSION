@@ -26,13 +26,10 @@ foreach ($required as $ext) {
 
 // 3. DB Connection
 echo "<h2>3. Database Connection</h2>";
-$host   = 'localhost';
-$user   = 'u642624414_db_user';
-$pass   = '6NY@D$f#';
-$dbname = 'u642624414_edusearch';
+
+require_once __DIR__ . '/db.php';
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     echo "<span class='ok'>✅ Database connected successfully!</span><br>";
 
