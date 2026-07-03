@@ -161,7 +161,7 @@ $tabLabel = $type === 'all' ? 'All News' : ucwords(str_replace('_', ' ', $type))
   <meta property="og:url" content="<?= $canonicalUrl ?>">
   <meta property="og:title" content="<?= htmlspecialchars($ogTitle) ?>">
   <meta property="og:description" content="<?= htmlspecialchars($ogDesc) ?>">
-  <meta property="og:image" content="<?= $siteBase ?>/assets/images/og-news.jpg">
+  <meta property="og:image" content="<?= $siteBase ?>/assets/img/logo.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:site_name" content="AdmissionSeason">
@@ -172,7 +172,7 @@ $tabLabel = $type === 'all' ? 'All News' : ucwords(str_replace('_', ' ', $type))
   <meta name="twitter:url" content="<?= $canonicalUrl ?>">
   <meta name="twitter:title" content="<?= htmlspecialchars($ogTitle) ?>">
   <meta name="twitter:description" content="<?= htmlspecialchars($ogDesc) ?>">
-  <meta name="twitter:image" content="<?= $siteBase ?>/assets/images/og-news.jpg">
+  <meta name="twitter:image" content="<?= $siteBase ?>/assets/img/logo.png">
   <meta name="twitter:site" content="@AdmissionSeason">
   <meta name="twitter:creator" content="@AdmissionSeason">
 
@@ -200,7 +200,7 @@ $tabLabel = $type === 'all' ? 'All News' : ucwords(str_replace('_', ' ', $type))
       'url' => "$siteBase",
       'logo' => [
         '@type' => 'ImageObject',
-        'url' => "$siteBase/assets/images/logo.png",
+        'url' => "$siteBase/assets/img/logo.png",
         'width' => 600,
         'height' => 60
       ],
@@ -271,7 +271,7 @@ $tabLabel = $type === 'all' ? 'All News' : ucwords(str_replace('_', ' ', $type))
                 'publisher' => [
                     '@type' => 'Organization',
                     'name' => 'AdmissionSeason',
-                    'logo' => ['@type' => 'ImageObject', 'url' => "$siteBase/assets/images/logo.png"]
+                    'logo' => ['@type' => 'ImageObject', 'url' => "$siteBase/assets/img/logo.png"]
                 ],
                 'image' => cImg($art['featured_image_url']),
                 'articleSection' => $art['category_name'] ?? 'News',

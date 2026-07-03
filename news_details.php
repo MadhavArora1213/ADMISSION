@@ -272,7 +272,7 @@ if (!empty($rawImage) && !str_starts_with($rawImage, 'http') && !str_starts_with
 } elseif (!empty($rawImage)) {
     $shareImage = $rawImage;
 } else {
-    $shareImage = $siteBase . '/assets/images/og-news.jpg';
+    $shareImage = $siteBase . '/assets/img/logo.png';
 }
 $shareDesc  = mb_strimwidth(strip_tags($article['excerpt'] ?? $article['content_body'] ?? ''), 0, 160, '...');
 $siteName   = 'AdmissionSeason';
@@ -397,7 +397,7 @@ $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
       'url' => $siteBase,
       'logo' => [
         '@type' => 'ImageObject',
-        'url' => $siteBase . '/assets/images/logo.png',
+        'url' => $siteBase . '/assets/img/logo.png',
         'width' => 600,
         'height' => 60
       ],
