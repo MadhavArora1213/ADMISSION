@@ -4626,16 +4626,16 @@ select {
 
 .shiksha-tabs {
   display: flex;
-  gap: 24px;
+  gap: 4px;
   overflow-x: auto;
   scrollbar-width: none;
 }
 
 .shiksha-tabs a {
-  padding: 16px 0;
+  padding: 14px 14px;
   color: #555;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   position: relative;
   white-space: nowrap;
 }
@@ -4879,13 +4879,23 @@ select {
   .shiksha-main-wrapper { padding: 20px 0 40px 0; }
 }
 
+@media(min-width: 1200px) {
+  .container {
+    max-width: 1200px;
+    padding: 0 16px;
+  }
+  .shiksha-main-wrapper {
+    padding: 20px 0 50px 0;
+  }
+}
+
 @media(max-width: 600px) {
   .shiksha-header { padding: 20px 0 12px 0; }
   .shiksha-breadcrumb { flex-wrap: wrap; gap: 4px 6px; font-size: 0.8rem; margin-bottom: 8px; }
   .shiksha-title { font-size: 1.35rem; line-height: 1.35; }
-  .shiksha-tabs { gap: 16px; -webkit-overflow-scrolling: touch; }
+  .shiksha-tabs { gap: 4px; -webkit-overflow-scrolling: touch; }
   .shiksha-tabs::-webkit-scrollbar { display: none; }
-  .shiksha-tabs a { padding: 12px 0; font-size: 0.88rem; }
+  .shiksha-tabs a { padding: 10px 10px; font-size: 0.82rem; }
   .shiksha-content { padding: 12px; }
   .shiksha-card { flex-direction: column; gap: 12px; padding: 16px 0; }
   .shiksha-card-img { width: 100%; height: 160px; }
