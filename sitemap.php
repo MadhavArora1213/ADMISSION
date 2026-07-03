@@ -21,91 +21,91 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
     <priority>1.0</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/colleges.php</loc>
+    <loc><?= $baseUrl ?>/colleges</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/universities.php</loc>
+    <loc><?= $baseUrl ?>/universities</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/courses.php</loc>
+    <loc><?= $baseUrl ?>/courses</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/exams.php</loc>
+    <loc><?= $baseUrl ?>/exams</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/rankings.php</loc>
+    <loc><?= $baseUrl ?>/rankings</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/compare.php</loc>
+    <loc><?= $baseUrl ?>/compare</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/predictor.php</loc>
+    <loc><?= $baseUrl ?>/predictor</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/ask-question.php</loc>
+    <loc><?= $baseUrl ?>/ask-question</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/news.php</loc>
+    <loc><?= $baseUrl ?>/news</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/news.php?type=news</loc>
+    <loc><?= $baseUrl ?>/news?type=news</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/news.php?type=exam_update</loc>
+    <loc><?= $baseUrl ?>/news?type=exam_update</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/news.php?type=blog</loc>
+    <loc><?= $baseUrl ?>/news?type=blog</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/news.php?type=guide</loc>
+    <loc><?= $baseUrl ?>/news?type=guide</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/news.php?type=opinion</loc>
+    <loc><?= $baseUrl ?>/news?type=opinion</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/news.php?type=ranking</loc>
+    <loc><?= $baseUrl ?>/news?type=ranking</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -117,13 +117,31 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
     <priority>0.6</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/study-abroad.php</loc>
+    <loc><?= $baseUrl ?>/study-abroad</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc><?= $baseUrl ?>/reviews.php</loc>
+    <loc><?= $baseUrl ?>/reviews</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/careers</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/community</loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc><?= $baseUrl ?>/discussions</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -208,10 +226,24 @@ $newsCats = $pdo->query("SELECT category_slug, category_name FROM article_catego
 foreach ($newsCats as $nc):
 ?>
   <url>
-    <loc><?= $baseUrl ?>/news.php?category=<?= htmlspecialchars($nc['category_slug']) ?></loc>
+    <loc><?= $baseUrl ?>/news?category=<?= htmlspecialchars($nc['category_slug']) ?></loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
+  </url>
+<?php endforeach; ?>
+
+<!-- Dynamic: Career Pages -->
+<?php
+$careers = $pdo->query("SELECT career_slug, updated_at FROM careers WHERE status='active' ORDER BY career_name")->fetchAll(PDO::FETCH_ASSOC);
+foreach ($careers as $cr):
+  $mod = !empty($cr['updated_at']) ? date('Y-m-d', strtotime($cr['updated_at'])) : $today;
+?>
+  <url>
+    <loc><?= $baseUrl ?>/career/<?= htmlspecialchars($cr['career_slug']) ?></loc>
+    <lastmod><?= $mod ?></lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 <?php endforeach; ?>
 

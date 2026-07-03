@@ -21,7 +21,7 @@ $description = 'Latest college and university news, exam updates, admission aler
 if (!function_exists('cImg')) {
     function cImg(?string $url = ''): string {
         global $baseUrl;
-        if (!$url) return $baseUrl . '/assets/images/og-news.jpg';
+        if (!$url) return $baseUrl . '/assets/img/logo.png';
         if (str_starts_with($url, 'http') || str_starts_with($url, '//')) return $url;
         return $baseUrl . '/' . ltrim($url, '/');
     }
@@ -81,7 +81,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
   <ttl>60</ttl>
   <atom:link href="<?= $baseUrl ?>/news/rss" rel="self" type="application/rss+xml"/>
   <image>
-    <url><?= $baseUrl ?>/assets/images/logo.png</url>
+    <url><?= $baseUrl ?>/assets/img/logo.png</url>
     <title><?= htmlspecialchars($siteName) ?></title>
     <link><?= $baseUrl ?></link>
     <width>600</width>

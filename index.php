@@ -133,7 +133,7 @@ $siteBase = getBaseUrl();
 <meta property="og:url" content="<?= $siteBase ?>/">
 <meta property="og:title" content="AdmissionSeason – Top Colleges, Exams & Courses in India 2026">
 <meta property="og:description" content="India's leading college discovery platform. Find 500+ top colleges, 100+ courses, 20+ entrance exams with fees, rankings, placements & admission details.">
-<meta property="og:image" content="<?= $siteBase ?>/assets/images/og-homepage.jpg">
+<meta property="og:image" content="<?= $siteBase ?>/assets/img/logo.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="AdmissionSeason - Find Your Dream College in India">
@@ -142,10 +142,13 @@ $siteBase = getBaseUrl();
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="<?= $siteBase ?>/">
 <meta name="twitter:title" content="AdmissionSeason – Top Colleges, Exams & Courses in India 2026">
 <meta name="twitter:description" content="India's leading college discovery platform. Find 500+ top colleges, 100+ courses, 20+ entrance exams with fees, rankings, placements & admission details.">
-<meta name="twitter:image" content="<?= $siteBase ?>/assets/images/og-homepage.jpg">
+<meta name="twitter:image" content="<?= $siteBase ?>/assets/img/logo.png">
 <meta name="twitter:image:alt" content="AdmissionSeason - Find Your Dream College in India">
+<meta name="twitter:site" content="@AdmissionSeason">
+<meta name="twitter:creator" content="@AdmissionSeason">
 
 <!-- Additional Meta -->
 <meta name="theme-color" content="#0B2447">
@@ -180,7 +183,7 @@ $siteBase = getBaseUrl();
   "@id": "<?= $siteBase ?>/#organization",
   "name": "AdmissionSeason",
   "url": "<?= $siteBase ?>/",
-  "logo": "<?= $siteBase ?>/assets/images/logo.png",
+  "logo": "<?= $siteBase ?>/assets/img/logo.png",
   "description": "India's leading college discovery platform helping students find the right college, course, and career path.",
   "foundingDate": "2024",
   "areaServed": {
