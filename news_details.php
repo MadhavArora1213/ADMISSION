@@ -269,8 +269,18 @@ $shareUrl   = $siteBase . '/news/' . urlencode($slug);
 $rawImage = $article['featured_image_url'] ?? '';
 if (!empty($rawImage) && !str_starts_with($rawImage, 'http') && !str_starts_with($rawImage, '//')) {
     $shareImage = $siteBase . '/' . ltrim($rawImage, '/');
-} elseif (!empty($rawImage)) {
+} elseif (!empty($rawImage) && str_contains($rawImage, 'admissionseason.com')) {
     $shareImage = $rawImage;
+} elseif (!empty($rawImage) && str_starts_with($rawImage, 'http')) {
+    // External image (Unsplash etc.) — X/Twitter can't reliably fetch these
+    // Download and use locally, or fall back to default
+    $localPath = 'uploads/' . basename(parse_url($rawImage, PHP_URL_PATH));
+    $localFile = __DIR__ . '/' . $localPath;
+    if (file_exists($localFile)) {
+        $shareImage = $siteBase . '/' . $localPath;
+    } else {
+        $shareImage = $siteBase . '/assets/img/logo.png';
+    }
 } else {
     $shareImage = $siteBase . '/assets/img/logo.png';
 }
