@@ -203,7 +203,7 @@ foreach ($placements as $p) {
     'hasCredential' => !empty($college['naac_grade']) ? 'NAAC ' . $college['naac_grade'] : null,
     'aggregateRating' => $overallRating > 0 ? [
       '@type' => 'AggregateRating',
-      'ratingValue' => number_format($overallRating, 1),
+      'ratingValue' => number_format((float)$overallRating, 1),
       'bestRating' => '5',
       'ratingCount' => $reviewCount,
       'reviewCount' => $reviewCount,
@@ -238,7 +238,7 @@ foreach ($placements as $p) {
     'itemListElement' => array_values(array_filter([
       ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
       ['@type' => 'ListItem', 'position' => 2, 'name' => 'Colleges', 'item' => "$siteBase/colleges"],
-      !empty($college['state_name']) ? ['@type' => 'ListItem', 'position' => 3, 'name' => $college['state_name'], 'item' => "$siteBase/colleges?state=" . urlencode($college['state_id'] ?? '')] : null,
+      !empty($college['state_name']) ? ['@type' => 'ListItem', 'position' => 3, 'name' => $college['state_name'], 'item' => "$siteBase/colleges?state=" . urlencode((string)($college['state_id'] ?? ''))] : null,
       ['@type' => 'ListItem', 'position' => !empty($college['state_name']) ? 4 : 3, 'name' => $college['name']],
     ]))
   ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
