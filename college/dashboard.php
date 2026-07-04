@@ -86,6 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
                 $filename = 'college_logo_' . time() . '_' . uniqid() . '.' . $ext;
                 if (move_uploaded_file($_FILES['logo_file']['tmp_name'], $upload_dir . $filename)) {
                     $logo_url = 'uploads/' . $filename;
+                    require_once __DIR__ . '/../admin/upload_sync.php';
+                    sync_to_github('uploads/' . $filename);
                 }
             }
 
@@ -95,6 +97,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
                 $filename = 'college_cover_' . time() . '_' . uniqid() . '.' . $ext;
                 if (move_uploaded_file($_FILES['cover_file']['tmp_name'], $upload_dir . $filename)) {
                     $cover_image_url = 'uploads/' . $filename;
+                    require_once __DIR__ . '/../admin/upload_sync.php';
+                    sync_to_github('uploads/' . $filename);
                 }
             }
 
@@ -448,6 +452,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
                 $target_file = $upload_dir . $file_name;
                 if (move_uploaded_file($_FILES['media_file']['tmp_name'], $target_file)) {
                     $final_url = 'uploads/media/' . $file_name;
+                    require_once __DIR__ . '/../admin/upload_sync.php';
+                    sync_to_github('uploads/media/' . $file_name);
                 }
             }
 
@@ -527,6 +533,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
                 $file_name = time() . '_' . basename($_FILES['photo_file']['name']);
                 if (move_uploaded_file($_FILES['photo_file']['tmp_name'], $upload_dir . $file_name)) {
                     $photo_url = 'uploads/faculty/' . $file_name;
+                    require_once __DIR__ . '/../admin/upload_sync.php';
+                    sync_to_github('uploads/faculty/' . $file_name);
                 }
             }
             $ins = $pdo->prepare("INSERT INTO college_faculty (id, college_id, faculty_name, designation, department, qualification, experience_years, photo_url, research_papers, specialization, phd_from, linkedin_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
