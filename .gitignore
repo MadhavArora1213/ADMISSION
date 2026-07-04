@@ -38,9 +38,6 @@ h.html
 *.log
 npm-debug.log*
 
-# Uploads - user generated content (keep in DB, not git)
-# Uncomment line below if you do NOT want uploads in git:
-# uploads/
-
-# Keep specific upload subdirectories tracked
-!uploads/.htaccess
+# Keep uploads tracked in git (synced by watch-uploads.ps1)
+!uploads/
+!uploads/**
