@@ -1176,7 +1176,7 @@ $metaKeywords = 'sign up, register, create account, AdmissionSeason signup, stud
           
           <div class="terms-row">
             <input type="checkbox" id="agree_terms" required checked>
-            <label for="agree_terms">I agree to AdmissionSeason's <a href="#">Privacy Policy</a> and <a href="#">Terms & Conditions</a> and provide consent to be contacted for updates.</label>
+            <label for="agree_terms">I agree to AdmissionSeason's <a href="/cookie-policy" target="_blank">Privacy Policy</a> and <a href="#">Terms & Conditions</a> and provide consent to be contacted for updates.</label>
           </div>
         </div>
         

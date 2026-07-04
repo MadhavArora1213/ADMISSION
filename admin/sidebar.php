@@ -83,6 +83,7 @@ if (isset($pdo)) {
 
         <a href="analytics_reports.php" class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['analytics_reports.php', 'analytics_report_form.php']) ? 'active' : ''; ?>"><i class="ph ph-file-pdf"></i> Reports</a>
         <a href="nps_feedback.php" class="<?php echo ($current_page == 'nps_feedback.php') ? 'active' : ''; ?>"><i class="ph ph-smiley"></i> NPS Feedback</a>
+        <a href="cookie_consents.php" class="<?php echo ($current_page == 'cookie_consents.php') ? 'active' : ''; ?>"><i class="ph ph-cookie"></i> Cookie Consents</a>
 
         <div style="margin: 20px 24px 8px 24px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 700;">CMS</div>
         

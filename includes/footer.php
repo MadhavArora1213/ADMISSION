@@ -113,14 +113,41 @@ function fName($text) {
   </div>
 </footer>
 
-<!-- ═══ COOKIE CONSENT ═══ -->
+<!-- ═══ COOKIE CONSENT POPUP ═══ -->
 <div id="cookieConsent" class="cc-popup" style="display:none;">
   <div class="cc-popup-inner">
-    <div class="cc-popup-icon"><i class="ph ph-cookie"></i></div>
-    <p class="cc-popup-text">We use cookies to improve your experience. <a href="<?= $navBase ?>/privacy-policy">Learn more</a></p>
+    <div class="cc-popup-head">
+      <div class="cc-popup-icon"><i class="ph ph-cookie"></i></div>
+      <div class="cc-popup-title">We value your privacy</div>
+    </div>
+    <p class="cc-popup-text">We use cookies to enhance your experience, analyze site traffic, and personalize content. You can accept all, reject all, or customize your preferences.</p>
+    <div class="cc-popup-link"><a href="<?= $navBase ?>/cookie-policy" target="_blank">Learn what data we collect and why</a></div>
+
+    <!-- Category Toggles (hidden by default, shown on Manage) -->
+    <div id="ccCategories" class="cc-categories" style="display:none;">
+      <label class="cc-cat">
+        <div class="cc-cat-info"><i class="ph ph-shield-check"></i><strong>Necessary</strong><span>Required for the site to function</span></div>
+        <input type="checkbox" checked disabled class="cc-toggle">
+      </label>
+      <label class="cc-cat">
+        <div class="cc-cat-info"><i class="ph ph-chart-line-up"></i><strong>Analytics</strong><span>Help us understand how you use the site</span></div>
+        <input type="checkbox" id="ccAnalytics" class="cc-toggle">
+      </label>
+      <label class="cc-cat">
+        <div class="cc-cat-info"><i class="ph ph-megaphone"></i><strong>Marketing</strong><span>Used for targeted advertising</span></div>
+        <input type="checkbox" id="ccMarketing" class="cc-toggle">
+      </label>
+      <label class="cc-cat">
+        <div class="cc-cat-info"><i class="ph ph-gear"></i><strong>Preferences</strong><span>Remember your settings and choices</span></div>
+        <input type="checkbox" id="ccPreferences" class="cc-toggle">
+      </label>
+    </div>
+
     <div class="cc-popup-btns">
-      <button id="cookieAcceptAll" class="cc-btn cc-accept">Accept</button>
-      <button id="cookieRejectAll" class="cc-btn cc-reject">Decline</button>
+      <button id="cookieAcceptAll" class="cc-btn cc-accept">Accept All</button>
+      <button id="cookieRejectAll" class="cc-btn cc-reject">Reject All</button>
+      <button id="cookieManage" class="cc-btn cc-manage">Manage</button>
+      <button id="cookieSavePrefs" class="cc-btn cc-save" style="display:none;">Save Preferences</button>
     </div>
     <button id="ccClose" class="cc-close" aria-label="Close"><i class="ph ph-x"></i></button>
   </div>
@@ -129,11 +156,50 @@ function fName($text) {
 <script>
 (function() {
   var c = document.getElementById('cookieConsent');
+  var cats = document.getElementById('ccCategories');
+  var manageBtn = document.getElementById('cookieManage');
+  var saveBtn = document.getElementById('cookieSavePrefs');
+
   if (!localStorage.getItem('cookie_consent')) c.style.display = 'flex';
-  function hide(s) { localStorage.setItem('cookie_consent', s); c.style.display = 'none'; }
-  document.getElementById('cookieAcceptAll').onclick = function() { hide('accepted'); };
+
+  function postConsent(action, prefs) {
+    fetch('<?= $navBase ?>/api/cookie_consent.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: action,
+        analytics: prefs.analytics || false,
+        marketing: prefs.marketing || false,
+        preferences: prefs.preferences || false,
+        page_url: window.location.href
+      })
+    }).catch(function() {});
+  }
+
+  function hide(s, prefs) {
+    localStorage.setItem('cookie_consent', s);
+    c.style.display = 'none';
+    postConsent(s === 'accepted' ? 'accepted_all' : s === 'rejected' ? 'rejected_all' : s === 'custom' ? 'custom' : 'closed', prefs || {});
+  }
+
+  document.getElementById('cookieAcceptAll').onclick = function() { hide('accepted', {analytics:true,marketing:true,preferences:true}); };
   document.getElementById('cookieRejectAll').onclick = function() { hide('rejected'); };
   document.getElementById('ccClose').onclick = function() { hide('closed'); };
+
+  manageBtn.onclick = function() {
+    cats.style.display = cats.style.display === 'none' ? 'flex' : 'none';
+    saveBtn.style.display = cats.style.display === 'flex' ? 'inline-flex' : 'none';
+    manageBtn.style.display = cats.style.display === 'flex' ? 'none' : 'inline-flex';
+  };
+
+  saveBtn.onclick = function() {
+    var prefs = {
+      analytics: document.getElementById('ccAnalytics').checked,
+      marketing: document.getElementById('ccMarketing').checked,
+      preferences: document.getElementById('ccPreferences').checked
+    };
+    hide('custom', prefs);
+  };
 })();
 </script>
 

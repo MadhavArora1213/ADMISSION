@@ -6535,25 +6535,43 @@ select {
 
 /* ═══ COOKIE CONSENT POPUP ═══ */
 .cc-popup{position:fixed;bottom:20px;left:20px;z-index:9999;animation:ccPopIn .35s cubic-bezier(.34,1.56,.64,1)}
-.cc-popup-inner{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,.12);max-width:380px}
+.cc-popup-inner{display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:18px 20px;box-shadow:0 8px 32px rgba(0,0,0,.12);max-width:400px;position:relative}
+.cc-popup-head{display:flex;align-items:center;gap:10px}
 .cc-popup-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#fef3c7,#fde68a);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .cc-popup-icon i{font-size:1.1rem;color:#d97706}
-.cc-popup-text{margin:0;font-size:.78rem;color:#475569;line-height:1.5;flex:1}
-.cc-popup-text a{color:#19376D;font-weight:600;text-decoration:underline;text-underline-offset:2px}
-.cc-popup-text a:hover{color:#3b82f6}
-.cc-popup-btns{display:flex;gap:6px;flex-shrink:0}
-.cc-btn{padding:7px 14px;border:none;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s ease;font-family:'Inter',sans-serif}
+.cc-popup-title{font-size:.92rem;font-weight:800;color:#0B2447;font-family:'Space Grotesk',sans-serif}
+.cc-popup-text{margin:0;font-size:.78rem;color:#475569;line-height:1.55}
+.cc-popup-link{margin:0}
+.cc-popup-link a{color:#19376D;font-weight:600;font-size:.78rem;text-decoration:underline;text-underline-offset:2px}
+.cc-popup-link a:hover{color:#3b82f6}
+.cc-categories{display:flex;flex-direction:column;gap:8px;padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0}
+.cc-cat{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .15s}
+.cc-cat:hover{background:#f1f5f9}
+.cc-cat-info{display:flex;align-items:center;gap:8px;flex:1}
+.cc-cat-info i{font-size:1rem;color:#64748b;flex-shrink:0}
+.cc-cat-info strong{font-size:.8rem;color:#1e293b;font-weight:700;min-width:72px}
+.cc-cat-info span{font-size:.72rem;color:#94a3b8}
+.cc-toggle{width:36px;height:20px;appearance:none;-webkit-appearance:none;background:#cbd5e1;border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;border:none;outline:none}
+.cc-toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.cc-toggle:checked{background:#0B2447}
+.cc-toggle:checked::after{transform:translateX(16px)}
+.cc-toggle:disabled{opacity:.7;cursor:not-allowed}
+.cc-popup-btns{display:flex;gap:6px;flex-wrap:wrap}
+.cc-btn{padding:7px 14px;border:none;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s ease;font-family:'Inter',sans-serif;letter-spacing:.02em}
 .cc-accept{background:linear-gradient(135deg,#0B2447,#19376D);color:#fff}
 .cc-accept:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(11,36,71,.3)}
 .cc-reject{background:transparent;color:#94a3b8;border:1px solid #e2e8f0}
 .cc-reject:hover{background:#f8fafc;color:#64748b}
-.cc-close{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:6px;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#cbd5e1;transition:all .15s}
+.cc-manage{background:transparent;color:#19376D;border:1px solid #c7d2fe}
+.cc-manage:hover{background:#eef2ff}
+.cc-save{background:#059669;color:#fff}
+.cc-save:hover{background:#047857;transform:translateY(-1px)}
+.cc-close{position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:6px;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#cbd5e1;transition:all .15s}
 .cc-close:hover{background:#f1f5f9;color:#64748b}
 .cc-close i{font-size:.85rem}
 @keyframes ccPopIn{from{transform:scale(.85) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
 @media(max-width:480px){
   .cc-popup{bottom:12px;left:12px;right:12px}
-  .cc-popup-inner{max-width:100%;flex-wrap:wrap;justify-content:center;text-align:center}
-  .cc-popup-text{flex-basis:100%;text-align:center}
-  .cc-popup-btns{width:100%;justify-content:center}
+  .cc-popup-inner{max-width:100%}
+  .cc-popup-btns{justify-content:center}
 }
