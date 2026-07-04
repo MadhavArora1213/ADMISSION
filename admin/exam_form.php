@@ -37,6 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
                 
                 if (move_uploaded_file($_FILES["conducting_body_logo_file"]["tmp_name"], $target_file)) {
                     $logo_url = "uploads/" . $new_filename;
+                    require_once __DIR__ . '/upload_sync.php';
+                    sync_to_github('uploads/' . $new_filename);
                 }
             }
 

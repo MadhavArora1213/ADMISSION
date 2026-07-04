@@ -64,6 +64,10 @@ function uploadDoc(array $file, string $prefix, bool $required = false): array {
     return [null, 'Could not save uploaded file.'];
   }
 
+  // Sync to GitHub
+  require_once __DIR__ . '/../admin/upload_sync.php';
+  sync_to_github('uploads/college_docs/' . $name);
+
   return [$name, null];
 }
 function validatePan($n) { return preg_match('/^[A-Z]{5}[0-9]{4}[A-Z]$/', $n); }

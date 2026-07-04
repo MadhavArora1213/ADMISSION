@@ -38,6 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         if (move_uploaded_file($_FILES['media_file']['tmp_name'], $target_file)) {
             $media_url = 'uploads/ads/' . $new_filename;
+            require_once __DIR__ . '/upload_sync.php';
+            sync_to_github('uploads/ads/' . $new_filename);
         }
     } elseif (isset($_POST['media_url']) && !empty(trim($_POST['media_url']))) {
         $media_url = trim($_POST['media_url']);
