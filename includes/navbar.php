@@ -665,8 +665,38 @@ if (!isset($navColleges)) {
       <?php endforeach; ?>
     </div>
 
-    <a href="<?= $navBase ?>/study-abroad" class="pro-mobile-link"><i class="ph ph-globe"></i> Study Abroad</a>
-    <a href="<?= $navBase ?>/counselling" class="pro-mobile-link"><i class="ph ph-headset"></i> Counseling</a>
+    <a href="<?= $navBase ?>/study-abroad" class="pro-mobile-link pro-has-sub"><i class="ph ph-globe"></i> Study Abroad <i class="ph ph-caret-right pro-mobile-arrow"></i></a>
+    <div class="pro-mobile-sub" id="mobileSubStudyAbroad">
+      <div class="pro-mobile-sub-title">Universities Abroad</div>
+      <?php foreach($navUnis ?? [] as $nu): ?>
+      <a href="<?= $navBase ?>/foreign-university/<?= htmlspecialchars($nu['university_slug'] ?? $nu['id']) ?>"><?= htmlspecialchars($nu['university_name']) ?></a>
+      <?php endforeach; ?>
+      <a href="<?= $navBase ?>/study-abroad?tab=universities" style="color:var(--yale-blue);font-weight:700">View All Universities &rarr;</a>
+      <div class="pro-mobile-sub-title" style="margin-top:12px">Visa Guides</div>
+      <?php foreach($navVisas ?? [] as $nv): ?>
+      <a href="<?= $navBase ?>/visa-guide/<?= strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $nv['country']), '-')) ?>"><?= htmlspecialchars($nv['country']) ?> Visa Guide</a>
+      <?php endforeach; ?>
+      <a href="<?= $navBase ?>/study-abroad?tab=visas" style="color:var(--yale-blue);font-weight:700">View All Visa Guides &rarr;</a>
+      <div class="pro-mobile-sub-title" style="margin-top:12px">Consultants</div>
+      <?php foreach($navCons ?? [] as $nc): ?>
+      <a href="<?= $navBase ?>/consultant/<?= (int)$nc['id'] ?>"><?= htmlspecialchars($nc['consultant_name']) ?></a>
+      <?php endforeach; ?>
+      <a href="<?= $navBase ?>/study-abroad?tab=consultants" style="color:var(--yale-blue);font-weight:700">View All Consultants &rarr;</a>
+    </div>
+
+    <a href="<?= $navBase ?>/counselling" class="pro-mobile-link pro-has-sub"><i class="ph ph-headset"></i> Counseling <i class="ph ph-caret-right pro-mobile-arrow"></i></a>
+    <div class="pro-mobile-sub" id="mobileSubCounselling">
+      <div class="pro-mobile-sub-title">Get Expert Guidance</div>
+      <a href="<?= $navBase ?>/ask-question"><i class="ph ph-question"></i> Ask a Question</a>
+      <a href="<?= $navBase ?>/discussions"><i class="ph ph-chats"></i> Discussions</a>
+      <div class="pro-mobile-sub-title" style="margin-top:12px">Careers After 12th</div>
+      <a href="<?= $navBase ?>/careers.php?stream=Science"><i class="ph ph-atom"></i> Science Careers</a>
+      <a href="<?= $navBase ?>/careers.php?stream=Commerce"><i class="ph ph-chart-line-up"></i> Commerce Careers</a>
+      <a href="<?= $navBase ?>/careers.php?stream=Humanities"><i class="ph ph-palette"></i> Humanities Careers</a>
+      <div class="pro-mobile-sub-title" style="margin-top:12px">Top Colleges</div>
+      <a href="<?= $navBase ?>/colleges.php">All Colleges</a>
+      <a href="<?= $navBase ?>/counselling" style="color:var(--yale-blue);font-weight:700"><i class="ph-fill ph-headset"></i> Free Counselling &rarr;</a>
+    </div>
     <a href="#" class="pro-mobile-link pro-has-sub"><i class="ph ph-grid-four"></i> More <i class="ph ph-caret-right pro-mobile-arrow"></i></a>
     <div class="pro-mobile-sub" id="mobileSubMore">
       <?php foreach($navMoreCategories ?? [] as $cat): ?>
