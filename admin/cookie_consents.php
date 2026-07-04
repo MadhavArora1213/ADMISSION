@@ -205,19 +205,56 @@ $totalPages = max(1, (int)ceil($totalConsents / $perPage));
         .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #0f172a; padding: 4px; }
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
 
-        @media(max-width:768px){
+        @media(max-width:900px){
             .sidebar { transform: translateX(-100%); z-index: 100; }
             .sidebar.open { transform: translateX(0); }
             .sidebar-overlay.show { display: block; }
             .main-content { margin-left: 0; }
             .mobile-menu-btn { display: block; }
-            .topbar { height: auto; min-height: 56px; padding: 10px 12px; }
-            .content-area { padding: 12px; gap: 16px; }
+            .topbar { height: auto; min-height: 56px; padding: 10px 14px; }
+            .content-area { padding: 14px; gap: 16px; }
             .page-title { font-size: 1.1rem; }
             .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
             .kpi-card { padding: 14px; }
             .kpi-value { font-size: 1.3rem; }
+            .kpi-title { font-size: .75rem; }
+            .kpi-sub { font-size: .75rem; }
             .charts-grid { grid-template-columns: 1fr; }
+            .filter-bar { flex-direction: column; align-items: stretch; padding: 14px; gap: 10px; }
+            .filter-bar > div { width: 100%; }
+            .filter-bar input, .filter-bar select { width: 100%; }
+            .filter-bar button, .filter-clear { width: 100%; text-align: center; justify-content: center; }
+            .card-box-header { padding: 12px 14px; font-size: .88rem; }
+            .card-box-body { padding: 14px; }
+            .bar-chart { height: 110px; }
+            .fb-table th, .fb-table td { padding: 8px 10px; font-size: .78rem; }
+        }
+        @media(max-width:480px){
+            .content-area { padding: 10px; gap: 12px; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .kpi-card { padding: 12px 10px; border-radius: 10px; }
+            .kpi-value { font-size: 1.15rem; }
+            .kpi-title { font-size: .68rem; letter-spacing: .03em; }
+            .kpi-sub { font-size: .7rem; margin-top: 2px; }
+            .kpi-icon { padding: 6px; font-size: 1rem; }
+            .page-title { font-size: 1rem; gap: 6px; }
+            .page-title i { font-size: 1.1rem; }
+            .filter-bar { padding: 12px; border-radius: 10px; gap: 8px; }
+            .filter-bar label { font-size: .72rem; margin-bottom: 2px; }
+            .filter-bar input, .filter-bar select { padding: 7px 10px; font-size: .8rem; border-radius: 6px; }
+            .charts-grid { gap: 12px; }
+            .card-box { border-radius: 10px; }
+            .bar-chart { height: 90px; gap: 2px; }
+            .bar-label { font-size: .55rem; }
+            .fb-table-wrap { margin: 0 -14px; padding: 0 14px; }
+            .fb-table th { font-size: .7rem; padding: 8px 8px; }
+            .fb-table td { font-size: .76rem; padding: 8px; }
+            .fb-table th:nth-child(n+6), .fb-table td:nth-child(n+6) { display: none; }
+            .status-badge { font-size: .65rem; padding: 3px 7px; }
+            .chip-toggle { font-size: .6rem; padding: 1px 6px; }
+            .pager { gap: 4px; margin: 12px 0; }
+            .pager a { padding: 5px 9px; font-size: .78rem; }
+            .donut-wrap { flex-direction: column; gap: 12px; }
         }
     </style>
 </head>
