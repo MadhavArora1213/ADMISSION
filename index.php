@@ -15,6 +15,12 @@ require_once __DIR__ . '/includes/news_seo_helpers.php';
 
 // ─── SIMPLE ROUTER ───
 $route = trim($_GET['url'] ?? '/', '/');
+
+// Strip /ADMISSION/ prefix if present (localhost RewriteBase workaround)
+if (stripos($route, 'ADMISSION/') === 0) {
+    $route = substr($route, 10);
+}
+
 $routeParts = explode('/', $route);
 $routeBase = $routeParts[0] ?? '';
 

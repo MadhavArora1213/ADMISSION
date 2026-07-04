@@ -9,8 +9,9 @@ Options -Indexes
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Auto-detect: localhost pe /ADMISSION/, hosted pe /
-    RewriteBase /ADMISSION/
+    # Hostinger: document root IS the ADMISSION folder, so base is /
+    # Localhost: accessed via /ADMISSION/, handled in index.php router
+    RewriteBase /
 
     # ── Force HTTPS (skip localhost) ──
     RewriteCond %{HTTPS} off
