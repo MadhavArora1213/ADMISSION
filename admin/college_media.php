@@ -44,6 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $target_file = $upload_dir . $file_name;
                 if (move_uploaded_file($_FILES['media_file']['tmp_name'], $target_file)) {
                     $final_url = 'uploads/media/' . $file_name;
+                    require_once __DIR__ . '/upload_sync.php';
+                    sync_to_github('uploads/media/' . $file_name);
                 }
             }
 

@@ -44,6 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $new_name = uniqid('INV_') . '.' . $file_ext;
             if (move_uploaded_file($_FILES['invoice_file']['tmp_name'], $upload_dir . $new_name)) {
                 $invoice_file = 'uploads/invoices/' . $new_name;
+                require_once __DIR__ . '/upload_sync.php';
+                sync_to_github('uploads/invoices/' . $new_name);
             } else {
                 $error = "Failed to save the uploaded invoice file.";
             }

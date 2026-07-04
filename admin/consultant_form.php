@@ -47,6 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $new_name = uniqid() . '.' . $file_ext;
         if (move_uploaded_file($_FILES['profile_picture']['tmp_name'], $upload_dir . $new_name)) {
             $profile_picture = 'uploads/consultants/' . $new_name;
+            require_once __DIR__ . '/upload_sync.php';
+            sync_to_github('uploads/consultants/' . $new_name);
         }
     }
     

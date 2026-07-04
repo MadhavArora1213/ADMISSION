@@ -113,6 +113,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         $filename = 'article_og_' . time() . '_' . uniqid() . '.' . $ext;
                         if (move_uploaded_file($_FILES['og_image_file']['tmp_name'], $upload_dir . $filename)) {
                             $url = BASE_URL . '/uploads/' . $filename;
+                            require_once __DIR__ . '/upload_sync.php';
+                            sync_to_github('uploads/' . $filename);
                         }
                     }
                     return $url ?: null;

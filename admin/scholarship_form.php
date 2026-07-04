@@ -20,6 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         if (move_uploaded_file($tmp_name, $upload_dir . $file_name)) {
             $provider_logo = 'uploads/scholarships/' . $file_name;
+            require_once __DIR__ . '/upload_sync.php';
+            sync_to_github('uploads/scholarships/' . $file_name);
         }
     }
 

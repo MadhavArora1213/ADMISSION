@@ -41,6 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 $file_name = time() . '_' . mt_rand(100, 999) . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '', $_FILES['company_logo_file']['name'][$index]);
                 if (move_uploaded_file($tmp_name, $upload_dir . $file_name)) {
                     $logo = 'uploads/companies/' . $file_name;
+                    require_once __DIR__ . '/upload_sync.php';
+                    sync_to_github('uploads/companies/' . $file_name);
                 }
             }
             if ($name !== '') {

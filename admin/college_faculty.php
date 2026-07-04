@@ -29,6 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $target_file = $upload_dir . $file_name;
                 if (move_uploaded_file($_FILES['photo_file']['tmp_name'], $target_file)) {
                     $photo_url = 'uploads/faculty/' . $file_name;
+                    require_once __DIR__ . '/upload_sync.php';
+                    sync_to_github('uploads/faculty/' . $file_name);
                 }
             }
             if (!$photo_url && !empty($_POST['photo_url'])) {

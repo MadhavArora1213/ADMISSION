@@ -61,6 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $targetFile = $uploadDir . $fileName;
                 if (move_uploaded_file($_FILES['placement_report_pdf']['tmp_name'], $targetFile)) {
                     $placement_report_pdf = 'uploads/placements/' . $fileName;
+                    require_once __DIR__ . '/upload_sync.php';
+                    sync_to_github('uploads/placements/' . $fileName);
                 }
             }
 

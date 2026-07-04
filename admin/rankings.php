@@ -42,6 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $target_file = $upload_dir . $file_name;
             if (move_uploaded_file($_FILES['source_file']['tmp_name'], $target_file)) {
                 $source_url = 'uploads/rankings/' . $file_name;
+                require_once __DIR__ . '/upload_sync.php';
+                sync_to_github('uploads/rankings/' . $file_name);
             }
         }
         $published_date = $_POST['published_date'] ?: null;

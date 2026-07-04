@@ -24,6 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         $target_file = $upload_dir . $file_name;
         if (move_uploaded_file($_FILES['icon_file']['tmp_name'], $target_file)) {
             $icon_url = 'uploads/categories/' . $file_name;
+            require_once __DIR__ . '/upload_sync.php';
+            sync_to_github('uploads/categories/' . $file_name);
         }
     }
 

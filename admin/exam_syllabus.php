@@ -23,6 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         $new_filename = uniqid('syl_') . '.' . $file_extension;
         if (move_uploaded_file($_FILES['chapter_pdf_file']['tmp_name'], $target_dir . $new_filename)) {
             $chapter_pdf_url = "uploads/" . $new_filename;
+            require_once __DIR__ . '/upload_sync.php';
+            sync_to_github('uploads/' . $new_filename);
         }
     }
 
