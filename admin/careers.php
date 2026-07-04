@@ -110,7 +110,7 @@ try {
             <header class="topbar">
                 <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
                 <div class="user-profile">
-                    <span style="font-weight:700; color:#334155;"><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
+                    <span style="font-weight:700; color:#334155;"><?php echo htmlspecialchars($_SESSION['admin_username'] ?? 'Admin'); ?></span>
                     <a href="logout.php" style="margin-left: 16px; color: #ef4444;" title="Logout"><i class="ph ph-sign-out" style="font-size: 1.4rem;"></i></a>
                 </div>
             </header>

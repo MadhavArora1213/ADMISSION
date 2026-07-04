@@ -109,7 +109,7 @@ $colleges = $pdo->query("SELECT id, name FROM colleges ORDER BY name ASC")->fetc
         <header class="topbar">
             <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div class="user-profile">
-                <span><?php echo isset($_SESSION['admin_username']) ? htmlspecialchars($_SESSION['admin_username']) : 'Admin'; ?></span>
+                <span><?php echo isset($_SESSION['admin_username']) ? htmlspecialchars($_SESSION['admin_username'] ?? 'Admin') : 'Admin'; ?></span>
                 <a href="logout.php" style="margin-left:16px;color:#19376d;"><i class="ph ph-sign-out" style="font-size:1.5rem;"></i></a>
             </div>
         </header>

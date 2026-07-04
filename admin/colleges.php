@@ -186,7 +186,7 @@ $colleges = $stmt->fetchAll();
                     <div style="font-weight:700; color:#0f172a;">Manage Colleges</div>
                 </div>
                 <div class="header-right">
-                    <span style="font-size:0.88rem; color:rgba(15,23,42,0.65);"><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
+                    <span style="font-size:0.88rem; color:rgba(15,23,42,0.65);"><?php echo htmlspecialchars($_SESSION['admin_username'] ?? 'Admin'); ?></span>
                     <a href="logout.php" style="color:#0f172a; font-size:1.2rem;"><i class="ph ph-sign-out"></i></a>
                 </div>
             </header>

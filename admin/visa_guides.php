@@ -111,7 +111,7 @@ $total_guides = $pdo->query("SELECT count(*) FROM visa_guides")->fetchColumn();
         <header class="topbar">
             <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
             <div class="user-profile">
-                <span><?php echo isset($_SESSION['admin_username']) ? htmlspecialchars($_SESSION['admin_username']) : 'Admin'; ?></span>
+                <span><?php echo isset($_SESSION['admin_username']) ? htmlspecialchars($_SESSION['admin_username'] ?? 'Admin') : 'Admin'; ?></span>
             </div>
         </header>
         <div class="content-area">

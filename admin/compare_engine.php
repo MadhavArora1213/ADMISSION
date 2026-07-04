@@ -120,7 +120,7 @@ $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <main class="main-content">
         <header class="topbar">
             <div class="user-profile">
-                <span><?php echo isset($_SESSION['admin_username']) ? htmlspecialchars($_SESSION['admin_username']) : 'Admin'; ?></span>
+                <span><?php echo isset($_SESSION['admin_username']) ? htmlspecialchars($_SESSION['admin_username'] ?? 'Admin') : 'Admin'; ?></span>
                 <a href="logout.php" style="margin-left:16px; color:var(--text-dark);"><i class="ph ph-sign-out" style="font-size:1.5rem;"></i></a>
             </div>
         </header>

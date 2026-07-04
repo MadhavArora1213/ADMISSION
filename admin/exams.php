@@ -96,8 +96,8 @@ $exams = $stmt->fetchAll();
             <header class="topbar">
                 <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="ph ph-list"></i></button>
                 <div class="user-profile">
-                    <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
-                    <div class="avatar"><?php echo strtoupper(substr($_SESSION['admin_username'], 0, 1)); ?></div>
+                    <span><?php echo htmlspecialchars($_SESSION['admin_username'] ?? 'Admin'); ?></span>
+                    <div class="avatar"><?php echo strtoupper(substr($_SESSION['admin_username'] ?? 'A', 0, 1)); ?></div>
                     <a href="logout.php" style="margin-left: 16px; color: #19376d;" title="Logout">
                         <i class="ph ph-sign-out" style="font-size: 1.5rem;"></i>
                     </a>

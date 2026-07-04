@@ -121,7 +121,7 @@ $faculty = $stmt->fetchAll();
                     <i class="ph ph-list"></i>
                 </button>
                 <div class="user-profile">
-                    <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
+                    <span><?php echo htmlspecialchars($_SESSION['admin_username'] ?? 'Admin'); ?></span>
                     <a href="logout.php" style="margin-left: 16px; color: #19376d;"><i class="ph ph-sign-out" style="font-size: 1.5rem;"></i></a>
                 </div>
             </header>
