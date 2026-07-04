@@ -113,6 +113,30 @@ function fName($text) {
   </div>
 </footer>
 
+<!-- ═══ COOKIE CONSENT ═══ -->
+<div id="cookieConsent" class="cc-popup" style="display:none;">
+  <div class="cc-popup-inner">
+    <div class="cc-popup-icon"><i class="ph ph-cookie"></i></div>
+    <p class="cc-popup-text">We use cookies to improve your experience. <a href="<?= $navBase ?>/privacy-policy">Learn more</a></p>
+    <div class="cc-popup-btns">
+      <button id="cookieAcceptAll" class="cc-btn cc-accept">Accept</button>
+      <button id="cookieRejectAll" class="cc-btn cc-reject">Decline</button>
+    </div>
+    <button id="ccClose" class="cc-close" aria-label="Close"><i class="ph ph-x"></i></button>
+  </div>
+</div>
+
+<script>
+(function() {
+  var c = document.getElementById('cookieConsent');
+  if (!localStorage.getItem('cookie_consent')) c.style.display = 'flex';
+  function hide(s) { localStorage.setItem('cookie_consent', s); c.style.display = 'none'; }
+  document.getElementById('cookieAcceptAll').onclick = function() { hide('accepted'); };
+  document.getElementById('cookieRejectAll').onclick = function() { hide('rejected'); };
+  document.getElementById('ccClose').onclick = function() { hide('closed'); };
+})();
+</script>
+
 <!-- Structured Data - ItemList (Top Colleges) -->
 <?php if (!empty($fColleges)): ?>
 <script type="application/ld+json">
