@@ -1,8 +1,10 @@
 @echo off
-title AdmissionSeason - Upload Sync
+title AdmissionSeason - Upload Sync (Real-Time)
+color 0B
 echo ============================================
-echo  AdmissionSeason Upload Sync
-echo  Watching uploads/ folder every 60 seconds
+echo  AdmissionSeason - Real-Time Upload Sync
+echo  Watches uploads/ folder for any changes
+echo  Pushes to GitHub automatically
 echo  Press CTRL+C to stop
 echo ============================================
 echo.
