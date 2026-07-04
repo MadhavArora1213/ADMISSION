@@ -1,2 +1,46 @@
 .env
 .env.production
+.env.local
+
+# Dependencies
+node_modules/
+vendor/
+composer.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+deploy-build/
+.build-info
+
+# Mimocode
+.mimocode/
+
+# Temporary / test files
+diff.txt
+fix_sql_for_hostinger.ps1
+test_full.html
+nimhans.html
+temp_index.html
+out.html
+h.html
+
+# Logs
+*.log
+npm-debug.log*
+
+# Uploads - user generated content (keep in DB, not git)
+# Uncomment line below if you do NOT want uploads in git:
+# uploads/
+
+# Keep specific upload subdirectories tracked
+!uploads/.htaccess
