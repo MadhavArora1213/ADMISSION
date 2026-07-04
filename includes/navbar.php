@@ -173,7 +173,6 @@ if (!isset($navColleges)) {
 
       <div class="pro-nav-right">
         <a href="<?= $navBase ?>/saved_colleges.php" class="pro-icon-btn" title="Saved"><i class="ph ph-heart"></i></a>
-        <a href="<?= $navBase ?>/college/login.php" class="pro-icon-btn pro-college-login-desktop" title="College Login" style="font-size:.75rem;width:auto;padding:0 10px;display:flex;align-items:center;gap:4px;text-decoration:none;color:#64748b"><i class="ph ph-graduation-cap"></i> <span style="display:inline">College Login</span></a>
         <?php if (isset($_SESSION['user_id'])): ?>
           <div class="pro-user-dropdown">
             <button class="pro-user-avatar" id="userMenuBtn" onclick="toggleUserMenu()">
@@ -681,7 +680,6 @@ if (!isset($navColleges)) {
 
     <div class="pro-mobile-section-title" style="margin-top:16px">Actions</div>
     <a href="<?= $navBase ?>/counselling" class="pro-mobile-link"><i class="ph-fill ph-headset"></i> Free Counselling</a>
-    <a href="<?= $navBase ?>/college/login.php" class="pro-mobile-link"><i class="ph ph-graduation-cap"></i> College Login</a>
     <a href="<?= $navBase ?>/college/signup.php" class="pro-mobile-link"><i class="ph ph-buildings"></i> Register Your Institute</a>
     <a href="<?= $navBase ?>/saved_colleges.php" class="pro-mobile-link"><i class="ph ph-heart"></i> Saved Colleges</a>
     <?php if (isset($_SESSION['user_id'])): ?>

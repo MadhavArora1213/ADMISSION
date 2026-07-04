@@ -1186,7 +1186,8 @@ $metaKeywords = 'sign up, register, create account, AdmissionSeason signup, stud
         </div>
         
         
-        <div style="display: flex; justify-content: center; margin: 8px auto 0 auto;">
+        <div style="display: flex; justify-content: center; margin: 8px auto 0 auto; position: relative;">
+          <div id="phone_email_overlay" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,0.7); z-index:10; border-radius:8px; cursor:not-allowed;" title="Please fill all details first"></div>
           <div class="pe_signin_button" data-client-id="<?= PE_APP_ID ?>"></div>
         </div>
         <script src="https://www.phone.email/sign_in_button_v1.js"></script>
@@ -1210,7 +1211,7 @@ $metaKeywords = 'sign up, register, create account, AdmissionSeason signup, stud
 function showAlert(message, type = 'danger') {
   const container = document.getElementById('alert_container');
   if (!container) return;
-  
+
   if (message) {
     const icon = type === 'success' ? 'ph-check-circle' : 'ph-warning-circle';
     container.className = `alert-box alert-${type}`;
@@ -1220,6 +1221,43 @@ function showAlert(message, type = 'danger') {
     container.style.display = 'none';
   }
 }
+
+// Check if all signup fields are filled to enable phone button
+function checkSignupFields() {
+  const formMode = document.getElementById('form_mode').value;
+  const overlay = document.getElementById('phone_email_overlay');
+  if (!overlay) return;
+
+  if (formMode !== 'signup') {
+    overlay.style.display = 'none';
+    return;
+  }
+
+  const name = document.querySelector('input[name="name"]').value.trim();
+  const email = document.querySelector('input[name="email"]').value.trim();
+  const courseId = document.getElementById('course_id_input').value.trim();
+  const city = document.getElementById('city_input').value.trim();
+  const terms = document.getElementById('agree_terms').checked;
+
+  const allFilled = name.length >= 2 && email.includes('@') && courseId !== '' && city.length >= 2 && terms;
+  overlay.style.display = allFilled ? 'none' : 'block';
+}
+
+// Add listeners to all signup fields
+document.addEventListener('DOMContentLoaded', function() {
+  const formMode = document.getElementById('form_mode');
+  if (formMode && formMode.value === 'signup') {
+    const fields = ['input[name="name"]', 'input[name="email"]', '#course_input', '#city_input', '#agree_terms'];
+    fields.forEach(sel => {
+      const el = document.querySelector(sel);
+      if (el) {
+        el.addEventListener('input', checkSignupFields);
+        el.addEventListener('change', checkSignupFields);
+      }
+    });
+    checkSignupFields();
+  }
+});
 
 
 
@@ -1310,6 +1348,7 @@ function switchFormMode(mode) {
       otherInput.removeAttribute('required');
     }
   }
+  checkSignupFields();
 }
 
 function toggleOtherCourseInput() {
