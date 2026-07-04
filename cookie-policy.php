@@ -19,7 +19,7 @@ $navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="<?= $navBase ?>/assets/css/style.css?v=<?= time() ?>">
+<link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
 <style>
 .cookie-page{max-width:860px;margin:0 auto;padding:100px 24px 60px}
 .cookie-page h1{font-size:2.2rem;font-weight:900;color:#0B2447;margin-bottom:8px;font-family:'Space Grotesk',sans-serif}
@@ -43,10 +43,29 @@ $navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
 .last-updated{font-size:.82rem;color:#94a3b8;margin-bottom:24px}
 .highlight-box{background:linear-gradient(135deg,#f0f4ff,#e8eeff);border:1px solid #c7d2fe;border-radius:12px;padding:20px 24px;margin:20px 0}
 .highlight-box p{margin:0;color:#1e3a5f}
+
+@media(max-width:768px){
+  .cookie-page{padding:80px 16px 40px}
+  .cookie-page h1{font-size:1.6rem}
+  .cookie-page h2{font-size:1.15rem;margin:28px 0 10px;padding-top:16px}
+  .cookie-page h3{font-size:1rem}
+  .cookie-page p,.cookie-page li{font-size:.88rem;line-height:1.7}
+  .cookie-table{font-size:.8rem;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .cookie-table th,.cookie-table td{padding:10px 12px}
+  .highlight-box{padding:16px;border-radius:10px}
+  .badge{font-size:.65rem;padding:2px 8px}
+}
+@media(max-width:480px){
+  .cookie-page{padding:70px 12px 32px}
+  .cookie-page h1{font-size:1.4rem}
+  .cookie-page h2{font-size:1.05rem;margin:24px 0 8px}
+  .cookie-page p,.cookie-page li{font-size:.84rem}
+  .highlight-box{padding:14px}
+}
 </style>
 </head>
 <body>
-<?php include $navBase . '/includes/navbar.php'; ?>
+<?php include __DIR__ . '/includes/navbar.php'; ?>
 
 <div class="cookie-page">
   <h1>Cookie Policy</h1>
@@ -218,6 +237,6 @@ $navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
   </ul>
 </div>
 
-<?php include $navBase . '/includes/footer.php'; ?>
+<?php include __DIR__ . '/includes/footer.php'; ?>
 </body>
 </html>
