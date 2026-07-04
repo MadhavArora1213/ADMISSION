@@ -44,7 +44,7 @@ $ogImage = !empty($exam['conducting_body_logo']) ? cImg($exam['conducting_body_l
 
 $tabIcons = [
     'info'=>'ph-info', 'dates'=>'ph-calendar-blank', 'pattern'=>'ph-grid-four',
-    'syllabus'=>'ph-book-open', 'fees'=>'ph-currency-inr', 'cutoffs'=>'ph-scissors'
+    'syllabus'=>'ph-code', 'fees'=>'ph-currency-inr', 'cutoffs'=>'ph-scissors'
 ];
 
 ?>
