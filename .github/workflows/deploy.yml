@@ -118,9 +118,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           echo "Build ${{ github.sha }} at $(date -u +'%Y-%m-%dT%H:%M:%SZ')" > .build-info
-          git add .build-info
-          git diff --staged --quiet || git commit -m "ci: update build info [skip ci]"
-          git push
+          git add -f .build-info
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "ci: update build info [skip ci]"
+            git push
+          fi
 
   # ─── NOTIFY ───
   notify:

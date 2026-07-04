@@ -20,7 +20,6 @@ Thumbs.db
 
 # Build artifacts
 deploy-build/
-.build-info
 
 # Mimocode
 .mimocode/
