@@ -14,7 +14,8 @@ if ($status_filter !== 'all') {
     $params[] = $status_filter;
 }
 if ($search !== '') {
-    $where[] = "(l.name LIKE ? OR l.phone LIKE ? OR l.email LIKE ? OR l.city LIKE ?)";
+    $where[] = "(l.name LIKE ? OR l.phone LIKE ? OR l.email LIKE ? OR l.city LIKE ? OR l.school_id IN (SELECT id FROM schools WHERE name LIKE ?))";
+    $params[] = "%$search%";
     $params[] = "%$search%";
     $params[] = "%$search%";
     $params[] = "%$search%";
@@ -22,13 +23,14 @@ if ($search !== '') {
 }
 
 $whereSQL = count($where) ? "WHERE " . implode(" AND ", $where) : "";
-$query = "SELECT l.*, c.name AS college_name, co.course_name, u.full_name AS assigned_name 
-          FROM leads l 
-          LEFT JOIN colleges c ON l.college_id = c.id 
-          LEFT JOIN courses co ON l.course_id = co.id 
-          LEFT JOIN users u ON l.assigned_to = u.id 
+$query = "SELECT l.*, c.name AS college_name, co.course_name, u.full_name AS assigned_name, sc.name AS school_name
+          FROM leads l
+          LEFT JOIN colleges c ON l.college_id = c.id
+          LEFT JOIN courses co ON l.course_id = co.id
+          LEFT JOIN schools sc ON l.school_id = sc.id
+          LEFT JOIN users u ON l.assigned_to = u.id
           $whereSQL
-          ORDER BY l.created_at DESC 
+          ORDER BY l.created_at DESC
           LIMIT 100";
 
 $stmt = $pdo->prepare($query);
@@ -212,7 +214,7 @@ $counsellors = $counselStmt->fetchAll();
                                 <th>Date</th>
                                 <th>Contact</th>
                                 <th class="hide-mobile">Type</th>
-                                <th>College / Course</th>
+                                <th>Institution</th>
                                 <th>Status</th>
                                 <th class="hide-mobile">Priority</th>
                                 <th class="hide-mobile">Delivery</th>
@@ -238,6 +240,10 @@ $counsellors = $counselStmt->fetchAll();
                                     <?php
                                     $instName = $l['college_name'] ?: '';
                                     $instLabel = 'college';
+                                    if (empty($instName) && !empty($l['school_name'])) {
+                                        $instName = $l['school_name'];
+                                        $instLabel = 'school';
+                                    }
                                     if (empty($instName) && $l['source_page'] === 'university_apply') {
                                         preg_match('/University:\s*(.+?)\s*\(ID:/', $l['counsellor_notes'] ?? '', $mUni);
                                         $instName = $mUni[1] ?? 'University';

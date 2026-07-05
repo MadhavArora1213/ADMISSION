@@ -212,17 +212,54 @@ if (!$geoMeta) {
     'name' => $pageTitle,
     'description' => $metaDesc,
     'url' => $canonicalUrl,
+    'inLanguage' => 'en-IN',
     'publisher' => [
       '@type' => 'Organization',
       'name' => 'AdmissionSeason',
       'url' => $siteBase,
       'logo' => ['@type' => 'ImageObject', 'url' => "$siteBase/assets/img/logo.png", 'width' => 600, 'height' => 60],
+      'sameAs' => [
+        'https://www.facebook.com/admissionseason',
+        'https://www.twitter.com/admissionseason',
+        'https://www.instagram.com/admissionseason',
+      ],
     ],
     'mainEntity' => [
       '@type' => 'ItemList',
-      'name' => 'Schools in India',
+      'name' => ($filterState ? "Schools in $filterState" : 'Schools in India') . ($filterBoard ? " — $filterBoard Board" : '') . ($filterType ? " — $filterType" : ''),
       'numberOfItems' => $total,
-    ]
+      'itemListElement' => array_map(function($s, $i) use ($siteBase) {
+        return [
+          '@type' => 'ListItem',
+          'position' => $i + 1,
+          'item' => [
+            '@type' => 'SchoolOrAcademicOrganization',
+            'name' => $s['name'],
+            'url' => schoolUrl($s['slug']),
+            'image' => cImg($s['cover_image_url']),
+            'address' => [
+              '@type' => 'PostalAddress',
+              'addressLocality' => $s['city_name'] ?? '',
+              'addressRegion' => $s['state_name'] ?? '',
+              'addressCountry' => 'IN',
+            ],
+            'geo' => ($s['latitude'] && $s['longitude']) ? [
+              '@type' => 'GeoCoordinates',
+              'latitude' => (float)$s['latitude'],
+              'longitude' => (float)$s['longitude'],
+            ] : null,
+            'aggregateRating' => ($s['overall_rating_avg'] > 0) ? [
+              '@type' => 'AggregateRating',
+              'ratingValue' => round((float)$s['overall_rating_avg'], 1),
+              'bestRating' => 5,
+              'reviewCount' => (int)($s['total_reviews'] ?? 0),
+            ] : null,
+            'foundingDate' => !empty($s['established_year']) ? (string)$s['established_year'] : null,
+          ],
+        ];
+      }, array_slice($schools, 0, 20), range(0, min(19, count($schools) - 1))),
+    ],
+    ($geoJsonLd ? ['contentLocation' => $geoJsonLd] : []),
   ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
   </script>
 
@@ -233,7 +270,23 @@ if (!$geoMeta) {
     'itemListElement' => [
       ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => "$siteBase/"],
       ['@type' => 'ListItem', 'position' => 2, 'name' => 'Schools', 'item' => $canonicalUrl],
+      ...($filterState ? [['@type' => 'ListItem', 'position' => 3, 'name' => $filterState, 'item' => $canonicalUrl]] : []),
+      ...($filterBoard ? [['@type' => 'ListItem', 'position' => ($filterState ? 4 : 3), 'name' => $filterBoard . ' Schools', 'item' => $canonicalUrl]] : []),
     ]
+  ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+  </script>
+
+  <script type="application/ld+json">
+  <?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'WebSite',
+    'name' => 'AdmissionSeason',
+    'url' => $siteBase,
+    'potentialAction' => [
+      '@type' => 'SearchAction',
+      'target' => ['@type' => 'EntryPoint', 'urlTemplate' => $siteBase . '/schools?q={search_term_string}'],
+      'query-input' => 'required name=search_term_string',
+    ],
   ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
   </script>
 
@@ -244,17 +297,49 @@ if (!$geoMeta) {
   <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=<?= time() ?>">
   <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/college-pages.css?v=<?= time() ?>">
   <style>
+    /* ── Stats Bar ──────────────────────────────────────────────────── */
     .cl-stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:24px;position:relative;z-index:1}
     .cl-stat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:16px 20px;backdrop-filter:blur(10px);text-align:center}
     .cl-stat-val{font-size:1.5rem;font-weight:800;color:#fff;font-family:'Plus Jakarta Sans',sans-serif}
     .cl-stat-lbl{font-size:.75rem;color:rgba(255,255,255,.7);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+
+    /* ── Sort Bar ───────────────────────────────────────────────────── */
     .sort-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 24px;background:#f8fafc;border-bottom:1px solid rgba(15,23,42,0.08);font-size:.85rem}
     .sort-bar label{color:rgba(15,23,42,0.45);font-weight:500}
     .sort-bar select{padding:6px 12px;border:1.5px solid rgba(15,23,42,0.08);border-radius:8px;font-size:.83rem;background:#fff;cursor:pointer;font-family:inherit}
     .sort-result-count{margin-left:auto;color:rgba(15,23,42,0.4);font-size:.82rem}
-    .clc-featured-badge{position:absolute;top:10px;right:10px;background:linear-gradient(135deg,#19376D,#0F172A);color:#fff;font-size:.65rem;font-weight:700;padding:3px 9px;border-radius:6px;text-transform:uppercase;letter-spacing:.5px}
-    @media(max-width:768px){
-      .cl-stats-bar{grid-template-columns:repeat(2,1fr)}
+
+    /* ── Featured Badge ─────────────────────────────────────────────── */
+    .clc-featured-badge{position:absolute;top:10px;right:10px;background:linear-gradient(135deg,#19376D,#0F172A);color:#fff;font-size:.65rem;font-weight:700;padding:3px 9px;border-radius:6px;text-transform:uppercase;letter-spacing:.5px;z-index:2}
+
+    /* ── Filter Toggle (mobile) ─────────────────────────────────────── */
+    .col-filter-toggle{display:none;align-items:center;gap:6px;padding:10px 20px;border-radius:12px;border:1.5px solid rgba(15,23,42,.1);background:#fff;font-size:.85rem;font-weight:700;color:#0B2447;cursor:pointer;transition:all .2s}
+    .col-filter-toggle:hover{border-color:#2563eb;color:#2563eb}
+    .col-filter-close{display:none;position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:8px;background:rgba(15,23,42,.06);border:none;cursor:pointer;align-items:center;justify-content:center;font-size:1rem;color:#0f172a;z-index:1}
+
+    /* ── Board filter pills ─────────────────────────────────────────── */
+    .board-filter-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .board-pill{padding:6px 16px;border-radius:100px;font-size:.8rem;font-weight:600;text-decoration:none;border:1.5px solid rgba(15,23,42,0.08);color:rgba(15,23,42,0.45);background:transparent;transition:all .2s;white-space:nowrap}
+    .board-pill:hover{border-color:#19376D;color:#19376D}
+    .board-pill.active{color:#fff;background:linear-gradient(135deg,#19376D,#19376D);border-color:transparent;box-shadow:0 4px 12px rgba(37,99,235,.3)}
+
+    /* ── SEO Content Section ────────────────────────────────────────── */
+    .seo-content-section{background:#fff;border-radius:14px;border:1px solid rgba(15,23,42,0.08);padding:28px;margin-top:28px}
+    .seo-content-section h2{font-size:1.15rem;font-weight:700;color:#0F172A;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+    .seo-content-section h2::before{content:'';width:4px;height:20px;border-radius:2px;background:linear-gradient(180deg,#0B2447,#19376D);flex-shrink:0}
+    .seo-content-section p{color:rgba(15,23,42,0.6);font-size:.9rem;line-height:1.75;margin-bottom:14px}
+    .seo-content-section p:last-child{margin-bottom:0}
+    .seo-content-section a{color:#19376D;font-weight:600;text-decoration:none}
+    .seo-content-section a:hover{text-decoration:underline}
+    .seo-faq-toggle{cursor:pointer;user-select:none}
+
+    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+    /* ══════════════════════════════════════════════════════════════════
+       RESPONSIVE — Tablet (≤ 1024px)
+       ══════════════════════════════════════════════════════════════════ */
+    @media(max-width:1024px){
+      .cl-stats-bar{grid-template-columns:repeat(2,1fr);gap:12px}
       .sort-result-count{display:none}
       .col-filter-toggle{display:flex}
       .shiksha-sidebar{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(0,0,0,.4);padding:0}
@@ -262,12 +347,92 @@ if (!$geoMeta) {
       .shiksha-sidebar .shiksha-widget{position:static;border-radius:16px 16px 0 0;max-height:80vh;overflow-y:auto;width:100%;box-shadow:0 -4px 24px rgba(0,0,0,.15);animation:slideUp .3s ease}
       .shiksha-sidebar .shiksha-widget-wrapper{display:flex;flex-direction:column;gap:0;background:#fff;padding:20px;border-radius:16px 16px 0 0}
       .col-filter-close{display:flex}
+      .board-filter-row{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+      .board-filter-row::-webkit-scrollbar{display:none}
     }
-    @media(max-width:480px){.cl-stats-bar{grid-template-columns:1fr 1fr}}
-    .col-filter-toggle{display:none;align-items:center;gap:6px;padding:10px 20px;border-radius:12px;border:1.5px solid rgba(15,23,42,.1);background:#fff;font-size:.85rem;font-weight:700;color:#0B2447;cursor:pointer;transition:all .2s}
-    .col-filter-toggle:hover{border-color:#2563eb;color:#2563eb}
-    .col-filter-close{display:none;position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:8px;background:rgba(15,23,42,.06);border:none;cursor:pointer;align-items:center;justify-content:center;font-size:1rem;color:#0f172a;z-index:1}
-    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+    /* ══════════════════════════════════════════════════════════════════
+       RESPONSIVE — Mobile landscape (≤ 768px)
+       ══════════════════════════════════════════════════════════════════ */
+    @media(max-width:768px){
+      .cl-stats-bar{grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
+      .cl-stat{padding:12px 14px}
+      .cl-stat-val{font-size:1.2rem}
+      .cl-stat-lbl{font-size:.68rem}
+
+      .shiksha-tabs{gap:2px;padding:4px 0}
+      .shiksha-tabs a{padding:8px 12px;font-size:.78rem}
+
+      .board-filter-row{gap:6px}
+      .board-pill{padding:5px 12px;font-size:.75rem}
+
+      .college-filter-bar{padding:12px 16px}
+      .college-search-form{flex-direction:column;gap:8px}
+      .college-search-form input[type="text"]{min-width:0;width:100%}
+      .college-search-form select{width:100%;min-width:0}
+      .college-search-form button{width:100%;justify-content:center}
+
+      .college-list-card{flex-direction:column;gap:12px;padding:16px}
+      .clc-img{width:100%;height:160px;border-radius:10px}
+      .clc-body h3{font-size:1rem}
+      .clc-meta{gap:8px;font-size:.78rem}
+      .clc-chips{gap:4px}
+      .clc-chip{font-size:.65rem;padding:2px 7px}
+      .clc-stats{flex-wrap:wrap}
+      .clc-stats div{min-width:calc(50% - 1px);font-size:.85rem;padding:8px 6px}
+      .clc-stats strong{font-size:.9rem}
+
+      .sort-bar{flex-direction:column;align-items:stretch;gap:8px;padding:12px 16px}
+      .sort-result-count{margin-left:0;font-size:.78rem}
+
+      .college-pager{padding:16px;gap:4px}
+      .pager-link{padding:6px 12px;font-size:.8rem}
+
+      .shiksha-widget{padding:16px}
+      .shiksha-widget-title{font-size:.82rem;margin-bottom:10px}
+      .shiksha-widget-list li a{padding:8px 8px;font-size:.82rem}
+
+      .col-filter-toggle{
+        display:flex;position:fixed;bottom:20px;right:20px;z-index:150;
+        box-shadow:0 4px 20px rgba(0,0,0,.2);border-radius:50px;padding:12px 20px;
+      }
+      .clc-featured-badge{font-size:.6rem;padding:2px 7px;top:8px;right:8px}
+
+      .seo-content-section{padding:18px;margin-top:20px}
+      .seo-content-section h2{font-size:1rem;margin-bottom:10px}
+      .seo-content-section p{font-size:.84rem;line-height:1.65}
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
+       RESPONSIVE — Mobile portrait (≤ 480px)
+       ══════════════════════════════════════════════════════════════════ */
+    @media(max-width:480px){
+      .cl-stats-bar{grid-template-columns:1fr 1fr;gap:8px}
+      .cl-stat{padding:10px 12px}
+      .cl-stat-val{font-size:1.1rem}
+
+      .shiksha-tabs a{padding:7px 10px;font-size:.72rem}
+      .clc-featured-badge{font-size:.58rem;padding:2px 7px;top:8px;right:8px}
+      .col-filter-toggle{padding:10px 16px;font-size:.8rem}
+
+      .board-filter-row{gap:5px}
+      .board-pill{padding:4px 10px;font-size:.7rem}
+
+      .college-search-form{gap:6px}
+      .college-search-form input[type="text"]{padding:9px 12px;font-size:.85rem}
+      .college-search-form select{padding:9px 12px;font-size:.82rem}
+      .college-search-form button{padding:9px 16px;font-size:.82rem}
+
+      .shiksha-widget-wrapper{padding:16px 12px}
+      .shiksha-widget{padding:14px}
+
+      .container{padding:0 16px}
+      .shiksha-main-wrapper{padding:12px 0 24px}
+
+      .seo-content-section{padding:14px;margin-top:16px;border-radius:10px}
+      .seo-content-section h2{font-size:.92rem;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(15,23,42,0.08)}
+      .seo-content-section p{font-size:.8rem;line-height:1.6}
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -283,7 +448,7 @@ if (!$geoMeta) {
       <span>Schools</span>
     </div>
     <h1 class="shiksha-title">Find the Best Schools in India</h1>
-    <p class="college-list-sub"><?= number_format($total) ?> schools found<?= $search ? ' for "' . htmlspecialchars($search) . '"' : '' ?><?= $state > 0 ? ' in ' . htmlspecialchars(array_column($states, 'name', 'id')[$state] ?? '') : '' ?></p>
+    <p class="college-list-sub"><?= number_format($total) ?> <?= strtolower(implode(' ', $parts)) ?> found<?= $search ? ' for "' . htmlspecialchars($search) . '"' : '' ?></p>
     <div class="cl-stats-bar">
       <div class="cl-stat">
         <div class="cl-stat-val"><?= number_format($stats['total']) ?>+</div>
@@ -320,11 +485,11 @@ if (!$geoMeta) {
 <!-- Board Filter Tabs -->
 <div style="background:#fff;border-bottom:1px solid rgba(15,23,42,0.08);">
   <div class="container" style="padding-top:12px;padding-bottom:12px;">
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-      <span style="font-size:.82rem;font-weight:600;color:rgba(15,23,42,0.45);margin-right:4px;">Board:</span>
+    <div class="board-filter-row">
+      <span style="font-size:.82rem;font-weight:600;color:rgba(15,23,42,0.45);margin-right:4px;flex-shrink:0;">Board:</span>
       <?php foreach (['all' => 'All', 'CBSE' => 'CBSE', 'ICSE' => 'ICSE', 'State' => 'State Board', 'IB' => 'IB', 'IGCSE' => 'IGCSE'] as $bk => $bl): ?>
       <a href="<?= schoolsUrl(array_filter(['type' => $type !== 'all' ? $type : null, 'board' => $bk !== 'all' ? $bk : null, 'state' => $state ?: null, 'q' => $search ?: null, 'sort' => $sort !== 'featured' ? $sort : null])) ?>"
-         style="padding:6px 16px;border-radius:100px;font-size:.8rem;font-weight:600;text-decoration:none;border:1.5px solid <?= $board === $bk ? 'transparent' : 'rgba(15,23,42,0.08)' ?>;color:<?= $board === $bk ? '#fff' : 'rgba(15,23,42,0.45)' ?>;background:<?= $board === $bk ? 'linear-gradient(135deg,#19376D,#19376D)' : 'transparent' ?>;transition:all .2s;white-space:nowrap;<?= $board === $bk ? 'box-shadow:0 4px 12px rgba(37,99,235,.3);' : '' ?>"><?= htmlspecialchars($bl) ?></a>
+         class="board-pill <?= $board === $bk ? 'active' : '' ?>"><?= htmlspecialchars($bl) ?></a>
       <?php endforeach; ?>
     </div>
   </div>
@@ -485,6 +650,51 @@ if (!$geoMeta) {
       </div>
     </aside>
 
+  </div>
+</div>
+
+<!-- Dynamic SEO Content Section -->
+<?php
+$seoH2 = 'Schools in India — Find the Best School for Your Child';
+$seoText = 'AdmissionSeason helps parents and students discover the <strong>best schools in India</strong>. Whether you are looking for a <strong>CBSE school</strong>, <strong>ICSE school</strong>, <strong>IB school</strong>, or a <strong>state board school</strong>, our comprehensive directory covers government, private, aided, international, and boarding schools across all states and union territories.';
+if ($filterState) {
+    $seoH2 = htmlspecialchars($filterState) . ' — Top Schools, Fees & Admissions';
+    $seoText = "Looking for the best schools in <strong>" . htmlspecialchars($filterState) . "</strong>? AdmissionSeason lists " . number_format($total) . "+ verified schools in " . htmlspecialchars($filterState) . " — compare fees, admission processes, board affiliations, ratings, and campus facilities. Find government, private, CBSE, ICSE, and international schools in " . htmlspecialchars($filterState) . ".";
+} elseif ($filterBoard) {
+    $seoH2 = htmlspecialchars($filterBoard) . ' Schools in India — Fees, Admissions & Rankings';
+    $seoText = "Discover " . number_format($total) . "+ <strong>" . htmlspecialchars($filterBoard) . " schools</strong> across India. AdmissionSeason provides detailed information on " . htmlspecialchars($filterBoard) . " board schools including fees, admission deadlines, student reviews, and school ratings. Find the right " . htmlspecialchars($filterBoard) . " school near you.";
+} elseif ($filterType) {
+    $seoH2 = ucfirst($filterType) . ' Schools in India — Complete Directory';
+    $seoText = "Browse " . number_format($total) . "+ <strong>" . strtolower($filterType) . " schools in India</strong>. AdmissionSeason lists verified " . strtolower($filterType) . " schools with details on fees, admissions, board affiliations, infrastructure, and reviews. Compare and shortlist the best " . strtolower($filterType) . " schools near you.";
+}
+$faqItems = [
+    ['q' => 'How many schools are listed on AdmissionSeason?', 'a' => 'AdmissionSeason currently lists ' . number_format($stats['total']) . '+ verified schools across India, covering government, private, aided, international, and boarding schools.'],
+    ['q' => 'Can I filter schools by board?', 'a' => 'Yes. You can filter schools by CBSE, ICSE, State Board, IB, IGCSE, and NIOS boards. Use the board filter tabs above to narrow your search.'],
+    ['q' => 'Are the school fees listed on the website accurate?', 'a' => 'We strive to keep fee information up to date. However, fees may vary and should be confirmed directly with the school.'],
+    ['q' => 'How do I apply to a school listed on AdmissionSeason?', 'a' => 'Click on any school listing to view detailed admission information, including the admission process, important dates, and contact details. You can reach out to the school directly through their contact page.'],
+];
+if ($filterState) {
+    $faqItems[] = ['q' => "What are the top schools in {$filterState}?", 'a' => "AdmissionSeason lists " . number_format($total) . "+ verified schools in {$filterState}. Use our filters to find the best schools by type, board, and ratings."];
+    $faqItems[] = ['q' => "How many CBSE schools are there in {$filterState}?", 'a' => "You can filter by CBSE board on this page to see all CBSE-affiliated schools in {$filterState}. Our directory is regularly updated with new schools."];
+}
+?>
+<div class="container">
+  <div class="seo-content-section" itemscope itemtype="https://schema.org/FAQPage">
+    <h2><?= $seoH2 ?></h2>
+    <p><?= $seoText ?></p>
+    <p>Explore schools by <a href="<?= schoolsUrl(['type' => 'govt']) ?>">government schools</a>, <a href="<?= schoolsUrl(['type' => 'private']) ?>">private schools</a>, <a href="<?= schoolsUrl(['type' => 'international']) ?>">international schools</a>, or <a href="<?= schoolsUrl(['type' => 'boarding']) ?>">boarding schools</a>. Filter by <a href="<?= schoolsUrl(['board' => 'CBSE']) ?>">CBSE</a>, <a href="<?= schoolsUrl(['board' => 'ICSE']) ?>">ICSE</a>, or <a href="<?= schoolsUrl(['board' => 'IB']) ?>">IB</a> boards to find the perfect match.</p>
+
+    <h2 style="margin-top:24px;">Frequently Asked Questions</h2>
+    <div class="college-faq-list">
+      <?php foreach ($faqItems as $faq): ?>
+      <details class="college-faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <summary class="seo-faq-toggle" itemprop="name"><?= htmlspecialchars($faq['q']) ?></summary>
+        <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+          <p itemprop="text"><?= $faq['a'] ?></p>
+        </div>
+      </details>
+      <?php endforeach; ?>
+    </div>
   </div>
 </div>
 

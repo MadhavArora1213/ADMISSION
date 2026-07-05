@@ -167,13 +167,121 @@ $tabIcons = [
   <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=<?= time() ?>">
   <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/college-pages.css?v=<?= time() ?>">
   <style>
+    /* ── Applied Badge ──────────────────────────────────────────────── */
+    .college-applied-badge{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;background:rgba(5,150,105,0.08);border:1.5px solid rgba(5,150,105,0.25);border-radius:10px;font-size:.85rem;font-weight:600;color:#059669;white-space:nowrap}
+
+    /* ── Tab Arrows ──────────────────────────────────────────────────── */
+    .college-tabs-wrapper {
+      position: relative;
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+    }
+    .college-tabs-wrapper .shiksha-tabs {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+      padding: 8px 0;
+    }
+    @media (min-width: 769px) {
+      .college-tabs-wrapper.has-scroll .shiksha-tabs {
+        padding: 8px 48px;
+      }
+    }
+    .college-tabs-wrapper .shiksha-tabs::-webkit-scrollbar {
+      display: none;
+    }
+    .college-tabs-wrapper.has-scroll::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      right: 0;
+      width: 48px;
+      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.95) 50%, #fff 100%);
+      pointer-events: none;
+      z-index: 5;
+      transition: opacity 0.3s;
+    }
+    .college-tabs-wrapper.scroll-end::after {
+      opacity: 0;
+    }
+    @media (max-width: 768px) {
+      .college-tabs-wrapper.has-scroll .tab-arrow { display: flex !important; }
+      .college-tabs-wrapper .tab-arrow { opacity: 1 !important; pointer-events: auto !important; }
+      .college-tabs-wrapper .tab-arrow-left { padding-left: 4px; }
+      .college-tabs-wrapper .tab-arrow-right { padding-right: 4px; }
+      .college-tabs-wrapper .tab-arrow i { width: 26px; height: 26px; font-size: .85rem; }
+      .college-tabs-wrapper .shiksha-tabs { padding: 8px 36px; }
+      .college-tabs-wrapper.has-scroll::after { display: none; }
+    }
+    .tab-arrow {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 64px;
+      border: none;
+      background: none;
+      padding: 0;
+      margin: 0;
+      outline: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      z-index: 10;
+      transition: all .25s ease;
+    }
+    .tab-arrow-left {
+      left: 0;
+      background: linear-gradient(90deg, #ffffff 50%, rgba(255,255,255,0));
+      justify-content: flex-start;
+      padding-left: 8px;
+    }
+    .tab-arrow-right {
+      right: 0;
+      background: linear-gradient(270deg, #ffffff 50%, rgba(255,255,255,0));
+      justify-content: flex-end;
+      padding-right: 8px;
+    }
+    .tab-arrow i {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 1px solid rgba(15,23,42,0.12);
+      box-shadow: 0 4px 10px rgba(11,36,71,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: #19376D;
+      transition: all 0.2s ease;
+    }
+    .tab-arrow:hover i {
+      color: #ffffff;
+      background: #19376D;
+      border-color: #19376D;
+      transform: scale(1.1);
+    }
+    .tab-arrow.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ── Overview Stats ─────────────────────────────────────────────── */
     .overview-stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:24px}
     .overview-stat{text-align:center;padding:18px 12px;background:linear-gradient(135deg,#f8fafc,rgba(11,36,71,0.06));border-radius:14px;border:1px solid rgba(37,99,235,.1)}
     .overview-stat-val{font-size:1.4rem;font-weight:800;color:#19376D;font-family:'Plus Jakarta Sans',sans-serif}
     .overview-stat-lbl{font-size:.72rem;color:rgba(15,23,42,0.45);margin-top:4px;text-transform:uppercase;letter-spacing:.4px}
+
+    /* ── Empty State ────────────────────────────────────────────────── */
     .tab-empty-state{text-align:center;padding:48px 24px;color:rgba(15,23,42,0.4)}
     .tab-empty-state i{font-size:3rem;display:block;margin-bottom:12px}
     .tab-empty-state p{font-size:.92rem}
+
+    /* ── Infrastructure Grid ────────────────────────────────────────── */
     .infrastructure-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:16px}
     .infra-item{display:flex;align-items:center;gap:10px;padding:14px 16px;background:#f8fafc;border-radius:12px;border:1px solid rgba(15,23,42,0.06)}
     .infra-item .infra-icon{width:36px;height:36px;border-radius:10px;background:rgba(11,36,71,0.06);display:flex;align-items:center;justify-content:center;color:#19376D;font-size:1.1rem;flex-shrink:0}
@@ -184,6 +292,168 @@ $tabIcons = [
     .infra-item:not(.available){opacity:.45}
     .infra-item:not(.available) .infra-icon{background:rgba(15,23,42,0.04);color:rgba(15,23,42,0.25)}
     .infra-item:not(.available) span{color:rgba(15,23,42,0.35);font-weight:400}
+
+    /* ── Courses Table Card (mobile) ────────────────────────────────── */
+    .courses-table-mobile{display:none}
+
+    /* ── News card mobile ───────────────────────────────────────────── */
+    .news-card-flex{display:flex;gap:16px;align-items:flex-start}
+    .news-card-thumb{width:120px;height:90px;object-fit:cover;border-radius:10px;flex-shrink:0}
+
+    /* ── Review modal responsive ────────────────────────────────────── */
+    .review-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .review-modal-double{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+    /* ══════════════════════════════════════════════════════════════════
+       RESPONSIVE — Tablet (≤ 1024px)
+       ══════════════════════════════════════════════════════════════════ */
+    @media(max-width:1024px){
+      .overview-stat-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+      .infrastructure-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
+       RESPONSIVE — Mobile landscape (≤ 768px)
+       ══════════════════════════════════════════════════════════════════ */
+    @media(max-width:768px){
+      /* Hero */
+      .college-hero{min-height:auto}
+      .college-hero-inner{padding:16px 0 20px}
+      .college-hero-main{flex-direction:column;gap:12px}
+      .college-hero-logo{width:60px;height:60px;border-radius:12px}
+      .college-hero-title{font-size:1.3rem;line-height:1.3}
+      .college-hero-sub{font-size:.82rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+      .college-hero-chips{gap:6px}
+      .college-hero-chips span{padding:4px 10px;font-size:.72rem}
+      .college-hero-actions{flex-direction:column;gap:8px}
+      .college-hero-actions .college-btn-primary,
+      .college-hero-actions .college-btn-outline{width:100%;justify-content:center}
+
+      /* Breadcrumb */
+      .college-breadcrumb{font-size:.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+      /* Tabs */
+      .college-detail-tabs{gap:0;overflow-x:auto;scrollbar-width:none}
+      .college-detail-tabs::-webkit-scrollbar{display:none}
+      .college-detail-tabs a{padding:12px 12px;font-size:.8rem;white-space:nowrap}
+
+      /* Content */
+      .college-tab-content{padding:18px}
+      .college-section{margin-bottom:24px}
+      .college-section h2{font-size:1rem;margin-bottom:12px;padding-bottom:8px}
+      .college-prose{font-size:.85rem;line-height:1.7}
+
+      /* Stats */
+      .overview-stat-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+      .overview-stat{padding:14px 10px}
+      .overview-stat-val{font-size:1.15rem}
+
+      /* Infrastructure */
+      .infrastructure-grid{grid-template-columns:1fr 1fr;gap:8px}
+      .infra-item{padding:10px 12px;gap:8px}
+      .infra-item .infra-icon{width:30px;height:30px;font-size:.95rem}
+      .infra-item span{font-size:.8rem}
+
+      /* Courses — hide table, show cards */
+      .college-table-wrap{display:none !important}
+      .courses-table-mobile{display:flex !important;flex-direction:column;gap:12px}
+      .course-mobile-card{background:#fff;border:1px solid rgba(15,23,42,0.08);border-radius:12px;padding:16px}
+      .course-mobile-card .cmc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+      .course-mobile-card .cmc-name{font-size:1rem;font-weight:700;color:#0B2447}
+      .course-mobile-card .cmc-level{font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(11,36,71,0.06);color:#19376D;text-transform:capitalize}
+      .course-mobile-card .cmc-details{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+      .course-mobile-card .cmc-detail{display:flex;flex-direction:column;gap:2px}
+      .course-mobile-card .cmc-detail .cmc-label{font-size:.68rem;font-weight:600;text-transform:uppercase;color:rgba(15,23,42,0.4);letter-spacing:.3px}
+      .course-mobile-card .cmc-detail .cmc-value{font-size:.88rem;font-weight:600;color:#0f172a}
+
+      /* News */
+      .news-card-flex{flex-direction:column;gap:10px}
+      .news-card-thumb{width:100%;height:160px}
+
+      /* Reviews */
+      .college-review-card{padding:14px}
+      .college-review-card h4{font-size:.88rem}
+      .college-review-card p{font-size:.82rem;line-height:1.6}
+
+      /* Info grid */
+      .college-info-grid{grid-template-columns:1fr 1fr;gap:10px}
+      .college-info-grid>div{padding:12px}
+
+      /* Contact */
+      .college-contact-grid p{padding:10px 12px;font-size:.82rem}
+
+      /* Tags */
+      .college-tag{padding:4px 10px;font-size:.72rem}
+
+      /* Sidebar — bottom sheet */
+      .shiksha-sidebar{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(0,0,0,.5);padding:0;align-items:flex-end}
+      .shiksha-sidebar.open{display:flex}
+      .shiksha-sidebar .shiksha-widget-wrapper{
+        position:static;border-radius:16px 16px 0 0;max-height:85vh;overflow-y:auto;
+        width:100%;box-shadow:0 -4px 24px rgba(0,0,0,.2);
+        background:#fff;padding:20px;display:flex;flex-direction:column;gap:16px
+      }
+      .shiksha-sidebar .shiksha-widget{margin:0;background:#f8fafc}
+
+      /* Review modal */
+      .review-modal-grid{grid-template-columns:1fr;gap:10px}
+      .review-modal-double{grid-template-columns:1fr;gap:10px}
+      #schoolReviewModal > div{margin:10px;max-height:95vh}
+      #schoolReviewModal .review-modal-header{padding:20px 20px 0}
+      #schoolReviewModal .review-modal-body{padding:20px}
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
+       RESPONSIVE — Mobile portrait (≤ 480px)
+       ══════════════════════════════════════════════════════════════════ */
+    @media(max-width:480px){
+      .college-hero-inner{padding:12px 0 16px}
+      .college-hero-logo{width:48px;height:48px;border-radius:10px}
+      .college-hero-title{font-size:1.1rem;margin-bottom:4px}
+      .college-hero-sub{font-size:.75rem;margin-bottom:8px}
+      .college-hero-chips{gap:4px}
+      .college-hero-chips span{padding:3px 7px;font-size:.65rem}
+
+      .college-tab-content{padding:14px}
+      .college-detail-tabs a{padding:10px 8px;font-size:.72rem}
+
+      .overview-stat-grid{grid-template-columns:1fr 1fr;gap:6px}
+      .overview-stat{padding:10px 8px;border-radius:10px}
+      .overview-stat-val{font-size:1rem}
+      .overview-stat-lbl{font-size:.6rem}
+
+      .infrastructure-grid{grid-template-columns:1fr 1fr;gap:6px}
+      .infra-item{padding:8px 10px;gap:6px;border-radius:8px}
+      .infra-item .infra-icon{width:26px;height:26px;font-size:.85rem;border-radius:8px}
+      .infra-item span{font-size:.72rem}
+
+      .course-mobile-card{padding:14px}
+      .course-mobile-card .cmc-name{font-size:.92rem}
+      .course-mobile-card .cmc-details{grid-template-columns:1fr 1fr;gap:6px}
+      .course-mobile-card .cmc-detail .cmc-value{font-size:.82rem}
+
+      .college-section{margin-bottom:18px}
+      .college-section h2{font-size:.92rem;margin-bottom:10px;padding-bottom:6px}
+
+      .college-info-grid{grid-template-columns:1fr;gap:6px}
+      .college-info-grid>div{padding:10px 12px}
+      .college-info-grid strong{font-size:.62rem}
+      .college-info-grid p{font-size:.78rem}
+
+      .college-contact-grid p{padding:8px 10px;font-size:.78rem}
+
+      .college-tag{padding:3px 8px;font-size:.68rem}
+
+      .college-review-card{padding:12px}
+      .college-review-card h4{font-size:.82rem}
+      .college-review-card p{font-size:.78rem;line-height:1.55}
+
+      .news-card-thumb{height:140px}
+
+      .tab-empty-state{padding:32px 16px}
+      .tab-empty-state i{font-size:2.2rem}
+      .tab-empty-state p{font-size:.82rem}
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -220,6 +490,43 @@ $tabIcons = [
             <?php if ($year): ?><span><i class="ph ph-calendar"></i> Estd <?= htmlspecialchars((string)$year) ?></span><?php endif; ?>
             <?php if (!empty($school['is_verified'])): ?><span style="background:rgba(22,163,74,.35);border-color:rgba(22,163,74,.5)"><i class="ph-fill ph-seal-check"></i> Verified</span><?php endif; ?>
           </div>
+
+          <!-- Save & Apply Buttons -->
+          <div class="college-hero-actions">
+            <?php
+            $isSaved = false;
+            $hasApplied = false;
+            $userId = $_SESSION['user_id'] ?? null;
+            if ($userId) {
+                try {
+                    $saveChk = $pdo->prepare("SELECT id FROM saved_schools WHERE user_id = ? AND school_id = ?");
+                    $saveChk->execute([$userId, $sid]);
+                    $isSaved = (bool)$saveChk->fetch();
+                } catch(Exception $e) {}
+                try {
+                    $applyChk = $pdo->prepare("SELECT id, created_at FROM leads WHERE user_id = ? AND school_id = ? AND lead_type = 'apply' ORDER BY created_at DESC LIMIT 1");
+                    $applyChk->execute([$userId, $sid]);
+                    $appliedRow = $applyChk->fetch();
+                    $hasApplied = (bool)$appliedRow;
+                    $appliedDate = $hasApplied ? date('d M Y', strtotime($appliedRow['created_at'])) : '';
+                } catch(Exception $e) {}
+            }
+            ?>
+            <button class="college-btn-outline" id="saveSchoolBtn" onclick="toggleSaveSchool()" style="display:flex;align-items:center;gap:6px">
+              <i class="<?= $isSaved ? 'ph-fill ph-heart-break' : 'ph ph-heart' ?>" id="saveIcon"></i>
+              <span id="saveLabel"><?= $isSaved ? 'Saved' : 'Save' ?></span>
+            </button>
+            <?php if ($hasApplied): ?>
+            <div class="college-applied-badge" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(5,150,105,0.08);border:1.5px solid rgba(5,150,105,0.25);border-radius:10px;font-size:.87rem;font-weight:600;color:#059669">
+              <i class="ph-fill ph-check-circle" style="font-size:1.1rem"></i>
+              <span>Already Applied<?= $appliedDate ? ' on ' . $appliedDate : '' ?></span>
+            </div>
+            <?php else: ?>
+            <button class="college-btn-primary" onclick="openApplyModal()" style="display:flex;align-items:center;gap:6px">
+              <i class="ph ph-paper-plane-tilt"></i> Apply Now
+            </button>
+            <?php endif; ?>
+          </div>
         </div>
       </div>
     </div>
@@ -230,6 +537,7 @@ $tabIcons = [
 <div class="shiksha-tabs-nav college-tabs-sticky">
   <div class="container">
     <div class="college-tabs-wrapper">
+      <button class="tab-arrow tab-arrow-left" onclick="scrollTabs(-1)" aria-label="Scroll tabs left"><i class="ph ph-caret-left"></i></button>
       <div class="shiksha-tabs college-detail-tabs" id="collegeTabs">
         <?php foreach ($tabs as $key => $label): ?>
         <a href="<?= schoolUrl($slug, $key) ?>" class="<?= $tab === $key ? 'active' : '' ?>">
@@ -238,6 +546,7 @@ $tabIcons = [
         </a>
         <?php endforeach; ?>
       </div>
+      <button class="tab-arrow tab-arrow-right" onclick="scrollTabs(1)" aria-label="Scroll tabs right"><i class="ph ph-caret-right"></i></button>
     </div>
   </div>
 </div>
@@ -315,6 +624,7 @@ $tabIcons = [
             <?php if (empty($schoolCourses)): ?>
             <div class="tab-empty-state"><i class="ph ph-book-open"></i><p>Class details coming soon.</p></div>
             <?php else: ?>
+            <!-- Desktop table -->
             <div class="college-table-wrap">
               <table class="college-data-table">
                 <thead><tr><th>Class</th><th>Level</th><th>Annual Fee</th><th>Semester Fee</th><th>Total Fee</th><th>Seats</th></tr></thead>
@@ -331,6 +641,36 @@ $tabIcons = [
                 <?php endforeach; ?>
                 </tbody>
               </table>
+            </div>
+
+            <!-- Mobile card layout -->
+            <div class="courses-table-mobile">
+              <?php foreach ($schoolCourses as $sc): ?>
+              <div class="course-mobile-card">
+                <div class="cmc-header">
+                  <span class="cmc-name"><?= htmlspecialchars($sc['class_name']) ?></span>
+                  <?php if (!empty($sc['class_level'])): ?><span class="cmc-level"><?= htmlspecialchars($sc['class_level']) ?></span><?php endif; ?>
+                </div>
+                <div class="cmc-details">
+                  <div class="cmc-detail">
+                    <span class="cmc-label">Annual Fee</span>
+                    <span class="cmc-value" style="color:#0B2447"><?= formatFee(isset($sc['annual_fee']) ? (float)$sc['annual_fee'] : null) ?></span>
+                  </div>
+                  <div class="cmc-detail">
+                    <span class="cmc-label">Semester Fee</span>
+                    <span class="cmc-value"><?= formatFee(isset($sc['semester_fee']) ? (float)$sc['semester_fee'] : null) ?></span>
+                  </div>
+                  <div class="cmc-detail">
+                    <span class="cmc-label">Total Fee</span>
+                    <span class="cmc-value"><?= formatFee(isset($sc['total_fee']) ? (float)$sc['total_fee'] : null) ?></span>
+                  </div>
+                  <div class="cmc-detail">
+                    <span class="cmc-label">Seats</span>
+                    <span class="cmc-value"><?= htmlspecialchars((string)($sc['seats_available'] ?? '—')) ?></span>
+                  </div>
+                </div>
+              </div>
+              <?php endforeach; ?>
             </div>
             <?php endif; ?>
 
@@ -407,9 +747,9 @@ $tabIcons = [
             </div>
 
             <?php if (empty($reviews)): ?>
-            <div class="tab-empty-state"><i class="ph ph-star"></i><p>No reviews yet. Be the first to review!</p></div>
+            <div class="tab-empty-state" style="margin-top:20px"><i class="ph ph-star"></i><p>No reviews yet. Be the first to review!</p></div>
             <?php else: ?>
-            <div class="college-reviews-list">
+            <div class="college-reviews-list" style="margin-top:20px">
               <?php foreach ($reviews as $rev): ?>
               <article class="college-review-card">
                 <div class="cr-head">
@@ -435,10 +775,10 @@ $tabIcons = [
               <?php foreach ($updates as $up): ?>
               <a href="<?= $siteBase ?>/school/<?= urlencode($slug) ?>/news/<?= urlencode($up['id']) ?>" style="text-decoration:none;color:inherit;display:block">
               <article class="college-review-card" style="cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
-                <div style="display:flex;gap:16px;align-items:flex-start">
+                <div class="news-card-flex">
                   <?php if(!empty($up['image_url'])): ?>
                     <?php $imgSrc = str_starts_with($up['image_url'],'http') ? $up['image_url'] : $siteBase.'/'.$up['image_url']; ?>
-                    <img src="<?= htmlspecialchars($imgSrc) ?>" style="width:120px;height:90px;object-fit:cover;border-radius:10px;flex-shrink:0">
+                    <img src="<?= htmlspecialchars($imgSrc) ?>" class="news-card-thumb" alt="">
                   <?php endif; ?>
                   <div style="flex:1;min-width:0">
                     <div class="cr-head">
@@ -493,11 +833,11 @@ $tabIcons = [
 <!-- School Review Modal -->
 <div id="schoolReviewModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeSchoolReviewModal()">
   <div style="background:#fff;border-radius:20px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.2);position:relative">
-    <div style="padding:28px 32px 0;border-bottom:1px solid rgba(15,23,42,0.06);display:flex;align-items:center;justify-content:space-between">
+    <div class="review-modal-header" style="padding:28px 32px 0;border-bottom:1px solid rgba(15,23,42,0.06);display:flex;align-items:center;justify-content:space-between">
       <h3 style="margin:0;font-size:1.3rem;font-weight:800;color:#0B2447;display:flex;align-items:center;gap:10px"><i class="ph ph-star" style="font-size:1.4rem"></i> Write a Review</h3>
       <button onclick="closeSchoolReviewModal()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:rgba(15,23,42,0.3);padding:4px"><i class="ph ph-x"></i></button>
     </div>
-    <div style="padding:24px 32px 32px">
+    <div class="review-modal-body" style="padding:24px 32px 32px">
       <div style="text-align:center;margin-bottom:24px;padding:20px;background:linear-gradient(135deg,rgba(11,36,71,0.03),rgba(11,36,71,0.06));border-radius:14px">
         <div style="font-size:.85rem;color:rgba(15,23,42,0.5);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Overall Rating</div>
         <div id="school-stars-overall" class="star-rating-group" data-category="overall" data-value="0" style="display:flex;gap:6px;justify-content:center;margin-bottom:4px">
@@ -509,7 +849,7 @@ $tabIcons = [
         </div>
         <div style="font-size:1.2rem;font-weight:800;color:#0B2447"><span id="schoolOverallAvg">0.0</span>/5</div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px">
+      <div class="review-modal-grid" style="margin-bottom:24px">
         <?php foreach([
           ['key'=>'academics','label'=>'Teaching Quality'],
           ['key'=>'faculty','label'=>'Faculty & Staff'],
@@ -538,7 +878,7 @@ $tabIcons = [
         <label style="display:block;font-size:.85rem;font-weight:700;color:rgba(15,23,42,0.6);margin-bottom:6px">Your Review *</label>
         <textarea id="schoolReviewBody" rows="4" placeholder="Tell us about your experience at this school..." style="width:100%;padding:12px 16px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.95rem;font-family:inherit;resize:vertical;box-sizing:border-box;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'"></textarea>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+      <div class="review-modal-double" style="margin-bottom:16px">
         <div>
           <label style="display:block;font-size:.85rem;font-weight:700;color:rgba(15,23,42,0.6);margin-bottom:6px">Pros</label>
           <textarea id="schoolReviewPros" rows="2" placeholder="What did you like?" style="width:100%;padding:12px 16px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.9rem;font-family:inherit;resize:vertical;box-sizing:border-box;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'"></textarea>
@@ -566,9 +906,38 @@ $tabIcons = [
 
 <script>
 function scrollTabs(dir) {
-  var el = document.getElementById('collegeTabs');
-  if (el) el.scrollBy({ left: dir * 200, behavior: 'smooth' });
+  var tabs = document.getElementById('collegeTabs');
+  if (!tabs) return;
+  tabs.scrollBy({ left: dir * 200, behavior: 'smooth' });
 }
+function updateTabArrows() {
+  var tabs = document.getElementById('collegeTabs');
+  if (!tabs) return;
+  var wrapper = tabs.closest('.college-tabs-wrapper');
+  var left = document.querySelector('.tab-arrow-left');
+  var right = document.querySelector('.tab-arrow-right');
+
+  var canScroll = tabs.scrollWidth > tabs.clientWidth;
+  if (wrapper) wrapper.classList.toggle('has-scroll', canScroll);
+
+  if (left) {
+    var atStart = !canScroll || tabs.scrollLeft <= 5;
+    left.classList.toggle('hidden', window.innerWidth > 768 && atStart);
+  }
+  if (right) {
+    var atEnd = !canScroll || tabs.scrollLeft + tabs.clientWidth >= tabs.scrollWidth - 5;
+    right.classList.toggle('hidden', window.innerWidth > 768 && atEnd);
+  }
+  if (wrapper) wrapper.classList.toggle('scroll-end', canScroll && tabs.scrollLeft + tabs.clientWidth >= tabs.scrollWidth - 5);
+}
+document.addEventListener('DOMContentLoaded', function() {
+  var tabs = document.getElementById('collegeTabs');
+  if (tabs) {
+    tabs.addEventListener('scroll', updateTabArrows);
+    updateTabArrows();
+  }
+  window.addEventListener('resize', updateTabArrows);
+});
 
 function openSchoolReviewModal() {
   var m = document.getElementById('schoolReviewModal');
@@ -652,6 +1021,141 @@ function submitSchoolReview() {
   })
   .catch(function(err) {
     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ph ph-check-circle"></i> Submit Review'; }
+    alert('Network error. Please try again.');
+  });
+}
+</script>
+
+<!-- Apply Now Modal -->
+<div id="applyModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeApplyModal()">
+  <div style="background:#fff;border-radius:20px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.2);position:relative">
+    <div style="padding:28px 32px 0;border-bottom:1px solid rgba(15,23,42,0.06);display:flex;align-items:center;justify-content:space-between">
+      <h3 style="margin:0;font-size:1.2rem;font-weight:800;color:#0B2447;display:flex;align-items:center;gap:10px"><i class="ph ph-paper-plane-tilt" style="font-size:1.3rem"></i> Apply to <?= htmlspecialchars($school['name']) ?></h3>
+      <button onclick="closeApplyModal()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:rgba(15,23,42,0.3);padding:4px"><i class="ph ph-x"></i></button>
+    </div>
+    <div style="padding:24px 32px 32px">
+      <div id="applySuccess" style="display:none;padding:16px 20px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:12px;color:#059669;font-weight:600;font-size:.9rem;margin-bottom:20px">
+        <i class="ph ph-check-circle"></i> <span id="applySuccessMsg">Application submitted successfully!</span>
+      </div>
+      <form id="applyForm" onsubmit="submitSchoolApplication(event)">
+        <input type="hidden" name="school_id" value="<?= htmlspecialchars($sid) ?>">
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:.85rem;font-weight:700;color:rgba(15,23,42,0.6);margin-bottom:6px">Full Name *</label>
+          <input type="text" name="name" required placeholder="Enter your full name" style="width:100%;padding:12px 16px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.95rem;font-family:inherit;box-sizing:border-box;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div>
+            <label style="display:block;font-size:.85rem;font-weight:700;color:rgba(15,23,42,0.6);margin-bottom:6px">Phone *</label>
+            <input type="tel" name="phone" required placeholder="10-digit mobile" pattern="[0-9]{10}" maxlength="10" style="width:100%;padding:12px 16px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.95rem;font-family:inherit;box-sizing:border-box;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'">
+          </div>
+          <div>
+            <label style="display:block;font-size:.85rem;font-weight:700;color:rgba(15,23,42,0.6);margin-bottom:6px">Email</label>
+            <input type="email" name="email" placeholder="your@email.com" style="width:100%;padding:12px 16px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.95rem;font-family:inherit;box-sizing:border-box;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div>
+            <label style="display:block;font-size:.85rem;font-weight:700;color:rgba(15,23,42,0.6);margin-bottom:6px">City</label>
+            <input type="text" name="city" placeholder="Your city" style="width:100%;padding:12px 16px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.95rem;font-family:inherit;box-sizing:border-box;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'">
+          </div>
+          <div>
+            <label style="display:block;font-size:.85rem;font-weight:700;color:rgba(15,23,42,0.6);margin-bottom:6px">State</label>
+            <input type="text" name="state" placeholder="Your state" style="width:100%;padding:12px 16px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.95rem;font-family:inherit;box-sizing:border-box;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'">
+          </div>
+        </div>
+        <div style="margin-bottom:20px">
+          <label style="display:block;font-size:.85rem;font-weight:700;color:rgba(15,23,42,0.6);margin-bottom:6px">Message (Optional)</label>
+          <textarea name="message" rows="3" placeholder="Any specific questions or requirements..." style="width:100%;padding:12px 16px;border:1.5px solid rgba(15,23,42,0.1);border-radius:10px;font-size:.95rem;font-family:inherit;resize:vertical;box-sizing:border-box;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#19376D'" onblur="this.style.borderColor='rgba(15,23,42,0.1)'"></textarea>
+        </div>
+        <button type="submit" id="applySubmitBtn" style="width:100%;padding:14px;background:linear-gradient(135deg,#0B2447,#19376D);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px">
+          <i class="ph ph-paper-plane-tilt"></i> Submit Application
+        </button>
+        <p style="text-align:center;font-size:.78rem;color:rgba(15,23,42,0.4);margin-top:12px;margin-bottom:0">By submitting, you agree to be contacted by the school.</p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Save School ── */
+function toggleSaveSchool() {
+  var userId = '<?= $_SESSION["user_id"] ?? "" ?>';
+  if (!userId) {
+    window.location.href = '<?= $siteBase ?>/login.php?redirect=' + encodeURIComponent(window.location.href);
+    return;
+  }
+  var btn = document.getElementById('saveSchoolBtn');
+  var icon = document.getElementById('saveIcon');
+  var label = document.getElementById('saveLabel');
+
+  fetch('<?= $siteBase ?>/api/toggle_save_school.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify({ school_id: '<?= $sid ?>' })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      if (data.saved) {
+        icon.className = 'ph-fill ph-heart-break';
+        label.textContent = 'Saved';
+      } else {
+        icon.className = 'ph ph-heart';
+        label.textContent = 'Save';
+      }
+    } else if (data.error === 'login_required') {
+      window.location.href = '<?= $siteBase ?>/login.php?redirect=' + encodeURIComponent(window.location.href);
+    } else {
+      alert(data.message || data.error || 'Failed to save.');
+    }
+  })
+  .catch(function() { alert('Network error. Please try again.'); });
+}
+
+/* ── Apply Now Modal ── */
+function openApplyModal() {
+  document.getElementById('applyModal').style.display = 'flex';
+  document.getElementById('applySuccess').style.display = 'none';
+  document.getElementById('applyForm').style.display = 'block';
+}
+function closeApplyModal() {
+  document.getElementById('applyModal').style.display = 'none';
+}
+
+function submitSchoolApplication(e) {
+  e.preventDefault();
+  var btn = document.getElementById('applySubmitBtn');
+  var form = document.getElementById('applyForm');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ph ph-spinner" style="animation:spin 1s linear infinite"></i> Submitting...';
+
+  var fd = new FormData(form);
+  var payload = {};
+  fd.forEach(function(v, k) { payload[k] = v; });
+
+  fetch('<?= $siteBase ?>/api/submit_school_application.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify(payload)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Submit Application';
+    if (data.ok) {
+      form.style.display = 'none';
+      document.getElementById('applySuccess').style.display = 'block';
+      document.getElementById('applySuccessMsg').textContent = data.message || 'Application submitted successfully!';
+      setTimeout(closeApplyModal, 4000);
+    } else {
+      alert(data.message || data.error || 'Failed to submit application.');
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Submit Application';
     alert('Network error. Please try again.');
   });
 }
