@@ -6,6 +6,7 @@ require_once __DIR__ . '/college_helpers.php';
 require_once __DIR__ . '/university_helpers.php';
 require_once __DIR__ . '/exam_helpers.php';
 require_once __DIR__ . '/course_helpers.php';
+require_once __DIR__ . '/school_helpers.php';
 
 // Use BASE_URL from config.php (already included by db.php before this file)
 $navBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
@@ -15,6 +16,7 @@ if (!isset($navColleges)) {
     $navColleges = cAll($pdo, "SELECT name,slug FROM colleges WHERE status='active' ORDER BY is_featured DESC, overall_rating_avg DESC, ranking_nirf ASC LIMIT 50");
     $navStates = cAll($pdo, "SELECT s.id, s.name, COUNT(c.id) as college_count FROM states s LEFT JOIN colleges c ON c.state_id = s.id AND c.status = 'active' GROUP BY s.id, s.name ORDER BY college_count DESC, s.name ASC LIMIT 50");
     $navUniversities = cAll($pdo, "SELECT name,slug,university_type,ranking_nirf,naac_grade FROM universities WHERE status='active' ORDER BY is_featured DESC, ranking_nirf ASC LIMIT 30");
+    $navSchools = cAll($pdo, "SELECT name,slug FROM schools WHERE status='active' ORDER BY is_featured DESC, overall_rating_avg DESC LIMIT 30");
     $navPopularCourses = cAll($pdo, "SELECT course_name,course_slug FROM courses WHERE status='active' ORDER BY is_popular DESC, total_colleges_offering DESC LIMIT 50");
     $navExamsUg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams WHERE status='active' AND (exam_name LIKE '%JEE%' OR exam_name LIKE '%NEET%' OR exam_name LIKE '%CLAT%' OR exam_name LIKE '%CUET%') ORDER BY applicants_last_year DESC LIMIT 10");
     $navExamsPg = cAll($pdo, "SELECT exam_name,exam_slug FROM exams WHERE status='active' AND (exam_name LIKE '%GATE%' OR exam_name LIKE '%CAT%' OR exam_name LIKE '%GMAT%' OR exam_name LIKE '%XAT%' OR exam_name LIKE '%MAT%') ORDER BY applicants_last_year DESC LIMIT 10");
@@ -232,6 +234,39 @@ if (!isset($navColleges)) {
                 <?php foreach($navColleges ?? [] as $navClg): ?>
                 <li><a href="<?= collegeUrl($navClg['slug'] ?? '') ?>"><?=htmlspecialchars((string)($navClg['name'] ?? ''))?></a></li>
                 <?php endforeach; ?>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="pro-has-mega">
+          <a href="<?= schoolsUrl() ?>">Schools <i class="ph ph-caret-down"></i></a>
+          <div class="pro-mega-menu">
+            <div class="mega-col">
+              <h4>Top Schools</h4>
+              <ul>
+                <?php foreach($navSchools ?? [] as $navSch): ?>
+                <li><a href="<?= schoolUrl($navSch['slug'] ?? '') ?>"><?=htmlspecialchars($navSch['name'] ?? '')?></a></li>
+                <?php endforeach; ?>
+              </ul>
+            </div>
+            <div class="mega-col">
+              <h4>By Board</h4>
+              <ul>
+                <li><a href="<?= schoolsUrl(['board' => 'CBSE']) ?>">CBSE Schools</a></li>
+                <li><a href="<?= schoolsUrl(['board' => 'ICSE']) ?>">ICSE Schools</a></li>
+                <li><a href="<?= schoolsUrl(['board' => 'State']) ?>">State Board Schools</a></li>
+                <li><a href="<?= schoolsUrl(['board' => 'IB']) ?>">IB Schools</a></li>
+                <li><a href="<?= schoolsUrl(['board' => 'IGCSE']) ?>">IGCSE Schools</a></li>
+              </ul>
+            </div>
+            <div class="mega-col">
+              <h4>By Type</h4>
+              <ul>
+                <li><a href="<?= schoolsUrl(['type' => 'govt']) ?>">Government Schools</a></li>
+                <li><a href="<?= schoolsUrl(['type' => 'private']) ?>">Private Schools</a></li>
+                <li><a href="<?= schoolsUrl(['type' => 'international']) ?>">International Schools</a></li>
+                <li><a href="<?= schoolsUrl(['type' => 'boarding']) ?>">Boarding Schools</a></li>
               </ul>
             </div>
           </div>
@@ -633,6 +668,19 @@ if (!isset($navColleges)) {
       <?php endforeach; ?>
     </div>
 
+    <a href="<?= schoolsUrl() ?>" class="pro-mobile-link pro-has-sub"><i class="ph ph-graduation-cap"></i> Schools <i class="ph ph-caret-right pro-mobile-arrow"></i></a>
+    <div class="pro-mobile-sub" id="mobileSubSchools">
+      <a href="<?= schoolsUrl() ?>">All Schools</a>
+      <div class="pro-mobile-sub-title">By Board</div>
+      <a href="<?= schoolsUrl(['board' => 'CBSE']) ?>">CBSE Schools</a>
+      <a href="<?= schoolsUrl(['board' => 'ICSE']) ?>">ICSE Schools</a>
+      <a href="<?= schoolsUrl(['board' => 'State']) ?>">State Board Schools</a>
+      <div class="pro-mobile-sub-title" style="margin-top:10px">Top Schools</div>
+      <?php foreach($navSchools ?? [] as $navSch): ?>
+      <a href="<?= schoolUrl($navSch['slug'] ?? '') ?>"><?=htmlspecialchars($navSch['name'] ?? '')?></a>
+      <?php endforeach; ?>
+    </div>
+
     <a href="<?= universitiesUrl() ?>" class="pro-mobile-link pro-has-sub"><i class="ph ph-graduation-cap"></i> Universities <i class="ph ph-caret-right pro-mobile-arrow"></i></a>
     <div class="pro-mobile-sub" id="mobileSubUniversities">
       <a href="<?= universitiesUrl() ?>">All Universities</a>
@@ -793,11 +841,11 @@ document.querySelectorAll('.pro-mobile-link.pro-has-sub').forEach(function(link)
   });
 });
 
-// Hide hamburger on desktop (>768px)
+// Hide hamburger on desktop (>1200px)
 function handleHamburgerVisibility() {
   var hb = document.getElementById('proHamburger');
   if (hb) {
-    hb.style.display = window.innerWidth > 768 ? 'none' : '';
+    hb.style.display = window.innerWidth > 1200 ? 'none' : '';
   }
 }
 handleHamburgerVisibility();
@@ -868,13 +916,13 @@ document.querySelectorAll('.pro-has-mega').forEach(function(item) {
 </script>
 <style>
 /* Hide hamburger on desktop */
-@media(min-width: 769px) {
+@media(min-width: 1201px) {
   .pro-hamburger { display: none !important; }
   .pro-hamburger.active { display: none !important; }
 }
 
 /* Hamburger on mobile - plain, no bg */
-@media(max-width: 768px) {
+@media(max-width: 1200px) {
   .pro-hamburger { display: flex !important; background: none !important; border: none !important; box-shadow: none !important; }
   .pro-hamburger i { font-size: 1.4rem; color: #0B2447; }
 }

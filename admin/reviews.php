@@ -5,19 +5,29 @@ require_once 'db.php';
 
 // Fetch Reviews
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
-$query = "SELECT r.*, u.full_name as user_name, c.name as college_name, (SELECT COUNT(*) FROM review_reports rr WHERE rr.review_id = r.id AND rr.status = 'open') as open_reports FROM reviews r LEFT JOIN users u ON r.user_id = u.id LEFT JOIN colleges c ON r.college_id = c.id";
+$type_filter = isset($_GET['type']) ? $_GET['type'] : 'all';
+$query = "SELECT r.*, u.full_name as user_name, c.name as college_name, s.name as school_name, (SELECT COUNT(*) FROM review_reports rr WHERE rr.review_id = r.id AND rr.status = 'open') as open_reports FROM reviews r LEFT JOIN users u ON r.user_id = u.id LEFT JOIN colleges c ON r.college_id = c.id LEFT JOIN schools s ON r.school_id = s.id";
 
+$conditions = [];
 if ($status_filter !== 'all') {
-    $query .= " WHERE r.moderation_status = :status";
+    $conditions[] = "r.moderation_status = :status";
+}
+if ($type_filter === 'college') {
+    $conditions[] = "r.college_id IS NOT NULL";
+} elseif ($type_filter === 'school') {
+    $conditions[] = "r.school_id IS NOT NULL";
+}
+if (!empty($conditions)) {
+    $query .= " WHERE " . implode(" AND ", $conditions);
 }
 $query .= " ORDER BY r.created_at DESC";
 
 $stmt = $pdo->prepare($query);
+$bindParams = [];
 if ($status_filter !== 'all') {
-    $stmt->execute(['status' => $status_filter]);
-} else {
-    $stmt->execute();
+    $bindParams['status'] = $status_filter;
 }
+$stmt->execute($bindParams);
 $reviews = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -108,16 +118,22 @@ $reviews = $stmt->fetchAll();
                 <div class="page-header">
                     <div>
                         <h2>Manage Reviews</h2>
-                        <p style="color: var(--text-muted);">Moderate and manage user submitted college reviews.</p>
+                        <p style="color: var(--text-muted);">Moderate and manage user submitted reviews.</p>
                     </div>
                 </div>
-                
+
+                <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+                    <a href="?status=<?=$status_filter?>&type=all" class="tab-link <?= $type_filter=='all'?'active':''; ?>" style="text-decoration:none;padding:6px 14px;border-radius:8px;font-size:.85rem;font-weight:600;background:<?=$type_filter=='all'?'var(--primary)':'#f1f5f9'?>;color:<?=$type_filter=='all'?'#fff':'#64748b'?>">All Types</a>
+                    <a href="?status=<?=$status_filter?>&type=college" class="tab-link <?= $type_filter=='college'?'active':''; ?>" style="text-decoration:none;padding:6px 14px;border-radius:8px;font-size:.85rem;font-weight:600;background:<?=$type_filter=='college'?'var(--primary)':'#f1f5f9'?>;color:<?=$type_filter=='college'?'#fff':'#64748b'?>">College</a>
+                    <a href="?status=<?=$status_filter?>&type=school" class="tab-link <?= $type_filter=='school'?'active':''; ?>" style="text-decoration:none;padding:6px 14px;border-radius:8px;font-size:.85rem;font-weight:600;background:<?=$type_filter=='school'?'var(--primary)':'#f1f5f9'?>;color:<?=$type_filter=='school'?'#fff':'#64748b'?>">School</a>
+                </div>
+
                 <div class="tabs-nav">
-                    <a href="?status=all" class="tab-link <?php echo $status_filter=='all'?'active':''; ?>">All Reviews</a>
-                    <a href="?status=pending" class="tab-link <?php echo $status_filter=='pending'?'active':''; ?>">Pending</a>
-                    <a href="?status=approved" class="tab-link <?php echo $status_filter=='approved'?'active':''; ?>">Approved</a>
-                    <a href="?status=rejected" class="tab-link <?php echo $status_filter=='rejected'?'active':''; ?>">Rejected</a>
-                    <a href="?status=escalated" class="tab-link <?php echo $status_filter=='escalated'?'active':''; ?>">Escalated</a>
+                    <a href="?status=all&type=<?=$type_filter?>" class="tab-link <?php echo $status_filter=='all'?'active':''; ?>">All Reviews</a>
+                    <a href="?status=pending&type=<?=$type_filter?>" class="tab-link <?php echo $status_filter=='pending'?'active':''; ?>">Pending</a>
+                    <a href="?status=approved&type=<?=$type_filter?>" class="tab-link <?php echo $status_filter=='approved'?'active':''; ?>">Approved</a>
+                    <a href="?status=rejected&type=<?=$type_filter?>" class="tab-link <?php echo $status_filter=='rejected'?'active':''; ?>">Rejected</a>
+                    <a href="?status=escalated&type=<?=$type_filter?>" class="tab-link <?php echo $status_filter=='escalated'?'active':''; ?>">Escalated</a>
                 </div>
 
                 <div class="panel">
@@ -143,7 +159,8 @@ $reviews = $stmt->fetchAll();
                                             <?php echo date('M d, Y', strtotime($r['created_at'])); ?>
                                         </td>
                                         <td>
-                                            <div style="font-weight: 600; color: var(--primary);"><?php echo htmlspecialchars($r['college_name']); ?></div>
+                                            <div style="font-weight: 600; color: var(--primary);"><?php echo htmlspecialchars($r['school_name'] ?: $r['college_name'] ?: 'Unknown'); ?></div>
+                                            <div style="font-size: 0.75rem; color: var(--text-muted);"><?php echo $r['school_id'] ? '<span style="background:#e0f2fe;color:#0369a1;padding:1px 6px;border-radius:4px;font-size:.7rem">School</span>' : '<span style="background:#f0fdf4;color:#15803d;padding:1px 6px;border-radius:4px;font-size:.7rem">College</span>'; ?></div>
                                             <div style="font-size: 0.8rem; color: var(--text-muted);">by <?php echo htmlspecialchars($r['user_name']); ?> <?php if($r['is_verified_alumnus']) echo '<i class="ph-fill ph-seal-check" style="color:#19376D;" title="Verified Alumnus"></i>'; ?></div>
                                         </td>
                                         <td>

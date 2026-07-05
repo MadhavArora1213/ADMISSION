@@ -40,6 +40,9 @@ if (isset($pdo)) {
         <a href="universities.php" class="<?php echo ($current_page == 'universities.php' || $current_page == 'university_form.php') ? 'active' : ''; ?>">
             <i class="ph ph-bank"></i> Universities
         </a>
+        <a href="schools.php" class="<?php echo ($current_page == 'schools.php' || $current_page == 'school_form.php') ? 'active' : ''; ?>">
+            <i class="ph ph-graduation-cap"></i> Schools
+        </a>
         <a href="rankings.php" class="<?php echo ($current_page == 'rankings.php') ? 'active' : ''; ?>">
             <i class="ph ph-medal"></i> Rankings
         </a>

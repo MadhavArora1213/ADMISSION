@@ -37,6 +37,19 @@ try {
 } catch (Exception $e) {}
 
 try {
+    $stmt = $pdo->prepare("SELECT id, name, slug FROM schools WHERE status='active' AND name LIKE ? ORDER BY is_featured DESC, overall_rating_avg DESC LIMIT 5");
+    $stmt->execute([$like]);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $results[] = [
+            'type' => 'school', 'label' => $r['name'],
+            'url' => BASE_URL . '/school/' . $r['slug'], 'icon' => 'ph-graduation-cap',
+            'title' => $r['name'], 'subtitle' => '', 'badge' => 'School',
+            'relevance' => relevanceScore($r['name'], $q),
+        ];
+    }
+} catch (Exception $e) {}
+
+try {
     $stmt = $pdo->prepare("SELECT id, exam_name, exam_slug, exam_abbreviation FROM exams WHERE status='active' AND exam_name LIKE ? ORDER BY applicants_last_year DESC LIMIT 5");
     $stmt->execute([$like]);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {

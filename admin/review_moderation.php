@@ -10,16 +10,28 @@ if (!$id) { header('Location: reviews.php'); exit; }
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'moderate') {
     $status = $_POST['moderation_status'];
     $reason = $_POST['moderation_reason'];
-    
+
     $stmt = $pdo->prepare("UPDATE reviews SET moderation_status = ?, moderation_reason = ?, moderated_by = ?, moderated_at = CURRENT_TIMESTAMP WHERE id = ?");
     $stmt->execute([$status, $reason, $_SESSION['admin_id'], $id]);
-    
+
+    // Update school review count and rating if it's a school review
+    $revCheck = $pdo->prepare("SELECT school_id FROM reviews WHERE id = ?");
+    $revCheck->execute([$id]);
+    $revRow = $revCheck->fetch();
+    if ($revRow && !empty($revRow['school_id'])) {
+        $sid = $revRow['school_id'];
+        $stats = $pdo->prepare("SELECT COUNT(*) AS cnt, COALESCE(AVG(overall_rating),0) AS avg_r FROM reviews WHERE school_id = ? AND moderation_status = 'approved'");
+        $stats->execute([$sid]);
+        $s = $stats->fetch();
+        $pdo->prepare("UPDATE schools SET total_reviews = ?, overall_rating_avg = ? WHERE id = ?")->execute([$s['cnt'], round($s['avg_r'], 1), $sid]);
+    }
+
     header("Location: review_moderation.php?id=$id&msg=saved");
     exit;
 }
 
 // Fetch Review Data
-$stmt = $pdo->prepare("SELECT r.*, u.full_name as user_name, u.email as user_email, c.name as college_name, m.full_name as moderator_name FROM reviews r LEFT JOIN users u ON r.user_id = u.id LEFT JOIN colleges c ON r.college_id = c.id LEFT JOIN users m ON r.moderated_by = m.id WHERE r.id = ?");
+$stmt = $pdo->prepare("SELECT r.*, u.full_name as user_name, u.email as user_email, c.name as college_name, s.name as school_name, m.full_name as moderator_name FROM reviews r LEFT JOIN users u ON r.user_id = u.id LEFT JOIN colleges c ON r.college_id = c.id LEFT JOIN schools s ON r.school_id = s.id LEFT JOIN users m ON r.moderated_by = m.id WHERE r.id = ?");
 $stmt->execute([$id]);
 $review = $stmt->fetch();
 if (!$review) { header('Location: reviews.php'); exit; }
@@ -142,7 +154,7 @@ $reports = $stmtRep->fetchAll();
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
                             <div>
                                 <h3 style="border:none; margin:0; padding:0;"><?php echo htmlspecialchars($review['review_title'] ?: 'Untitled Review'); ?></h3>
-                                <div style="color:var(--text-muted); margin-top:4px;">For <strong style="color:var(--primary);"><?php echo htmlspecialchars($review['college_name']); ?></strong></div>
+                                <div style="color:var(--text-muted); margin-top:4px;">For <strong style="color:var(--primary);"><?php echo htmlspecialchars($review['school_name'] ?: $review['college_name'] ?: 'Unknown'); ?></strong> <?php echo $review['school_id'] ? '<span style="background:#e0f2fe;color:#0369a1;padding:1px 6px;border-radius:4px;font-size:.7rem;margin-left:4px">School</span>' : ''; ?></div>
                             </div>
                             <span class="badge status-<?php echo $review['moderation_status']; ?>"><?php echo ucfirst($review['moderation_status']); ?></span>
                         </div>

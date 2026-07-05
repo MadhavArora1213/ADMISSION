@@ -21,6 +21,7 @@
         <div class="nh-search-tabs">
           <button class="active" data-type="all"><i class="ph ph-magnifying-glass"></i> All</button>
           <button data-type="colleges"><i class="ph ph-buildings"></i> Colleges</button>
+          <button data-type="schools"><i class="ph ph-graduation-cap"></i> Schools</button>
           <button data-type="exams"><i class="ph ph-pencil-line"></i> Exams</button>
           <button data-type="courses"><i class="ph ph-book-open"></i> Courses</button>
         </div>
@@ -36,6 +37,7 @@
       <div class="nh-quick">
         <span class="nh-quick-label">Popular:</span>
         <a href="<?=collegesUrl(['q'=>'IIT'])?>" class="nh-quick-link">IIT Colleges</a>
+        <a href="<?=schoolsUrl()?>" class="nh-quick-link">Top Schools</a>
         <a href="<?=collegesUrl(['q'=>'Medical'])?>" class="nh-quick-link">Medical Colleges</a>
         <a href="<?=examsUrl()?>" class="nh-quick-link">Entrance Exams</a>
         <a href="<?=coursesUrl(['q'=>'MBA'])?>" class="nh-quick-link">MBA Courses</a>
@@ -108,23 +110,23 @@
   }
 
   function iconFor(type) {
-    const m = {college:'ph-buildings',exam:'ph-clipboard-text',course:'ph-books',career:'ph-briefcase',article:'ph-newspaper',question:'ph-chat-circle-question',university:'ph-globe-hemisphere-west'};
+    const m = {college:'ph-buildings',school:'ph-graduation-cap',exam:'ph-clipboard-text',course:'ph-books',career:'ph-briefcase',article:'ph-newspaper',question:'ph-chat-circle-question',university:'ph-globe-hemisphere-west'};
     return m[type] || 'ph-arrow-right';
   }
 
   function typeLabel(type) {
-    const m = {college:'Colleges',exam:'Exams',course:'Courses',career:'Careers',article:'News & Articles',question:'Questions',university:'Foreign Universities'};
+    const m = {college:'Colleges',school:'Schools',exam:'Exams',course:'Courses',career:'Careers',article:'News & Articles',question:'Questions',university:'Foreign Universities'};
     return m[type] || type;
   }
 
   function typeColor(type) {
-    const m = {college:'#19376D',exam:'#7C3AED',course:'#059669',career:'#EA580C',article:'#D97706',question:'#2563EB',university:'#0891B2'};
+    const m = {college:'#19376D',school:'#0B2447',exam:'#7C3AED',course:'#059669',career:'#EA580C',article:'#D97706',question:'#2563EB',university:'#0891B2'};
     return m[type] || '#64748B';
   }
 
   function render(results, q) {
     if (filterType !== 'all') {
-      results = results.filter(r => r.type === filterType || (filterType === 'colleges' && r.type === 'college') || (filterType === 'exams' && r.type === 'exam') || (filterType === 'courses' && r.type === 'course'));
+      results = results.filter(r => r.type === filterType || (filterType === 'colleges' && r.type === 'college') || (filterType === 'schools' && r.type === 'school') || (filterType === 'exams' && r.type === 'exam') || (filterType === 'courses' && r.type === 'course'));
     }
     if (!results.length) {
       dd.innerHTML = '<div class="nh-search-empty"><i class="ph ph-magnifying-glass"></i>No results found for "<strong>' + q.replace(/</g,'&lt;') + '</strong>"</div>';
@@ -137,7 +139,7 @@
       groups[r.type].push(r);
     });
     let html = '';
-    const order = ['college','exam','course','career','university','article','question'];
+    const order = ['college','school','exam','course','career','university','article','question'];
     order.forEach(type => {
       if (!groups[type]) return;
       html += '<div class="nh-search-group">';
