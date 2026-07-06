@@ -56,32 +56,42 @@ $orderMap = [
 ];
 $orderSql = $orderMap[$sort] ?? $orderMap['featured'];
 
-$countStmt = $pdo->prepare("
-    SELECT COUNT(*) FROM schools s
-    LEFT JOIN cities ci ON s.city_id = ci.id
-    LEFT JOIN states st ON s.state_id = st.id
-    WHERE {$whereSql}
-");
-$countStmt->execute($params);
-$total = (int)$countStmt->fetchColumn();
+try {
+    $countStmt = $pdo->prepare("
+        SELECT COUNT(*) FROM schools s
+        LEFT JOIN cities ci ON s.city_id = ci.id
+        LEFT JOIN states st ON s.state_id = st.id
+        WHERE {$whereSql}
+    ");
+    $countStmt->execute($params);
+    $total = (int)$countStmt->fetchColumn();
+} catch (Exception $e) {
+    error_log("Schools count query failed: " . $e->getMessage());
+    $total = 0;
+}
 
-$sql = "
-    SELECT s.id, s.name, s.slug, s.school_type, s.ownership, s.board_affiliation, s.board_state_name,
-           s.overall_rating_avg, s.total_reviews, s.established_year,
-           s.is_verified, s.is_featured, s.total_students, s.campus_area_acres,
-           st.name AS state_name, ci.name AS city_name,
-           sm.logo_url, sm.cover_image_url
-    FROM schools s
-    LEFT JOIN states st ON s.state_id = st.id
-    LEFT JOIN cities ci ON s.city_id = ci.id
-    LEFT JOIN school_media sm ON sm.school_id = s.id AND sm.image_type IS NULL
-    WHERE {$whereSql}
-    ORDER BY {$orderSql}
-    LIMIT {$perPage} OFFSET {$offset}
-";
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$schools = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$schools = [];
+try {
+    $sql = "
+        SELECT s.id, s.name, s.slug, s.school_type, s.ownership, s.board_affiliation, s.board_state_name,
+               s.overall_rating_avg, s.total_reviews, s.established_year,
+               s.is_verified, s.is_featured, s.total_students, s.campus_area_acres,
+               st.name AS state_name, ci.name AS city_name,
+               sm.logo_url, sm.cover_image_url
+        FROM schools s
+        LEFT JOIN states st ON s.state_id = st.id
+        LEFT JOIN cities ci ON s.city_id = ci.id
+        LEFT JOIN school_media sm ON sm.school_id = s.id AND sm.image_type IS NULL
+        WHERE {$whereSql}
+        ORDER BY {$orderSql}
+        LIMIT {$perPage} OFFSET {$offset}
+    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $schools = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    error_log("Schools query failed: " . $e->getMessage());
+}
 
 $states = cAll($pdo, "SELECT st.id, st.name, COUNT(s.id) AS cnt FROM states st LEFT JOIN schools s ON s.state_id = st.id AND s.status='active' GROUP BY st.id, st.name ORDER BY cnt DESC, st.name ASC LIMIT 30");
 $totalPages = max(1, (int)ceil($total / $perPage));
@@ -228,7 +238,8 @@ if (!$geoMeta) {
       '@type' => 'ItemList',
       'name' => ($filterState ? "Schools in $filterState" : 'Schools in India') . ($filterBoard ? " — $filterBoard Board" : '') . ($filterType ? " — $filterType" : ''),
       'numberOfItems' => $total,
-      'itemListElement' => array_map(function($s, $i) use ($siteBase) {
+      'itemListElement' => array_values(array_filter(array_map(function($s, $i) use ($siteBase) {
+        if (empty($s['slug'])) return null;
         return [
           '@type' => 'ListItem',
           'position' => $i + 1,
@@ -257,7 +268,7 @@ if (!$geoMeta) {
             'foundingDate' => !empty($s['established_year']) ? (string)$s['established_year'] : null,
           ],
         ];
-      }, array_slice($schools, 0, 20), range(0, min(19, count($schools) - 1))),
+      }, array_slice($schools, 0, 20), range(0, min(19, count($schools) - 1))))),
     ],
     ($geoJsonLd ? ['contentLocation' => $geoJsonLd] : []),
   ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>

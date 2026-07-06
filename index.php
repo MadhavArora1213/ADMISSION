@@ -37,6 +37,18 @@ if ($routeBase === 'college' && !empty($routeParts[1])) {
     exit;
 }
 
+if ($routeBase === 'schools') {
+    require __DIR__ . '/schools.php';
+    exit;
+}
+
+if ($routeBase === 'school' && !empty($routeParts[1])) {
+    $_GET['slug'] = $routeParts[1];
+    if (!empty($routeParts[2])) $_GET['tab'] = $routeParts[2];
+    require __DIR__ . '/school.php';
+    exit;
+}
+
 $totalColleges = cCol($pdo, "SELECT COUNT(*) FROM colleges WHERE status='active'");
 $totalReviews  = cCol($pdo, "SELECT COUNT(*) FROM reviews WHERE moderation_status='approved'");
 $totalExams    = cCol($pdo, "SELECT COUNT(*) FROM exams");
