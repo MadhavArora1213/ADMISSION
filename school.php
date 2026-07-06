@@ -573,7 +573,7 @@ $tabIcons = [
           <?php if (!empty($school['about_text'])): ?>
           <section class="college-section">
             <h2>About <?= htmlspecialchars($school['name']) ?></h2>
-            <div class="college-prose"><?= nl2br(htmlspecialchars($school['about_text'])) ?></div>
+            <div class="college-prose"><?= $school['about_text'] ?></div>
           </section>
           <?php endif; ?>
 
