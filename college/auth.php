@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../panel_cms_2847/db.php';
 
 function collegeAuth() {
     global $pdo;

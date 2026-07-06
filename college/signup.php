@@ -1,6 +1,6 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../panel_cms_2847/db.php';
 
 // Security headers
 header('X-Content-Type-Options: nosniff');
@@ -65,7 +65,7 @@ function uploadDoc(array $file, string $prefix, bool $required = false): array {
   }
 
   // Sync to GitHub
-  require_once __DIR__ . '/../admin/upload_sync.php';
+  require_once __DIR__ . '/../panel_cms_2847/upload_sync.php';
   sync_to_github('uploads/college_docs/' . $name);
 
   return [$name, null];

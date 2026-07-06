@@ -7,43 +7,44 @@ require_once 'db.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'save') {
     $id = $_POST['id'] ?? null;
     $data = [
-        $_POST['link_source_page'], $_POST['link_target_page'], $_POST['anchor_text'], isset($_POST['is_broken']) ? 1 : 0
+        $_POST['template_name'], $_POST['template_slug_pattern'], $_POST['data_source'],
+        $_POST['title_template'], $_POST['description_template'], isset($_POST['is_active']) ? 1 : 0
     ];
     if ($id) {
         $data[] = $id;
-        $pdo->prepare("UPDATE internal_links SET link_source_page=?, link_target_page=?, anchor_text=?, is_broken=? WHERE id=?")->execute($data);
+        $pdo->prepare("UPDATE seo_templates SET template_name=?, template_slug_pattern=?, data_source=?, title_template=?, description_template=?, is_active=? WHERE id=?")->execute($data);
     } else {
-        $pdo->prepare("INSERT INTO internal_links (link_source_page, link_target_page, anchor_text, is_broken) VALUES (?, ?, ?, ?)")->execute($data);
+        $pdo->prepare("INSERT INTO seo_templates (template_name, template_slug_pattern, data_source, title_template, description_template, is_active, pages_generated) VALUES (?, ?, ?, ?, ?, ?, 0)")->execute($data);
     }
-    header("Location: internal_links.php?msg=saved"); exit;
+    header("Location: seo_templates.php?msg=saved"); exit;
 }
 
 // Handle deleting
 if (isset($_GET['delete_id'])) {
-    $pdo->prepare("DELETE FROM internal_links WHERE id = ?")->execute([$_GET['delete_id']]);
-    header("Location: internal_links.php?msg=deleted"); exit;
+    $pdo->prepare("DELETE FROM seo_templates WHERE id = ?")->execute([$_GET['delete_id']]);
+    header("Location: seo_templates.php?msg=deleted"); exit;
 }
 
-// Handle toggle broken
-if (isset($_GET['toggle_broken_id'])) {
-    $pdo->prepare("UPDATE internal_links SET is_broken = NOT is_broken WHERE id = ?")->execute([$_GET['toggle_broken_id']]);
-    header("Location: internal_links.php"); exit;
+// Handle toggle active
+if (isset($_GET['toggle_active_id'])) {
+    $pdo->prepare("UPDATE seo_templates SET is_active = NOT is_active WHERE id = ?")->execute([$_GET['toggle_active_id']]);
+    header("Location: seo_templates.php"); exit;
 }
 
-// Fetch all links
-$links = $pdo->query("SELECT * FROM internal_links ORDER BY created_at DESC")->fetchAll();
-$edit_link = null;
+// Fetch all templates
+$templates = $pdo->query("SELECT * FROM seo_templates ORDER BY created_at DESC")->fetchAll();
+$edit_tpl = null;
 if (isset($_GET['edit_id'])) {
-    $stmt = $pdo->prepare("SELECT * FROM internal_links WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT * FROM seo_templates WHERE id = ?");
     $stmt->execute([$_GET['edit_id']]);
-    $edit_link = $stmt->fetch();
+    $edit_tpl = $stmt->fetch();
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Internal Links | Admin</title>
+    <title>SEO Templates | Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
@@ -63,7 +64,7 @@ if (isset($_GET['edit_id'])) {
         .panel{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:24px;box-shadow:var(--shadow-sm);margin-bottom:24px}
         .panel h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color);padding-bottom:12px}
         .panel-body{margin-top:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
-        .form-layout{display:grid;grid-template-columns:350px 1fr;gap:24px}
+        .form-layout{display:grid;grid-template-columns:400px 1fr;gap:24px}
         .form-group{margin-bottom:16px}
         .form-group label{display:block;font-weight:600;margin-bottom:6px;font-size:.85rem;color:var(--text-muted)}
         .form-control{width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:8px;font-family:inherit;font-size:.9rem;box-sizing:border-box}
@@ -79,6 +80,7 @@ if (isset($_GET['edit_id'])) {
         .btn-primary{background:var(--primary);color:#fff}
         .btn-primary:hover{opacity:.9}
         .msg-alert{padding:14px 20px;border-radius:8px;background:rgba(11,36,71,0.04);color:#0B2447;border:1px solid rgba(11,36,71,0.04);margin-bottom:20px}
+        .vars-helper{font-size:.75rem;color:rgba(15,23,42,.45);background:#f8fafc;padding:8px;border-radius:6px;margin-top:4px;font-family:monospace}
 
         .mobile-menu-btn{display:none;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#0f172a;padding:4px}
         .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:90}
@@ -121,8 +123,8 @@ if (isset($_GET['edit_id'])) {
         <div class="content-area">
             <div class="page-header">
                 <div>
-                    <h2><i class="ph ph-link-break" style="color:var(--primary);"></i> Internal Links</h2>
-                    <p style="color:var(--text-muted);">Manage explicit internal cross-linking for SEO.</p>
+                    <h2><i class="ph ph-file-code" style="color:var(--primary);"></i> Programmatic SEO Templates</h2>
+                    <p style="color:var(--text-muted);">Generate thousands of pages automatically using templates.</p>
                 </div>
             </div>
 
@@ -130,9 +132,8 @@ if (isset($_GET['edit_id'])) {
                 <a href="seo_dashboard.php" class="sub-link"><i class="ph ph-squares-four"></i> Overview</a>
                 <a href="seo_meta.php" class="sub-link"><i class="ph ph-tag"></i> Meta Tags & Schema</a>
                 <a href="redirects.php" class="sub-link"><i class="ph ph-arrows-left-right"></i> Redirects</a>
-                <a href="sitemaps.php" class="sub-link"><i class="ph ph-map-trifold"></i> Sitemaps</a>
-                <a href="internal_links.php" class="sub-link active"><i class="ph ph-link-break"></i> Internal Links</a>
-                <a href="seo_templates.php" class="sub-link"><i class="ph ph-file-code"></i> SEO Templates</a>
+                <a href="internal_links.php" class="sub-link"><i class="ph ph-link-break"></i> Internal Links</a>
+                <a href="seo_templates.php" class="sub-link active"><i class="ph ph-file-code"></i> SEO Templates</a>
             </div>
 
             <?php if(isset($_GET['msg'])): ?>
@@ -142,66 +143,81 @@ if (isset($_GET['edit_id'])) {
             <div class="form-layout">
                 <!-- Add/Edit Form -->
                 <div class="panel">
-                    <h3><?php echo $edit_link ? 'Edit Link' : 'Add New Link'; ?></h3>
-                    <form method="POST" action="internal_links.php">
+                    <h3><?php echo $edit_tpl ? 'Edit Template' : 'Add New Template'; ?></h3>
+                    <form method="POST" action="seo_templates.php">
                         <input type="hidden" name="action" value="save">
-                        <?php if($edit_link): ?><input type="hidden" name="id" value="<?php echo $edit_link['id']; ?>"><?php endif; ?>
+                        <?php if($edit_tpl): ?><input type="hidden" name="id" value="<?php echo $edit_tpl['id']; ?>"><?php endif; ?>
 
                         <div class="form-group">
-                            <label>Source Page URL *</label>
-                            <input type="text" name="link_source_page" class="form-control" value="<?php echo htmlspecialchars($edit_link['link_source_page']??''); ?>" required placeholder="/course/btech">
+                            <label>Template Name *</label>
+                            <input type="text" name="template_name" class="form-control" value="<?php echo htmlspecialchars($edit_tpl['template_name']??''); ?>" required placeholder="Top Colleges by City">
                         </div>
                         <div class="form-group">
-                            <label>Target Page URL *</label>
-                            <input type="text" name="link_target_page" class="form-control" value="<?php echo htmlspecialchars($edit_link['link_target_page']??''); ?>" required placeholder="/colleges/btech">
+                            <label>Slug Pattern *</label>
+                            <input type="text" name="template_slug_pattern" class="form-control" value="<?php echo htmlspecialchars($edit_tpl['template_slug_pattern']??''); ?>" required placeholder="/:course-colleges-:city">
+                            <div class="vars-helper">Use :var syntax for URL segments</div>
                         </div>
                         <div class="form-group">
-                            <label>Anchor Text</label>
-                            <input type="text" name="anchor_text" class="form-control" value="<?php echo htmlspecialchars($edit_link['anchor_text']??''); ?>" placeholder="Top B.Tech Colleges">
+                            <label>Data Source</label>
+                            <select name="data_source" class="form-control">
+                                <?php foreach(['colleges','exams','courses'] as $opt): ?>
+                                <option value="<?php echo $opt; ?>" <?php echo ($edit_tpl['data_source']??'') == $opt ? 'selected' : ''; ?>><?php echo ucfirst($opt); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Title Template *</label>
+                            <input type="text" name="title_template" class="form-control" value="<?php echo htmlspecialchars($edit_tpl['title_template']??''); ?>" required placeholder="Top {course} Colleges in {city}">
+                            <div class="vars-helper">Available vars: {course}, {city}, {state}</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description Template *</label>
+                            <textarea name="description_template" class="form-control" rows="4" required placeholder="Explore the best {course} colleges located in {city}..."><?php echo htmlspecialchars($edit_tpl['description_template']??''); ?></textarea>
                         </div>
                         
                         <div class="form-group" style="display:flex; align-items:center; gap:8px;">
-                            <input type="checkbox" name="is_broken" id="is_broken" <?php echo ($edit_link['is_broken']??0) ? 'checked' : ''; ?>>
-                            <label for="is_broken" style="margin:0;">Mark as Broken Link</label>
+                            <input type="checkbox" name="is_active" id="is_active" <?php echo !isset($edit_tpl) || $edit_tpl['is_active'] ? 'checked' : ''; ?>>
+                            <label for="is_active" style="margin:0;">Active (Generate Pages)</label>
                         </div>
 
-                        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="ph ph-floppy-disk"></i> Save Link</button>
-                        <?php if($edit_link): ?>
-                        <a href="internal_links.php" class="btn" style="display:block; text-align:center; margin-top:10px; background:#F8FAFC; text-decoration:none; color:var(--text-color); padding:10px; border-radius:8px;">Cancel Edit</a>
+                        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="ph ph-floppy-disk"></i> Save Template</button>
+                        <?php if($edit_tpl): ?>
+                        <a href="seo_templates.php" class="btn" style="display:block; text-align:center; margin-top:10px; background:#F8FAFC; text-decoration:none; color:var(--text-color); padding:10px; border-radius:8px;">Cancel Edit</a>
                         <?php endif; ?>
                     </form>
                 </div>
 
                 <!-- List Panel -->
                 <div class="panel">
-                    <h3>Registered Internal Links (<?php echo count($links); ?>)</h3>
+                    <h3>Active Templates (<?php echo count($templates); ?>)</h3>
                     <div class="panel-body">
                         <table style="min-width:480px;">
-                            <thead><tr><th>Source</th><th>Target</th><th>Anchor</th><th>Status</th><th>Actions</th></tr></thead>
+                            <thead><tr><th>Template Name</th><th>Data Source</th><th>Pattern</th><th>Generated</th><th>Status</th><th>Actions</th></tr></thead>
                             <tbody>
-                                <?php foreach($links as $l): ?>
+                                <?php foreach($templates as $t): ?>
                                 <tr>
-                                    <td style="color:var(--text-muted); font-size:0.8rem; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                        <?php echo htmlspecialchars($l['link_source_page']); ?>
+                                    <td style="font-weight:600; color:var(--primary);">
+                                        <?php echo htmlspecialchars($t['template_name']); ?>
                                     </td>
-                                    <td style="font-weight:600; color:var(--primary); max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                        <?php echo htmlspecialchars($l['link_target_page']); ?>
-                                    </td>
-                                    <td><?php echo htmlspecialchars($l['anchor_text']); ?></td>
+                                    <td><span class="badge" style="background:rgba(11,36,71,0.06);color:#19376D;"><?php echo ucfirst($t['data_source']); ?></span></td>
+                                    <td style="font-family:monospace; font-size:0.8rem; color:rgba(15,23,42,0.45);"><?php echo htmlspecialchars($t['template_slug_pattern']); ?></td>
+                                    <td style="font-weight:700;"><?php echo number_format($t['pages_generated']); ?></td>
                                     <td>
-                                        <a href="?toggle_broken_id=<?php echo $l['id']; ?>" style="text-decoration:none;">
-                                            <?php if($l['is_broken']): ?><span class="badge" style="background:rgba(15,23,42,0.06);color:#0F172A;">Broken</span>
-                                            <?php else: ?><span class="badge" style="background:rgba(11,36,71,0.04);color:#0B2447;">Valid</span><?php endif; ?>
+                                        <a href="?toggle_active_id=<?php echo $t['id']; ?>" style="text-decoration:none;">
+                                            <?php if($t['is_active']): ?><i class="ph-fill ph-check-circle" style="color:#0B2447;font-size:1.2rem;"></i>
+                                            <?php else: ?><i class="ph-fill ph-minus-circle" style="color:#0F172A;font-size:1.2rem;"></i><?php endif; ?>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href="?edit_id=<?php echo $l['id']; ?>" style="color:var(--primary); margin-right:8px;"><i class="ph ph-pencil-simple"></i></a>
-                                        <a href="?delete_id=<?php echo $l['id']; ?>" onclick="return confirm('Delete internal link?');" style="color:#0F172A;"><i class="ph ph-trash"></i></a>
+                                        <a href="?edit_id=<?php echo $t['id']; ?>" style="color:var(--primary); margin-right:8px;"><i class="ph ph-pencil-simple"></i></a>
+                                        <a href="?delete_id=<?php echo $t['id']; ?>" onclick="return confirm('Delete SEO template?');" style="color:#0F172A;"><i class="ph ph-trash"></i></a>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
-                                <?php if(empty($links)): ?>
-                                <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No internal links configured.</td></tr>
+                                <?php if(empty($templates)): ?>
+                                <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No SEO templates configured.</td></tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>

@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../panel_cms_2847/db.php';
 
 $q = trim($_GET['q'] ?? '');
 if (strlen($q) < 1) { echo json_encode([]); exit; }

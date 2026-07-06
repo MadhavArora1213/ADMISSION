@@ -3,7 +3,7 @@ declare(strict_types=1);
 header('Content-Type: application/json');
 header('Cache-Control: no-cache, no-store, must-revalidate');
 
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../panel_cms_2847/db.php';
 
 $q = trim($_GET['q'] ?? '');
 if (mb_strlen($q) < 1) {
@@ -31,8 +31,26 @@ function relevanceScore(string $text, string $query): int {
 
 function logSearchQuery(PDO $pdo, string $query, int $resultCount): void {
     try {
-        $stmt = $pdo->prepare("INSERT INTO search_queries (query_text, result_count, searched_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE result_count = VALUES(result_count), searched_at = NOW()");
-        $stmt->execute([$query, $resultCount]);
+        $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+        );
+
+        $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $device = 'desktop';
+        if (preg_match('/mobile|android|iphone/i', $ua)) $device = 'mobile';
+        elseif (preg_match('/tablet|ipad/i', $ua)) $device = 'tablet';
+
+        $sid = session_id();
+        $uid = $_SESSION['user_id'] ?? null;
+
+        $stmt = $pdo->prepare("INSERT INTO search_queries (id, query_text, results_count, zero_results, device_type, session_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$uuid, $query, $resultCount, $resultCount === 0 ? 1 : 0, $device, $sid ?: null, $uid]);
+
+        $pdo->prepare("INSERT INTO search_trending (query_text, trending_score, trending_period) VALUES (?, 1, 'daily') ON DUPLICATE KEY UPDATE trending_score = trending_score + 1")->execute([$query]);
     } catch (Exception $e) {}
 }
 

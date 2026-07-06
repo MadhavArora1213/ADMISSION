@@ -3275,6 +3275,7 @@ select {
   background: #ffffff;
   padding: 0;
   border-bottom: 1px solid rgba(15, 23, 42, 0.04);
+  overflow: visible;
 }
 
 .pro-nav-sub .pro-nav-flex {
@@ -3298,6 +3299,12 @@ select {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   min-width: 0;
+  overflow-y: visible;
+}
+
+/* On desktop, prevent overflow from clipping mega menus */
+@media(min-width: 1201px) {
+  .pro-sub-links { overflow-x: visible; overflow-y: visible; }
 }
 
 .pro-sub-links::-webkit-scrollbar {

@@ -5,7 +5,7 @@ ini_set('display_errors', '0');
 header('Content-Type: application/json');
 session_start();
 
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../panel_cms_2847/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['ok' => false, 'msg' => 'Method not allowed']);

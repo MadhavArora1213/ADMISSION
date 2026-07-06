@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
                 $filename = 'college_logo_' . time() . '_' . uniqid() . '.' . $ext;
                 if (move_uploaded_file($_FILES['logo_file']['tmp_name'], $upload_dir . $filename)) {
                     $logo_url = 'uploads/' . $filename;
-                    require_once __DIR__ . '/../admin/upload_sync.php';
+                    require_once __DIR__ . '/../panel_cms_2847/upload_sync.php';
                     sync_to_github('uploads/' . $filename);
                 }
             }
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
                 $filename = 'college_cover_' . time() . '_' . uniqid() . '.' . $ext;
                 if (move_uploaded_file($_FILES['cover_file']['tmp_name'], $upload_dir . $filename)) {
                     $cover_image_url = 'uploads/' . $filename;
-                    require_once __DIR__ . '/../admin/upload_sync.php';
+                    require_once __DIR__ . '/../panel_cms_2847/upload_sync.php';
                     sync_to_github('uploads/' . $filename);
                 }
             }
@@ -452,7 +452,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
                 $target_file = $upload_dir . $file_name;
                 if (move_uploaded_file($_FILES['media_file']['tmp_name'], $target_file)) {
                     $final_url = 'uploads/media/' . $file_name;
-                    require_once __DIR__ . '/../admin/upload_sync.php';
+                    require_once __DIR__ . '/../panel_cms_2847/upload_sync.php';
                     sync_to_github('uploads/media/' . $file_name);
                 }
             }
@@ -533,7 +533,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $collegeId) {
                 $file_name = time() . '_' . basename($_FILES['photo_file']['name']);
                 if (move_uploaded_file($_FILES['photo_file']['tmp_name'], $upload_dir . $file_name)) {
                     $photo_url = 'uploads/faculty/' . $file_name;
-                    require_once __DIR__ . '/../admin/upload_sync.php';
+                    require_once __DIR__ . '/../panel_cms_2847/upload_sync.php';
                     sync_to_github('uploads/faculty/' . $file_name);
                 }
             }
@@ -2641,26 +2641,258 @@ tr:hover td {
     </div>
 
     <?php elseif($tab==='leads'): ?>
+    <?php
+    // Fetch form leads for this college
+    $formLeads = [];
+    try {
+        $stmt = $pdo->prepare("SELECT l.*, u.full_name as user_name FROM leads l LEFT JOIN users u ON u.id = l.user_id WHERE l.college_id = ? ORDER BY l.created_at DESC LIMIT 100");
+        $stmt->execute([$collegeId]);
+        $formLeads = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch(Exception $e){}
+
+    // Fetch activity data for this college
+    $activities = [];
+    try {
+        $stmt = $pdo->prepare("
+            SELECT ca.*, u.full_name as user_name, u.email as user_email, u.phone as user_phone
+            FROM college_activity ca
+            LEFT JOIN users u ON u.id = ca.user_id
+            WHERE ca.college_id = ?
+            ORDER BY ca.created_at DESC LIMIT 100
+        ");
+        $stmt->execute([$collegeId]);
+        $activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch(Exception $e){}
+
+    // Summary stats - combine leads + activity
+    try {
+        $statsStmt = $pdo->prepare("
+            SELECT
+                COUNT(DISTINCT visitor_id) as unique_visitors,
+                SUM(CASE WHEN action_type='apply_click' THEN 1 ELSE 0 END) as apply_clicks,
+                SUM(CASE WHEN action_type='call_click' THEN 1 ELSE 0 END) as call_clicks,
+                SUM(CASE WHEN action_type='course_view' THEN 1 ELSE 0 END) as course_views,
+                SUM(CASE WHEN action_type='shortlist' THEN 1 ELSE 0 END) as shortlists,
+                SUM(CASE WHEN action_type='page_view' THEN 1 ELSE 0 END) as page_views
+            FROM college_activity WHERE college_id=? AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        ");
+        $statsStmt->execute([$collegeId]);
+        $stats = $statsStmt->fetch(PDO::FETCH_ASSOC);
+    } catch(Exception $e) { $stats = ['unique_visitors'=>0,'apply_clicks'=>0,'call_clicks'=>0,'course_views'=>0,'shortlists'=>0,'page_views'=>0]; }
+
+    // Merge unique users: from activity + from leads
+    $uniqueUsers = [];
+    // From activity
+    try {
+        $uStmt = $pdo->prepare("
+            SELECT ca.user_id, u.full_name, u.email, u.phone,
+                   COUNT(*) as total_actions,
+                   MIN(ca.created_at) as first_seen,
+                   MAX(ca.created_at) as last_seen,
+                   GROUP_CONCAT(DISTINCT ca.action_type) as actions_done,
+                   SUM(CASE WHEN ca.action_type='apply_click' THEN 1 ELSE 0 END) as applied,
+                   SUM(CASE WHEN ca.action_type='call_click' THEN 1 ELSE 0 END) as called,
+                   SUM(CASE WHEN ca.course_name != '' THEN ca.course_name END) as courses_viewed
+            FROM college_activity ca
+            LEFT JOIN users u ON u.id = ca.user_id
+            WHERE ca.college_id = ? AND ca.user_id IS NOT NULL
+            GROUP BY ca.user_id, u.full_name, u.email, u.phone
+            ORDER BY MAX(ca.created_at) DESC
+        ");
+        $uStmt->execute([$collegeId]);
+        $uniqueUsers = $uStmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch(Exception $e){}
+
+    // From leads table - add any not already in uniqueUsers
+    $existingUserIds = array_column($uniqueUsers, 'user_id');
+    foreach ($formLeads as $fl) {
+        $uid = $fl['user_id'] ?? null;
+        if ($uid && !in_array($uid, $existingUserIds)) {
+            $uniqueUsers[] = [
+                'user_id' => $uid,
+                'full_name' => $fl['user_name'] ?? $fl['full_name'] ?? '',
+                'email' => $fl['email'] ?? '',
+                'phone' => $fl['phone'] ?? '',
+                'total_actions' => 0,
+                'first_seen' => $fl['created_at'],
+                'last_seen' => $fl['created_at'],
+                'actions_done' => $fl['lead_type'] ?? '',
+                'applied' => ($fl['lead_type'] === 'apply') ? 1 : 0,
+                'called' => 0,
+                'courses_viewed' => $fl['course_id'] ?? '',
+                'lead_source' => 'form',
+                'lead_status' => $fl['lead_status'] ?? '',
+            ];
+        } elseif (!$uid && !empty($fl['phone'])) {
+            // Anonymous lead with phone - still show as a lead
+            $uniqueUsers[] = [
+                'user_id' => null,
+                'full_name' => $fl['full_name'] ?? '',
+                'email' => $fl['email'] ?? '',
+                'phone' => $fl['phone'] ?? '',
+                'total_actions' => 0,
+                'first_seen' => $fl['created_at'],
+                'last_seen' => $fl['created_at'],
+                'actions_done' => $fl['lead_type'] ?? '',
+                'applied' => ($fl['lead_type'] === 'apply') ? 1 : 0,
+                'called' => 0,
+                'courses_viewed' => '',
+                'lead_source' => 'form',
+                'lead_status' => $fl['lead_status'] ?? '',
+            ];
+        }
+    }
+    ?>
+
+    <!-- Stats Cards -->
+    <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:24px;">
+      <div class="stat-box" style="padding:20px;">
+        <div class="num" style="font-size:1.5rem;"><?= number_format($stats['unique_visitors'] ?? 0) ?></div>
+        <div class="lbl">Visitors (30d)</div>
+      </div>
+      <div class="stat-box" style="padding:20px;">
+        <div class="num" style="font-size:1.5rem; color:#059669;"><?= number_format($stats['page_views'] ?? 0) ?></div>
+        <div class="lbl">Page Views</div>
+      </div>
+      <div class="stat-box" style="padding:20px;">
+        <div class="num" style="font-size:1.5rem; color:#7C3AED;"><?= number_format($stats['course_views'] ?? 0) ?></div>
+        <div class="lbl">Course Views</div>
+      </div>
+      <div class="stat-box" style="padding:20px;">
+        <div class="num" style="font-size:1.5rem; color:#EA580C;"><?= number_format($stats['apply_clicks'] ?? 0) ?></div>
+        <div class="lbl">Apply Clicks</div>
+      </div>
+      <div class="stat-box" style="padding:20px;">
+        <div class="num" style="font-size:1.5rem; color:#DC2626;"><?= number_format($stats['call_clicks'] ?? 0) ?></div>
+        <div class="lbl">Call Clicks</div>
+      </div>
+    </div>
+
+    <!-- Logged-in Users (Leads) -->
     <div class="dash-card">
-      <h3><i class="ph ph-users-three"></i> Enquiries & Leads (<?=count($leads)?>)</h3>
-      <?php if($leads): ?>
+      <h3><i class="ph ph-user-focus"></i> Student Leads (<?= count($uniqueUsers) ?>)</h3>
+      <?php if($uniqueUsers): ?>
       <div style="overflow-x:auto;">
       <table>
-        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Course Interest</th><th>Received Date</th></tr></thead>
+        <thead><tr><th>Student</th><th>Phone</th><th>Email</th><th>Activity</th><th>Status</th><th>Last Active</th><th>Action</th></tr></thead>
         <tbody>
-        <?php foreach($leads as $l): ?>
+        <?php foreach($uniqueUsers as $u): ?>
         <tr>
-          <td style="font-weight:600"><?=htmlspecialchars($l['full_name']??$l['name']??'-')?></td>
-          <td><?=htmlspecialchars($l['email']??'-')?></td>
-          <td><?=htmlspecialchars($l['phone']??'-')?></td>
-          <td><?=htmlspecialchars($l['course_interest']??$l['course']??'-')?></td>
-          <td><?=date('d M Y h:i A', strtotime($l['created_at']))?></td>
+          <td style="font-weight:600;"><?= htmlspecialchars($u['full_name'] ?: 'Unknown') ?></td>
+          <td style="font-weight:700; color:#19376D;">
+            <?php if(!empty($u['phone'])): ?>
+              <?= htmlspecialchars($u['phone']) ?>
+            <?php else: ?>
+              <span style="color:var(--text-muted);">-</span>
+            <?php endif; ?>
+          </td>
+          <td style="font-size:0.82rem;"><?= htmlspecialchars($u['email'] ?? '-') ?></td>
+          <td style="font-size:0.82rem;">
+            <?php if(!empty($u['actions_done'])): ?>
+              <?php
+              $actions = explode(',', $u['actions_done']);
+              $actionMap = [
+                'apply_click' => ['color'=>'#166534','bg'=>'#DCFCE7','text'=>'Applied'],
+                'call_click' => ['color'=>'#991B1B','bg'=>'#FEE2E2','text'=>'Called'],
+                'course_view' => ['color'=>'#1D4ED8','bg'=>'#EFF6FF','text'=>'Viewed Course'],
+                'shortlist' => ['color'=>'#9F1239','bg'=>'#FFF1F2','text'=>'Shortlisted'],
+                'inquiry' => ['color'=>'#92400E','bg'=>'#FEF3C7','text'=>'Inquiry'],
+                'page_view' => ['color'=>'#475569','bg'=>'#F1F5F9','text'=>'Visited'],
+              ];
+              foreach (array_unique($actions) as $act) {
+                  $a = $actionMap[trim($act)] ?? ['color'=>'#475569','bg'=>'#F1F5F9','text'=>$act];
+                  echo '<span style="background:'.$a['bg'].';color:'.$a['color'].';padding:2px 6px;border-radius:4px;font-size:0.7rem;font-weight:600;margin:1px;display:inline-block;">'.$a['text'].'</span> ';
+              }
+              ?>
+            <?php else: ?>
+              <span style="color:var(--text-muted);">-</span>
+            <?php endif; ?>
+          </td>
+          <td>
+            <?php if(!empty($u['lead_status'])): ?>
+              <?php
+              $statusColors = [
+                'new' => 'badge-yellow',
+                'contacted' => 'badge-blue',
+                'qualified' => 'badge-green',
+                'converted' => 'badge-green',
+                'lost' => 'badge-red',
+              ];
+              ?>
+              <span class="<?= $statusColors[$u['lead_status']] ?? 'badge-yellow' ?>" style="font-size:0.7rem;"><?= ucfirst($u['lead_status']) ?></span>
+            <?php elseif(!empty($u['applied'])): ?>
+              <span class="badge-green" style="font-size:0.7rem; padding:3px 8px; border-radius:6px; font-weight:600; background:#DCFCE7; color:#166534;">Applied</span>
+            <?php else: ?>
+              <span style="color:var(--text-muted); font-size:0.75rem;">New</span>
+            <?php endif; ?>
+          </td>
+          <td style="font-size:0.8rem; color:var(--text-muted);"><?= date('d M, H:i', strtotime($u['last_seen'])) ?></td>
+          <td>
+            <?php if(!empty($u['phone'])): ?>
+              <a href="tel:<?= htmlspecialchars($u['phone']) ?>" style="display:inline-flex;align-items:center;gap:4px;background:#19376D;color:#fff;padding:6px 14px;border-radius:8px;font-size:0.78rem;font-weight:600;text-decoration:none;">
+                <i class="ph ph-phone"></i> Call
+              </a>
+            <?php elseif(!empty($u['email'])): ?>
+              <a href="mailto:<?= htmlspecialchars($u['email']) ?>" style="display:inline-flex;align-items:center;gap:4px;background:#fff;color:#19376D;border:1px solid #19376D;padding:6px 14px;border-radius:8px;font-size:0.78rem;font-weight:600;text-decoration:none;">
+                <i class="ph ph-envelope"></i> Email
+              </a>
+            <?php endif; ?>
+          </td>
         </tr>
-        <?php endforeach;?>
+        <?php endforeach; ?>
         </tbody>
       </table>
       </div>
-      <?php else: ?><div class="empty">No enquiries received yet.</div><?php endif;?>
+      <?php else: ?>
+        <div class="empty">No student leads yet. Data appears when students visit your college page or submit inquiries.</div>
+      <?php endif; ?>
+    </div>
+
+    <!-- Recent Activity Feed -->
+    <div class="dash-card">
+      <h3><i class="ph ph-activity"></i> Recent Activity (<?= count($activities) ?>)</h3>
+      <?php if($activities): ?>
+      <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Student</th><th>Action</th><th>Details</th><th>Device</th><th>Time</th></tr></thead>
+        <tbody>
+        <?php foreach($activities as $a): ?>
+        <tr>
+          <td style="font-weight:600; font-size:0.85rem;"><?= htmlspecialchars($a['user_name'] ?? ($a['visitor_id'] ? substr($a['visitor_id'],0,12).'...' : 'Guest')) ?></td>
+          <td>
+            <?php
+            $aType = $a['action_type'];
+            $aLabels = array(
+                'page_view' => array('bg'=>'#F1F5F9','color'=>'#475569','icon'=>'ph-eye','text'=>'Page View'),
+                'course_view' => array('bg'=>'#EFF6FF','color'=>'#1D4ED8','icon'=>'ph-book-open','text'=>'Course View'),
+                'tab_switch' => array('bg'=>'#F5F3FF','color'=>'#7C3AED','icon'=>'ph-arrows-left-right','text'=>'Tab Switch'),
+                'apply_click' => array('bg'=>'#DCFCE7','color'=>'#166534','icon'=>'ph-check-circle','text'=>'Apply Click'),
+                'brochure_download' => array('bg'=>'#FEF3C7','color'=>'#92400E','icon'=>'ph-download','text'=>'Brochure'),
+                'call_click' => array('bg'=>'#FEE2E2','color'=>'#991B1B','icon'=>'ph-phone','text'=>'Call Click'),
+                'shortlist' => array('bg'=>'#FFF1F2','color'=>'#9F1239','icon'=>'ph-heart','text'=>'Shortlist'),
+                'share' => array('bg'=>'#ECFEFF','color'=>'#0E7490','icon'=>'ph-share-network','text'=>'Share'),
+                'review_read' => array('bg'=>'#FFFBEB','color'=>'#92400E','icon'=>'ph-star','text'=>'Review Read'),
+                'faq_toggle' => array('bg'=>'#F8FAFC','color'=>'#475569','icon'=>'ph-question','text'=>'FAQ'),
+            );
+            $aInfo = isset($aLabels[$aType]) ? $aLabels[$aType] : array('bg'=>'#F1F5F9','color'=>'#475569','icon'=>'ph-circle','text'=>$aType);
+            ?>
+            <span style="background:<?= $aInfo['bg'] ?>;color:<?= $aInfo['color'] ?>;padding:3px 8px;border-radius:6px;font-size:0.75rem;font-weight:600;display:inline-flex;align-items:center;gap:4px;">
+              <i class="ph <?= $aInfo['icon'] ?>"></i> <?= $aInfo['text'] ?>
+            </span>
+          </td>
+          <td style="font-size:0.82rem; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            <?= htmlspecialchars($a['course_name'] ?: ($a['tab_name'] ?: $a['page_url'])) ?>
+          </td>
+          <td><span style="font-size:0.75rem;"><?= ucfirst($a['device_type']) ?></span></td>
+          <td style="font-size:0.8rem; color:var(--text-muted);"><?= date('d M, H:i', strtotime($a['created_at'])) ?></td>
+        </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
+      </div>
+      <?php else: ?>
+        <div class="empty">No activity recorded yet. Tracking starts when students visit your college page.</div>
+      <?php endif; ?>
     </div>
 
     <?php elseif($tab==='submissions'): 

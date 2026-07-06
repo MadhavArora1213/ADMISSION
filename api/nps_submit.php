@@ -3,7 +3,7 @@ declare(strict_types=1);
 header('Content-Type: application/json');
 
 if (session_status() === PHP_SESSION_NONE) session_start();
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../panel_cms_2847/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);

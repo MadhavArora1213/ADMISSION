@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/admin/db.php';
+require_once __DIR__ . '/panel_cms_2847/db.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');

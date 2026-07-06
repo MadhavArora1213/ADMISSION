@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 error_reporting(0);
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../panel_cms_2847/db.php';
 
 $examId = $_GET['exam_id'] ?? '';
 $rank = intval($_GET['rank'] ?? 0);

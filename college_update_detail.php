@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/admin/db.php';
+require_once __DIR__ . '/panel_cms_2847/db.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 if (!function_exists('cImg')) {

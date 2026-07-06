@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS college_activity (
+    id CHAR(36) PRIMARY KEY,
+    college_id CHAR(36) NOT NULL,
+    user_id INT DEFAULT NULL,
+    visitor_id VARCHAR(64) NOT NULL,
+    session_id VARCHAR(128) DEFAULT NULL,
+    action_type ENUM('page_view','course_view','tab_switch','apply_click','brochure_download','call_click','shortlist','share','review_read','faq_toggle') NOT NULL,
+    page_url VARCHAR(500) DEFAULT '',
+    course_id INT DEFAULT NULL,
+    course_name VARCHAR(255) DEFAULT '',
+    tab_name VARCHAR(100) DEFAULT '',
+    time_on_page INT DEFAULT 0,
+    scroll_depth INT DEFAULT 0,
+    extra_data JSON DEFAULT NULL,
+    device_type ENUM('desktop','mobile','tablet') DEFAULT 'desktop',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_college (college_id),
+    INDEX idx_user (user_id),
+    INDEX idx_visitor (visitor_id),
+    INDEX idx_action (action_type),
+    INDEX idx_created (created_at),
+    INDEX idx_college_action (college_id, action_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

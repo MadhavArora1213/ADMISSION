@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
-Disallow: /admin/
+Disallow: /panel_cms_2847/
 Disallow: /includes/
 Disallow: /api/
 Disallow: /logs/
@@ -48,7 +48,7 @@ Allow: /news/rss
 
 User-agent: Googlebot-News
 Allow: /
-Disallow: /admin/
+Disallow: /panel_cms_2847/
 Disallow: /includes/
 Disallow: /api/
 Disallow: /debug_*

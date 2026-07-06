@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../panel_cms_2847/db.php';
 
 $id1 = $_GET['id1'] ?? '';
 $id2 = $_GET['id2'] ?? '';

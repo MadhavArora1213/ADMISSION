@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS page_views (
+    id CHAR(36) PRIMARY KEY,
+    page_url VARCHAR(500) NOT NULL,
+    page_title VARCHAR(500) DEFAULT '',
+    referrer VARCHAR(500) DEFAULT '',
+    visitor_id VARCHAR(64) NOT NULL,
+    session_id VARCHAR(128) DEFAULT NULL,
+    user_id INT DEFAULT NULL,
+    device_type ENUM('desktop','mobile','tablet') DEFAULT 'desktop',
+    browser VARCHAR(100) DEFAULT '',
+    os VARCHAR(100) DEFAULT '',
+    country VARCHAR(2) DEFAULT '',
+    time_on_page INT DEFAULT 0,
+    scroll_depth INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_page_url (page_url(191)),
+    INDEX idx_visitor (visitor_id),
+    INDEX idx_created (created_at),
+    INDEX idx_page_date (page_url(191), created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

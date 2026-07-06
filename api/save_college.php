@@ -5,7 +5,7 @@ ini_set('display_errors', '0');
 header('Content-Type: application/json');
 session_start();
 
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../panel_cms_2847/db.php';
 
 @file_put_contents(__DIR__ . '/../scratch/save_college_debug.log', date('Y-m-d H:i:s') . " - Method: " . $_SERVER['REQUEST_METHOD'] . " - Input: " . file_get_contents('php://input') . "\n", FILE_APPEND);
 

@@ -30,7 +30,7 @@ if (empty($_SESSION['user_id'])) {
     exit;
 }
 
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../panel_cms_2847/db.php';
 
 $input = json_decode(file_get_contents('php://input'), true);
 $schoolId = trim($input['school_id'] ?? '');

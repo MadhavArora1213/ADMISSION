@@ -4,7 +4,7 @@ ini_set('display_errors', '0');
 header('Content-Type: application/xml; charset=utf-8');
 header('X-Robots-Tag: noindex');
 
-require_once __DIR__ . '/admin/db.php';
+require_once __DIR__ . '/panel_cms_2847/db.php';
 require_once __DIR__ . '/includes/college_helpers.php';
 require_once __DIR__ . '/includes/news_seo_helpers.php';
 $baseUrl = getBaseUrl();

@@ -1,7 +1,7 @@
 <?php
 // =============================================
 // DIAGNOSTIC FILE - DELETE AFTER USE
-// Visit: admissionseason.com/admin/diagnose.php
+// Visit: admissionseason.com/panel_cms_2847/diagnose.php
 // =============================================
 error_reporting(E_ALL);
 ini_set('display_errors', 1);

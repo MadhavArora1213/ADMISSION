@@ -29,6 +29,10 @@ Options -Indexes
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
+    # ── Block old /admin/ path completely ──
+    RewriteRule ^admin/?$ - [R=404,L]
+    RewriteRule ^admin/(.*)$ - [R=404,L]
+
     # ── Favicon ──
     RewriteRule ^favicon\.ico$ favicon.svg [L,NC]
 
@@ -63,6 +67,12 @@ Options -Indexes
     RewriteRule ^colleges/?$ colleges.php [L,QSA]
     RewriteRule ^college/([^\s]+?)/([^\s]+?)/?$ college.php?slug=$1&tab=$2 [L,QSA]
     RewriteRule ^college/([^\s]+?)/?$ college.php?slug=$1 [L,QSA]
+
+    # ── Schools ──
+    RewriteRule ^schools/?$ schools.php [L,QSA]
+    RewriteRule ^school/([^\s]+?)/news/([^\s]+?)/?$ school_news_details.php?id=$2 [L,QSA]
+    RewriteRule ^school/([^\s]+?)/([^\s]+?)/?$ school.php?slug=$1&tab=$2 [L,QSA]
+    RewriteRule ^school/([^\s]+?)/?$ school.php?slug=$1 [L,QSA]
 
     # ── Exams ──
     RewriteRule ^exams/?$ exams.php [L,QSA]

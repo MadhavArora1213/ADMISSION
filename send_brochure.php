@@ -6,7 +6,7 @@ ini_set('display_errors', '0');
 session_start();
 header('Content-Type: application/json');
 
-require_once __DIR__ . '/admin/db.php';
+require_once __DIR__ . '/panel_cms_2847/db.php';
 require_once __DIR__ . '/includes/phone_email_config.php';
 require_once __DIR__ . '/includes/college_helpers.php';
 

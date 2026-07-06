@@ -2,7 +2,7 @@
 declare(strict_types=1);
 error_reporting(E_ALL);
 ini_set('display_errors', '0');
-require_once __DIR__ . '/admin/db.php';
+require_once __DIR__ . '/panel_cms_2847/db.php';
 require_once __DIR__ . '/includes/college_helpers.php';
 require_once __DIR__ . '/includes/news_seo_helpers.php';
 
@@ -2276,5 +2276,97 @@ function submitReview() {
 <button type="button" class="cl-mobile-review-btn" onclick="openLoginPrompt()"><i class="ph ph-pencil-simple"></i> Write a Review</button>
 <?php endif; ?>
 <?php endif; ?>
+
+<!-- College Activity Tracking -->
+<script>
+(function(){
+  var vid = localStorage.getItem('_vid');
+  if(!vid){ vid = 'v'+Date.now()+'-'+Math.random().toString(36).substr(2,9); localStorage.setItem('_vid', vid); }
+
+  var cid = '<?= $cid ?>';
+  var loadTime = Date.now();
+  var maxScroll = 0;
+  var currentTab = '<?= $tab ?>';
+  var tracked = {};
+
+  function track(action, extra){
+    var data = {
+      college_id: cid,
+      action: action,
+      url: location.pathname + location.search,
+      tab: currentTab,
+      time: Math.round((Date.now() - loadTime) / 1000),
+      scroll: maxScroll,
+      vid: vid
+    };
+    if(extra) Object.assign(data, extra);
+    if(navigator.sendBeacon){
+      navigator.sendBeacon('<?= BASE_URL ?>/api/track_college_activity.php', JSON.stringify(data));
+    }
+  }
+
+  // Track page view on load
+  track('page_view');
+
+  // Track scroll depth
+  document.addEventListener('scroll', function(){
+    var h = document.documentElement;
+    var pct = Math.round(((h.scrollTop + window.innerHeight) / h.scrollHeight) * 100);
+    if(pct > maxScroll) maxScroll = pct;
+  });
+
+  // Track tab switches
+  document.querySelectorAll('.college-detail-tabs a').forEach(function(tabLink){
+    tabLink.addEventListener('click', function(){
+      var newTab = this.getAttribute('href').match(/tab=([^&]+)/);
+      if(newTab && newTab[1] !== currentTab){
+        track('tab_switch', {extra: {from_tab: currentTab, to_tab: newTab[1]}});
+      }
+    });
+  });
+
+  // Track course views - observe course sections
+  document.querySelectorAll('.courses-table tr, [class*="course-card"], [class*="course-item"]').forEach(function(row){
+    row.addEventListener('click', function(){
+      var name = this.querySelector('td:first-child, .course-name, h4');
+      if(name) track('course_view', {course_name: name.textContent.trim().substring(0, 255)});
+    });
+  });
+
+  // Track Apply Now clicks
+  document.querySelectorAll('a[href*="apply"], button').forEach(function(btn){
+    var text = btn.textContent.toLowerCase();
+    if(text.includes('apply') || text.includes('enquire') || text.includes('brochure')){
+      btn.addEventListener('click', function(){
+        var action = text.includes('brochure') ? 'brochure_download' : (text.includes('apply') ? 'apply_click' : 'call_click');
+        track(action);
+      });
+    }
+  });
+
+  // Track Call Now clicks
+  document.querySelectorAll('a[href^="tel:"]').forEach(function(el){
+    el.addEventListener('click', function(){ track('call_click'); });
+  });
+
+  // Track shortlist
+  document.querySelectorAll('[onclick*="shortlist"], [class*="shortlist"], [class*="save"]').forEach(function(el){
+    el.addEventListener('click', function(){ track('shortlist'); });
+  });
+
+  // Track share
+  document.querySelectorAll('[class*="share"]').forEach(function(el){
+    el.addEventListener('click', function(){ track('share'); });
+  });
+
+  // Track FAQ toggles
+  document.querySelectorAll('.faq-q, [class*="faq"] button, [class*="accordion"]').forEach(function(el){
+    el.addEventListener('click', function(){ track('faq_toggle'); });
+  });
+
+  // Send on unload
+  window.addEventListener('beforeunload', function(){ track('page_view'); });
+})();
+</script>
 </body>
 </html>

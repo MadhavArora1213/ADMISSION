@@ -3,7 +3,7 @@ session_start();
 if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
 require_once 'db.php';
 
-// --- Pull stats from page_analytics table ---
+// --- Pull stats from page_views table ---
 $totalViews     = 0;
 $uniqueVisitors = 0;
 $topPages       = [];
@@ -11,22 +11,40 @@ $chartLabels    = [];
 $chartData      = [];
 
 try {
-    $totalViews     = (int)$pdo->query("SELECT COALESCE(SUM(page_views),0) FROM page_analytics")->fetchColumn();
-    $uniqueVisitors = (int)$pdo->query("SELECT COALESCE(SUM(unique_visitors),0) FROM page_analytics")->fetchColumn();
-    $topPages       = $pdo->query("SELECT url_path, page_title, page_views, unique_visitors FROM page_analytics ORDER BY page_views DESC LIMIT 10")->fetchAll(PDO::FETCH_ASSOC);
+    $totalViews     = (int)$pdo->query("SELECT COUNT(*) FROM page_views")->fetchColumn();
+    $uniqueVisitors = (int)$pdo->query("SELECT COUNT(DISTINCT visitor_id) FROM page_views")->fetchColumn();
+    $topPages       = $pdo->query("
+        SELECT page_url as url_path, page_title, COUNT(*) as page_views,
+               COUNT(DISTINCT visitor_id) as unique_visitors,
+               ROUND(AVG(time_on_page),0) as avg_time,
+               ROUND(AVG(scroll_depth),0) as avg_scroll
+        FROM page_views
+        GROUP BY page_url, page_title
+        ORDER BY page_views DESC LIMIT 15
+    ")->fetchAll(PDO::FETCH_ASSOC);
 
-    // Build chart by day
+    // Build chart by day (last 7 days)
     try {
-        $rows = $pdo->query("SELECT DATE(created_at) as day, SUM(page_views) as views FROM page_analytics GROUP BY DATE(created_at) ORDER BY day DESC LIMIT 7")->fetchAll(PDO::FETCH_ASSOC);
-        $rows = array_reverse($rows);
+        $rows = $pdo->query("
+            SELECT DATE(created_at) as day, COUNT(*) as views
+            FROM page_views
+            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+            GROUP BY DATE(created_at) ORDER BY day ASC
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        // Fill missing days
+        $chartMap = [];
         foreach ($rows as $r) {
-            $chartLabels[] = date('D M j', strtotime($r['day']));
-            $chartData[]   = (int)$r['views'];
+            $chartMap[$r['day']] = (int)$r['views'];
+        }
+        for ($i = 6; $i >= 0; $i--) {
+            $d = date('Y-m-d', strtotime("-{$i} days"));
+            $chartLabels[] = date('D M j', strtotime($d));
+            $chartData[] = $chartMap[$d] ?? 0;
         }
     } catch (Exception $e) {}
 } catch (Exception $e) {}
 
-// Fallbacks
 if (empty($chartLabels)) {
     $chartLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
     $chartData   = [0, 0, 0, 0, 0, 0, 0];
@@ -177,6 +195,8 @@ $avgPerPage      = ($trackedPages > 0 && $totalViews > 0) ? (int)($totalViews / 
                             <th>URL Path</th>
                             <th>Views</th>
                             <th>Unique</th>
+                            <th>Avg Time</th>
+                            <th>Scroll %</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -187,6 +207,8 @@ $avgPerPage      = ($trackedPages > 0 && $totalViews > 0) ? (int)($totalViews / 
                             <td style="font-family:monospace; color:#19376D; font-size:0.82rem;"><?= htmlspecialchars($page['url_path']) ?></td>
                             <td style="font-weight:700;"><?= number_format($page['page_views']) ?></td>
                             <td><?= number_format($page['unique_visitors'] ?? 0) ?></td>
+                            <td><?= ($page['avg_time'] ?? 0) ?>s</td>
+                            <td><?= ($page['avg_scroll'] ?? 0) ?>%</td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>

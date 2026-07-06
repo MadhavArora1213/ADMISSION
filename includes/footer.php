@@ -1,6 +1,6 @@
 <?php
 if (!isset($pdo)) {
-    require_once __DIR__ . '/../admin/db.php';
+    require_once __DIR__ . '/../panel_cms_2847/db.php';
 }
 if (!function_exists('getBaseUrl')) {
     require_once __DIR__ . '/news_seo_helpers.php';
@@ -254,3 +254,42 @@ function fName($text) {
 }
 </script>
 <?php endif; ?>
+
+<!-- Page View Tracking -->
+<script>
+(function(){
+  if(!localStorage.getItem('cookie_consent') || localStorage.getItem('cookie_consent')==='rejected') return;
+
+  var vid = localStorage.getItem('_vid');
+  if(!vid){
+    vid = 'v'+Date.now()+'-'+Math.random().toString(36).substr(2,9);
+    localStorage.setItem('_vid', vid);
+  }
+
+  var loadTime = Date.now();
+  var maxScroll = 0;
+
+  document.addEventListener('scroll', function(){
+    var h = document.documentElement;
+    var pct = Math.round(((h.scrollTop + window.innerHeight) / h.scrollHeight) * 100);
+    if(pct > maxScroll) maxScroll = pct;
+  });
+
+  function sendData(){
+    var data = {
+      url: location.pathname,
+      title: document.title,
+      referrer: document.referrer,
+      vid: vid,
+      time: Math.round((Date.now() - loadTime) / 1000),
+      scroll: maxScroll
+    };
+    if(navigator.sendBeacon){
+      navigator.sendBeacon('<?= $navBase ?>/api/track_page_view.php', JSON.stringify(data));
+    }
+  }
+
+  window.addEventListener('beforeunload', sendData);
+  setTimeout(function(){ sendData(); }, 2000);
+})();
+</script>

@@ -7,44 +7,43 @@ require_once 'db.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'save') {
     $id = $_POST['id'] ?? null;
     $data = [
-        $_POST['sitemap_name'], $_POST['sitemap_url'], $_POST['sitemap_type']
+        $_POST['link_source_page'], $_POST['link_target_page'], $_POST['anchor_text'], isset($_POST['is_broken']) ? 1 : 0
     ];
     if ($id) {
         $data[] = $id;
-        $pdo->prepare("UPDATE sitemaps SET sitemap_name=?, sitemap_url=?, sitemap_type=? WHERE id=?")->execute($data);
+        $pdo->prepare("UPDATE internal_links SET link_source_page=?, link_target_page=?, anchor_text=?, is_broken=? WHERE id=?")->execute($data);
     } else {
-        $pdo->prepare("INSERT INTO sitemaps (sitemap_name, sitemap_url, sitemap_type, url_count) VALUES (?, ?, ?, 0)")->execute($data);
+        $pdo->prepare("INSERT INTO internal_links (link_source_page, link_target_page, anchor_text, is_broken) VALUES (?, ?, ?, ?)")->execute($data);
     }
-    header("Location: sitemaps.php?msg=saved"); exit;
+    header("Location: internal_links.php?msg=saved"); exit;
 }
 
 // Handle deleting
 if (isset($_GET['delete_id'])) {
-    $pdo->prepare("DELETE FROM sitemaps WHERE id = ?")->execute([$_GET['delete_id']]);
-    header("Location: sitemaps.php?msg=deleted"); exit;
+    $pdo->prepare("DELETE FROM internal_links WHERE id = ?")->execute([$_GET['delete_id']]);
+    header("Location: internal_links.php?msg=deleted"); exit;
 }
 
-// Handle trigger generate
-if (isset($_GET['generate_id'])) {
-    // In a real app this would trigger a background job to generate XML.
-    $pdo->prepare("UPDATE sitemaps SET last_generated_at=CURRENT_TIMESTAMP, url_count = FLOOR(RAND() * 500) + 10 WHERE id=?")->execute([$_GET['generate_id']]);
-    header("Location: sitemaps.php?msg=generated"); exit;
+// Handle toggle broken
+if (isset($_GET['toggle_broken_id'])) {
+    $pdo->prepare("UPDATE internal_links SET is_broken = NOT is_broken WHERE id = ?")->execute([$_GET['toggle_broken_id']]);
+    header("Location: internal_links.php"); exit;
 }
 
-// Fetch all sitemaps
-$sitemaps = $pdo->query("SELECT * FROM sitemaps ORDER BY created_at DESC")->fetchAll();
-$edit_sm = null;
+// Fetch all links
+$links = $pdo->query("SELECT * FROM internal_links ORDER BY created_at DESC")->fetchAll();
+$edit_link = null;
 if (isset($_GET['edit_id'])) {
-    $stmt = $pdo->prepare("SELECT * FROM sitemaps WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT * FROM internal_links WHERE id = ?");
     $stmt->execute([$_GET['edit_id']]);
-    $edit_sm = $stmt->fetch();
+    $edit_link = $stmt->fetch();
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sitemaps | Admin</title>
+    <title>Internal Links | Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
@@ -122,8 +121,8 @@ if (isset($_GET['edit_id'])) {
         <div class="content-area">
             <div class="page-header">
                 <div>
-                    <h2><i class="ph ph-map-trifold" style="color:var(--primary);"></i> Sitemaps</h2>
-                    <p style="color:var(--text-muted);">Manage and generate XML sitemaps for search engines.</p>
+                    <h2><i class="ph ph-link-break" style="color:var(--primary);"></i> Internal Links</h2>
+                    <p style="color:var(--text-muted);">Manage explicit internal cross-linking for SEO.</p>
                 </div>
             </div>
 
@@ -131,8 +130,7 @@ if (isset($_GET['edit_id'])) {
                 <a href="seo_dashboard.php" class="sub-link"><i class="ph ph-squares-four"></i> Overview</a>
                 <a href="seo_meta.php" class="sub-link"><i class="ph ph-tag"></i> Meta Tags & Schema</a>
                 <a href="redirects.php" class="sub-link"><i class="ph ph-arrows-left-right"></i> Redirects</a>
-                <a href="sitemaps.php" class="sub-link active"><i class="ph ph-map-trifold"></i> Sitemaps</a>
-                <a href="internal_links.php" class="sub-link"><i class="ph ph-link-break"></i> Internal Links</a>
+                <a href="internal_links.php" class="sub-link active"><i class="ph ph-link-break"></i> Internal Links</a>
                 <a href="seo_templates.php" class="sub-link"><i class="ph ph-file-code"></i> SEO Templates</a>
             </div>
 
@@ -143,62 +141,66 @@ if (isset($_GET['edit_id'])) {
             <div class="form-layout">
                 <!-- Add/Edit Form -->
                 <div class="panel">
-                    <h3><?php echo $edit_sm ? 'Edit Sitemap' : 'Add New Sitemap'; ?></h3>
-                    <form method="POST" action="sitemaps.php">
+                    <h3><?php echo $edit_link ? 'Edit Link' : 'Add New Link'; ?></h3>
+                    <form method="POST" action="internal_links.php">
                         <input type="hidden" name="action" value="save">
-                        <?php if($edit_sm): ?><input type="hidden" name="id" value="<?php echo $edit_sm['id']; ?>"><?php endif; ?>
+                        <?php if($edit_link): ?><input type="hidden" name="id" value="<?php echo $edit_link['id']; ?>"><?php endif; ?>
 
                         <div class="form-group">
-                            <label>Sitemap Name *</label>
-                            <input type="text" name="sitemap_name" class="form-control" value="<?php echo htmlspecialchars($edit_sm['sitemap_name']??''); ?>" required placeholder="Colleges Sitemap">
+                            <label>Source Page URL *</label>
+                            <input type="text" name="link_source_page" class="form-control" value="<?php echo htmlspecialchars($edit_link['link_source_page']??''); ?>" required placeholder="/course/btech">
                         </div>
                         <div class="form-group">
-                            <label>Sitemap URL *</label>
-                            <input type="url" name="sitemap_url" class="form-control" value="<?php echo htmlspecialchars($edit_sm['sitemap_url']??''); ?>" required placeholder="https://domain.com/sitemap_colleges.xml">
+                            <label>Target Page URL *</label>
+                            <input type="text" name="link_target_page" class="form-control" value="<?php echo htmlspecialchars($edit_link['link_target_page']??''); ?>" required placeholder="/colleges/btech">
                         </div>
                         <div class="form-group">
-                            <label>Sitemap Type</label>
-                            <select name="sitemap_type" class="form-control">
-                                <?php foreach(['colleges','exams','courses','articles','tools'] as $opt): ?>
-                                <option value="<?php echo $opt; ?>" <?php echo ($edit_sm['sitemap_type']??'') == $opt ? 'selected' : ''; ?>><?php echo ucfirst($opt); ?></option>
-                                <?php endforeach; ?>
-                            </select>
+                            <label>Anchor Text</label>
+                            <input type="text" name="anchor_text" class="form-control" value="<?php echo htmlspecialchars($edit_link['anchor_text']??''); ?>" placeholder="Top B.Tech Colleges">
                         </div>
                         
-                        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="ph ph-floppy-disk"></i> Save Sitemap</button>
-                        <?php if($edit_sm): ?>
-                        <a href="sitemaps.php" class="btn" style="display:block; text-align:center; margin-top:10px; background:#F8FAFC; text-decoration:none; color:var(--text-color); padding:10px; border-radius:8px;">Cancel Edit</a>
+                        <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+                            <input type="checkbox" name="is_broken" id="is_broken" <?php echo ($edit_link['is_broken']??0) ? 'checked' : ''; ?>>
+                            <label for="is_broken" style="margin:0;">Mark as Broken Link</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="ph ph-floppy-disk"></i> Save Link</button>
+                        <?php if($edit_link): ?>
+                        <a href="internal_links.php" class="btn" style="display:block; text-align:center; margin-top:10px; background:#F8FAFC; text-decoration:none; color:var(--text-color); padding:10px; border-radius:8px;">Cancel Edit</a>
                         <?php endif; ?>
                     </form>
                 </div>
 
                 <!-- List Panel -->
                 <div class="panel">
-                    <h3>Registered Sitemaps (<?php echo count($sitemaps); ?>)</h3>
+                    <h3>Registered Internal Links (<?php echo count($links); ?>)</h3>
                     <div class="panel-body">
                         <table style="min-width:480px;">
-                            <thead><tr><th>Name / URL</th><th>Type</th><th>URLs</th><th>Last Generated</th><th>Actions</th></tr></thead>
+                            <thead><tr><th>Source</th><th>Target</th><th>Anchor</th><th>Status</th><th>Actions</th></tr></thead>
                             <tbody>
-                                <?php foreach($sitemaps as $sm): ?>
+                                <?php foreach($links as $l): ?>
                                 <tr>
-                                    <td>
-                                        <strong><?php echo htmlspecialchars($sm['sitemap_name']); ?></strong><br>
-                                        <a href="<?php echo htmlspecialchars($sm['sitemap_url']); ?>" target="_blank" style="color:var(--text-muted); font-size:0.75rem; text-decoration:none;"><?php echo htmlspecialchars($sm['sitemap_url']); ?></a>
+                                    <td style="color:var(--text-muted); font-size:0.8rem; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                        <?php echo htmlspecialchars($l['link_source_page']); ?>
                                     </td>
-                                    <td><span class="badge" style="background:#F8FAFC;color:rgba(15,23,42,0.65);"><?php echo ucfirst($sm['sitemap_type']); ?></span></td>
-                                    <td style="font-weight:700; color:var(--primary);"><?php echo number_format($sm['url_count']); ?></td>
-                                    <td style="font-size:0.8rem; color:var(--text-muted);">
-                                        <?php echo $sm['last_generated_at'] ? date('M d, Y H:i', strtotime($sm['last_generated_at'])) : 'Never'; ?>
+                                    <td style="font-weight:600; color:var(--primary); max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                        <?php echo htmlspecialchars($l['link_target_page']); ?>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($l['anchor_text']); ?></td>
+                                    <td>
+                                        <a href="?toggle_broken_id=<?php echo $l['id']; ?>" style="text-decoration:none;">
+                                            <?php if($l['is_broken']): ?><span class="badge" style="background:rgba(15,23,42,0.06);color:#0F172A;">Broken</span>
+                                            <?php else: ?><span class="badge" style="background:rgba(11,36,71,0.04);color:#0B2447;">Valid</span><?php endif; ?>
+                                        </a>
                                     </td>
                                     <td>
-                                        <a href="?generate_id=<?php echo $sm['id']; ?>" title="Generate Now" style="color:#0B2447; margin-right:8px;"><i class="ph ph-arrows-clockwise"></i></a>
-                                        <a href="?edit_id=<?php echo $sm['id']; ?>" style="color:var(--primary); margin-right:8px;"><i class="ph ph-pencil-simple"></i></a>
-                                        <a href="?delete_id=<?php echo $sm['id']; ?>" onclick="return confirm('Delete sitemap entry?');" style="color:#0F172A;"><i class="ph ph-trash"></i></a>
+                                        <a href="?edit_id=<?php echo $l['id']; ?>" style="color:var(--primary); margin-right:8px;"><i class="ph ph-pencil-simple"></i></a>
+                                        <a href="?delete_id=<?php echo $l['id']; ?>" onclick="return confirm('Delete internal link?');" style="color:#0F172A;"><i class="ph ph-trash"></i></a>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
-                                <?php if(empty($sitemaps)): ?>
-                                <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No sitemaps configured.</td></tr>
+                                <?php if(empty($links)): ?>
+                                <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No internal links configured.</td></tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 error_reporting(E_ALL);
 ini_set('display_errors', '0');
-require_once __DIR__ . '/admin/db.php';
+require_once __DIR__ . '/panel_cms_2847/db.php';
 require_once __DIR__ . '/includes/college_helpers.php';
 require_once __DIR__ . '/includes/school_helpers.php';
 
@@ -18,6 +18,7 @@ if (!$isLoggedIn) {
 }
 
 $userId = $_SESSION['user_id'];
+$siteBase = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 
 // Tab filter
 $activeTab = isset($_GET['tab']) ? $_GET['tab'] : 'all';
@@ -66,13 +67,6 @@ $schoolStmt->execute([$userId]);
 $schools = $schoolStmt->fetchAll(PDO::FETCH_ASSOC);
 
 $totalSaved = count($colleges) + count($schools);
-
-$pageTitle = 'My Saved Colleges & Schools — Wishlist';
-
-$siteBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
-$canonicalUrl = $siteBase . '/saved_colleges.php';
-$metaDesc = 'View and manage your saved colleges wishlist. Compare shortlisted colleges, track application status and get personalized recommendations.';
-$metaKeywords = 'saved colleges, my wishlist, college wishlist, shortlisted colleges, saved colleges list, compare saved colleges, AdmissionSeason';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -80,276 +74,347 @@ $metaKeywords = 'saved colleges, my wishlist, college wishlist, shortlisted coll
   <?php include __DIR__ . '/includes/favicon.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= htmlspecialchars($pageTitle) ?> - AdmissionSeason</title>
-  <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>">
-  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <title>My Saved Colleges & Schools - AdmissionSeason</title>
   <meta name="robots" content="noindex, nofollow">
-  <link rel="canonical" href="<?= $canonicalUrl ?>">
-  <meta name="author" content="AdmissionSeason">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/style.css?v=<?= time() ?>">
-  <link rel="stylesheet" href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/css/college-pages.css?v=<?= time() ?>">
+  <link rel="stylesheet" href="<?= $siteBase ?>/assets/css/style.css">
   <style>
-    .cl-stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:24px;position:relative;z-index:1}
-    .cl-stat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
-      border-radius:12px;padding:16px 20px;backdrop-filter:blur(10px);text-align:center}
-    .cl-stat-val{font-size:1.5rem;font-weight:800;color:#fff;font-family:'Plus Jakarta Sans',sans-serif}
-    .cl-stat-lbl{font-size:.75rem;color:rgba(255,255,255,.7);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
-    .clc-featured-badge{
-      position:absolute;top:10px;right:10px;
-      background:linear-gradient(135deg,#19376D,#0F172A);
-      color:#fff;font-size:.65rem;font-weight:700;
-      padding:3px 9px;border-radius:6px;text-transform:uppercase;letter-spacing:.5px;
+    *, *::before, *::after { box-sizing: border-box; }
+    body { background: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; color: #0f172a; }
+
+    /* ── Hero ── */
+    .sv-hero {
+      background: linear-gradient(135deg, #0B2447 0%, #19376D 50%, #19376D 100%);
+      padding: 36px 0 28px; position: relative; overflow: hidden;
     }
-    @media(min-width:769px){
-      .college-list-card {
-        padding-right: 160px !important;
-      }
+    .sv-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
-    @media(max-width:768px){
-      .cl-stats-bar{grid-template-columns:repeat(2,1fr)}
-      .college-grid-list > div {
-        padding-bottom: 50px !important;
-        background: #fff;
-        border-radius: 16px;
-        box-shadow: 0 4px 6px rgba(11,36,71,0.05);
-        border: 1px solid rgba(15,23,42,0.1);
-      }
-      .college-list-card {
-        border: none !important;
-        box-shadow: none !important;
-        background: transparent !important;
-      }
-      .college-grid-list button {
-        bottom: 12px !important;
-        right: 12px !important;
-      }
+    .sv-hero .container { position: relative; z-index: 1; }
+    .sv-breadcrumb { display: flex; align-items: center; gap: 6px; font-size: .82rem; color: rgba(255,255,255,.7); margin-bottom: 14px; }
+    .sv-breadcrumb a { color: rgba(255,255,255,.85); text-decoration: none; }
+    .sv-breadcrumb a:hover { color: #fff; }
+    .sv-hero h1 { color: #fff; font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; margin: 0 0 6px; }
+    .sv-hero p { color: rgba(255,255,255,.75); font-size: .9rem; margin: 0; }
+    .sv-hero strong { color: #fff; }
+
+    /* ── Tabs ── */
+    .sv-tabs {
+      background: #fff; border-bottom: 1px solid rgba(15,23,42,.08);
+      position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,.04);
     }
-    @media(max-width:480px){.cl-stats-bar{grid-template-columns:1fr 1fr}}
+    .sv-tabs .container { display: flex; gap: 6px; padding-top: 10px; padding-bottom: 10px; flex-wrap: wrap; }
+    .sv-tab {
+      padding: 8px 20px; border-radius: 100px; font-size: .85rem; font-weight: 600;
+      text-decoration: none; border: 1.5px solid rgba(15,23,42,.08);
+      color: rgba(15,23,42,.45); background: transparent; transition: all .2s; white-space: nowrap;
+    }
+    .sv-tab:hover { border-color: #19376D; color: #19376D; }
+    .sv-tab.active { background: #19376D; color: #fff; border-color: #19376D; box-shadow: 0 4px 12px rgba(25,55,109,.3); }
+
+    /* ── Content ── */
+    .sv-content { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+    /* ── Section Header ── */
+    .sv-section-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+    }
+    .sv-section-header h2 {
+      font-size: 1rem; font-weight: 700; color: #0B2447; margin: 0;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sv-section-header .sv-count {
+      font-size: .75rem; color: rgba(15,23,42,.4); background: rgba(11,36,71,.05);
+      padding: 2px 10px; border-radius: 20px; font-weight: 600;
+    }
+
+    /* ── Card ── */
+    .sv-card {
+      background: #fff; border: 1px solid rgba(15,23,42,.07); border-radius: 16px;
+      overflow: hidden; margin-bottom: 16px; transition: all .25s;
+      box-shadow: 0 1px 3px rgba(11,36,71,.04);
+    }
+    .sv-card:hover { box-shadow: 0 8px 30px rgba(11,36,71,.1); transform: translateY(-2px); }
+    .sv-card-top { display: flex; gap: 0; }
+    .sv-card-img {
+      width: 220px; min-height: 160px; flex-shrink: 0; position: relative; overflow: hidden;
+    }
+    .sv-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+    .sv-card:hover .sv-card-img img { transform: scale(1.05); }
+    .sv-card-img .sv-badge-row {
+      position: absolute; bottom: 8px; left: 8px; display: flex; gap: 4px; flex-wrap: wrap;
+    }
+    .sv-badge {
+      background: rgba(0,0,0,.6); color: #fff; font-size: .65rem; font-weight: 600;
+      padding: 3px 8px; border-radius: 4px; backdrop-filter: blur(4px); white-space: nowrap;
+    }
+    .sv-badge-green { background: rgba(22,163,74,.85); }
+    .sv-featured-tag {
+      position: absolute; top: 10px; left: 10px; z-index: 2;
+      background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff;
+      font-size: .6rem; font-weight: 700; padding: 3px 8px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .sv-card-body { flex: 1; padding: 18px 20px; display: flex; flex-direction: column; min-width: 0; }
+    .sv-card-title {
+      font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 0 0 6px;
+      display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .sv-card-title a { color: inherit; text-decoration: none; }
+    .sv-card-title a:hover { color: #19376D; }
+    .sv-card-meta {
+      display: flex; flex-wrap: wrap; gap: 10px; font-size: .8rem; color: rgba(15,23,42,.5);
+      margin-bottom: 10px;
+    }
+    .sv-card-meta i { margin-right: 3px; vertical-align: middle; font-size: .85rem; }
+    .sv-card-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto; }
+    .sv-chip {
+      font-size: .65rem; font-weight: 700; padding: 3px 8px; border-radius: 20px;
+      background: rgba(11,36,71,.05); color: #19376D; text-transform: uppercase; letter-spacing: .3px;
+    }
+
+    /* ── Card Bottom (Stats + Remove) ── */
+    .sv-card-bottom {
+      display: flex; align-items: center; border-top: 1px solid rgba(15,23,42,.06);
+      background: #fafbfc;
+    }
+    .sv-card-stats { display: flex; flex: 1; }
+    .sv-stat {
+      flex: 1; text-align: center; padding: 12px 8px;
+      border-right: 1px solid rgba(15,23,42,.06);
+    }
+    .sv-stat:last-child { border-right: none; }
+    .sv-stat strong {
+      display: block; font-size: .95rem; font-weight: 700; color: #0f172a; line-height: 1.2;
+    }
+    .sv-stat span {
+      font-size: .65rem; color: rgba(15,23,42,.4); text-transform: uppercase;
+      letter-spacing: .4px; font-weight: 600;
+    }
+    .sv-remove-btn {
+      padding: 12px 20px; background: none; border: none; border-left: 1px solid rgba(15,23,42,.06);
+      color: rgba(225,29,72,.6); font-size: .8rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 5px; transition: all .2s; white-space: nowrap;
+      font-family: inherit;
+    }
+    .sv-remove-btn:hover { color: #e11d48; background: rgba(225,29,72,.04); }
+
+    /* ── Empty State ── */
+    .sv-empty {
+      text-align: center; padding: 80px 24px; background: #fff; border-radius: 16px;
+      border: 1px solid rgba(15,23,42,.06);
+    }
+    .sv-empty i { font-size: 3.5rem; color: rgba(225,29,72,.12); display: block; margin-bottom: 16px; }
+    .sv-empty h3 { font-size: 1.3rem; font-weight: 800; color: #0B2447; margin: 0 0 8px; }
+    .sv-empty p { color: rgba(15,23,42,.45); font-size: .9rem; max-width: 380px; margin: 0 auto 24px; }
+    .sv-empty-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .sv-empty-btn {
+      display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px;
+      border-radius: 10px; font-weight: 700; font-size: .88rem; text-decoration: none;
+      transition: all .2s; font-family: inherit;
+    }
+    .sv-empty-btn-primary { background: #19376D; color: #fff; border: none; }
+    .sv-empty-btn-primary:hover { background: #0B2447; }
+    .sv-empty-btn-outline { background: #fff; color: #19376D; border: 1.5px solid #19376D; }
+    .sv-empty-btn-outline:hover { background: #f0f4ff; }
+
+    /* ── Responsive ── */
+    @media(max-width:768px) {
+      .sv-card-top { flex-direction: column; }
+      .sv-card-img { width: 100%; height: 180px; }
+      .sv-card-body { padding: 14px 16px; }
+      .sv-card-title { font-size: .95rem; }
+      .sv-card-meta { font-size: .75rem; gap: 8px; }
+      .sv-card-stats { flex-wrap: wrap; }
+      .sv-stat { min-width: calc(50% - 1px); padding: 10px 8px; }
+      .sv-stat strong { font-size: .88rem; }
+      .sv-remove-btn { padding: 10px 16px; font-size: .75rem; }
+    }
+    @media(max-width:480px) {
+      .sv-hero { padding: 24px 0 20px; }
+      .sv-hero h1 { font-size: 1.25rem; }
+      .sv-hero p { font-size: .82rem; }
+      .sv-content { padding: 20px 14px 40px; }
+      .sv-card { border-radius: 12px; margin-bottom: 12px; }
+      .sv-card-img { height: 150px; }
+      .sv-card-body { padding: 12px 14px; }
+      .sv-card-title { font-size: .9rem; }
+      .sv-chip { font-size: .6rem; padding: 2px 6px; }
+      .sv-stat { padding: 8px 6px; }
+      .sv-stat strong { font-size: .82rem; }
+      .sv-stat span { font-size: .6rem; }
+    }
   </style>
 </head>
-<body class="bg-light">
+<body>
 
 <?php include __DIR__ . '/includes/navbar.php'; ?>
 
-<!-- ── Hero Header ───────────────────────────────────────────────── -->
-<div class="shiksha-header" style="background: linear-gradient(135deg, #0b2447 0%, #19376d 100%);">
+<!-- Hero -->
+<div class="sv-hero">
   <div class="container">
-    <div class="shiksha-breadcrumb">
-      <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/index.php" style="color:rgba(255,255,255,0.7)">Home</a>
-      <i class="ph ph-caret-right" style="color:rgba(255,255,255,0.4)"></i>
-      <span style="color:#fff">Saved Colleges</span>
+    <div class="sv-breadcrumb">
+      <a href="<?= $siteBase ?>/index.php">Home</a>
+      <i class="ph ph-caret-right"></i>
+      <span style="color:#fff">My Saved</span>
     </div>
-    <h1 class="shiksha-title" style="color:#fff"><i class="ph-fill ph-heart" style="color:#e11d48; margin-right: 8px;"></i> My Saved</h1>
-    <p class="college-list-sub" style="color:rgba(255,255,255,0.8)">You have bookmarked <strong><?= count($colleges) ?></strong> colleges and <strong><?= count($schools) ?></strong> schools in your wishlist.</p>
+    <h1><i class="ph-fill ph-heart" style="color:#e11d48;margin-right:8px"></i> My Saved</h1>
+    <p>You have bookmarked <strong><?= count($colleges) ?></strong> colleges and <strong><?= count($schools) ?></strong> schools.</p>
   </div>
 </div>
 
-<!-- Filter Tabs -->
-<div style="background:#fff;border-bottom:1px solid rgba(15,23,42,0.08);">
-  <div class="container" style="padding-top:12px;padding-bottom:12px;">
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <a href="?tab=all" style="padding:8px 20px;border-radius:100px;font-size:.85rem;font-weight:600;text-decoration:none;border:1.5px solid <?= $activeTab === 'all' ? 'transparent' : 'rgba(15,23,42,0.08)' ?>;color:<?= $activeTab === 'all' ? '#fff' : 'rgba(15,23,42,0.45)' ?>;background:<?= $activeTab === 'all' ? 'linear-gradient(135deg,#19376D,#19376D)' : 'transparent' ?>;transition:all .2s;<?= $activeTab === 'all' ? 'box-shadow:0 4px 12px rgba(37,99,235,.3);' : '' ?>">All (<?= $totalSaved ?>)</a>
-      <a href="?tab=colleges" style="padding:8px 20px;border-radius:100px;font-size:.85rem;font-weight:600;text-decoration:none;border:1.5px solid <?= $activeTab === 'colleges' ? 'transparent' : 'rgba(15,23,42,0.08)' ?>;color:<?= $activeTab === 'colleges' ? '#fff' : 'rgba(15,23,42,0.45)' ?>;background:<?= $activeTab === 'colleges' ? 'linear-gradient(135deg,#19376D,#19376D)' : 'transparent' ?>;transition:all .2s;<?= $activeTab === 'colleges' ? 'box-shadow:0 4px 12px rgba(37,99,235,.3);' : '' ?>">Colleges (<?= count($colleges) ?>)</a>
-      <a href="?tab=schools" style="padding:8px 20px;border-radius:100px;font-size:.85rem;font-weight:600;text-decoration:none;border:1.5px solid <?= $activeTab === 'schools' ? 'transparent' : 'rgba(15,23,42,0.08)' ?>;color:<?= $activeTab === 'schools' ? '#fff' : 'rgba(15,23,42,0.45)' ?>;background:<?= $activeTab === 'schools' ? 'linear-gradient(135deg,#19376D,#19376D)' : 'transparent' ?>;transition:all .2s;<?= $activeTab === 'schools' ? 'box-shadow:0 4px 12px rgba(37,99,235,.3);' : '' ?>">Schools (<?= count($schools) ?>)</a>
-    </div>
+<!-- Tabs -->
+<div class="sv-tabs">
+  <div class="container">
+    <a href="?tab=all" class="sv-tab <?= $activeTab === 'all' ? 'active' : '' ?>">All (<?= $totalSaved ?>)</a>
+    <a href="?tab=colleges" class="sv-tab <?= $activeTab === 'colleges' ? 'active' : '' ?>">Colleges (<?= count($colleges) ?>)</a>
+    <a href="?tab=schools" class="sv-tab <?= $activeTab === 'schools' ? 'active' : '' ?>">Schools (<?= count($schools) ?>)</a>
   </div>
 </div>
 
-<!-- ── Main Content ──────────────────────────────────────────────── -->
-<div class="container shiksha-main-wrapper" style="margin-top: 32px; min-height: 50vh;">
-  <div class="shiksha-layout" style="grid-template-columns: 1fr;">
+<!-- Content -->
+<div class="sv-content">
 
-    <!-- Content -->
-    <main class="shiksha-content college-list-main" style="width: 100%;">
+  <?php if (empty($colleges) && empty($schools)): ?>
+    <div class="sv-empty">
+      <i class="ph ph-heart"></i>
+      <h3>Your Wishlist is Empty</h3>
+      <p>Explore colleges and schools, and save the ones you like to build your wishlist.</p>
+      <div class="sv-empty-btns">
+        <a href="<?= $siteBase ?>/colleges.php" class="sv-empty-btn sv-empty-btn-primary"><i class="ph ph-buildings"></i> Browse Colleges</a>
+        <a href="<?= $siteBase ?>/schools.php" class="sv-empty-btn sv-empty-btn-outline"><i class="ph ph-graduation-cap"></i> Browse Schools</a>
+      </div>
+    </div>
 
-      <?php if (empty($colleges) && empty($schools)): ?>
-        <div class="shiksha-empty" style="text-align:center; padding: 80px 24px; background:#fff; border-radius:16px; border:1px solid rgba(15,23,42,0.06)">
-          <i class="ph ph-heart" style="font-size:4rem;color:rgba(225,29,72,0.15);display:block;margin-bottom:16px"></i>
-          <h3 style="font-size:1.35rem;font-weight:800;color:#0b2447;margin-bottom:8px;">Your Wishlist is Empty</h3>
-          <p style="color:rgba(15,23,42,0.5); font-size:.9rem; max-width:400px; margin:0 auto 24px;">Explore best colleges and schools in India, and click the save button to build your wishlist!</p>
-          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-            <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/colleges.php" style="display:inline-flex; align-items:center; gap:8px; padding:12px 28px; background:#19376D; color:#fff; font-weight:700; border-radius:10px; transition:all .2s;" onmouseover="this.style.background='#0B2447'" onmouseout="this.style.background='#19376D'">
-              <i class="ph ph-buildings"></i> Browse Colleges
-            </a>
-            <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/schools.php" style="display:inline-flex; align-items:center; gap:8px; padding:12px 28px; background:#fff; color:#19376D; font-weight:700; border-radius:10px; border:1.5px solid #19376D; transition:all .2s;" onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background='#fff'">
-              <i class="ph ph-graduation-cap"></i> Browse Schools
-            </a>
+  <?php else: ?>
+
+    <!-- ── COLLEGE CARDS ── -->
+    <?php if (($activeTab === 'all' || $activeTab === 'colleges') && !empty($colleges)): ?>
+      <?php if ($activeTab === 'all'): ?>
+      <div class="sv-section-header">
+        <h2><i class="ph ph-buildings"></i> Saved Colleges</h2>
+        <span class="sv-count"><?= count($colleges) ?></span>
+      </div>
+      <?php endif; ?>
+
+      <?php foreach ($colleges as $cl):
+        $year = $cl['established_year'] ?? $cl['founded_year'] ?? '';
+        $rating = (float)($cl['overall_rating_avg'] ?? 0);
+        $ownMap = ['central'=>'Central','state'=>'State Govt','private_trust'=>'Trust','minority'=>'Minority'];
+        $ownershipLabel = $ownMap[$cl['ownership'] ?? ''] ?? '';
+        $location = trim(($cl['city_name'] ?? '') . ($cl['city_name'] && $cl['state_name'] ? ', ' : '') . ($cl['state_name'] ?? ''));
+      ?>
+      <div class="sv-card" id="card-<?= $cl['id'] ?>">
+        <div class="sv-card-top">
+          <div class="sv-card-img">
+            <?php if (!empty($cl['is_featured'])): ?><span class="sv-featured-tag">Featured</span><?php endif; ?>
+            <img src="<?= cImg($cl['cover_image_url']) ?>" alt="<?= htmlspecialchars($cl['name']) ?>" loading="lazy">
+            <div class="sv-badge-row">
+              <?php if ($cl['naac_grade']): ?><span class="sv-badge">NAAC <?= htmlspecialchars($cl['naac_grade']) ?></span><?php endif; ?>
+              <?php if (!empty($cl['is_verified'])): ?><span class="sv-badge sv-badge-green"><i class="ph-fill ph-seal-check"></i> Verified</span><?php endif; ?>
+            </div>
+          </div>
+          <div class="sv-card-body">
+            <h3 class="sv-card-title"><a href="<?= collegeUrl($cl['slug']) ?>"><?= htmlspecialchars($cl['name']) ?></a></h3>
+            <div class="sv-card-meta">
+              <?php if ($location): ?><span><i class="ph ph-map-pin"></i><?= htmlspecialchars($location) ?></span><?php endif; ?>
+              <?php if ($year): ?><span><i class="ph ph-calendar"></i>Est. <?= htmlspecialchars((string)$year) ?></span><?php endif; ?>
+              <?php if (!empty($cl['total_courses'])): ?><span><i class="ph ph-book-open"></i><?= (int)$cl['total_courses'] ?> Courses</span><?php endif; ?>
+            </div>
+            <div class="sv-card-chips">
+              <span class="sv-chip"><?= htmlspecialchars(collegeTypeLabel($cl['college_type'], $cl['ownership'])) ?></span>
+              <?php if ($ownershipLabel): ?><span class="sv-chip"><?= $ownershipLabel ?></span><?php endif; ?>
+              <?php if (!empty($cl['ugc_approved'])): ?><span class="sv-chip">UGC</span><?php endif; ?>
+              <?php if (!empty($cl['ranking_nirf'])): ?><span class="sv-chip">NIRF #<?= (int)$cl['ranking_nirf'] ?></span><?php endif; ?>
+            </div>
           </div>
         </div>
-
-      <?php else: ?>
-        <div class="college-grid-list" style="display: flex; flex-direction: column; gap: 20px;">
-
-          <!-- ── COLLEGE CARDS ── -->
-          <?php if (($activeTab === 'all' || $activeTab === 'colleges') && !empty($colleges)): ?>
-            <?php if ($activeTab === 'all' && !empty($schools)): ?>
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-              <h3 style="font-size:1.1rem;font-weight:700;color:#0B2447;margin:0"><i class="ph ph-buildings" style="margin-right:6px"></i> Saved Colleges</h3>
-              <span style="font-size:.78rem;color:rgba(15,23,42,0.4);background:rgba(11,36,71,0.04);padding:3px 10px;border-radius:20px;font-weight:600"><?= count($colleges) ?></span>
-            </div>
+        <div class="sv-card-bottom">
+          <div class="sv-card-stats">
+            <div class="sv-stat"><strong><?= $rating > 0 ? number_format($rating, 1) . '/5' : '—' ?></strong><span>Rating</span></div>
+            <div class="sv-stat"><strong><?= formatFee(isset($cl['min_fee']) ? (float)$cl['min_fee'] : null) ?></strong><span>Fee/Yr</span></div>
+            <div class="sv-stat"><strong><?= formatLpa(isset($cl['avg_package']) ? (float)$cl['avg_package'] : null) ?></strong><span>Package</span></div>
+            <?php if (!empty($cl['total_courses'])): ?>
+            <div class="sv-stat"><strong><?= (int)$cl['total_courses'] ?></strong><span>Courses</span></div>
             <?php endif; ?>
-            <?php foreach ($colleges as $cl):
-              $year = $cl['established_year'] ?? $cl['founded_year'] ?? '';
-              $rating = (float)($cl['overall_rating_avg'] ?? 0);
-              $ownMap = ['central'=>'Central','state'=>'State Govt','private_trust'=>'Trust','minority'=>'Minority'];
-              $ownershipLabel = $ownMap[$cl['ownership'] ?? ''] ?? '';
-            ?>
-            <div style="position: relative;" class="saved-card-wrap" data-type="college">
-              <a href="<?= collegeUrl($cl['slug']) ?>" class="college-list-card" style="display: flex; position: relative;">
-                <?php if (!empty($cl['is_featured'])): ?>
-                <span class="clc-featured-badge" style="position:absolute;top:12px;right:12px;z-index:2">Featured</span>
-                <?php endif; ?>
-                <div class="clc-img">
-                  <img src="<?= cImg($cl['cover_image_url']) ?>" alt="<?= htmlspecialchars($cl['name']) ?>" loading="lazy">
-                  <div class="clc-img-badges">
-                    <?php if ($cl['naac_grade']): ?><span class="clc-badge">NAAC <?= htmlspecialchars($cl['naac_grade']) ?></span><?php endif; ?>
-                    <?php if (!empty($cl['is_verified'])): ?><span class="clc-badge clc-badge-verified"><i class="ph-fill ph-seal-check"></i> Verified</span><?php endif; ?>
-                  </div>
-                </div>
-                <div class="clc-body" style="flex: 1;">
-                  <div class="clc-top">
-                    <?php if ($cl['logo_url']): ?><img src="<?= cImg($cl['logo_url']) ?>" class="clc-logo" alt=""><?php endif; ?>
-                    <div style="flex:1;min-width:0">
-                      <h3><?= htmlspecialchars($cl['name']) ?></h3>
-                      <div class="clc-meta">
-                        <?php if ($cl['city_name'] || $cl['state_name']): ?>
-                        <span><i class="ph ph-map-pin"></i><?= htmlspecialchars(trim(($cl['city_name'] ?? '') . ($cl['city_name'] && $cl['state_name'] ? ', ' : '') . ($cl['state_name'] ?? ''))) ?></span>
-                        <?php endif; ?>
-                        <?php if ($year): ?><span><i class="ph ph-calendar"></i>Est. <?= htmlspecialchars((string)$year) ?></span><?php endif; ?>
-                        <?php if (!empty($cl['total_courses'])): ?><span><i class="ph ph-book-open"></i><?= (int)$cl['total_courses'] ?> Courses</span><?php endif; ?>
-                      </div>
-                      <div class="clc-chips">
-                        <span class="clc-chip"><?= htmlspecialchars(collegeTypeLabel($cl['college_type'], $cl['ownership'])) ?></span>
-                        <?php if ($ownershipLabel): ?><span class="clc-chip"><?= $ownershipLabel ?></span><?php endif; ?>
-                        <?php if (!empty($cl['ugc_approved'])): ?><span class="clc-chip chip-green">UGC ✓</span><?php endif; ?>
-                        <?php if (!empty($cl['ranking_nirf'])): ?><span class="clc-chip chip-orange">NIRF #<?= (int)$cl['ranking_nirf'] ?></span><?php endif; ?>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="clc-stats">
-                    <div>
-                      <strong><?= $rating > 0 ? number_format($rating, 1) . '/5 ★' : '—' ?></strong>
-                      <span>Rating</span>
-                    </div>
-                    <div>
-                      <strong><?= formatFee(isset($cl['min_fee']) ? (float)$cl['min_fee'] : null) ?></strong>
-                      <span>Min Fee/Yr</span>
-                    </div>
-                    <div>
-                      <strong><?= formatLpa(isset($cl['avg_package']) ? (float)$cl['avg_package'] : null) ?></strong>
-                      <span>Avg Package</span>
-                    </div>
-                    <?php if (!empty($cl['total_courses'])): ?>
-                    <div>
-                      <strong><?= (int)$cl['total_courses'] ?></strong>
-                      <span>Courses</span>
-                    </div>
-                    <?php endif; ?>
-                  </div>
-                </div>
-              </a>
-              <button onclick="removeSavedItem('college', '<?= htmlspecialchars($cl['id']) ?>', this.closest('.saved-card-wrap'))" style="position: absolute; bottom: 20px; right: 20px; z-index: 5; background: rgba(225,29,72,0.06); border: 1px solid rgba(225,29,72,0.15); color: #e11d48; padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#e11d48'; this.style.color='#fff'" onmouseout="this.style.background='rgba(225,29,72,0.06)'; this.style.color='#e11d48'">
-                <i class="ph ph-trash"></i> Remove
-              </button>
-            </div>
-            <?php endforeach; ?>
-          <?php endif; ?>
-
-          <!-- ── SCHOOL CARDS ── -->
-          <?php if (($activeTab === 'all' || $activeTab === 'schools') && !empty($schools)): ?>
-            <?php if ($activeTab === 'all' && !empty($colleges)): ?>
-            <div style="display:flex;align-items:center;gap:10px;margin-top:12px;margin-bottom:4px">
-              <h3 style="font-size:1.1rem;font-weight:700;color:#0B2447;margin:0"><i class="ph ph-graduation-cap" style="margin-right:6px"></i> Saved Schools</h3>
-              <span style="font-size:.78rem;color:rgba(15,23,42,0.4);background:rgba(11,36,71,0.04);padding:3px 10px;border-radius:20px;font-weight:600"><?= count($schools) ?></span>
-            </div>
-            <?php endif; ?>
-            <?php foreach ($schools as $sch):
-              $rating = (float)($sch['overall_rating_avg'] ?? 0);
-              $boardLabel = schoolBoardLabel($sch['board_affiliation']);
-              if ($sch['board_affiliation'] === 'State' && !empty($sch['board_state_name'])) {
-                  $boardLabel = $sch['board_state_name'];
-              }
-            ?>
-            <div style="position: relative;" class="saved-card-wrap" data-type="school">
-              <a href="<?= schoolUrl($sch['slug']) ?>" class="college-list-card" style="display: flex; position: relative;">
-                <?php if (!empty($sch['is_featured'])): ?>
-                <span class="clc-featured-badge" style="position:absolute;top:12px;right:12px;z-index:2">Featured</span>
-                <?php endif; ?>
-                <div class="clc-img">
-                  <img src="<?= cImg($sch['cover_image_url']) ?>" alt="<?= htmlspecialchars($sch['name']) ?>" loading="lazy">
-                  <div class="clc-img-badges">
-                    <?php if ($sch['board_affiliation']): ?><span class="clc-badge"><?= htmlspecialchars($boardLabel) ?></span><?php endif; ?>
-                    <?php if (!empty($sch['is_verified'])): ?><span class="clc-badge clc-badge-verified"><i class="ph-fill ph-seal-check"></i> Verified</span><?php endif; ?>
-                  </div>
-                </div>
-                <div class="clc-body" style="flex: 1;">
-                  <div class="clc-top">
-                    <?php if ($sch['logo_url']): ?><img src="<?= cImg($sch['logo_url']) ?>" class="clc-logo" alt=""><?php endif; ?>
-                    <div style="flex:1;min-width:0">
-                      <h3><?= htmlspecialchars($sch['name']) ?></h3>
-                      <div class="clc-meta">
-                        <?php if ($sch['city_name'] || $sch['state_name']): ?>
-                        <span><i class="ph ph-map-pin"></i><?= htmlspecialchars(trim(($sch['city_name'] ?? '') . ($sch['city_name'] && $sch['state_name'] ? ', ' : '') . ($sch['state_name'] ?? ''))) ?></span>
-                        <?php endif; ?>
-                        <?php if ($sch['established_year']): ?><span><i class="ph ph-calendar"></i>Est. <?= htmlspecialchars((string)$sch['established_year']) ?></span><?php endif; ?>
-                        <?php if (!empty($sch['total_students'])): ?><span><i class="ph ph-users"></i><?= number_format((int)$sch['total_students']) ?> Students</span><?php endif; ?>
-                      </div>
-                      <div class="clc-chips">
-                        <span class="clc-chip"><?= htmlspecialchars(schoolTypeLabel($sch['school_type'])) ?></span>
-                        <?php if ($boardLabel): ?><span class="clc-chip"><?= htmlspecialchars($boardLabel) ?></span><?php endif; ?>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="clc-stats">
-                    <div>
-                      <strong><?= $rating > 0 ? number_format($rating, 1) . '/5 ★' : '—' ?></strong>
-                      <span>Rating</span>
-                    </div>
-                    <div>
-                      <strong><?= !empty($sch['total_students']) ? number_format((int)$sch['total_students']) : '—' ?></strong>
-                      <span>Students</span>
-                    </div>
-                    <?php if (!empty($sch['campus_area_acres'])): ?>
-                    <div>
-                      <strong><?= (float)$sch['campus_area_acres'] ?> acres</strong>
-                      <span>Campus</span>
-                    </div>
-                    <?php endif; ?>
-                  </div>
-                </div>
-              </a>
-              <button onclick="removeSavedItem('school', '<?= htmlspecialchars($sch['id']) ?>', this.closest('.saved-card-wrap'))" style="position: absolute; bottom: 20px; right: 20px; z-index: 5; background: rgba(225,29,72,0.06); border: 1px solid rgba(225,29,72,0.15); color: #e11d48; padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#e11d48'; this.style.color='#fff'" onmouseout="this.style.background='rgba(225,29,72,0.06)'; this.style.color='#e11d48'">
-                <i class="ph ph-trash"></i> Remove
-              </button>
-            </div>
-            <?php endforeach; ?>
-          <?php endif; ?>
-
+          </div>
+          <button class="sv-remove-btn" onclick="removeSaved('college','<?= $cl['id'] ?>')"><i class="ph ph-x"></i> Remove</button>
         </div>
-      <?php endif; ?>
-    </main>
+      </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
 
-  </div>
+    <!-- ── SCHOOL CARDS ── -->
+    <?php if (($activeTab === 'all' || $activeTab === 'schools') && !empty($schools)): ?>
+      <?php if ($activeTab === 'all'): ?>
+      <div class="sv-section-header" style="margin-top:28px">
+        <h2><i class="ph ph-graduation-cap"></i> Saved Schools</h2>
+        <span class="sv-count"><?= count($schools) ?></span>
+      </div>
+      <?php endif; ?>
+
+      <?php foreach ($schools as $sch):
+        $rating = (float)($sch['overall_rating_avg'] ?? 0);
+        $boardLabel = schoolBoardLabel($sch['board_affiliation']);
+        if ($sch['board_affiliation'] === 'State' && !empty($sch['board_state_name'])) $boardLabel = $sch['board_state_name'];
+        $location = trim(($sch['city_name'] ?? '') . ($sch['city_name'] && $sch['state_name'] ? ', ' : '') . ($sch['state_name'] ?? ''));
+      ?>
+      <div class="sv-card" id="card-<?= $sch['id'] ?>">
+        <div class="sv-card-top">
+          <div class="sv-card-img">
+            <?php if (!empty($sch['is_featured'])): ?><span class="sv-featured-tag">Featured</span><?php endif; ?>
+            <img src="<?= cImg($sch['cover_image_url']) ?>" alt="<?= htmlspecialchars($sch['name']) ?>" loading="lazy">
+            <div class="sv-badge-row">
+              <?php if ($sch['board_affiliation']): ?><span class="sv-badge"><?= htmlspecialchars($boardLabel) ?></span><?php endif; ?>
+              <?php if (!empty($sch['is_verified'])): ?><span class="sv-badge sv-badge-green"><i class="ph-fill ph-seal-check"></i> Verified</span><?php endif; ?>
+            </div>
+          </div>
+          <div class="sv-card-body">
+            <h3 class="sv-card-title"><a href="<?= schoolUrl($sch['slug']) ?>"><?= htmlspecialchars($sch['name']) ?></a></h3>
+            <div class="sv-card-meta">
+              <?php if ($location): ?><span><i class="ph ph-map-pin"></i><?= htmlspecialchars($location) ?></span><?php endif; ?>
+              <?php if ($sch['established_year']): ?><span><i class="ph ph-calendar"></i>Est. <?= htmlspecialchars((string)$sch['established_year']) ?></span><?php endif; ?>
+              <?php if (!empty($sch['total_students'])): ?><span><i class="ph ph-users"></i><?= number_format((int)$sch['total_students']) ?> Students</span><?php endif; ?>
+            </div>
+            <div class="sv-card-chips">
+              <span class="sv-chip"><?= htmlspecialchars(schoolTypeLabel($sch['school_type'])) ?></span>
+              <?php if ($boardLabel): ?><span class="sv-chip"><?= htmlspecialchars($boardLabel) ?></span><?php endif; ?>
+            </div>
+          </div>
+        </div>
+        <div class="sv-card-bottom">
+          <div class="sv-card-stats">
+            <div class="sv-stat"><strong><?= $rating > 0 ? number_format($rating, 1) . '/5' : '—' ?></strong><span>Rating</span></div>
+            <div class="sv-stat"><strong><?= !empty($sch['total_students']) ? number_format((int)$sch['total_students']) : '—' ?></strong><span>Students</span></div>
+            <?php if (!empty($sch['campus_area_acres'])): ?>
+            <div class="sv-stat"><strong><?= (float)$sch['campus_area_acres'] ?> ac</strong><span>Campus</span></div>
+            <?php endif; ?>
+          </div>
+          <button class="sv-remove-btn" onclick="removeSaved('school','<?= $sch['id'] ?>')"><i class="ph ph-x"></i> Remove</button>
+        </div>
+      </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
+
+  <?php endif; ?>
 </div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
-<script src="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/assets/js/main.js"></script>
 <script>
-function removeSavedItem(type, itemId, cardElement) {
+function removeSaved(type, id) {
   var label = type === 'college' ? 'college' : 'school';
-  if (!confirm('Are you sure you want to remove this ' + label + ' from your wishlist?')) return;
+  if (!confirm('Remove this ' + label + ' from your wishlist?')) return;
 
   var endpoint = type === 'college'
-    ? '<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/api/save_college.php'
-    : '<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/api/toggle_save_school.php';
-
+    ? '<?= $siteBase ?>/api/save_college.php'
+    : '<?= $siteBase ?>/api/toggle_save_school.php';
   var payload = type === 'college'
-    ? { college_id: itemId, action: 'unsave' }
-    : { school_id: itemId };
+    ? { college_id: id, action: 'unsave' }
+    : { school_id: id };
 
   fetch(endpoint, {
     method: 'POST',
@@ -360,23 +425,29 @@ function removeSavedItem(type, itemId, cardElement) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (data.ok) {
-      cardElement.style.opacity = '0';
-      cardElement.style.transform = 'translateY(10px)';
-      cardElement.style.transition = 'all 0.3s ease';
-      setTimeout(function() {
-        cardElement.remove();
-        if (document.querySelectorAll('.saved-card-wrap').length === 0) {
-          location.reload();
-        }
-      }, 300);
+      var card = document.getElementById('card-' + id);
+      if (card) {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(-10px) scale(.98)';
+        card.style.transition = 'all .3s ease';
+        card.style.maxHeight = card.offsetHeight + 'px';
+        setTimeout(function() {
+          card.style.maxHeight = '0';
+          card.style.marginBottom = '0';
+          card.style.padding = '0';
+          card.style.borderWidth = '0';
+        }, 100);
+        setTimeout(function() { card.remove(); checkEmpty(); }, 400);
+      }
     } else {
       alert(data.msg || data.message || data.error || 'Failed to remove.');
     }
   })
-  .catch(function(err) {
-    console.error(err);
-    alert('Network error. Please try again.');
-  });
+  .catch(function() { alert('Network error. Please try again.'); });
+}
+
+function checkEmpty() {
+  if (document.querySelectorAll('.sv-card').length === 0) location.reload();
 }
 </script>
 </body>

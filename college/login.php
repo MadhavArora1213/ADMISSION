@@ -1,6 +1,6 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../panel_cms_2847/db.php';
 
 // Security headers
 header('X-Content-Type-Options: nosniff');
@@ -154,9 +154,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;background:#0B2
 .form-foot a{color:#19376D;font-weight:700;text-decoration:none;transition:color .2s}
 .form-foot a:hover{color:#0B2447}
 
-.forgot{display:block;text-align:right;font-size:.75rem;color:#64748b;text-decoration:none;font-weight:500;margin-top:-8px;margin-bottom:16px;transition:color .2s}
-.forgot:hover{color:#19376D}
-
 @media(max-width:960px){
   .page{grid-template-columns:1fr}
   .left{display:none}
@@ -210,7 +207,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;background:#0B2
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
     <div class="fg"><label>Email Address</label><input type="email" name="email" placeholder="your@institute.ac.in" required value="<?=htmlspecialchars($_POST['email'] ?? '')?>"></div>
     <div class="fg"><label>Password</label><div class="fg-icon"><input type="password" name="password" id="pwd" placeholder="Enter your password" required autocomplete="current-password"><i class="ph ph-eye" onclick="togglePwd()"></i></div></div>
-    <a href="#" class="forgot">Forgot password?</a>
     <button type="submit" class="btn-primary"><i class="ph ph-sign-in"></i> Login</button>
   </form>
 

@@ -39,7 +39,7 @@ if (empty($_SESSION['user_id'])) {
     exit;
 }
 
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../panel_cms_2847/db.php';
 
 $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
 $userId = $_SESSION['user_id'];

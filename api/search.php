@@ -3,7 +3,7 @@ declare(strict_types=1);
 header('Content-Type: application/json');
 header('Cache-Control: no-cache, no-store, must-revalidate');
 
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../panel_cms_2847/db.php';
 
 $q = trim($_GET['q'] ?? '');
 if (mb_strlen($q) < 1) {
@@ -92,3 +92,26 @@ try {
 usort($results, fn($a, $b) => ($a['relevance'] ?? 99) - ($b['relevance'] ?? 99));
 
 echo json_encode(['results' => $results]);
+
+// ── Log search to analytics ──
+if (mb_strlen($q) >= 2) {
+    try {
+        $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+        );
+
+        $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $device = 'desktop';
+        if (preg_match('/mobile|android|iphone/i', $ua)) $device = 'mobile';
+        elseif (preg_match('/tablet|ipad/i', $ua)) $device = 'tablet';
+
+        $ins = $pdo->prepare("INSERT INTO search_queries (id, query_text, results_count, zero_results, device_type, session_id) VALUES (?, ?, ?, ?, ?, ?)");
+        $ins->execute([$uuid, $q, count($results), count($results) === 0 ? 1 : 0, $device, session_id() ?: null]);
+
+        $pdo->prepare("INSERT INTO search_trending (query_text, trending_score, trending_period) VALUES (?, 1, 'daily') ON DUPLICATE KEY UPDATE trending_score = trending_score + 1")->execute([$q]);
+    } catch (Exception $e) {}
+}

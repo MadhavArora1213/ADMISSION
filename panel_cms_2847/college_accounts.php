@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/db.php';
-if (empty($_SESSION['admin_id'])) { header('Location: ' . BASE_URL . '/admin/index.php'); exit; }
+if (empty($_SESSION['admin_id'])) { header('Location: ' . BASE_URL . '/panel_cms_2847/index.php'); exit; }
 
 $msg = '';
 
@@ -342,7 +342,7 @@ td{padding:12px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
 <div class="detail-panel">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
     <h2 style="font-size:1.1rem;font-weight:700;color:#0B2447"><?=htmlspecialchars($detail['institute_name'])?></h2>
-    <a href="<?= BASE_URL ?>/admin/college_accounts.php" style="font-size:.78rem;color:#64748b;text-decoration:none"><i class="ph ph-x"></i> Close</a>
+    <a href="<?= BASE_URL ?>/panel_cms_2847/college_accounts.php" style="font-size:.78rem;color:#64748b;text-decoration:none"><i class="ph ph-x"></i> Close</a>
   </div>
 
   <div class="detail-grid">
@@ -427,10 +427,10 @@ td{padding:12px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
 <?php else: ?>
 
 <div class="filters">
-  <a href="<?= BASE_URL ?>/admin/college_accounts.php" class="<?=!$filterStatus?'active':''?>">All</a>
-  <a href="<?= BASE_URL ?>/admin/college_accounts.php?status=pending" class="<?=$filterStatus==='pending'?'active':''?>">Pending</a>
-  <a href="<?= BASE_URL ?>/admin/college_accounts.php?status=approved" class="<?=$filterStatus==='approved'?'active':''?>">Approved</a>
-  <a href="<?= BASE_URL ?>/admin/college_accounts.php?status=rejected" class="<?=$filterStatus==='rejected'?'active':''?>">Rejected</a>
+  <a href="<?= BASE_URL ?>/panel_cms_2847/college_accounts.php" class="<?=!$filterStatus?'active':''?>">All</a>
+  <a href="<?= BASE_URL ?>/panel_cms_2847/college_accounts.php?status=pending" class="<?=$filterStatus==='pending'?'active':''?>">Pending</a>
+  <a href="<?= BASE_URL ?>/panel_cms_2847/college_accounts.php?status=approved" class="<?=$filterStatus==='approved'?'active':''?>">Approved</a>
+  <a href="<?= BASE_URL ?>/panel_cms_2847/college_accounts.php?status=rejected" class="<?=$filterStatus==='rejected'?'active':''?>">Rejected</a>
 </div>
 
 <div class="card">
@@ -451,7 +451,7 @@ td{padding:12px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
   <td><span class="badge <?=($a['status']==='approved'?'badge-green':($a['status']==='rejected'?'badge-red':($a['status']==='pending'?'badge-yellow':'badge-blue')))?>"><?=ucfirst($a['status'])?></span></td>
   <td style="font-size:.72rem"><?=date('d M Y', strtotime($a['created_at']))?></td>
   <td>
-    <a href="<?= BASE_URL ?>/admin/college_accounts.php?view=<?=$a['id']?>" class="btn btn-ghost btn-sm"><i class="ph ph-eye"></i> View</a>
+    <a href="<?= BASE_URL ?>/panel_cms_2847/college_accounts.php?view=<?=$a['id']?>" class="btn btn-ghost btn-sm"><i class="ph ph-eye"></i> View</a>
     <?php if($a['status']==='pending'): ?>
     <form method="POST" style="display:inline"><input type="hidden" name="action" value="approve"><input type="hidden" name="account_id" value="<?=$a['id']?>"><button class="btn btn-green btn-sm"><i class="ph ph-check"></i></button></form>
     <?php endif; ?>

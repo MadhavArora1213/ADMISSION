@@ -2,7 +2,7 @@
 declare(strict_types=1);
 error_reporting(E_ALL);
 ini_set('display_errors', '0');
-require_once __DIR__ . '/admin/db.php';
+require_once __DIR__ . '/panel_cms_2847/db.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -101,6 +101,33 @@ if (mb_strlen($q) >= 1) {
 }
 
 $totalResults = array_sum(array_map('count', $results));
+
+// ── Log search query to analytics ──
+if (mb_strlen($q) >= 2) {
+    try {
+        $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+        );
+
+        $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $device = 'desktop';
+        if (preg_match('/mobile|android|iphone/i', $ua)) $device = 'mobile';
+        elseif (preg_match('/tablet|ipad/i', $ua)) $device = 'tablet';
+
+        $sid = session_id();
+        $uid = $_SESSION['user_id'] ?? null;
+
+        $ins = $pdo->prepare("INSERT INTO search_queries (id, query_text, results_count, zero_results, device_type, session_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $ins->execute([$uuid, $q, $totalResults, $totalResults === 0 ? 1 : 0, $device, $sid ?: null, $uid]);
+
+        // Update trending score
+        $pdo->prepare("INSERT INTO search_trending (query_text, trending_score, trending_period) VALUES (?, 1, 'daily') ON DUPLICATE KEY UPDATE trending_score = trending_score + 1")->execute([$q]);
+    } catch (Exception $e) {}
+}
 ?>
 $siteBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
 $canonicalUrl = $siteBase . '/search.php?q=' . urlencode($q);
@@ -222,7 +249,7 @@ $metaKeywords = $q . ', search ' . $q . ', AdmissionSeason search, find ' . $q;
                 <span class="count"><?= count($results['colleges']) ?></span>
             </div>
             <?php foreach ($results['colleges'] as $r): ?>
-            <a href="<?= $navBase ?>/college/<?= htmlspecialchars($r['slug']) ?>" class="search-card">
+            <a href="<?= $navBase ?>/college/<?= htmlspecialchars($r['slug']) ?>" class="search-card" data-track-click="<?= htmlspecialchars(json_encode(['type'=>'college','slug'=>$r['slug'],'q'=>$q])) ?>">
                 <div class="search-card-icon" style="background:rgba(25,55,109,0.08);color:#19376D"><i class="ph ph-buildings"></i></div>
                 <div class="search-card-body">
                     <div class="search-card-title"><?= htmlspecialchars($r['name']) ?></div>
@@ -245,7 +272,7 @@ $metaKeywords = $q . ', search ' . $q . ', AdmissionSeason search, find ' . $q;
                 <span class="count"><?= count($results['exams']) ?></span>
             </div>
             <?php foreach ($results['exams'] as $r): ?>
-            <a href="<?= $navBase ?>/exam/<?= htmlspecialchars($r['exam_slug']) ?>" class="search-card">
+            <a href="<?= $navBase ?>/exam/<?= htmlspecialchars($r['exam_slug']) ?>" class="search-card" data-track-click="<?= htmlspecialchars(json_encode(['type'=>'exam','slug'=>$r['exam_slug'],'q'=>$q])) ?>">
                 <div class="search-card-icon" style="background:rgba(124,58,237,0.08);color:#7C3AED"><i class="ph ph-clipboard-text"></i></div>
                 <div class="search-card-body">
                     <div class="search-card-title"><?= htmlspecialchars($r['exam_name']) ?> <?= $r['exam_abbreviation'] ? '(' . htmlspecialchars($r['exam_abbreviation']) . ')' : '' ?></div>
@@ -264,7 +291,7 @@ $metaKeywords = $q . ', search ' . $q . ', AdmissionSeason search, find ' . $q;
                 <span class="count"><?= count($results['courses']) ?></span>
             </div>
             <?php foreach ($results['courses'] as $r): ?>
-            <a href="<?= $navBase ?>/course/<?= htmlspecialchars($r['course_slug']) ?>" class="search-card">
+            <a href="<?= $navBase ?>/course/<?= htmlspecialchars($r['course_slug']) ?>" class="search-card" data-track-click="<?= htmlspecialchars(json_encode(['type'=>'course','slug'=>$r['course_slug'],'q'=>$q])) ?>">
                 <div class="search-card-icon" style="background:rgba(5,150,105,0.08);color:#059669"><i class="ph ph-books"></i></div>
                 <div class="search-card-body">
                     <div class="search-card-title"><?= htmlspecialchars($r['course_name']) ?></div>
@@ -283,7 +310,7 @@ $metaKeywords = $q . ', search ' . $q . ', AdmissionSeason search, find ' . $q;
                 <span class="count"><?= count($results['careers']) ?></span>
             </div>
             <?php foreach ($results['careers'] as $r): ?>
-            <a href="<?= $navBase ?>/career/<?= htmlspecialchars($r['slug']) ?>" class="search-card">
+            <a href="<?= $navBase ?>/career/<?= htmlspecialchars($r['slug']) ?>" class="search-card" data-track-click="<?= htmlspecialchars(json_encode(['type'=>'career','slug'=>$r['slug'],'q'=>$q])) ?>">
                 <div class="search-card-icon" style="background:rgba(234,88,12,0.08);color:#EA580C"><i class="ph ph-briefcase"></i></div>
                 <div class="search-card-body">
                     <div class="search-card-title"><?= htmlspecialchars($r['name']) ?></div>
@@ -304,7 +331,7 @@ $metaKeywords = $q . ', search ' . $q . ', AdmissionSeason search, find ' . $q;
                 <span class="count"><?= count($results['universities']) ?></span>
             </div>
             <?php foreach ($results['universities'] as $r): ?>
-            <a href="<?= $navBase ?>/foreign-university.php?slug=<?= htmlspecialchars($r['university_slug']) ?>" class="search-card">
+            <a href="<?= $navBase ?>/foreign-university.php?slug=<?= htmlspecialchars($r['university_slug']) ?>" class="search-card" data-track-click="<?= htmlspecialchars(json_encode(['type'=>'university','slug'=>$r['university_slug'],'q'=>$q])) ?>">
                 <div class="search-card-icon" style="background:rgba(8,145,178,0.08);color:#0891B2"><i class="ph ph-globe-hemisphere-west"></i></div>
                 <div class="search-card-body">
                     <div class="search-card-title"><?= htmlspecialchars($r['university_name']) ?></div>
@@ -325,7 +352,7 @@ $metaKeywords = $q . ', search ' . $q . ', AdmissionSeason search, find ' . $q;
                 <span class="count"><?= count($results['articles']) ?></span>
             </div>
             <?php foreach ($results['articles'] as $r): ?>
-            <a href="<?= $navBase ?>/news_details.php?slug=<?= htmlspecialchars($r['article_slug']) ?>" class="search-card">
+            <a href="<?= $navBase ?>/news_details.php?slug=<?= htmlspecialchars($r['article_slug']) ?>" class="search-card" data-track-click="<?= htmlspecialchars(json_encode(['type'=>'article','slug'=>$r['article_slug'],'q'=>$q])) ?>">
                 <div class="search-card-icon" style="background:rgba(217,119,6,0.08);color:#D97706"><i class="ph ph-newspaper"></i></div>
                 <div class="search-card-body">
                     <div class="search-card-title"><?= htmlspecialchars($r['article_title']) ?></div>
@@ -343,7 +370,7 @@ $metaKeywords = $q . ', search ' . $q . ', AdmissionSeason search, find ' . $q;
                 <span class="count"><?= count($results['questions']) ?></span>
             </div>
             <?php foreach ($results['questions'] as $r): ?>
-            <a href="<?= $navBase ?>/question/<?= htmlspecialchars($r['slug']) ?>" class="search-card">
+            <a href="<?= $navBase ?>/question/<?= htmlspecialchars($r['slug']) ?>" class="search-card" data-track-click="<?= htmlspecialchars(json_encode(['type'=>'question','slug'=>$r['slug'],'q'=>$q])) ?>">
                 <div class="search-card-icon" style="background:rgba(37,99,235,0.08);color:#2563EB"><i class="ph ph-chat-circle-question"></i></div>
                 <div class="search-card-body">
                     <div class="search-card-title"><?= htmlspecialchars(mb_strimwidth($r['question_text'], 0, 100, '...')) ?></div>
@@ -358,5 +385,15 @@ $metaKeywords = $q . ', search ' . $q . ', AdmissionSeason search, find ' . $q;
 </main>
 
 <?php include 'includes/footer.php'; ?>
+<script>
+document.querySelectorAll('[data-track-click]').forEach(function(el){
+    el.addEventListener('click', function(e){
+        try {
+            var data = JSON.parse(this.getAttribute('data-track-click'));
+            navigator.sendBeacon('<?= $navBase ?>/api/log_search_click.php', JSON.stringify(data));
+        } catch(ex){}
+    });
+});
+</script>
 </body>
 </html>
