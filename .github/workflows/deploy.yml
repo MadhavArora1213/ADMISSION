@@ -123,6 +123,7 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "ci: update build info [skip ci]"
+            git pull origin main --rebase
             git push
           fi
 
