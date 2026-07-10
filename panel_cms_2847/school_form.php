@@ -92,6 +92,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
                 $filename = 'school_logo_' . time() . '_' . uniqid() . '.' . $ext;
                 if (move_uploaded_file($_FILES['logo_file']['tmp_name'], $upload_dir . $filename)) {
                     $logo_url = 'uploads/' . $filename;
+                    require_once __DIR__ . '/upload_sync.php';
+                    sync_to_github('uploads/' . $filename);
                 }
             }
 
@@ -101,6 +103,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
                 $filename = 'school_cover_' . time() . '_' . uniqid() . '.' . $ext;
                 if (move_uploaded_file($_FILES['cover_file']['tmp_name'], $upload_dir . $filename)) {
                     $cover_url = 'uploads/' . $filename;
+                    require_once __DIR__ . '/upload_sync.php';
+                    sync_to_github('uploads/' . $filename);
                 }
             }
 
@@ -244,6 +248,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'news') {
                 $fn = 'school_news_' . time() . '_' . uniqid() . '.' . $ext;
                 if (move_uploaded_file($_FILES['news_image']['tmp_name'], $upload_dir . $fn)) {
                     $image_url = 'uploads/' . $fn;
+                    require_once __DIR__ . '/upload_sync.php';
+                    sync_to_github('uploads/' . $fn);
                 }
             }
             $newsId = generateUUID();
