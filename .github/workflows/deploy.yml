@@ -9,6 +9,10 @@ on:
 env:
   PHP_VERSION: '8.2'
 
+concurrency:
+  group: ci-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   # ─── LINT & VALIDATE ───
   lint:
@@ -123,8 +127,11 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "ci: update build info [skip ci]"
-            git pull origin main --rebase
-            git push
+            for i in 1 2 3; do
+              git pull origin main --rebase && git push && break
+              echo "Attempt $i failed, retrying..."
+              sleep 2
+            done
           fi
 
   # ─── NOTIFY ───
