@@ -123,7 +123,7 @@ $stats = [
   <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
   <style>
     .courses-hero{background-color:#0B2447;background-size:cover;background-position:center;padding:72px 0 48px;color:#fff;position:relative;overflow:hidden}
-    .courses-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(11,36,71,0.82),rgba(25,55,109,0.78));pointer-events:none}
+    .courses-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(11,36,71,0.65),rgba(25,55,109,0.6));pointer-events:none}
     .courses-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#0B2447,#19376D,#0B2447)}
     .courses-hero .container{position:relative;z-index:2}
     .courses-breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:.85rem;color:rgba(255,255,255,.5)}
@@ -226,7 +226,7 @@ $stats = [
 
 <?php include __DIR__ . '/includes/navbar.php'; ?>
 
-<div class="courses-hero" style="background-image:url('https://images.unsplash.com/photo-1523050854058-8df90110c8f1?w=1920&q=80')">
+<div class="courses-hero" style="background-image:url('https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1920&q=80')">
   <div class="container">
     <div class="courses-breadcrumb">
       <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/index.php">Home</a>

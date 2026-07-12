@@ -13,11 +13,19 @@ if (isset($_GET['action']) && $_GET['action'] == 'archive' && isset($_GET['id'])
         $stmt = $pdo->prepare("UPDATE colleges SET status = 'archived' WHERE id = ?");
         $stmt->execute([$id]);
     } catch (PDOException $e) {
-        // If archived_at column exists, include it
         $stmt = $pdo->prepare("UPDATE colleges SET status = 'archived', archived_at = NOW() WHERE id = ?");
         $stmt->execute([$id]);
     }
     header('Location: colleges.php?msg=archived');
+    exit;
+}
+
+// Handle Restore from Archive
+if (isset($_GET['action']) && $_GET['action'] == 'restore' && isset($_GET['id'])) {
+    $id = $_GET['id'];
+    $stmt = $pdo->prepare("UPDATE colleges SET status = 'active' WHERE id = ?");
+    $stmt->execute([$id]);
+    header('Location: colleges.php?status=archived&msg=restored');
     exit;
 }
 
@@ -28,7 +36,7 @@ $typeF       = isset($_GET['type']) ? trim($_GET['type']) : 'all';
 $publishF    = isset($_GET['publish']) ? trim($_GET['publish']) : 'all';
 $verifiedF   = isset($_GET['verified']) ? trim($_GET['verified']) : 'all';
 
-$where  = ["c.status != 'archived'"];
+$where  = [];
 $params = [];
 
 if ($search !== '') {
@@ -40,6 +48,8 @@ if ($search !== '') {
 if ($statusF !== 'all' && in_array($statusF, ['active','pending','archived','rejected'])) {
     $where[] = "c.status = ?";
     $params[] = $statusF;
+} else {
+    $where[] = "c.status != 'archived'";
 }
 if ($typeF !== 'all' && in_array($typeF, ['govt','private','deemed','autonomous'])) {
     $where[] = "c.college_type = ?";
@@ -213,6 +223,11 @@ $colleges = $stmt->fetchAll();
                     <i class="ph ph-check-circle"></i> College has been archived successfully.
                 </div>
                 <?php endif; ?>
+                <?php if(isset($_GET['msg']) && $_GET['msg'] == 'restored'): ?>
+                <div class="msg-alert">
+                    <i class="ph ph-check-circle"></i> College has been restored successfully.
+                </div>
+                <?php endif; ?>
                 <?php if(isset($_GET['msg']) && $_GET['msg'] == 'saved'): ?>
                 <div class="msg-alert">
                     <i class="ph ph-check-circle"></i> College details saved successfully.
@@ -230,6 +245,7 @@ $colleges = $stmt->fetchAll();
                             <option value="active" <?php echo $statusF==='active'?'selected':''; ?>>Active</option>
                             <option value="pending" <?php echo $statusF==='pending'?'selected':''; ?>>Pending</option>
                             <option value="rejected" <?php echo $statusF==='rejected'?'selected':''; ?>>Rejected</option>
+                            <option value="archived" <?php echo $statusF==='archived'?'selected':''; ?>>Archived</option>
                         </select>
                         <select name="type" class="filter-select" onchange="this.form.submit()">
                             <option value="all" <?php echo $typeF==='all'?'selected':''; ?>>All Types</option>
@@ -316,9 +332,15 @@ $colleges = $stmt->fetchAll();
                                                 <a href="college_form.php?id=<?php echo $college['id']; ?>" class="action-btn" title="Edit">
                                                     <i class="ph ph-pencil-simple"></i>
                                                 </a>
+                                                <?php if($college['status'] === 'archived'): ?>
+                                                <a href="colleges.php?action=restore&id=<?php echo $college['id']; ?>" class="action-btn" title="Restore" style="color:#16a34a;border-color:#16a34a;" onclick="return confirm('Restore this college?');">
+                                                    <i class="ph ph-arrow-u-up-left"></i>
+                                                </a>
+                                                <?php else: ?>
                                                 <a href="colleges.php?action=archive&id=<?php echo $college['id']; ?>" class="action-btn delete" title="Archive" onclick="return confirm('Are you sure you want to archive this college?');">
                                                     <i class="ph ph-archive"></i>
                                                 </a>
+                                                <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>

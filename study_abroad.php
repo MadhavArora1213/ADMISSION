@@ -137,7 +137,7 @@ $metaKeywords = 'study abroad ' . date('Y') . ', ' . strtolower($countryLabel) .
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg,rgba(11,36,71,0.82),rgba(25,55,109,0.78));
+      background: linear-gradient(135deg,rgba(11,36,71,0.65),rgba(25,55,109,0.6));
       pointer-events: none;
     }
 
