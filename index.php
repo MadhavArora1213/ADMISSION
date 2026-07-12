@@ -12,6 +12,7 @@ require_once __DIR__ . '/includes/college_helpers.php';
 require_once __DIR__ . '/includes/exam_helpers.php';
 require_once __DIR__ . '/includes/course_helpers.php';
 require_once __DIR__ . '/includes/news_seo_helpers.php';
+require_once __DIR__ . '/includes/school_helpers.php';
 
 // ─── SIMPLE ROUTER ───
 $route = trim($_GET['url'] ?? '/', '/');
@@ -125,6 +126,30 @@ $fExams = [
     ['name'=>'JEE Main','level'=>'National','date'=>'24 Jan 2026','last'=>'15 Dec 2025','cols'=>'2,046'],
     ['name'=>'NEET','level'=>'National','date'=>'04 May 2026','last'=>'15 Mar 2026','cols'=>'1,374'],
 ];
+
+// Featured schools
+$featuredSchools = cAll($pdo, "SELECT s.id, s.name, s.slug, s.school_type, s.board_affiliation,
+    s.overall_rating_avg, s.total_reviews, s.established_year, s.total_students,
+    st.name AS state_name, ci.name AS city_name,
+    sm.logo_url, sm.cover_image_url
+    FROM schools s
+    LEFT JOIN states st ON s.state_id = st.id
+    LEFT JOIN cities ci ON s.city_id = ci.id
+    LEFT JOIN school_media sm ON sm.school_id = s.id AND sm.image_type IS NULL
+    WHERE s.status = 'active' AND s.is_featured = 1
+    ORDER BY s.overall_rating_avg DESC, s.name ASC LIMIT 6");
+if (empty($featuredSchools)) {
+    $featuredSchools = cAll($pdo, "SELECT s.id, s.name, s.slug, s.school_type, s.board_affiliation,
+        s.overall_rating_avg, s.total_reviews, s.established_year, s.total_students,
+        st.name AS state_name, ci.name AS city_name,
+        sm.logo_url, sm.cover_image_url
+        FROM schools s
+        LEFT JOIN states st ON s.state_id = st.id
+        LEFT JOIN cities ci ON s.city_id = ci.id
+        LEFT JOIN school_media sm ON sm.school_id = s.id AND sm.image_type IS NULL
+        WHERE s.status = 'active' AND s.overall_rating_avg > 0
+        ORDER BY s.overall_rating_avg DESC, s.name ASC LIMIT 6");
+}
 
 $newsItems = cAll($pdo, "SELECT a.article_slug, a.article_title as title, a.featured_image_url as img, a.publish_at as date, c.category_name as cat FROM articles a LEFT JOIN article_categories c ON a.category_id=c.id WHERE a.status='published' ORDER BY a.publish_at DESC LIMIT 4");
 
@@ -261,6 +286,7 @@ $siteBase = getBaseUrl();
 <?php include 'includes/streams.php'; ?>
 <?php include 'includes/top_ranked.php'; ?>
 <?php include 'includes/featured_colleges.php'; ?>
+<?php include 'includes/featured_schools.php'; ?>
 <?php include 'includes/tools.php'; ?>
 <?php include 'includes/exams.php'; ?>
 <?php include 'includes/courses.php'; ?>
