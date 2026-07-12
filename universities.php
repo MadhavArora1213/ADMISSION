@@ -236,7 +236,7 @@ $ogDesc = 'Compare ' . number_format($total) . '+ universities across India. Fil
 <?php include __DIR__ . '/includes/navbar.php'; ?>
 
 <!-- Hero Header -->
-<div class="shiksha-header">
+<div class="shiksha-header" style="background-image:url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1920&q=80')">
   <div class="container">
     <div class="shiksha-breadcrumb">
       <a href="<?= $navBase ?>/">Home</a>

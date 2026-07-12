@@ -451,7 +451,7 @@ if (!$geoMeta) {
 <?php include __DIR__ . '/includes/navbar.php'; ?>
 
 <!-- Hero Header -->
-<div class="shiksha-header">
+<div class="shiksha-header" style="background-image:url('https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80')">
   <div class="container">
     <div class="shiksha-breadcrumb">
       <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/index.php">Home</a>

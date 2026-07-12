@@ -122,8 +122,8 @@ $stats = [
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
   <style>
-    .courses-hero{background:linear-gradient(135deg,#0B2447 0%,#19376D 50%,#0B2447 100%),url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.627 0l.83.83-49.12 49.12L5.5 49.12 54.627 0zM0 54.627l.83.83L5.5 54.627 0 49.12v5.507z' fill='%23ffffff' fill-opacity='0.04' fill-rule='evenodd'/%3E%3C/svg%3E");padding:72px 0 48px;color:#fff;position:relative;overflow:hidden}
-    .courses-hero::before{content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(255,255,255,.06) 0%,transparent 70%);pointer-events:none}
+    .courses-hero{background:linear-gradient(135deg,#0B2447 0%,#19376D 50%,#0B2447 100%);background-size:cover;background-position:center;padding:72px 0 48px;color:#fff;position:relative;overflow:hidden}
+    .courses-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(11,36,71,0.82),rgba(25,55,109,0.78));pointer-events:none}
     .courses-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#0B2447,#19376D,#0B2447)}
     .courses-hero .container{position:relative;z-index:2}
     .courses-breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:.85rem;color:rgba(255,255,255,.5)}
@@ -133,7 +133,7 @@ $stats = [
     .courses-hero h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:2.5rem;font-weight:800;margin:0 0 10px;line-height:1.2;text-shadow:0 2px 20px rgba(0,0,0,.2)}
     .courses-hero-sub{margin:0 0 28px;color:rgba(255,255,255,.7);font-size:1.08rem;max-width:600px}
     .courses-hero-sub strong{color:#fff;font-weight:700}
-    .courses-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+    .courses-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;position:relative;z-index:1}
     .course-stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:18px 16px;text-align:center;backdrop-filter:blur(8px);transition:all .3s}
     .course-stat:hover{background:rgba(255,255,255,.16);transform:translateY(-2px)}
     .course-stat-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.6rem;font-weight:800;color:#fff;display:block;line-height:1}
@@ -226,7 +226,7 @@ $stats = [
 
 <?php include __DIR__ . '/includes/navbar.php'; ?>
 
-<div class="courses-hero">
+<div class="courses-hero" style="background-image:url('https://images.unsplash.com/photo-1523050854058-8df90110c8f1?w=1920&q=80')">
   <div class="container">
     <div class="courses-breadcrumb">
       <a href="<?= rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/index.php">Home</a>

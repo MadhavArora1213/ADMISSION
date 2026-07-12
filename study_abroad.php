@@ -124,6 +124,8 @@ $metaKeywords = 'study abroad ' . date('Y') . ', ' . strtolower($countryLabel) .
     /* Hero Banner */
     .abroad-hero {
       background: linear-gradient(135deg, var(--oxford-navy) 0%, var(--yale-blue) 100%);
+      background-size: cover;
+      background-position: center;
       color: #fff;
       padding: 60px 0 50px 0;
       position: relative;
@@ -134,17 +136,16 @@ $metaKeywords = 'study abroad ' . date('Y') . ', ' . strtolower($countryLabel) .
     .abroad-hero::after {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 60%);
+      inset: 0;
+      background: linear-gradient(135deg,rgba(11,36,71,0.82),rgba(25,55,109,0.78));
       pointer-events: none;
     }
 
     .abroad-hero h1 {
       font-family: 'Space Grotesk', sans-serif;
       font-size: 3rem;
+      position: relative;
+      z-index: 1;
       font-weight: 800;
       margin-bottom: 16px;
       line-height: 1.1;
@@ -156,6 +157,8 @@ $metaKeywords = 'study abroad ' . date('Y') . ', ' . strtolower($countryLabel) .
       max-width: 600px;
       margin: 0 auto 32px auto;
       opacity: 0.9;
+      position: relative;
+      z-index: 1;
     }
 
     /* Quick Country Badges */
@@ -165,6 +168,8 @@ $metaKeywords = 'study abroad ' . date('Y') . ', ' . strtolower($countryLabel) .
       gap: 12px;
       flex-wrap: wrap;
       margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
     }
 
     .country-tab-btn {
@@ -780,7 +785,7 @@ $metaKeywords = 'study abroad ' . date('Y') . ', ' . strtolower($countryLabel) .
 <?php include __DIR__ . '/includes/navbar.php'; ?>
 
 <!-- Study Abroad Hero -->
-<section class="abroad-hero">
+<section class="abroad-hero" style="background-image:url('https://images.unsplash.com/photo-1523050854058-8df90110c8f1?w=1920&q=80')">
   <div class="container">
     <h1>Global Study Abroad Portal 2026</h1>
     <p>Unlock world-class education. Find top-ranked universities, read official visa guides, and consult verified study abroad counselors.</p>
