@@ -139,7 +139,7 @@ if ($level !== 'all' || $mode !== 'all') {
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
   <style>
-    .exams-hero{background:linear-gradient(135deg,#0B2447 0%,#19376D 50%,#0B2447 100%);background-size:cover;background-position:center;padding:72px 0 48px;color:#fff;position:relative;overflow:hidden}
+    .exams-hero{background-color:#0B2447;background-size:cover;background-position:center;padding:72px 0 48px;color:#fff;position:relative;overflow:hidden}
     .exams-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(11,36,71,0.82),rgba(25,55,109,0.78));pointer-events:none}
     .exams-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#0B2447,#19376D,#0B2447)}
     .exams-hero .container{position:relative;z-index:2}

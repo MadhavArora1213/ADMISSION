@@ -9,8 +9,14 @@ require_once 'db.php';
 // Handle Delete/Archive
 if (isset($_GET['action']) && $_GET['action'] == 'archive' && isset($_GET['id'])) {
     $id = $_GET['id'];
-    $stmt = $pdo->prepare("UPDATE colleges SET status = 'archived', archived_at = NOW() WHERE id = ?");
-    $stmt->execute([$id]);
+    try {
+        $stmt = $pdo->prepare("UPDATE colleges SET status = 'archived' WHERE id = ?");
+        $stmt->execute([$id]);
+    } catch (PDOException $e) {
+        // If archived_at column exists, include it
+        $stmt = $pdo->prepare("UPDATE colleges SET status = 'archived', archived_at = NOW() WHERE id = ?");
+        $stmt->execute([$id]);
+    }
     header('Location: colleges.php?msg=archived');
     exit;
 }

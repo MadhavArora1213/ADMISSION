@@ -123,7 +123,7 @@ $metaKeywords = 'study abroad ' . date('Y') . ', ' . strtolower($countryLabel) .
 
     /* Hero Banner */
     .abroad-hero {
-      background: linear-gradient(135deg, var(--oxford-navy) 0%, var(--yale-blue) 100%);
+      background-color: var(--oxford-navy);
       background-size: cover;
       background-position: center;
       color: #fff;
@@ -171,6 +171,7 @@ $metaKeywords = 'study abroad ' . date('Y') . ', ' . strtolower($countryLabel) .
       position: relative;
       z-index: 1;
     }
+    .abroad-hero .container { position: relative; z-index: 1; }
 
     .country-tab-btn {
       background: rgba(255, 255, 255, 0.12);
