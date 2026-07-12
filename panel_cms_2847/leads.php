@@ -3,6 +3,14 @@ session_start();
 if (!isset($_SESSION['admin_id'])) { header('Location: index.php'); exit; }
 require_once 'db.php';
 
+// Handle delete
+if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
+    $delId = $_GET['id'];
+    $pdo->prepare("DELETE FROM leads WHERE id = ?")->execute([$delId]);
+    header('Location: leads.php?msg=deleted');
+    exit;
+}
+
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
 $search = isset($_GET['q']) ? trim($_GET['q']) : '';
 
@@ -169,6 +177,9 @@ $counsellors = $counselStmt->fetchAll();
             <?php if(isset($_GET['msg']) && $_GET['msg']=='saved'): ?>
             <div class="msg-alert"><i class="ph ph-check-circle"></i> Lead saved successfully.</div>
             <?php endif; ?>
+            <?php if(isset($_GET['msg']) && $_GET['msg']=='deleted'): ?>
+            <div class="msg-alert" style="background:rgba(220,38,38,0.06);color:#991B1B;border-color:rgba(220,38,38,0.1);"><i class="ph ph-check-circle"></i> Lead deleted successfully.</div>
+            <?php endif; ?>
 
             <?php
             $totStmt = $pdo->query("SELECT lead_status, COUNT(*) AS cnt FROM leads GROUP BY lead_status");
@@ -258,7 +269,10 @@ $counsellors = $counselStmt->fetchAll();
                                 <td class="hide-mobile"><span class="badge d-<?php echo $l['delivery_status']; ?>"><?php echo ucfirst($l['delivery_status']); ?></span></td>
                                 <td class="hide-mobile" style="font-size:0.85rem;"><?php echo htmlspecialchars($l['assigned_name'] ?: '—'); ?></td>
                                 <td class="hide-mobile" style="font-size:0.82rem; white-space:nowrap;"><?php echo $l['next_followup_at'] ? date('d M y H:i', strtotime($l['next_followup_at'])) : '—'; ?></td>
-                                <td><a href="lead_form.php?id=<?php echo $l['id']; ?>" class="action-btn" title="View/Edit"><i class="ph ph-pencil-simple"></i></a></td>
+                                <td style="display:flex; gap:6px;">
+                                    <a href="lead_form.php?id=<?php echo $l['id']; ?>" class="action-btn" title="View/Edit"><i class="ph ph-pencil-simple"></i></a>
+                                    <a href="?action=delete&id=<?php echo $l['id']; ?>" class="action-btn" title="Delete" onclick="return confirm('Are you sure you want to delete this lead?')" style="color:#DC2626;border-color:rgba(220,38,38,0.2);"><i class="ph ph-trash"></i></a>
+                                </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>

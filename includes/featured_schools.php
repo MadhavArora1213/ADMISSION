@@ -16,44 +16,45 @@
         $schLocation = trim(($sch['city_name'] ?? '') . ($sch['city_name'] && $sch['state_name'] ? ', ' : '') . ($sch['state_name'] ?? ''));
         $schRating = (float)($sch['overall_rating_avg'] ?? 0);
       ?>
-      <a href="<?= schoolUrl($sch['slug']) ?>" class="uc-card reveal reveal-delay-<?= $si ?>">
-        <div class="uc-card-img">
+      <a href="<?= schoolUrl($sch['slug']) ?>" class="school-card reveal reveal-delay-<?= $si ?>">
+        <div class="school-card-img">
           <img src="<?= cImg($sch['cover_image_url'] ?? '') ?>" alt="<?= htmlspecialchars($sch['name']) ?>" loading="lazy">
-          <div class="uc-card-gradient"></div>
-          <?php if ($schRating > 0): ?>
-          <span class="uc-card-rating"><i class="ph-fill ph-star"></i> <?= number_format($schRating, 1) ?></span>
-          <?php endif; ?>
+          <div class="school-card-badge">
+            <?php if ($schRating > 0): ?>
+            <span class="badge-rating"><i class="ph-fill ph-star"></i> <?= number_format($schRating, 1) ?></span>
+            <?php endif; ?>
+            <span class="badge-type"><?= htmlspecialchars(schoolTypeLabel($sch['school_type'])) ?></span>
+          </div>
         </div>
-        <div class="uc-card-body">
-          <div class="uc-card-tags">
-            <span class="uc-card-tag"><?= htmlspecialchars(schoolTypeLabel($sch['school_type'])) ?></span>
+        <div class="school-card-body">
+          <div class="school-card-tags">
             <?php if (!empty($sch['board_affiliation'])): ?>
-            <span class="uc-card-tag uc-card-tag-accent"><?= htmlspecialchars(schoolBoardLabel($sch['board_affiliation'])) ?></span>
+            <span class="school-card-tag school-card-tag-board"><?= htmlspecialchars(schoolBoardLabel($sch['board_affiliation'])) ?></span>
             <?php endif; ?>
           </div>
-          <h3 class="uc-card-name"><?= htmlspecialchars($sch['name']) ?></h3>
+          <h3 class="school-card-name"><?= htmlspecialchars($sch['name']) ?></h3>
           <?php if ($schLocation): ?>
-          <div class="uc-card-loc"><i class="ph ph-map-pin"></i> <?= htmlspecialchars($schLocation) ?></div>
+          <div class="school-card-loc"><i class="ph ph-map-pin"></i> <?= htmlspecialchars($schLocation) ?></div>
           <?php endif; ?>
-          <div class="uc-card-stats">
-            <div class="uc-card-stat">
-              <i class="ph ph-users"></i>
-              <div>
-                <span class="uc-card-stat-val"><?= !empty($sch['total_students']) ? number_format((int)$sch['total_students']) : '—' ?></span>
-                <span class="uc-card-stat-lbl">Students</span>
+          <div class="school-card-stats">
+            <div class="school-card-stat">
+              <div class="school-card-stat-icon"><i class="ph ph-users"></i></div>
+              <div class="school-card-stat-content">
+                <span class="school-card-stat-val"><?= !empty($sch['total_students']) ? number_format((int)$sch['total_students']) : '—' ?></span>
+                <span class="school-card-stat-lbl">Students</span>
               </div>
             </div>
-            <div class="uc-card-stat-divider"></div>
-            <div class="uc-card-stat">
-              <i class="ph ph-calendar"></i>
-              <div>
-                <span class="uc-card-stat-val"><?= !empty($sch['established_year']) ? (int)$sch['established_year'] : '—' ?></span>
-                <span class="uc-card-stat-lbl">Est.</span>
+            <div class="school-card-stat">
+              <div class="school-card-stat-icon"><i class="ph ph-calendar-blank"></i></div>
+              <div class="school-card-stat-content">
+                <span class="school-card-stat-val"><?= !empty($sch['established_year']) ? (int)$sch['established_year'] : '—' ?></span>
+                <span class="school-card-stat-lbl">Established</span>
               </div>
             </div>
           </div>
-          <div class="uc-card-foot">
-            <span class="uc-card-cta">View Details <i class="ph ph-arrow-right"></i></span>
+          <div class="school-card-foot">
+            <span class="school-card-cta">View Details <i class="ph ph-arrow-right"></i></span>
+            <button class="school-card-save" title="Save school"><i class="ph ph-bookmark-simple"></i></button>
           </div>
         </div>
       </a>
