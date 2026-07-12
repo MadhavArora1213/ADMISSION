@@ -284,9 +284,9 @@ $siteBase = getBaseUrl();
 <?php include 'includes/stats.php'; ?>
 <?php include 'includes/marquee.php'; ?>
 <?php include 'includes/streams.php'; ?>
-<?php include 'includes/top_ranked.php'; ?>
 <?php include 'includes/featured_colleges.php'; ?>
 <?php include 'includes/featured_schools.php'; ?>
+<?php include 'includes/top_ranked.php'; ?>
 <?php include 'includes/tools.php'; ?>
 <?php include 'includes/exams.php'; ?>
 <?php include 'includes/courses.php'; ?>
