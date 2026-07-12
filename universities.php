@@ -48,14 +48,13 @@ $sql = "
            u.is_verified, u.is_featured, u.total_students, u.total_faculty, u.campus_area_acres,
            u.ugc_approved, u.aicte_approved, u.nba_approved,
            s.name AS state_name, ci.name AS city_name,
-           um.logo_url, um.cover_image_url,
+           u.logo_url, u.cover_image_url,
            (SELECT MIN(uc.annual_fee) FROM university_courses uc WHERE uc.university_id = u.id AND uc.annual_fee > 0) AS min_fee,
            (SELECT MAX(up.avg_package_lpa) FROM university_placements up WHERE up.university_id = u.id) AS avg_package,
            (SELECT COUNT(*) FROM university_courses uc WHERE uc.university_id = u.id) AS total_courses
     FROM universities u
     LEFT JOIN states s ON u.state_id = s.id
     LEFT JOIN cities ci ON u.city_id = ci.id
-    LEFT JOIN university_media um ON um.university_id = u.id AND um.image_type IS NULL
     WHERE {$whereSql}
     ORDER BY {$orderSql}
     LIMIT {$perPage} OFFSET {$offset}
