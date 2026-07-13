@@ -113,7 +113,7 @@
             $sd = ['icon'=>'ph-graduation-cap','color'=>'#0B2447','bg'=>'#f0f4ff','accent'=>'#e2e8f0','count'=>$display > 0 ? number_format($display).'+' : '0','desc'=>'Explore programs'];
         }
       ?>
-      <a href="<?=coursesUrl(['category'=>$name])?>" class="sc reveal reveal-delay-<?=$i?>" style="--sc:<?=$sd['color']?>;--sc-bg:<?=$sd['bg']?>;--sc-accent:<?=$sd['accent']?>;<?php if(!empty($sd['img'])):?>background-image:url('<?=$sd['img']?>');<?php endif?>">
+      <a href="<?=coursesUrl(['category'=>$name])?>" class="sc<?=!empty($sd['img'])?' sc-img':''?> reveal reveal-delay-<?=$i?>" style="--sc:<?=$sd['color']?>;--sc-bg:<?=$sd['bg']?>;--sc-accent:<?=$sd['accent']?>;<?php if(!empty($sd['img'])):?>background-image:url('<?=$sd['img']?>');<?php endif?>">
         <?php if(!empty($sd['img'])): ?><div class="sc-overlay"></div><?php endif;?>
         <div class="sc-top">
           <div class="sc-icon"><i class="ph <?=$sd['icon']?>"></i></div>
@@ -131,7 +131,7 @@
       <?php foreach ($streamFallback as $i=>$c):
         $sd = $streamData[$c['slug']] ?? ['icon'=>'ph-graduation-cap','color'=>'#0B2447','bg'=>'#f0f4ff','accent'=>'#e2e8f0','count'=>'0','desc'=>'Explore programs','img'=>''];
       ?>
-      <a href="<?=coursesUrl(['category'=>$c['name']])?>" class="sc reveal reveal-delay-<?=$i?>" style="--sc:<?=$sd['color']?>;--sc-bg:<?=$sd['bg']?>;--sc-accent:<?=$sd['accent']?>;<?php if(!empty($sd['img'])):?>background-image:url('<?=$sd['img']?>');<?php endif?>">
+      <a href="<?=coursesUrl(['category'=>$c['name']])?>" class="sc<?=!empty($sd['img'])?' sc-img':''?> reveal reveal-delay-<?=$i?>" style="--sc:<?=$sd['color']?>;--sc-bg:<?=$sd['bg']?>;--sc-accent:<?=$sd['accent']?>;<?php if(!empty($sd['img'])):?>background-image:url('<?=$sd['img']?>');<?php endif?>">
         <?php if(!empty($sd['img'])): ?><div class="sc-overlay"></div><?php endif;?>
         <div class="sc-top">
           <div class="sc-icon"><i class="ph <?=$sd['icon']?>"></i></div>

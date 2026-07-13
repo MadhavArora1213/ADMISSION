@@ -2380,8 +2380,8 @@ select {
   box-shadow: 0 12px 32px color-mix(in srgb, var(--sc) 12%, transparent)
 }
 
-.sc:hover .sc-overlay {
-  background: linear-gradient(180deg, rgba(15,23,42,0.45) 0%, rgba(15,23,42,0.7) 100%);
+.sc-img:hover .sc-overlay {
+  background: linear-gradient(180deg, rgba(11,36,71,0.5) 0%, rgba(11,36,71,0.75) 100%);
 }
 
 .sc-top {
@@ -2409,13 +2409,13 @@ select {
   box-shadow: 0 4px 16px color-mix(in srgb, var(--sc) 20%, transparent)
 }
 
-.sc:has(.sc-overlay) .sc-name { color: #fff !important }
-.sc:has(.sc-overlay) .sc-desc { color: rgba(255,255,255,.75) !important }
-.sc:has(.sc-overlay) .sc-badge { background: rgba(255,255,255,.2); color: #fff !important; backdrop-filter: blur(8px) }
-.sc:has(.sc-overlay) .sc-icon { background: rgba(255,255,255,.2); color: #fff !important; backdrop-filter: blur(8px) }
-.sc:has(.sc-overlay) .sc-footer { color: #fff !important }
-.sc:has(.sc-overlay) .sc-footer span { color: #fff !important }
-.sc:has(.sc-overlay)::before { background: rgba(255,255,255,.5) }
+.sc-img .sc-name { color: #fff !important }
+.sc-img .sc-desc { color: rgba(255,255,255,.75) !important }
+.sc-img .sc-badge { background: rgba(255,255,255,.2); color: #fff !important; backdrop-filter: blur(8px) }
+.sc-img .sc-icon { background: rgba(255,255,255,.2); color: #fff !important; backdrop-filter: blur(8px) }
+.sc-img .sc-footer { color: #fff !important }
+.sc-img .sc-footer span { color: #fff !important }
+.sc-img::before { background: rgba(255,255,255,.5) }
 
 .sc-badge {
   font-size: .7rem;
