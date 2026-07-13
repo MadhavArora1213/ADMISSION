@@ -2332,7 +2332,7 @@ select {
 }
 
 .sc {
-  background: var(--card);
+  background-color: var(--card);
   background-size: cover;
   background-position: center;
   border: 1px solid var(--border);
@@ -2349,7 +2349,7 @@ select {
 .sc-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(11,36,71,0.65) 0%, rgba(11,36,71,0.85) 100%);
+  background: linear-gradient(180deg, rgba(10,10,10,0.6) 0%, rgba(10,10,10,0.88) 100%);
   z-index: 0;
 }
 
@@ -2409,13 +2409,17 @@ select {
   box-shadow: 0 4px 16px color-mix(in srgb, var(--sc) 20%, transparent)
 }
 
-.sc-img .sc-name { color: #fff !important }
-.sc-img .sc-desc { color: rgba(255,255,255,.75) !important }
-.sc-img .sc-badge { background: rgba(255,255,255,.2); color: #fff !important; backdrop-filter: blur(8px) }
-.sc-img .sc-icon { background: rgba(255,255,255,.2); color: #fff !important; backdrop-filter: blur(8px) }
-.sc-img .sc-footer { color: #fff !important }
+.sc-img .sc-name,
+.sc-img .sc-desc,
+.sc-img .sc-badge,
+.sc-img .sc-icon,
+.sc-img .sc-footer,
 .sc-img .sc-footer span { color: #fff !important }
-.sc-img::before { background: rgba(255,255,255,.5) }
+
+.sc-img .sc-desc { color: rgba(255,255,255,.8) !important }
+.sc-img .sc-badge { background: rgba(255,255,255,.18) !important; backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.15) }
+.sc-img .sc-icon { background: rgba(255,255,255,.15) !important; backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.1) }
+.sc-img::before { background: rgba(255,255,255,.4) }
 
 .sc-badge {
   font-size: .7rem;

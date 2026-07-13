@@ -10,14 +10,14 @@
     <?php
     // Dynamic stream counts from database
     $streamMap = [
-      'engineering' => ['icon'=>'ph-laptop','color'=>'#2563eb','bg'=>'#eff6ff','accent'=>'#dbeafe','categories'=>['Engineering','IT & Software'],'desc'=>'Tech, CS, IT & more','img'=>'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&q=75'],
-      'management'  => ['icon'=>'ph-briefcase','color'=>'#7c3aed','bg'=>'#f5f3ff','accent'=>'#ede9fe','categories'=>['Management','Commerce'],'desc'=>'MBA, BBA & Commerce','img'=>'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=75'],
-      'medical'     => ['icon'=>'ph-stethoscope','color'=>'#059669','bg'=>'#ecfdf5','accent'=>'#d1fae5','categories'=>['Medical','Nursing'],'desc'=>'MBBS, BDS, Nursing','img'=>'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=600&q=75'],
-      'law'         => ['icon'=>'ph-scales','color'=>'#dc2626','bg'=>'#fef2f2','accent'=>'#fecaca','categories'=>['Law'],'desc'=>'LLB, CLAT & Legal','img'=>'https://images.unsplash.com/photo-1589994965851-a8f479c573a9?w=600&q=75'],
-      'science'     => ['icon'=>'ph-flask','color'=>'#0891b2','bg'=>'#ecfeff','accent'=>'#cffafe','categories'=>['Science'],'desc'=>'BSc, Research & Lab','img'=>'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=600&q=75'],
-      'arts'        => ['icon'=>'ph-palette','color'=>'#e11d48','bg'=>'#fff1f2','accent'=>'#ffe4e6','categories'=>['Arts'],'desc'=>'Design, Fine Arts','img'=>'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&q=75'],
-      'design'      => ['icon'=>'ph-magic-wand','color'=>'#9333ea','bg'=>'#faf5ff','accent'=>'#f3e8ff','categories'=>['Design'],'desc'=>'UI/UX, Graphic & more','img'=>'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=75'],
-      'commerce'    => ['icon'=>'ph-chart-line','color'=>'#d97706','bg'=>'#fffbeb','accent'=>'#fef3c7','categories'=>['Commerce'],'desc'=>'BCom, CA, Finance','img'=>'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=75'],
+      'engineering' => ['icon'=>'ph-laptop','color'=>'#2563eb','bg'=>'#eff6ff','accent'=>'#dbeafe','categories'=>['Engineering','IT & Software'],'desc'=>'Tech, CS, IT & more','img'=>'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80'],
+      'management'  => ['icon'=>'ph-briefcase','color'=>'#7c3aed','bg'=>'#f5f3ff','accent'=>'#ede9fe','categories'=>['Management','Commerce'],'desc'=>'MBA, BBA & Commerce','img'=>'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&q=80'],
+      'medical'     => ['icon'=>'ph-stethoscope','color'=>'#059669','bg'=>'#ecfdf5','accent'=>'#d1fae5','categories'=>['Medical','Nursing'],'desc'=>'MBBS, BDS, Nursing','img'=>'https://images.unsplash.com/photo-1551190822-a9ce113d0d25?w=600&q=80'],
+      'law'         => ['icon'=>'ph-scales','color'=>'#dc2626','bg'=>'#fef2f2','accent'=>'#fecaca','categories'=>['Law'],'desc'=>'LLB, CLAT & Legal','img'=>'https://images.unsplash.com/photo-1479142506502-19b3a3b7ff33?w=600&q=80'],
+      'science'     => ['icon'=>'ph-flask','color'=>'#0891b2','bg'=>'#ecfeff','accent'=>'#cffafe','categories'=>['Science'],'desc'=>'BSc, Research & Lab','img'=>'https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=600&q=80'],
+      'arts'        => ['icon'=>'ph-palette','color'=>'#e11d48','bg'=>'#fff1f2','accent'=>'#ffe4e6','categories'=>['Arts'],'desc'=>'Design, Fine Arts','img'=>'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=600&q=80'],
+      'design'      => ['icon'=>'ph-magic-wand','color'=>'#9333ea','bg'=>'#faf5ff','accent'=>'#f3e8ff','categories'=>['Design'],'desc'=>'UI/UX, Graphic & more','img'=>'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=600&q=80'],
+      'commerce'    => ['icon'=>'ph-chart-line','color'=>'#d97706','bg'=>'#fffbeb','accent'=>'#fef3c7','categories'=>['Commerce'],'desc'=>'BCom, CA, Finance','img'=>'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80'],
     ];
 
     // Fetch real counts from DB
