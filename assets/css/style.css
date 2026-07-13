@@ -2347,13 +2347,14 @@ select {
 }
 
 .sc-overlay {
-  position: absolute;
+  position: absolute !important;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.75) 100%);
-  z-index: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.78) 100%);
+  z-index: 0 !important;
+  pointer-events: none;
 }
 
-.sc > * {
+.sc > *:not(.sc-overlay) {
   position: relative;
   z-index: 1;
 }
