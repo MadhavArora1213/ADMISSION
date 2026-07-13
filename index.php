@@ -9,6 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/includes/college_helpers.php';
+require_once __DIR__ . '/includes/university_helpers.php';
 require_once __DIR__ . '/includes/exam_helpers.php';
 require_once __DIR__ . '/includes/course_helpers.php';
 require_once __DIR__ . '/includes/news_seo_helpers.php';

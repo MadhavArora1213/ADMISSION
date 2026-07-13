@@ -1,20 +1,106 @@
-<!-- ═══ UNIQUE HERO — Mesh Gradient + Floating Stats ═══ -->
-<section class="nh">
-  <!-- Animated mesh blobs -->
-  <div class="nh-mesh">
-    <div class="nh-blob nh-blob-1"></div>
-    <div class="nh-blob nh-blob-2"></div>
-    <div class="nh-blob nh-blob-3"></div>
+<!-- ═══ HERO BANNER — Rotating Background Carousel (Shiksha-style) ═══ -->
+<section class="hero-banner" id="heroBanner">
+  <!-- Background Slides -->
+  <div class="hero-slides" id="heroSlides">
+    <?php
+    // Fetch hero institutions from all 3 tables, ordered by hero_priority
+    $heroItems = [];
+    try {
+      // Colleges with hero_priority
+      $hCols = cAll($pdo, "SELECT c.id, c.name, c.slug, c.overall_rating_avg, c.total_reviews,
+        s.name AS state_name, ci.name AS city_name, cm.cover_image_url,
+        'college' AS entity_type
+        FROM colleges c
+        LEFT JOIN states s ON c.state_id=s.id LEFT JOIN cities ci ON c.city_id=ci.id
+        LEFT JOIN college_media cm ON cm.college_id=c.id AND (cm.image_type='cover' OR cm.image_type IS NULL)
+        WHERE c.status='active' AND c.hero_priority IS NOT NULL
+        ORDER BY c.hero_priority ASC LIMIT 5");
+      foreach ($hCols as $hc) $heroItems[] = $hc;
+
+      // Universities with hero_priority
+      $hUnis = cAll($pdo, "SELECT u.id, u.name, u.slug, u.overall_rating_avg, u.total_reviews,
+        s.name AS state_name, ci.name AS city_name, u.cover_image_url,
+        'university' AS entity_type
+        FROM universities u
+        LEFT JOIN states s ON u.state_id=s.id LEFT JOIN cities ci ON u.city_id=ci.id
+        WHERE u.status='active' AND u.hero_priority IS NOT NULL
+        ORDER BY u.hero_priority ASC LIMIT 5");
+      foreach ($hUnis as $hu) $heroItems[] = $hu;
+
+      // Schools with hero_priority
+      $hSchs = cAll($pdo, "SELECT sc.id, sc.name, sc.slug, sc.overall_rating_avg, sc.total_reviews,
+        s.name AS state_name, ci.name AS city_name, sm.cover_image_url,
+        'school' AS entity_type
+        FROM schools sc
+        LEFT JOIN states s ON sc.state_id=s.id LEFT JOIN cities ci ON sc.city_id=ci.id
+        LEFT JOIN school_media sm ON sm.school_id=sc.id AND sm.image_type IS NULL
+        WHERE sc.status='active' AND sc.hero_priority IS NOT NULL
+        ORDER BY sc.hero_priority ASC LIMIT 5");
+      foreach ($hSchs as $hs) $heroItems[] = $hs;
+
+      // Sort all by hero_priority
+      usort($heroItems, function($a, $b) {
+        $pa = (int)($a['hero_priority'] ?? 99);
+        $pb = (int)($b['hero_priority'] ?? 99);
+        return $pa <=> $pb;
+      });
+    } catch (Throwable $e) {}
+
+    // Fallback: if no hero_priority items, use featured colleges
+    if (empty($heroItems)) {
+      $heroItems = array_map(fn($c) => $c + ['entity_type' => 'college'], $featuredColleges ?? []);
+    }
+    // Limit to 5
+    $heroItems = array_slice($heroItems, 0, 5);
+    ?>
+
+    <?php if (!empty($heroItems)): ?>
+    <?php foreach ($heroItems as $hi => $hero):
+      $hImg = $hero['cover_image_url'] ?? '';
+      $hName = htmlspecialchars($hero['name'] ?? '');
+      $hCity = $hero['city_name'] ?? '';
+      $hState = $hero['state_name'] ?? '';
+      $hLoc = trim($hCity . ($hCity && $hState ? ', ' : '') . $hState);
+      $hRating = (float)($hero['overall_rating_avg'] ?? 0);
+      $hType = $hero['entity_type'] ?? 'college';
+      $hSlug = $hero['slug'] ?? '';
+      // Build URL based on type
+      $hUrl = ($hType === 'college') ? collegeUrl($hSlug) : (($hType === 'university') ? universityUrl($hSlug) : schoolUrl($hSlug));
+      $hTypeLabel = ($hType === 'college') ? 'College' : (($hType === 'university') ? 'University' : 'School');
+    ?>
+    <div class="hero-slide <?= $hi === 0 ? 'active' : '' ?>" data-index="<?= $hi ?>">
+      <div class="hero-slide-bg" style="background-image:url('<?= htmlspecialchars($hImg ?: 'https://images.unsplash.com/photo-1562774053-701939374585?w=1920&q=80') ?>')"></div>
+      <div class="hero-slide-overlay"></div>
+      <div class="hero-slide-info">
+        <span class="hero-slide-type"><?= $hTypeLabel ?></span>
+        <a href="<?= $hUrl ?>" class="hero-slide-link">
+          <strong><?= $hName ?></strong>
+          <?php if ($hLoc): ?><span><i class="ph ph-map-pin"></i> <?= htmlspecialchars($hLoc) ?></span><?php endif; ?>
+          <span class="hero-slide-meta">
+            <?php if ($hRating > 0): ?><span class="hero-slide-rating"><i class="ph-fill ph-star"></i> <?= number_format($hRating, 1) ?></span><?php endif; ?>
+            <span class="hero-slide-view">(view details)</span>
+          </span>
+        </a>
+      </div>
+    </div>
+    <?php endforeach; ?>
+
+    <!-- Slide dots -->
+    <?php if (count($heroItems) > 1): ?>
+    <div class="hero-dots" id="heroDots">
+      <?php foreach ($heroItems as $di => $_): ?>
+      <button class="hero-dot <?= $di === 0 ? 'active' : '' ?>" data-idx="<?= $di ?>"></button>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+    <?php endif; ?>
   </div>
 
-  <div class="container nh-layout">
-    <!-- LEFT: Text + Search -->
-    <div class="nh-left">
-      <?php if (!empty($totalStudents)): ?>
-      <div class="nh-badge"><i class="ph-fill ph-shield-check"></i> Trusted by <?=number_format($totalStudents)?>+ Students</div>
-      <?php endif; ?>
-      <h1 class="nh-title">Find Your <span class="nh-gradient">Dream College</span> in India</h1>
-      <p class="nh-sub">Explore <?=number_format($totalColleges)?>+ colleges, <?=number_format($totalCourses)?>+ courses & <?=number_format($totalExams)?>+ entrance exams — all in one place.</p>
+  <!-- Content Overlay -->
+  <div class="hero-content-wrap">
+    <div class="container hero-content">
+      <h1 class="hero-title">Find <span class="hero-gradient">Best Colleges, Schools & Universities</span> in India</h1>
+      <p class="hero-sub">Explore <?= number_format($totalColleges ?? 0) ?>+ colleges, <?= number_format($totalStudents ?? 0) ?>+ students & <?= number_format($totalExams ?? 0) ?>+ entrance exams — all in one place.</p>
 
       <!-- Search Card -->
       <div class="nh-search" id="nhSearchWrap">
@@ -22,12 +108,13 @@
           <button class="active" data-type="all"><i class="ph ph-magnifying-glass"></i> All</button>
           <button data-type="colleges"><i class="ph ph-buildings"></i> Colleges</button>
           <button data-type="schools"><i class="ph ph-graduation-cap"></i> Schools</button>
+          <button data-type="universities"><i class="ph ph-globe-hemisphere-west"></i> Universities</button>
           <button data-type="exams"><i class="ph ph-pencil-line"></i> Exams</button>
           <button data-type="courses"><i class="ph ph-book-open"></i> Courses</button>
         </div>
         <div class="nh-search-row">
           <i class="ph ph-magnifying-glass"></i>
-          <input type="text" placeholder="Search colleges, exams, courses, careers..." id="nhSearchInput" autocomplete="off">
+          <input type="text" placeholder="Search colleges, schools, exams, courses..." id="nhSearchInput" autocomplete="off">
           <button class="nh-search-btn" id="nhSearchBtn">Search <i class="ph ph-arrow-right"></i></button>
         </div>
         <div class="nh-search-dropdown" id="nhSearchDropdown"></div>
@@ -36,49 +123,12 @@
       <!-- Quick Links -->
       <div class="nh-quick">
         <span class="nh-quick-label">Popular:</span>
-        <a href="<?=collegesUrl(['q'=>'IIT'])?>" class="nh-quick-link">IIT Colleges</a>
-        <a href="<?=schoolsUrl()?>" class="nh-quick-link">Top Schools</a>
-        <a href="<?=collegesUrl(['q'=>'Medical'])?>" class="nh-quick-link">Medical Colleges</a>
-        <a href="<?=examsUrl()?>" class="nh-quick-link">Entrance Exams</a>
-        <a href="<?=coursesUrl(['q'=>'MBA'])?>" class="nh-quick-link">MBA Courses</a>
-      </div>
-    </div>
-
-    <!-- RIGHT: Floating Stat Cards -->
-    <div class="nh-right">
-      <div class="nh-card nh-card-1">
-        <div class="nh-card-icon"><i class="ph-fill ph-buildings"></i></div>
-        <div class="nh-card-text">
-          <strong><?=number_format($totalColleges)?>+</strong>
-          <span>Colleges</span>
-        </div>
-      </div>
-      <div class="nh-card nh-card-2">
-        <div class="nh-card-icon"><i class="ph-fill ph-book-open"></i></div>
-        <div class="nh-card-text">
-          <strong><?=number_format($totalCourses)?>+</strong>
-          <span>Courses</span>
-        </div>
-      </div>
-      <div class="nh-card nh-card-3">
-        <div class="nh-card-icon"><i class="ph-fill ph-star"></i></div>
-        <div class="nh-card-text">
-          <strong><?=number_format($totalReviews)?>+</strong>
-          <span>Reviews</span>
-        </div>
-      </div>
-      <div class="nh-card nh-card-4">
-        <div class="nh-card-icon nh-card-icon-accent"><i class="ph-fill ph-users"></i></div>
-        <div class="nh-card-text">
-          <strong><?=number_format($totalStudents ?? 0)?>+</strong>
-          <span>Students</span>
-        </div>
-      </div>
-      <!-- Central visual -->
-      <div class="nh-center-visual">
-        <div class="nh-ring"></div>
-        <div class="nh-ring nh-ring-2"></div>
-        <i class="ph-fill ph-graduation-cap"></i>
+        <a href="<?= collegesUrl(['q'=>'IIT']) ?>" class="nh-quick-link">IIT Colleges</a>
+        <a href="<?= schoolsUrl() ?>" class="nh-quick-link">Top Schools</a>
+        <a href="<?= universitiesUrl() ?>" class="nh-quick-link">Universities</a>
+        <a href="<?= collegesUrl(['q'=>'Medical']) ?>" class="nh-quick-link">Medical Colleges</a>
+        <a href="<?= examsUrl() ?>" class="nh-quick-link">Entrance Exams</a>
+        <a href="<?= coursesUrl(['q'=>'MBA']) ?>" class="nh-quick-link">MBA Courses</a>
       </div>
     </div>
   </div>
@@ -96,6 +146,33 @@
 
 <script>
 (function(){
+  // ── Hero Carousel ──
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.hero-dot');
+  let current = 0, interval = null;
+
+  function goTo(idx) {
+    slides.forEach(s => s.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
+    if (slides[idx]) slides[idx].classList.add('active');
+    if (dots[idx]) dots[idx].classList.add('active');
+    current = idx;
+  }
+
+  function next() {
+    goTo((current + 1) % Math.max(slides.length, 1));
+  }
+
+  if (slides.length > 1) {
+    interval = setInterval(next, 5000);
+    dots.forEach(d => d.addEventListener('click', () => {
+      clearInterval(interval);
+      goTo(parseInt(d.dataset.idx));
+      interval = setInterval(next, 5000);
+    }));
+  }
+
+  // ── Search Tabs (including Universities) ──
   const input = document.getElementById('nhSearchInput');
   const dd = document.getElementById('nhSearchDropdown');
   const btn = document.getElementById('nhSearchBtn');
@@ -115,7 +192,7 @@
   }
 
   function typeLabel(type) {
-    const m = {college:'Colleges',school:'Schools',exam:'Exams',course:'Courses',career:'Careers',article:'News & Articles',question:'Questions',university:'Foreign Universities'};
+    const m = {college:'Colleges',school:'Schools',exam:'Exams',course:'Courses',career:'Careers',article:'News & Articles',question:'Questions',university:'Universities'};
     return m[type] || type;
   }
 
@@ -126,7 +203,7 @@
 
   function render(results, q) {
     if (filterType !== 'all') {
-      results = results.filter(r => r.type === filterType || (filterType === 'colleges' && r.type === 'college') || (filterType === 'schools' && r.type === 'school') || (filterType === 'exams' && r.type === 'exam') || (filterType === 'courses' && r.type === 'course'));
+      results = results.filter(r => r.type === filterType || (filterType === 'colleges' && r.type === 'college') || (filterType === 'schools' && r.type === 'school') || (filterType === 'universities' && r.type === 'university') || (filterType === 'exams' && r.type === 'exam') || (filterType === 'courses' && r.type === 'course'));
     }
     if (!results.length) {
       dd.innerHTML = '<div class="nh-search-empty"><i class="ph ph-magnifying-glass"></i>No results found for "<strong>' + q.replace(/</g,'&lt;') + '</strong>"</div>';
@@ -139,7 +216,7 @@
       groups[r.type].push(r);
     });
     let html = '';
-    const order = ['college','school','exam','course','career','university','article','question'];
+    const order = ['college','school','university','exam','course','career','article','question'];
     order.forEach(type => {
       if (!groups[type]) return;
       html += '<div class="nh-search-group">';
@@ -234,8 +311,10 @@
       tab.classList.add('active');
       filterType = tab.dataset.type || 'all';
       const placeholders = {
-        all: 'Search colleges, exams, courses, careers...',
+        all: 'Search colleges, schools, exams, courses...',
         colleges: 'Search colleges by name, location...',
+        schools: 'Search schools by name, board, city...',
+        universities: 'Search universities by name, type...',
         exams: 'Search entrance exams...',
         courses: 'Search courses & programs...'
       };
