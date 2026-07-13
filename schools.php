@@ -103,6 +103,17 @@ $stats = [
     'states'  => cCol($pdo, "SELECT COUNT(DISTINCT state_id) FROM schools WHERE status='active'"),
 ];
 
+// Suggested Schools for sidebar
+$suggestedSchools = cAll($pdo, "SELECT s.id, s.name, s.slug, s.school_type, s.board_affiliation, s.overall_rating_avg, s.established_year,
+    st.name AS state_name, ci.name AS city_name, sm.cover_image_url, sm.logo_url,
+    s.total_students, s.campus_area_acres
+    FROM schools s
+    LEFT JOIN states st ON s.state_id=st.id LEFT JOIN cities ci ON s.city_id=ci.id
+    LEFT JOIN school_media sm ON sm.school_id=s.id AND sm.image_type IS NULL
+    WHERE s.status='active' AND s.is_featured=1
+    ORDER BY s.overall_rating_avg DESC
+    LIMIT 5");
+
 $siteBase = getBaseUrl();
 $canonicalUrl = $siteBase . '/schools';
 $queryParams = [];
@@ -627,6 +638,40 @@ if (!$geoMeta) {
     <aside class="shiksha-sidebar">
       <div class="shiksha-widget-wrapper">
         <button class="col-filter-close" onclick="this.closest('.shiksha-sidebar').classList.remove('open')"><i class="ph ph-x"></i></button>
+
+        <!-- Suggested Schools -->
+        <?php if (!empty($suggestedSchools)): ?>
+        <div class="shiksha-widget sug-colleges-widget">
+          <h4 class="shiksha-widget-title"><i class="ph ph-star"></i> Suggested Schools</h4>
+          <div class="sug-college-list">
+            <?php foreach ($suggestedSchools as $ss):
+              $ssLoc = trim(($ss['city_name'] ?? '') . ($ss['city_name'] && $ss['state_name'] ? ', ' : '') . ($ss['state_name'] ?? ''));
+              $ssRating = (float)($ss['overall_rating_avg'] ?? 0);
+            ?>
+            <a href="<?= schoolUrl($ss['slug']) ?>" class="sug-college-card">
+              <div class="sug-college-img">
+                <img src="<?= cImg($ss['cover_image_url'] ?? '') ?>" alt="<?= htmlspecialchars($ss['name']) ?>" loading="lazy">
+              </div>
+              <div class="sug-college-info">
+                <h5><?= htmlspecialchars($ss['name']) ?></h5>
+                <?php if ($ssLoc): ?>
+                <span class="sug-college-loc"><i class="ph ph-map-pin"></i> <?= htmlspecialchars($ssLoc) ?></span>
+                <?php endif; ?>
+                <div class="sug-college-meta">
+                  <?php if ($ssRating > 0): ?>
+                  <span class="sug-rating"><i class="ph-fill ph-star"></i> <?= number_format($ssRating, 1) ?></span>
+                  <?php endif; ?>
+                  <?php if (!empty($ss['board_affiliation'])): ?>
+                  <span class="sug-naac"><?= htmlspecialchars($ss['board_affiliation'] === 'State' ? ($ss['board_state_name'] ?? 'State') : $ss['board_affiliation']) ?></span>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </a>
+            <?php endforeach; ?>
+          </div>
+        </div>
+        <?php endif; ?>
+
       <div class="shiksha-widget">
         <h4 class="shiksha-widget-title">Browse by State</h4>
         <ul class="shiksha-widget-list">

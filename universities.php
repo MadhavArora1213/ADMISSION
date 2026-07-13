@@ -71,6 +71,17 @@ $stats = [
     'states'  => cCol($pdo, "SELECT COUNT(DISTINCT state_id) FROM universities WHERE status='active'"),
 ];
 
+// Suggested Universities for sidebar
+$suggestedUnis = cAll($pdo, "SELECT u.id, u.name, u.slug, u.university_type, u.naac_grade, u.ranking_nirf, u.overall_rating_avg, u.established_year,
+    s.name AS state_name, ci.name AS city_name, u.cover_image_url, u.logo_url,
+    (SELECT MIN(uc.annual_fee) FROM university_courses uc WHERE uc.university_id=u.id AND uc.annual_fee > 0) AS min_fee,
+    (SELECT MAX(up.avg_package_lpa) FROM university_placements up WHERE up.university_id=u.id) AS avg_package
+    FROM universities u
+    LEFT JOIN states s ON u.state_id=s.id LEFT JOIN cities ci ON u.city_id=ci.id
+    WHERE u.status='active' AND u.is_featured=1
+    ORDER BY u.overall_rating_avg DESC, u.ranking_nirf ASC
+    LIMIT 5");
+
 $navBase = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 $siteBase = getBaseUrl();
 $canonicalUrl = $siteBase . '/universities';
@@ -365,6 +376,42 @@ $ogDesc = 'Compare ' . number_format($total) . '+ universities across India. Fil
     <aside class="shiksha-sidebar">
       <div class="shiksha-widget-wrapper">
         <button class="col-filter-close" onclick="this.closest('.shiksha-sidebar').classList.remove('open')"><i class="ph ph-x"></i></button>
+
+        <!-- Suggested Universities -->
+        <?php if (!empty($suggestedUnis)): ?>
+        <div class="shiksha-widget sug-colleges-widget">
+          <h4 class="shiksha-widget-title"><i class="ph ph-star"></i> Suggested Universities</h4>
+          <div class="sug-college-list">
+            <?php foreach ($suggestedUnis as $su):
+              $suLoc = trim(($su['city_name'] ?? '') . ($su['city_name'] && $su['state_name'] ? ', ' : '') . ($su['state_name'] ?? ''));
+              $suRating = (float)($su['overall_rating_avg'] ?? 0);
+            ?>
+            <a href="<?= universityUrl($su['slug']) ?>" class="sug-college-card">
+              <div class="sug-college-img">
+                <img src="<?= cImg($su['cover_image_url'] ?? '') ?>" alt="<?= htmlspecialchars($su['name']) ?>" loading="lazy">
+              </div>
+              <div class="sug-college-info">
+                <h5><?= htmlspecialchars($su['name']) ?></h5>
+                <?php if ($suLoc): ?>
+                <span class="sug-college-loc"><i class="ph ph-map-pin"></i> <?= htmlspecialchars($suLoc) ?></span>
+                <?php endif; ?>
+                <div class="sug-college-meta">
+                  <?php if ($suRating > 0): ?>
+                  <span class="sug-rating"><i class="ph-fill ph-star"></i> <?= number_format($suRating, 1) ?></span>
+                  <?php endif; ?>
+                  <?php if (!empty($su['naac_grade'])): ?>
+                  <span class="sug-naac">NAAC <?= htmlspecialchars($su['naac_grade']) ?></span>
+                  <?php endif; ?>
+                  <?php if (!empty($su['ranking_nirf'])): ?>
+                  <span class="sug-nirf">NIRF #<?= (int)$su['ranking_nirf'] ?></span>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </a>
+            <?php endforeach; ?>
+          </div>
+        </div>
+        <?php endif; ?>
 
         <div class="shiksha-widget">
           <h4 class="shiksha-widget-title"><i class="ph ph-list-magnifying-glass"></i> Quick Filters</h4>
