@@ -136,7 +136,7 @@ $featuredSchools = cAll($pdo, "SELECT s.id, s.name, s.slug, s.school_type, s.boa
     FROM schools s
     LEFT JOIN states st ON s.state_id = st.id
     LEFT JOIN cities ci ON s.city_id = ci.id
-    LEFT JOIN school_media sm ON sm.school_id = s.id AND sm.image_type IS NULL
+    LEFT JOIN school_media sm ON sm.school_id = s.id AND (sm.image_type='cover' OR sm.image_type IS NULL)
     WHERE s.status = 'active' AND s.is_featured = 1
     ORDER BY s.overall_rating_avg DESC, s.name ASC LIMIT 6");
 if (empty($featuredSchools)) {
@@ -147,7 +147,7 @@ if (empty($featuredSchools)) {
         FROM schools s
         LEFT JOIN states st ON s.state_id = st.id
         LEFT JOIN cities ci ON s.city_id = ci.id
-        LEFT JOIN school_media sm ON sm.school_id = s.id AND sm.image_type IS NULL
+        LEFT JOIN school_media sm ON sm.school_id = s.id AND (sm.image_type='cover' OR sm.image_type IS NULL)
         WHERE s.status = 'active' AND s.overall_rating_avg > 0
         ORDER BY s.overall_rating_avg DESC, s.name ASC LIMIT 6");
 }
