@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/download/493db749d-8274b4ab4/sitemap.xsl"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
        <loc>https://admissionseason.com/</loc>
@@ -597,12 +596,6 @@
        <priority>0.8000</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/university/eyfgyhrefvh</loc>
-       <lastmod>2026-07-13T09:35:55+00:00</lastmod>
-       <changefreq>daily</changefreq>
-       <priority>0.8000</priority>
-  </url>
-  <url>
        <loc>https://admissionseason.com/university/iisc-bangalore</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
@@ -1077,13 +1070,13 @@
        <priority>0.8000</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/news.php</loc>
+       <loc>https://admissionseason.com/news</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.8000</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/college/signup.php</loc>
+       <loc>https://admissionseason.com/signup</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.8000</priority>
@@ -2781,67 +2774,67 @@
        <priority>0.6400</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/news.php?type=news</loc>
+       <loc>https://admissionseason.com/news?type=news</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.6400</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/news.php?type=exam_update</loc>
+       <loc>https://admissionseason.com/news?type=exam_update</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.6400</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/news.php?type=blog</loc>
+       <loc>https://admissionseason.com/news?type=blog</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.6400</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/news.php?type=guide</loc>
+       <loc>https://admissionseason.com/news?type=guide</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.6400</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/news.php?type=opinion</loc>
+       <loc>https://admissionseason.com/news?type=opinion</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.6400</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/news.php?type=ranking</loc>
+       <loc>https://admissionseason.com/news?type=ranking</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.6400</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/news.php?category=rankings</loc>
+       <loc>https://admissionseason.com/news?category=rankings</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.6400</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/news.php?category=news</loc>
+       <loc>https://admissionseason.com/news?category=news</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.6400</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/news.php?category=how-to</loc>
+       <loc>https://admissionseason.com/news?category=how-to</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.6400</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/news.php?category=campus-life</loc>
+       <loc>https://admissionseason.com/news?category=campus-life</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.6400</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/news.php?category=admissions</loc>
+       <loc>https://admissionseason.com/news?category=admissions</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.6400</priority>
@@ -2859,7 +2852,7 @@
        <priority>0.6400</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/colleges&amp;course=B.Com</loc>
+       <loc>https://admissionseason.com/colleges?course=B.Com</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.5120</priority>
@@ -2889,7 +2882,7 @@
        <priority>0.5120</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/colleges&amp;course=BA+-+Bachelor+of+Arts</loc>
+       <loc>https://admissionseason.com/colleges?course=BA+-+Bachelor+of+Arts</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.5120</priority>
@@ -2919,7 +2912,7 @@
        <priority>0.5120</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/colleges&amp;course=B.Tech+CSE</loc>
+       <loc>https://admissionseason.com/colleges?course=B.Tech+CSE</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.5120</priority>
@@ -2949,7 +2942,7 @@
        <priority>0.5120</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/colleges&amp;course=B.Tech+-+Bachelor+of+Technology</loc>
+       <loc>https://admissionseason.com/colleges?course=B.Tech+-+Bachelor+of+Technology</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.5120</priority>
@@ -2979,7 +2972,7 @@
        <priority>0.5120</priority>
   </url>
   <url>
-       <loc>https://admissionseason.com/colleges&amp;course=B.Sc+-+Bachelor+of+Science</loc>
+       <loc>https://admissionseason.com/colleges?course=B.Sc+-+Bachelor+of+Science</loc>
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.5120</priority>
@@ -3001,5 +2994,55 @@
        <lastmod>2026-07-13T09:35:55+00:00</lastmod>
        <changefreq>daily</changefreq>
        <priority>0.5120</priority>
+  </url>
+
+  <!-- Missing static pages from sitemap.php -->
+  <url>
+       <loc>https://admissionseason.com/ask-question</loc>
+       <lastmod>2026-07-13</lastmod>
+       <changefreq>weekly</changefreq>
+       <priority>0.7</priority>
+  </url>
+  <url>
+       <loc>https://admissionseason.com/counselling</loc>
+       <lastmod>2026-07-13</lastmod>
+       <changefreq>weekly</changefreq>
+       <priority>0.7</priority>
+  </url>
+  <url>
+       <loc>https://admissionseason.com/reviews</loc>
+       <lastmod>2026-07-13</lastmod>
+       <changefreq>weekly</changefreq>
+       <priority>0.6</priority>
+  </url>
+  <url>
+       <loc>https://admissionseason.com/community</loc>
+       <lastmod>2026-07-13</lastmod>
+       <changefreq>weekly</changefreq>
+       <priority>0.6</priority>
+  </url>
+  <url>
+       <loc>https://admissionseason.com/community?tab=qna</loc>
+       <lastmod>2026-07-13</lastmod>
+       <changefreq>weekly</changefreq>
+       <priority>0.6</priority>
+  </url>
+  <url>
+       <loc>https://admissionseason.com/exams?level=university</loc>
+       <lastmod>2026-07-13</lastmod>
+       <changefreq>weekly</changefreq>
+       <priority>0.7</priority>
+  </url>
+  <url>
+       <loc>https://admissionseason.com/study-abroad?tab=universities</loc>
+       <lastmod>2026-07-13</lastmod>
+       <changefreq>weekly</changefreq>
+       <priority>0.7</priority>
+  </url>
+  <url>
+       <loc>https://admissionseason.com/courses?category=Sports</loc>
+       <lastmod>2026-07-13</lastmod>
+       <changefreq>weekly</changefreq>
+       <priority>0.7</priority>
   </url>
 </urlset>

@@ -24,14 +24,14 @@ Options -Indexes
     RewriteCond %{HTTP_HOST} !^localhost$ [NC]
     RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 
+    # ── Block old /admin/ path completely ──
+    RewriteRule ^admin/?$ - [R=404,L]
+    RewriteRule ^admin/(.*)$ - [R=404,L]
+
     # ── Existing files/dirs pass through ──
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
-
-    # ── Block old /admin/ path completely ──
-    RewriteRule ^admin/?$ - [R=404,L]
-    RewriteRule ^admin/(.*)$ - [R=404,L]
 
     # ── Favicon ──
     RewriteRule ^favicon\.ico$ favicon.svg [L,NC]
