@@ -15,6 +15,15 @@ if (isset($_GET['action']) && $_GET['action'] == 'archive' && isset($_GET['id'])
     exit;
 }
 
+// Handle Restore from Archive
+if (isset($_GET['action']) && $_GET['action'] == 'restore' && isset($_GET['id'])) {
+    $id = $_GET['id'];
+    $stmt = $pdo->prepare("UPDATE schools SET status = 'active' WHERE id = ?");
+    $stmt->execute([$id]);
+    header('Location: schools.php?status=archived&msg=restored');
+    exit;
+}
+
 // Filters
 $search    = isset($_GET['q']) ? trim($_GET['q']) : '';
 $statusF  = isset($_GET['status']) ? trim($_GET['status']) : 'all';
@@ -22,7 +31,7 @@ $typeF    = isset($_GET['type']) ? trim($_GET['type']) : 'all';
 $boardF   = isset($_GET['board']) ? trim($_GET['board']) : 'all';
 $publishF = isset($_GET['publish']) ? trim($_GET['publish']) : 'all';
 
-$where  = ["s.status != 'archived'"];
+$where  = [];
 $params = [];
 
 if ($search !== '') {
@@ -31,9 +40,11 @@ if ($search !== '') {
     $params[] = "%$search%";
     $params[] = "%$search%";
 }
-if ($statusF !== 'all' && in_array($statusF, ['active','pending','rejected'])) {
+if ($statusF !== 'all' && in_array($statusF, ['active','pending','archived','rejected'])) {
     $where[] = "s.status = ?";
     $params[] = $statusF;
+} else {
+    $where[] = "s.status != 'archived'";
 }
 if ($typeF !== 'all' && in_array($typeF, ['govt','private','aided','unaided','international','boarding'])) {
     $where[] = "s.school_type = ?";
@@ -303,6 +314,9 @@ $schools = $stmt->fetchAll();
                 <?php if(isset($_GET['msg']) && $_GET['msg'] == 'archived'): ?>
                 <div class="msg-alert"><i class="ph ph-check-circle"></i> School has been archived successfully.</div>
                 <?php endif; ?>
+                <?php if(isset($_GET['msg']) && $_GET['msg'] == 'restored'): ?>
+                <div class="msg-alert"><i class="ph ph-check-circle"></i> School has been restored successfully.</div>
+                <?php endif; ?>
                 <?php if(isset($_GET['msg']) && $_GET['msg'] == 'saved'): ?>
                 <div class="msg-alert"><i class="ph ph-check-circle"></i> School details saved successfully.</div>
                 <?php endif; ?>
@@ -318,6 +332,7 @@ $schools = $stmt->fetchAll();
                             <option value="active" <?= $statusF==='active'?'selected':''; ?>>Active</option>
                             <option value="pending" <?= $statusF==='pending'?'selected':''; ?>>Pending</option>
                             <option value="rejected" <?= $statusF==='rejected'?'selected':''; ?>>Rejected</option>
+                            <option value="archived" <?= $statusF==='archived'?'selected':''; ?>>Archived</option>
                         </select>
                         <select name="type" class="filter-select" onchange="this.form.submit()">
                             <option value="all" <?= $typeF==='all'?'selected':''; ?>>All Types</option>
@@ -414,9 +429,15 @@ $schools = $stmt->fetchAll();
                                                 <a href="school_form.php?id=<?= $school['id'] ?>" class="action-btn" title="Edit">
                                                     <i class="ph ph-pencil-simple"></i>
                                                 </a>
+                                                <?php if($school['status'] === 'archived'): ?>
+                                                <a href="schools.php?action=restore&id=<?= $school['id'] ?>" class="action-btn" title="Restore" style="color:#16a34a;border-color:#16a34a;" onclick="return confirm('Restore this school?');">
+                                                    <i class="ph ph-arrow-u-up-left"></i>
+                                                </a>
+                                                <?php else: ?>
                                                 <a href="schools.php?action=archive&id=<?= $school['id'] ?>" class="action-btn delete" title="Archive" onclick="return confirm('Are you sure you want to archive this school?');">
                                                     <i class="ph ph-archive"></i>
                                                 </a>
+                                                <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>
@@ -435,9 +456,15 @@ $schools = $stmt->fetchAll();
                                         <a href="school_form.php?id=<?= $school['id'] ?>" class="action-btn" title="Edit">
                                             <i class="ph ph-pencil-simple"></i>
                                         </a>
+                                        <?php if($school['status'] === 'archived'): ?>
+                                        <a href="schools.php?action=restore&id=<?= $school['id'] ?>" class="action-btn" title="Restore" style="color:#16a34a;border-color:#16a34a;" onclick="return confirm('Restore this school?');">
+                                            <i class="ph ph-arrow-u-up-left"></i>
+                                        </a>
+                                        <?php else: ?>
                                         <a href="schools.php?action=archive&id=<?= $school['id'] ?>" class="action-btn delete" title="Archive" onclick="return confirm('Are you sure you want to archive this school?');">
                                             <i class="ph ph-archive"></i>
                                         </a>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                                 <div class="card-details">
