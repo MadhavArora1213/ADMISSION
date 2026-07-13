@@ -10,14 +10,14 @@
     <?php
     // Dynamic stream counts from database
     $streamMap = [
-      'engineering' => ['icon'=>'ph-laptop','color'=>'#2563eb','bg'=>'#eff6ff','accent'=>'#dbeafe','categories'=>['Engineering','IT & Software'],'desc'=>'Tech, CS, IT & more'],
-      'management'  => ['icon'=>'ph-briefcase','color'=>'#7c3aed','bg'=>'#f5f3ff','accent'=>'#ede9fe','categories'=>['Management','Commerce'],'desc'=>'MBA, BBA & Commerce'],
-      'medical'     => ['icon'=>'ph-stethoscope','color'=>'#059669','bg'=>'#ecfdf5','accent'=>'#d1fae5','categories'=>['Medical','Nursing'],'desc'=>'MBBS, BDS, Nursing'],
-      'law'         => ['icon'=>'ph-scales','color'=>'#dc2626','bg'=>'#fef2f2','accent'=>'#fecaca','categories'=>['Law'],'desc'=>'LLB, CLAT & Legal'],
-      'science'     => ['icon'=>'ph-flask','color'=>'#0891b2','bg'=>'#ecfeff','accent'=>'#cffafe','categories'=>['Science'],'desc'=>'BSc, Research & Lab'],
-      'arts'        => ['icon'=>'ph-palette','color'=>'#e11d48','bg'=>'#fff1f2','accent'=>'#ffe4e6','categories'=>['Arts'],'desc'=>'Design, Fine Arts'],
-      'design'      => ['icon'=>'ph-magic-wand','color'=>'#9333ea','bg'=>'#faf5ff','accent'=>'#f3e8ff','categories'=>['Design'],'desc'=>'UI/UX, Graphic & more'],
-      'commerce'    => ['icon'=>'ph-chart-line','color'=>'#d97706','bg'=>'#fffbeb','accent'=>'#fef3c7','categories'=>['Commerce'],'desc'=>'BCom, CA, Finance'],
+      'engineering' => ['icon'=>'ph-laptop','color'=>'#2563eb','bg'=>'#eff6ff','accent'=>'#dbeafe','categories'=>['Engineering','IT & Software'],'desc'=>'Tech, CS, IT & more','img'=>'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&q=75'],
+      'management'  => ['icon'=>'ph-briefcase','color'=>'#7c3aed','bg'=>'#f5f3ff','accent'=>'#ede9fe','categories'=>['Management','Commerce'],'desc'=>'MBA, BBA & Commerce','img'=>'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=75'],
+      'medical'     => ['icon'=>'ph-stethoscope','color'=>'#059669','bg'=>'#ecfdf5','accent'=>'#d1fae5','categories'=>['Medical','Nursing'],'desc'=>'MBBS, BDS, Nursing','img'=>'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=600&q=75'],
+      'law'         => ['icon'=>'ph-scales','color'=>'#dc2626','bg'=>'#fef2f2','accent'=>'#fecaca','categories'=>['Law'],'desc'=>'LLB, CLAT & Legal','img'=>'https://images.unsplash.com/photo-1589994965851-a8f479c573a9?w=600&q=75'],
+      'science'     => ['icon'=>'ph-flask','color'=>'#0891b2','bg'=>'#ecfeff','accent'=>'#cffafe','categories'=>['Science'],'desc'=>'BSc, Research & Lab','img'=>'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=600&q=75'],
+      'arts'        => ['icon'=>'ph-palette','color'=>'#e11d48','bg'=>'#fff1f2','accent'=>'#ffe4e6','categories'=>['Arts'],'desc'=>'Design, Fine Arts','img'=>'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&q=75'],
+      'design'      => ['icon'=>'ph-magic-wand','color'=>'#9333ea','bg'=>'#faf5ff','accent'=>'#f3e8ff','categories'=>['Design'],'desc'=>'UI/UX, Graphic & more','img'=>'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=75'],
+      'commerce'    => ['icon'=>'ph-chart-line','color'=>'#d97706','bg'=>'#fffbeb','accent'=>'#fef3c7','categories'=>['Commerce'],'desc'=>'BCom, CA, Finance','img'=>'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=75'],
     ];
 
     // Fetch real counts from DB
@@ -42,6 +42,7 @@
             'icon' => $sd['icon'], 'color' => $sd['color'], 'bg' => $sd['bg'], 'accent' => $sd['accent'],
             'count' => $display > 0 ? number_format($display) . '+' : '0',
             'desc' => $sd['desc'],
+            'img' => $sd['img'] ?? '',
         ];
     }
 
@@ -112,7 +113,8 @@
             $sd = ['icon'=>'ph-graduation-cap','color'=>'#0B2447','bg'=>'#f0f4ff','accent'=>'#e2e8f0','count'=>$display > 0 ? number_format($display).'+' : '0','desc'=>'Explore programs'];
         }
       ?>
-      <a href="<?=coursesUrl(['category'=>$name])?>" class="sc reveal reveal-delay-<?=$i?>" style="--sc:<?=$sd['color']?>;--sc-bg:<?=$sd['bg']?>;--sc-accent:<?=$sd['accent']?>">
+      <a href="<?=coursesUrl(['category'=>$name])?>" class="sc reveal reveal-delay-<?=$i?>" style="--sc:<?=$sd['color']?>;--sc-bg:<?=$sd['bg']?>;--sc-accent:<?=$sd['accent']?>;<?php if(!empty($sd['img'])):?>background-image:url('<?=$sd['img']?>');<?php endif?>">
+        <?php if(!empty($sd['img'])): ?><div class="sc-overlay"></div><?php endif;?>
         <div class="sc-top">
           <div class="sc-icon"><i class="ph <?=$sd['icon']?>"></i></div>
           <div class="sc-badge"><?=$sd['count']?></div>
@@ -127,9 +129,10 @@
       <?php endforeach; ?>
     <?php else: ?>
       <?php foreach ($streamFallback as $i=>$c):
-        $sd = $streamData[$c['slug']] ?? ['icon'=>'ph-graduation-cap','color'=>'#0B2447','bg'=>'#f0f4ff','accent'=>'#e2e8f0','count'=>'0','desc'=>'Explore programs'];
+        $sd = $streamData[$c['slug']] ?? ['icon'=>'ph-graduation-cap','color'=>'#0B2447','bg'=>'#f0f4ff','accent'=>'#e2e8f0','count'=>'0','desc'=>'Explore programs','img'=>''];
       ?>
-      <a href="<?=coursesUrl(['category'=>$c['name']])?>" class="sc reveal reveal-delay-<?=$i?>" style="--sc:<?=$sd['color']?>;--sc-bg:<?=$sd['bg']?>;--sc-accent:<?=$sd['accent']?>">
+      <a href="<?=coursesUrl(['category'=>$c['name']])?>" class="sc reveal reveal-delay-<?=$i?>" style="--sc:<?=$sd['color']?>;--sc-bg:<?=$sd['bg']?>;--sc-accent:<?=$sd['accent']?>;<?php if(!empty($sd['img'])):?>background-image:url('<?=$sd['img']?>');<?php endif?>">
+        <?php if(!empty($sd['img'])): ?><div class="sc-overlay"></div><?php endif;?>
         <div class="sc-top">
           <div class="sc-icon"><i class="ph <?=$sd['icon']?>"></i></div>
           <div class="sc-badge"><?=$sd['count']?></div>

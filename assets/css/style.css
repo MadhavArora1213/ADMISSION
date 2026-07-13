@@ -2333,6 +2333,8 @@ select {
 
 .sc {
   background: var(--card);
+  background-size: cover;
+  background-position: center;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 24px;
@@ -2342,6 +2344,18 @@ select {
   display: flex;
   flex-direction: column;
   text-decoration: none
+}
+
+.sc-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15,23,42,0.55) 0%, rgba(15,23,42,0.8) 100%);
+  z-index: 0;
+}
+
+.sc > * {
+  position: relative;
+  z-index: 1;
 }
 
 .sc::before {
@@ -2364,6 +2378,10 @@ select {
   transform: translateY(-6px);
   border-color: var(--sc-accent);
   box-shadow: 0 12px 32px color-mix(in srgb, var(--sc) 12%, transparent)
+}
+
+.sc:hover .sc-overlay {
+  background: linear-gradient(180deg, rgba(15,23,42,0.45) 0%, rgba(15,23,42,0.7) 100%);
 }
 
 .sc-top {
@@ -2390,6 +2408,13 @@ select {
   transform: scale(1.1) rotate(-5deg);
   box-shadow: 0 4px 16px color-mix(in srgb, var(--sc) 20%, transparent)
 }
+
+.sc:has(.sc-overlay) .sc-name { color: #fff }
+.sc:has(.sc-overlay) .sc-desc { color: rgba(255,255,255,.7) }
+.sc:has(.sc-overlay) .sc-badge { background: rgba(255,255,255,.15); color: #fff; backdrop-filter: blur(8px) }
+.sc:has(.sc-overlay) .sc-icon { background: rgba(255,255,255,.15); color: #fff; backdrop-filter: blur(8px) }
+.sc:has(.sc-overlay) .sc-footer { color: #fff }
+.sc:has(.sc-overlay)::before { background: rgba(255,255,255,.5) }
 
 .sc-badge {
   font-size: .7rem;
