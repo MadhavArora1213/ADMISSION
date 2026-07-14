@@ -84,9 +84,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($blocked) {
         $error = 'Too many registration attempts. Please try again later.';
     } else {
-        $type=trim($_POST['institute_type']??'');$name=trim($_POST['institute_name']??'');$website=trim($_POST['website']??'');$stateId=(int)($_POST['state_id']??0);$city=trim($_POST['city']??'');$estYear=(int)($_POST['established_year']??0);$affiliation=trim($_POST['affiliation_details']??'');$person=trim($_POST['contact_person']??'');$designation=trim($_POST['designation']??'');$email=trim($_POST['email']??'');$phone=trim($_POST['phone']??'');$password=$_POST['password']??'';$pan=strtoupper(trim($_POST['pan_number']??''));$aadhar=preg_replace('/[\s-]/','',$_POST['aadhar_number']??'');$gstin=strtoupper(trim($_POST['gst_number']??''));
+        $type=trim($_POST['institute_type']??'');$name=trim($_POST['institute_name']??'');$website=trim($_POST['website']??'');$stateId=(int)($_POST['state_id']??0);$city=trim($_POST['city']??'');$estYear=(int)($_POST['established_year']??0);$affiliation=trim($_POST['affiliation_details']??'');$person=trim($_POST['contact_person']??'');$designation=trim($_POST['designation']??'');$email=trim($_POST['email']??'');$phone=trim($_POST['phone']??'');$password=$_POST['password']??'';$pan=strtoupper(trim($_POST['pan_number']??''));$aadhar=preg_replace('/[\s-]/','',$_POST['aadhar_number']??'');$gstin=strtoupper(trim($_POST['gst_number']??''));$upiRef=trim($_POST['upi_transaction_id']??'');
 
-        if (!$type||!$name||!$person||!$designation||!$email||!$password||!$phone||!$pan||!$aadhar) $error='All required fields must be filled.';
+        if (!$type||!$name||!$person||!$designation||!$email||!$password||!$phone||!$pan||!$aadhar||!$upiRef) $error='All required fields must be filled.';
         elseif (strlen($password)<8) $error='Password must be at least 8 characters.';
         elseif (!preg_match('/[A-Z]/',$password)||!preg_match('/[a-z]/',$password)||!preg_match('/[0-9]/',$password)) $error='Password must contain uppercase, lowercase and a number.';
         elseif (!filter_var($email,FILTER_VALIDATE_EMAIL)) $error='Invalid email address.';
@@ -107,13 +107,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 [$aadharDoc, $aadharErr] = uploadDoc($_FILES['aadhar_doc'] ?? [], 'aadhar', true);
                 [$gstDoc, $gstErr] = uploadDoc($_FILES['gst_doc'] ?? [], 'gst', false);
                 [$affDoc, $affErr] = uploadDoc($_FILES['affiliation_doc'] ?? [], 'aff', false);
+                [$payDoc, $payErr] = uploadDoc($_FILES['payment_screenshot'] ?? [], 'payment', true);
 
-                if ($panErr || $aadharErr || $gstErr || $affErr) {
-                  $error = $panErr ? ('PAN: ' . $panErr) : ($aadharErr ? ('Aadhar: ' . $aadharErr) : ($gstErr ? ('GST: ' . $gstErr) : ('Affiliation: ' . $affErr)));
+                if ($panErr || $aadharErr || $gstErr || $affErr || $payErr) {
+                  $error = $payErr ? ('Payment: ' . $payErr) : ($panErr ? ('PAN: ' . $panErr) : ($aadharErr ? ('Aadhar: ' . $aadharErr) : ($gstErr ? ('GST: ' . $gstErr) : ('Affiliation: ' . $affErr))));
                 } else {
                     $id=sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0x0fff)|0x4000,mt_rand(0,0x3fff)|0x8000,mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff));
                     $hash=password_hash($password,PASSWORD_DEFAULT);
-                  $pdo->prepare("INSERT INTO college_accounts (id,institute_type,institute_name,contact_person,designation,email,phone,website,state_id,city,established_year,affiliation_details,pan_number,aadhar_number,gst_number,pan_doc,aadhar_doc,gst_doc,affiliation_doc,password_hash,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")->execute([$id,$type,$name,$person,$designation,$email,$phone,$website?:null,$stateId?:null,$city?:null,$estYear?:null,$affiliation?:null,$pan,$aadhar,$gstin?:null,$panDoc,$aadharDoc,$gstDoc,$affDoc,$hash,'pending']);
+                  $pdo->prepare("INSERT INTO college_accounts (id,institute_type,institute_name,contact_person,designation,email,phone,website,state_id,city,established_year,affiliation_details,pan_number,aadhar_number,gst_number,pan_doc,aadhar_doc,gst_doc,affiliation_doc,payment_screenshot,upi_transaction_id,password_hash,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")->execute([$id,$type,$name,$person,$designation,$email,$phone,$website?:null,$stateId?:null,$city?:null,$estYear?:null,$affiliation?:null,$pan,$aadhar,$gstin?:null,$panDoc,$aadharDoc,$gstDoc,$affDoc,$payDoc,$upiRef,$hash,'pending']);
                     $attempts[] = time();
                     file_put_contents($rlKey, json_encode(array_values($attempts)), LOCK_EX);
                     $success='Registration submitted! Our team will verify your documents within 24-48 hours.';
@@ -144,6 +145,14 @@ $metaKeywords = 'register college, college registration, list college online, in
 <meta name="author" content="AdmissionSeason">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2JZX2204BL"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-2JZX2204BL');
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -375,6 +384,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;background:#0B2
     <button class="active" id="sn1" onclick="goStep(1)"><i class="ph ph-buildings"></i>Institute<span>Details</span></button>
     <button id="sn2" onclick="goStep(2)"><i class="ph ph-shield-check"></i>KYC<span>Verification</span></button>
     <button id="sn3" onclick="goStep(3)"><i class="ph ph-upload-simple"></i>Documents<span>Upload</span></button>
+    <button id="sn4" onclick="goStep(4)"><i class="ph ph-currency-circle-dollar"></i>Payment<span>₹9</span></button>
   </div>
 
   <form method="POST" enctype="multipart/form-data" id="regForm" novalidate>
@@ -490,7 +500,51 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;background:#0B2
 
       <div class="nav-btns">
         <button type="button" class="btn-submit btn-outline" onclick="goStep(2)"><i class="ph ph-arrow-left"></i> Back</button>
-        <button type="submit" class="btn-submit"><i class="ph ph-check-circle"></i> Submit Registration</button>
+        <button type="button" class="btn-submit" onclick="goStep(4)">Continue to Payment <i class="ph ph-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Payment -->
+    <div class="step-section" id="s4">
+      <div class="fieldset-label"><i class="ph ph-currency-circle-dollar"></i> Registration Fee — ₹9</div>
+
+      <div class="pay-info" style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1px solid #bbf7d0;border-radius:12px;padding:16px;margin-bottom:18px">
+        <p style="font-size:.82rem;color:#166534;font-weight:600;margin-bottom:4px"><i class="ph-fill ph-check-circle" style="color:#16a34a"></i> One-time registration fee of just ₹9</p>
+        <p style="font-size:.72rem;color:#15803d;line-height:1.5">This covers your institute listing on AdmissionSeason. Pay via UPI using the QR code below.</p>
+      </div>
+
+      <div style="text-align:center;margin-bottom:18px">
+        <div style="background:#fff;border:2px solid #e2e8f0;border-radius:16px;padding:20px;display:inline-block;position:relative">
+          <img src="<?= $siteBase ?>/assets/img/QR.jpg" alt="Scan to Pay ₹9" style="width:220px;height:auto;border-radius:12px;object-fit:contain">
+          <div style="position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);background:#0B2447;color:#fff;font-size:.65rem;font-weight:700;padding:3px 12px;border-radius:6px;white-space:nowrap">UPI — vksandal1102-2@oksbi</div>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>UPI ID / Transaction Reference <span class="r">*</span></label>
+        <input type="text" name="upi_transaction_id" placeholder="e.g. 123456789012 or user@upi" data-req="1" value="<?=htmlspecialchars($_POST['upi_transaction_id']??'')?>">
+        <div class="hint">Enter UPI reference number or transaction ID for verification</div>
+      </div>
+
+      <div class="fg" style="margin-bottom:14px">
+        <label>Payment Screenshot <span class="r">*</span></label>
+        <div class="upload-box" onclick="this.querySelector('input').click()" style="margin-top:4px">
+          <input type="file" name="payment_screenshot" accept=".jpg,.jpeg,.png,.webp" data-req="1" onchange="handleFile(this)">
+          <div class="u-icon"><i class="ph ph-screenshot"></i></div>
+          <p>Upload Payment Screenshot <span class="r">*</span></p>
+          <div class="u-sub">JPG, PNG or WEBP — Max 5MB</div>
+          <div class="u-done"><i class="ph-fill ph-check-circle"></i> File Selected</div>
+        </div>
+      </div>
+
+      <div class="info-banner">
+        <div class="info-icon"><i class="ph ph-info"></i></div>
+        <p><strong>After Payment:</strong> Upload your payment screenshot and UPI reference. Our team will verify and activate your account within 24-48 hours.</p>
+      </div>
+
+      <div class="nav-btns">
+        <button type="button" class="btn-submit btn-outline" onclick="goStep(3)"><i class="ph ph-arrow-left"></i> Back</button>
+        <button type="submit" class="btn-submit"><i class="ph ph-check-circle"></i> Submit & Pay ₹9</button>
       </div>
     </div>
   </form>
@@ -513,8 +567,9 @@ function goStep(n){
   if(n>cur&&!validStep(cur))return;
   document.querySelectorAll('.step-section').forEach(s=>s.classList.remove('active'));
   document.getElementById('s'+n).classList.add('active');
-  for(let i=1;i<=3;i++){
+  for(let i=1;i<=4;i++){
     const b=document.getElementById('sn'+i);
+    if(!b)continue;
     b.classList.remove('active','done');
     if(i<n){b.classList.add('done');b.querySelector('i').className='ph-fill ph-check-circle';}
     else if(i===n)b.classList.add('active');
@@ -531,7 +586,7 @@ function validStep(n){
   return ok;
 }
 const f=document.getElementById('regForm');
-if(f)f.addEventListener('submit',e=>{if(!validStep(3))e.preventDefault();});
+if(f)f.addEventListener('submit',e=>{if(!validStep(4))e.preventDefault();});
 function handleFile(inp){
   if(!(inp.files&&inp.files[0]))return;
   const f=inp.files[0];

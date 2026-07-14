@@ -398,7 +398,19 @@ td{padding:12px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
         <i class="ph ph-minus-circle" style="color:#94a3b8"></i><p style="color:#94a3b8">Optional</p>
         <?php endif; ?>
       </div>
+      <div class="doc-card" style="border-color:#fef3c7;background:#fffbeb">
+        <?php if($detail['payment_screenshot']): ?>
+        <a href="<?= BASE_URL ?>/uploads/college_docs/<?=htmlspecialchars($detail['payment_screenshot'])?>" target="_blank"><i class="ph ph-currency-circle-dollar" style="color:#d97706"></i><p>Payment Screenshot</p><small>₹9 UPI Payment</small></a>
+        <?php else: ?>
+        <i class="ph ph-x-circle" style="color:#dc2626"></i><p style="color:#dc2626">Not uploaded</p>
+        <?php endif; ?>
+      </div>
     </div>
+    <?php if($detail['upi_transaction_id']): ?>
+    <div style="margin-top:12px;padding:10px 14px;background:#fffbeb;border:1px solid #fef3c7;border-radius:8px;font-size:.78rem">
+      <strong style="color:#92400e">UPI Transaction ID:</strong> <span style="color:#0B2447"><?=htmlspecialchars($detail['upi_transaction_id'])?></span>
+    </div>
+    <?php endif; ?>
   </div>
 
   <?php if($detail['status']==='pending'): ?>

@@ -3669,8 +3669,8 @@ select {
 .hero-slide-bg{position:absolute;inset:0;background-size:cover;background-position:center;transform:scale(1.05);animation:heroZoom 8s ease infinite alternate}
 .hero-slide.active .hero-slide-bg{animation:heroZoom 8s ease infinite alternate}
 @keyframes heroZoom{from{transform:scale(1.02)}to{transform:scale(1.08)}}
-.hero-slide-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,36,71,.55) 0%,rgba(11,36,71,.75) 50%,rgba(11,36,71,.92) 100%)}
-.hero-slide-info{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:20px 24px 16px;background:linear-gradient(0deg,rgba(11,36,71,.95) 0%,rgba(11,36,71,.7) 50%,rgba(11,36,71,.3) 80%,transparent 100%)}
+.hero-slide-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,36,71,.25) 0%,rgba(11,36,71,.45) 50%,rgba(11,36,71,.7) 100%)}
+.hero-slide-info{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:20px 24px 16px;background:linear-gradient(0deg,rgba(11,36,71,.85) 0%,rgba(11,36,71,.5) 50%,rgba(11,36,71,.15) 80%,transparent 100%)}
 .hero-slide-type{display:inline-block;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);color:#fff;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 12px;border-radius:6px;margin-bottom:6px}
 .hero-slide-link{display:block;text-decoration:none;color:#fff;padding:4px 0 0}
 .hero-slide-link strong{display:block;font-size:1.1rem;font-weight:700;font-family:'Space Grotesk',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
