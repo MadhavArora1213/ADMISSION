@@ -24,7 +24,7 @@ $siteBase = getBaseUrl();
 $schoolSlug = $news['school_slug'];
 $schoolName = $news['school_name'];
 $newsTitle = $news['title'];
-$pageUrl = $siteBase . '/school/' . urlencode($schoolSlug) . '/news/' . urlencode($newsId);
+$pageUrl = $siteBase . '/school/' . $schoolSlug . '/news/' . $newsId;
 
 $imgSrc = '';
 if (!empty($news['image_url'])) {
@@ -103,7 +103,7 @@ $readingTime = max(1, (int)ceil(str_word_count(strip_tags($news['content'] ?? ''
     'itemListElement' => [
       ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => $siteBase . '/'],
       ['@type' => 'ListItem', 'position' => 2, 'name' => 'Schools', 'item' => $siteBase . '/schools'],
-      ['@type' => 'ListItem', 'position' => 3, 'name' => $schoolName, 'item' => $siteBase . '/school/' . urlencode($schoolSlug)],
+      ['@type' => 'ListItem', 'position' => 3, 'name' => $schoolName, 'item' => $siteBase . '/school/' . $schoolSlug],
       ['@type' => 'ListItem', 'position' => 4, 'name' => mb_strimwidth($newsTitle, 0, 50, '...')]
     ]
   ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
@@ -204,7 +204,7 @@ $readingTime = max(1, (int)ceil(str_word_count(strip_tags($news['content'] ?? ''
       <i class="ph ph-caret-right"></i>
       <a href="<?= $siteBase ?>/schools">Schools</a>
       <i class="ph ph-caret-right"></i>
-      <a href="<?= $siteBase ?>/school/<?= urlencode($schoolSlug) ?>"><?= htmlspecialchars($schoolName) ?></a>
+      <a href="<?= $siteBase ?>/school/<?= $schoolSlug ?>"><?= htmlspecialchars($schoolName) ?></a>
       <i class="ph ph-caret-right"></i>
       <span><?= htmlspecialchars(mb_strimwidth($newsTitle, 0, 50, '...')) ?></span>
     </div>
@@ -212,7 +212,7 @@ $readingTime = max(1, (int)ceil(str_word_count(strip_tags($news['content'] ?? ''
 </div>
 
 <div class="container" style="max-width:860px;margin:0 auto;padding:28px 20px">
-  <a href="<?= $siteBase ?>/school/<?= urlencode($schoolSlug) ?>/news" class="sn-back"><i class="ph ph-arrow-left"></i> Back to <?= htmlspecialchars($schoolName) ?> News</a>
+  <a href="<?= $siteBase ?>/school/<?= $schoolSlug ?>/news" class="sn-back"><i class="ph ph-arrow-left"></i> Back to <?= htmlspecialchars($schoolName) ?> News</a>
 
   <article class="sn-card" style="margin-top:20px">
     <?php if ($imgSrc): ?>
@@ -264,7 +264,7 @@ $readingTime = max(1, (int)ceil(str_word_count(strip_tags($news['content'] ?? ''
     </div>
   </article>
 
-  <a href="<?= $siteBase ?>/school/<?= urlencode($schoolSlug) ?>/news" class="sn-back" style="margin-top:24px"><i class="ph ph-arrow-left"></i> Back to all <?= htmlspecialchars($schoolName) ?> news</a>
+  <a href="<?= $siteBase ?>/school/<?= $schoolSlug ?>/news" class="sn-back" style="margin-top:24px"><i class="ph ph-arrow-left"></i> Back to all <?= htmlspecialchars($schoolName) ?> news</a>
 
   <div class="sn-cta">
     <h3>Need Help with School Admissions?</h3>
