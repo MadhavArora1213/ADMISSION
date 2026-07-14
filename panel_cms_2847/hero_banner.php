@@ -6,6 +6,13 @@ if (!isset($_SESSION['admin_id'])) {
 }
 require_once 'db.php';
 
+// Fix image URLs — stored as relative paths like 'uploads/xxx.jpg'
+function heroImg($url) {
+    if (!$url) return 'https://images.unsplash.com/photo-1562774053-701939374585?w=400&q=80';
+    if (str_starts_with($url, 'http') || str_starts_with($url, '//')) return $url;
+    return '../' . ltrim($url, '/');
+}
+
 $msg = '';
 $error = '';
 
@@ -166,8 +173,9 @@ $availableSchools = $pdo->query("SELECT sc.id, sc.name, ci.name AS city_name FRO
         .assign-grid { display: grid; grid-template-columns: 1fr 1fr 2fr auto; gap: 12px; align-items: end; }
         .form-group { display: flex; flex-direction: column; gap: 4px; }
         .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
-        .form-group select, .form-group input { padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; background: #fff; }
+        .form-group select, .form-group input { padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; background: #fff; width: 100%; }
         .form-group select:focus, .form-group input:focus { outline: none; border-color: var(--primary); }
+        .assign-btn { padding: 10px 20px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
         .btn { padding: 10px 20px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; text-decoration: none; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
         .btn-primary { background: var(--primary); color: #fff; }
         .btn-primary:hover { background: var(--primary-dark); }
@@ -190,7 +198,8 @@ $availableSchools = $pdo->query("SELECT sc.id, sc.name, ci.name AS city_name FRO
             .page-header { flex-wrap:wrap !important; gap:10px !important; }
             .page-header h2 { font-size:1.4rem !important; }
             .hero-slots { grid-template-columns: repeat(2, 1fr); }
-            .assign-grid { grid-template-columns: 1fr; }
+            .assign-grid { grid-template-columns: 1fr 1fr; }
+            .assign-grid .assign-btn { grid-column: 1 / -1; justify-content: center; }
         }
         @media(max-width:768px){
             .topbar { height:56px !important; padding:0 12px !important; }
@@ -201,12 +210,15 @@ $availableSchools = $pdo->query("SELECT sc.id, sc.name, ci.name AS city_name FRO
             .hero-slot { min-height:180px; padding:12px; }
             .hero-slot-img { height:60px; }
             .assign-grid { grid-template-columns: 1fr; gap:10px; }
+            .assign-grid .assign-btn { width: 100%; justify-content: center; }
             .btn { padding:8px 14px !important; font-size:0.85rem !important; }
         }
         @media(max-width:480px){
             .page-header h2 { font-size:1.1rem !important; }
             .hero-slots { grid-template-columns: 1fr; }
             .hero-slot { min-height:160px; }
+            .assign-grid { grid-template-columns: 1fr; }
+            .assign-grid .assign-btn { width: 100%; justify-content: center; }
         }
     </style>
 </head>
@@ -260,7 +272,7 @@ $availableSchools = $pdo->query("SELECT sc.id, sc.name, ci.name AS city_name FRO
                         <div class="hero-slot <?= $slotItem ? 'occupied' : '' ?>">
                             <div class="hero-slot-number">Slot <?= $i ?></div>
                             <?php if ($slotItem): ?>
-                                <img src="<?= htmlspecialchars($slotItem['cover_image_url'] ?: 'https://images.unsplash.com/photo-1562774053-701939374585?w=400&q=80') ?>" alt="" class="hero-slot-img" loading="lazy">
+                                <img src="<?= heroImg($slotItem['cover_image_url'] ?? '') ?>" alt="" class="hero-slot-img" loading="lazy">
                                 <span class="hero-slot-type type-<?= $slotItem['entity_type'] ?>"><?= ucfirst($slotItem['entity_type']) ?></span>
                                 <div class="hero-slot-name"><?= htmlspecialchars($slotItem['name']) ?></div>
                                 <div class="hero-slot-meta"><?= htmlspecialchars(($slotItem['city_name'] ?? '') . (($slotItem['city_name'] ?? '') && ($slotItem['state_name'] ?? '') ? ', ' : '') . ($slotItem['state_name'] ?? '')) ?></div>
@@ -322,7 +334,7 @@ $availableSchools = $pdo->query("SELECT sc.id, sc.name, ci.name AS city_name FRO
                             </select>
                         </div>
 
-                        <button type="submit" class="btn btn-primary"><i class="ph ph-check"></i> Assign</button>
+                        <button type="submit" class="btn btn-primary assign-btn"><i class="ph ph-check"></i> Assign</button>
                     </form>
                 </div>
 
