@@ -9,14 +9,15 @@ require_once 'db.php';
 $msg = '';
 $error = '';
 
-// Handle form submissions
+// Handle form submissions — PRG pattern
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
+    $action = isset($_POST['action']) ? trim($_POST['action']) : '';
+    $self = basename($_SERVER['PHP_SELF']);
 
     // Toggle featured status
-    if ($action === 'toggle') {
-        $collegeId = (int)($_POST['college_id'] ?? 0);
-        if ($collegeId > 0) {
+    if ($action === 'toggle' && isset($_POST['college_id'])) {
+        $collegeId = filter_var($_POST['college_id'], FILTER_VALIDATE_INT);
+        if ($collegeId && $collegeId > 0) {
             $checkStmt = $pdo->prepare("SELECT is_featured, featured_order FROM colleges WHERE id = ?");
             $checkStmt->execute([$collegeId]);
             $college = $checkStmt->fetch(PDO::FETCH_ASSOC);
@@ -27,40 +28,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $updateStmt = $pdo->prepare("UPDATE colleges SET is_featured = ?, featured_order = ? WHERE id = ?");
                 $updateStmt->execute([$newFeatured, $newOrder, $collegeId]);
                 $msg = $newFeatured ? "College marked as featured!" : "College removed from featured.";
+            } else {
+                $error = "College not found in database.";
             }
         } else {
             $error = "Invalid college ID.";
         }
+        header("Location: $self" . ($msg ? "?msg=" . urlencode($msg) : "") . ($error ? "?err=" . urlencode($error) : ""));
+        exit;
     }
 
     // Set featured order
-    if ($action === 'set_order') {
-        $collegeId = (int)($_POST['college_id'] ?? 0);
-        $order = (int)($_POST['featured_order'] ?? 0);
-        if ($collegeId > 0 && $order >= 0 && $order <= 6) {
-            // Check if this order is already taken by another college
+    if ($action === 'set_order' && isset($_POST['college_id'])) {
+        $collegeId = filter_var($_POST['college_id'], FILTER_VALIDATE_INT);
+        $order = filter_var($_POST['featured_order'] ?? '0', FILTER_VALIDATE_INT);
+        if ($collegeId && $collegeId > 0 && $order >= 0 && $order <= 6) {
             if ($order > 0) {
                 $dupStmt = $pdo->prepare("SELECT id, name FROM colleges WHERE featured_order = ? AND id != ? AND is_featured = 1");
                 $dupStmt->execute([$order, $collegeId]);
                 $dup = $dupStmt->fetch(PDO::FETCH_ASSOC);
                 if ($dup) {
-                    $error = "Order #{$order} is already taken by {$dup['name']}. Swap or choose another.";
+                    $error = "Order #{$order} is already taken by {$dup['name']}.";
+                    header("Location: $self?err=" . urlencode($error));
+                    exit;
                 }
             }
-            if (empty($error)) {
-                $updateStmt = $pdo->prepare("UPDATE colleges SET featured_order = ? WHERE id = ?");
-                $updateStmt->execute([$order > 0 ? $order : null, $collegeId]);
-                $msg = "Featured order updated!";
-            }
+            $updateStmt = $pdo->prepare("UPDATE colleges SET featured_order = ? WHERE id = ?");
+            $updateStmt->execute([$order > 0 ? $order : null, $collegeId]);
+            $msg = "Featured order updated!";
+        } else {
+            $error = "Invalid data.";
         }
+        header("Location: $self" . ($msg ? "?msg=" . urlencode($msg) : "") . ($error ? "?err=" . urlencode($error) : ""));
+        exit;
     }
 
     // Clear all featured
     if ($action === 'clear_all') {
         $pdo->exec("UPDATE colleges SET is_featured = 0, featured_order = NULL");
         $msg = "All colleges removed from featured.";
+        header("Location: $self?msg=" . urlencode($msg));
+        exit;
     }
 }
+
+// Read flash messages from redirect
+if (isset($_GET['msg'])) $msg = $_GET['msg'];
+if (isset($_GET['err'])) $error = $_GET['err'];
 
 // Fetch featured colleges
 $featuredColleges = $pdo->query("SELECT c.id, c.name, c.slug, c.college_type, c.is_featured, c.featured_order,
@@ -108,8 +122,6 @@ $availableColleges = $pdo->query("SELECT c.id, c.name, ci.name AS city_name, c.o
         .page-header h2 { font-size: 2rem; font-weight: 800; }
         .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); padding: 24px; box-shadow: var(--shadow-sm); margin-bottom: 24px; }
         .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-
-        /* Featured Grid */
         .featured-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
         .featured-item { background: #fff; border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; transition: all 0.2s; position: relative; }
         .featured-item.ordered { border-color: #22c55e; }
@@ -133,12 +145,10 @@ $availableColleges = $pdo->query("SELECT c.id, c.name, ci.name AS city_name, c.o
         .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
         .btn-success { background: #22c55e; color: #fff; }
         .btn-success:hover { background: #16a34a; }
-        .msg-alert { padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 24px; border: 1px solid rgba(11,36,71,0.04); display: flex; align-items: center; gap: 8px; }
+        .msg-alert { padding: 16px; border-radius: 8px; background: rgba(34,197,94,0.08); color: #166534; margin-bottom: 24px; border: 1px solid rgba(34,197,94,0.2); display: flex; align-items: center; gap: 8px; }
         .msg-error { padding: 16px; border-radius: 8px; background: rgba(239,68,68,0.04); color: #991b1b; margin-bottom: 24px; border: 1px solid rgba(239,68,68,0.1); display: flex; align-items: center; gap: 8px; }
         .hint-text { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
         .order-badge { position: absolute; top: 8px; left: 8px; background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; z-index: 2; }
-
-        /* Responsive */
         @media(max-width:1024px){
             .sidebar { transform:translateX(-100%) !important; }
             .sidebar.open { transform:translateX(0) !important; }
@@ -178,7 +188,7 @@ $availableColleges = $pdo->query("SELECT c.id, c.name, ci.name AS city_name, c.o
                 <div class="page-header">
                     <div>
                         <h2>Featured Colleges</h2>
-                        <p style="color: var(--text-muted);">Manage which colleges appear on the homepage "Curated Institutions" carousel.</p>
+                        <p style="color: var(--text-muted);">Manage which colleges appear on the homepage "Curated Institutions" section.</p>
                     </div>
                 </div>
 
@@ -193,7 +203,7 @@ $availableColleges = $pdo->query("SELECT c.id, c.name, ci.name AS city_name, c.o
                 <div class="panel">
                     <div class="section-title"><i class="ph ph-trophy"></i> Current Featured (<?= count($featuredColleges) ?> / 6)</div>
                     <p class="hint-text">
-                        These colleges appear in the homepage carousel. Set order 1-6 to control display order. Leave order as 0 to auto-sort by rating.
+                        These colleges appear on the homepage. Set order 1-6 to control display order. Leave order as 0 to auto-sort by rating.
                     </p>
 
                     <?php if (!empty($featuredColleges)): ?>
@@ -203,7 +213,13 @@ $availableColleges = $pdo->query("SELECT c.id, c.name, ci.name AS city_name, c.o
                             <?php if (!empty($fc['featured_order'])): ?>
                             <div class="order-badge">#<?= (int)$fc['featured_order'] ?></div>
                             <?php endif; ?>
-                            <img src="<?= !empty($fc['cover_image_url']) ? (str_starts_with($fc['cover_image_url'], 'http') ? $fc['cover_image_url'] : '../' . ltrim($fc['cover_image_url'], '/')) : 'https://images.unsplash.com/photo-1562774053-701939374585?w=400&q=80' ?>" alt="" class="featured-item-img">
+                            <?php
+                            $imgUrl = 'https://images.unsplash.com/photo-1562774053-701939374585?w=400&q=80';
+                            if (!empty($fc['cover_image_url'])) {
+                                $imgUrl = str_starts_with($fc['cover_image_url'], 'http') ? $fc['cover_image_url'] : '../' . ltrim($fc['cover_image_url'], '/');
+                            }
+                            ?>
+                            <img src="<?= htmlspecialchars($imgUrl) ?>" alt="" class="featured-item-img">
                             <div class="featured-item-body">
                                 <div class="featured-item-tags">
                                     <span class="featured-item-tag tag-college"><?= ucfirst(htmlspecialchars($fc['college_type'] ?? 'College')) ?></span>
@@ -220,9 +236,9 @@ $availableColleges = $pdo->query("SELECT c.id, c.name, ci.name AS city_name, c.o
                                 <div class="featured-item-name"><?= htmlspecialchars($fc['name']) ?></div>
                                 <div class="featured-item-meta"><?= htmlspecialchars(($fc['city_name'] ?? '') . (($fc['city_name'] ?? '') && ($fc['state_name'] ?? '') ? ', ' : '') . ($fc['state_name'] ?? '')) ?></div>
                                 <div class="featured-item-actions">
-                                    <form method="POST" style="display:inline">
+                                    <form method="POST" action="featured_colleges.php" style="display:inline">
                                         <input type="hidden" name="action" value="set_order">
-                                        <input type="hidden" name="college_id" value="<?= $fc['id'] ?>">
+                                        <input type="hidden" name="college_id" value="<?= (int)$fc['id'] ?>">
                                         <select name="featured_order" onchange="this.form.submit()">
                                             <option value="0" <?= empty($fc['featured_order']) ? 'selected' : '' ?>>Auto</option>
                                             <?php for ($i = 1; $i <= 6; $i++): ?>
@@ -230,9 +246,9 @@ $availableColleges = $pdo->query("SELECT c.id, c.name, ci.name AS city_name, c.o
                                             <?php endfor; ?>
                                         </select>
                                     </form>
-                                    <form method="POST" style="display:inline" onsubmit="return confirm('Remove from featured?')">
+                                    <form method="POST" action="featured_colleges.php" style="display:inline" onsubmit="return confirm('Remove from featured?')">
                                         <input type="hidden" name="action" value="toggle">
-                                        <input type="hidden" name="college_id" value="<?= $fc['id'] ?>">
+                                        <input type="hidden" name="college_id" value="<?= (int)$fc['id'] ?>">
                                         <button type="submit" class="btn btn-danger btn-sm"><i class="ph ph-x"></i> Remove</button>
                                     </form>
                                 </div>
@@ -240,19 +256,16 @@ $availableColleges = $pdo->query("SELECT c.id, c.name, ci.name AS city_name, c.o
                         </div>
                         <?php endforeach; ?>
                     </div>
+                    <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+                        <form method="POST" action="featured_colleges.php" onsubmit="return confirm('Remove ALL from featured?')">
+                            <input type="hidden" name="action" value="clear_all">
+                            <button type="submit" class="btn btn-danger"><i class="ph ph-trash"></i> Clear All Featured</button>
+                        </form>
+                    </div>
                     <?php else: ?>
                     <div style="text-align:center;padding:40px;color:#94a3b8">
                         <i class="ph ph-trophy" style="font-size:2.5rem;display:block;margin-bottom:12px;opacity:.15"></i>
                         <p>No featured colleges yet. Add some below!</p>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if (!empty($featuredColleges)): ?>
-                    <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
-                        <form method="POST" onsubmit="return confirm('Remove ALL from featured?')">
-                            <input type="hidden" name="action" value="clear_all">
-                            <button type="submit" class="btn btn-danger"><i class="ph ph-trash"></i> Clear All Featured</button>
-                        </form>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -278,13 +291,13 @@ $availableColleges = $pdo->query("SELECT c.id, c.name, ci.name AS city_name, c.o
                                 <?php foreach ($availableColleges as $ac): ?>
                                 <tr style="border-bottom:1px solid #f1f5f9;">
                                     <td style="padding:10px 16px; font-weight:600;"><?= htmlspecialchars($ac['name']) ?></td>
-                                    <td style="padding:10px 16px; color:var(--text-muted); font-size:0.82rem;"><?= htmlspecialchars(($ac['city_name'] ?? '')) ?></td>
+                                    <td style="padding:10px 16px; color:var(--text-muted); font-size:0.82rem;"><?= htmlspecialchars($ac['city_name'] ?? '') ?></td>
                                     <td style="padding:10px 16px; font-size:0.82rem;"><?= !empty($ac['overall_rating_avg']) && (float)$ac['overall_rating_avg'] > 0 ? number_format((float)$ac['overall_rating_avg'], 1) : '—' ?></td>
                                     <td style="padding:10px 16px; font-size:0.82rem;"><?= !empty($ac['ranking_nirf']) ? '#' . htmlspecialchars($ac['ranking_nirf']) : '—' ?></td>
                                     <td style="padding:10px 16px;">
-                                        <form method="POST" style="display:inline">
+                                        <form method="POST" action="featured_colleges.php" style="display:inline">
                                             <input type="hidden" name="action" value="toggle">
-                                            <input type="hidden" name="college_id" value="<?= $ac['id'] ?>">
+                                            <input type="hidden" name="college_id" value="<?= (int)$ac['id'] ?>">
                                             <button type="submit" class="btn btn-primary btn-sm"><i class="ph ph-plus"></i> Feature</button>
                                         </form>
                                     </td>

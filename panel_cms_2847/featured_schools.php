@@ -9,59 +9,68 @@ require_once 'db.php';
 $msg = '';
 $error = '';
 
-// Handle form submissions
+// Handle form submissions — PRG pattern
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
+    $action = isset($_POST['action']) ? trim($_POST['action']) : '';
+    $self = basename($_SERVER['PHP_SELF']);
 
-    // Toggle featured status
-    if ($action === 'toggle') {
-        $schoolId = (int)($_POST['school_id'] ?? 0);
-        if ($schoolId > 0) {
+    if ($action === 'toggle' && isset($_POST['school_id'])) {
+        $schoolId = filter_var($_POST['school_id'], FILTER_VALIDATE_INT);
+        if ($schoolId && $schoolId > 0) {
             $checkStmt = $pdo->prepare("SELECT is_featured, featured_order FROM schools WHERE id = ?");
             $checkStmt->execute([$schoolId]);
             $school = $checkStmt->fetch(PDO::FETCH_ASSOC);
-
             if ($school) {
                 $newFeatured = $school['is_featured'] ? 0 : 1;
                 $newOrder = $newFeatured ? 0 : null;
                 $updateStmt = $pdo->prepare("UPDATE schools SET is_featured = ?, featured_order = ? WHERE id = ?");
                 $updateStmt->execute([$newFeatured, $newOrder, $schoolId]);
                 $msg = $newFeatured ? "School marked as featured!" : "School removed from featured.";
+            } else {
+                $error = "School not found in database.";
             }
         } else {
             $error = "Invalid school ID.";
         }
+        header("Location: $self" . ($msg ? "?msg=" . urlencode($msg) : "") . ($error ? "&err=" . urlencode($error) : ""));
+        exit;
     }
 
-    // Set featured order
-    if ($action === 'set_order') {
-        $schoolId = (int)($_POST['school_id'] ?? 0);
-        $order = (int)($_POST['featured_order'] ?? 0);
-        if ($schoolId > 0 && $order >= 0 && $order <= 6) {
+    if ($action === 'set_order' && isset($_POST['school_id'])) {
+        $schoolId = filter_var($_POST['school_id'], FILTER_VALIDATE_INT);
+        $order = filter_var($_POST['featured_order'] ?? '0', FILTER_VALIDATE_INT);
+        if ($schoolId && $schoolId > 0 && $order >= 0 && $order <= 6) {
             if ($order > 0) {
                 $dupStmt = $pdo->prepare("SELECT id, name FROM schools WHERE featured_order = ? AND id != ? AND is_featured = 1");
                 $dupStmt->execute([$order, $schoolId]);
                 $dup = $dupStmt->fetch(PDO::FETCH_ASSOC);
                 if ($dup) {
-                    $error = "Order #{$order} is already taken by {$dup['name']}. Swap or choose another.";
+                    $error = "Order #{$order} is already taken by {$dup['name']}.";
+                    header("Location: $self?err=" . urlencode($error));
+                    exit;
                 }
             }
-            if (empty($error)) {
-                $updateStmt = $pdo->prepare("UPDATE schools SET featured_order = ? WHERE id = ?");
-                $updateStmt->execute([$order > 0 ? $order : null, $schoolId]);
-                $msg = "Featured order updated!";
-            }
+            $updateStmt = $pdo->prepare("UPDATE schools SET featured_order = ? WHERE id = ?");
+            $updateStmt->execute([$order > 0 ? $order : null, $schoolId]);
+            $msg = "Featured order updated!";
+        } else {
+            $error = "Invalid data.";
         }
+        header("Location: $self" . ($msg ? "?msg=" . urlencode($msg) : "") . ($error ? "&err=" . urlencode($error) : ""));
+        exit;
     }
 
-    // Clear all featured
     if ($action === 'clear_all') {
         $pdo->exec("UPDATE schools SET is_featured = 0, featured_order = NULL");
         $msg = "All schools removed from featured.";
+        header("Location: $self?msg=" . urlencode($msg));
+        exit;
     }
 }
 
-// Fetch featured schools
+if (isset($_GET['msg'])) $msg = $_GET['msg'];
+if (isset($_GET['err'])) $error = $_GET['err'];
+
 $featuredSchools = $pdo->query("SELECT sc.id, sc.name, sc.slug, sc.school_type, sc.is_featured, sc.featured_order,
     sc.overall_rating_avg, sc.board_affiliation, sc.established_year, sc.total_students,
     st.name AS state_name, ci.name AS city_name, sm.cover_image_url
@@ -72,13 +81,11 @@ $featuredSchools = $pdo->query("SELECT sc.id, sc.name, sc.slug, sc.school_type, 
     WHERE sc.status='active' AND sc.is_featured=1
     ORDER BY sc.featured_order ASC, sc.overall_rating_avg DESC LIMIT 20")->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch available schools (not featured)
 $availableSchools = $pdo->query("SELECT sc.id, sc.name, ci.name AS city_name, sc.overall_rating_avg, sc.school_type, sc.board_affiliation
     FROM schools sc LEFT JOIN cities ci ON sc.city_id=ci.id
     WHERE sc.status='active' AND (sc.is_featured=0 OR sc.is_featured IS NULL)
     ORDER BY sc.overall_rating_avg DESC, sc.name ASC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
 
-// Helper function
 function schoolTypeLabel($type) {
     return match($type) {
         'govt' => 'Government',
@@ -118,8 +125,6 @@ function schoolTypeLabel($type) {
         .page-header h2 { font-size: 2rem; font-weight: 800; }
         .panel { background: #f8fafc; border-radius: 16px; border: 1px solid var(--border-color); padding: 24px; box-shadow: var(--shadow-sm); margin-bottom: 24px; }
         .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-
-        /* Featured Grid */
         .featured-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
         .featured-item { background: #fff; border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; transition: all 0.2s; position: relative; }
         .featured-item.ordered { border-color: #22c55e; }
@@ -132,7 +137,6 @@ function schoolTypeLabel($type) {
         .tag-school { background: #fef3c7; color: #92400e; }
         .tag-rating { background: #dbeafe; color: #1e40af; }
         .tag-board { background: #d1fae5; color: #065f46; }
-        .tag-type { background: #e0e7ff; color: #4338ca; }
         .featured-item-actions { display: flex; gap: 8px; align-items: center; }
         .featured-item-actions select { padding: 6px 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.8rem; background: #fff; }
         .btn { padding: 10px 20px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; text-decoration: none; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
@@ -141,12 +145,10 @@ function schoolTypeLabel($type) {
         .btn-danger { background: #ef4444; color: #fff; }
         .btn-danger:hover { background: #dc2626; }
         .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
-        .msg-alert { padding: 16px; border-radius: 8px; background: rgba(11,36,71,0.04); color: #0B2447; margin-bottom: 24px; border: 1px solid rgba(11,36,71,0.04); display: flex; align-items: center; gap: 8px; }
+        .msg-alert { padding: 16px; border-radius: 8px; background: rgba(34,197,94,0.08); color: #166534; margin-bottom: 24px; border: 1px solid rgba(34,197,94,0.2); display: flex; align-items: center; gap: 8px; }
         .msg-error { padding: 16px; border-radius: 8px; background: rgba(239,68,68,0.04); color: #991b1b; margin-bottom: 24px; border: 1px solid rgba(239,68,68,0.1); display: flex; align-items: center; gap: 8px; }
         .hint-text { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
         .order-badge { position: absolute; top: 8px; left: 8px; background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; z-index: 2; }
-
-        /* Responsive */
         @media(max-width:1024px){
             .sidebar { transform:translateX(-100%) !important; }
             .sidebar.open { transform:translateX(0) !important; }
@@ -200,9 +202,7 @@ function schoolTypeLabel($type) {
                 <!-- Current Featured -->
                 <div class="panel">
                     <div class="section-title"><i class="ph ph-school"></i> Current Featured (<?= count($featuredSchools) ?> / 6)</div>
-                    <p class="hint-text">
-                        These schools appear on the homepage. Set order 1-6 to control display order. Leave order as 0 to auto-sort by rating.
-                    </p>
+                    <p class="hint-text">These schools appear on the homepage. Set order 1-6 to control display order.</p>
 
                     <?php if (!empty($featuredSchools)): ?>
                     <div class="featured-grid">
@@ -211,7 +211,13 @@ function schoolTypeLabel($type) {
                             <?php if (!empty($fs['featured_order'])): ?>
                             <div class="order-badge">#<?= (int)$fs['featured_order'] ?></div>
                             <?php endif; ?>
-                            <img src="<?= !empty($fs['cover_image_url']) ? (str_starts_with($fs['cover_image_url'], 'http') ? $fs['cover_image_url'] : '../' . ltrim($fs['cover_image_url'], '/')) : 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=400&q=80' ?>" alt="" class="featured-item-img">
+                            <?php
+                            $imgUrl = 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=400&q=80';
+                            if (!empty($fs['cover_image_url'])) {
+                                $imgUrl = str_starts_with($fs['cover_image_url'], 'http') ? $fs['cover_image_url'] : '../' . ltrim($fs['cover_image_url'], '/');
+                            }
+                            ?>
+                            <img src="<?= htmlspecialchars($imgUrl) ?>" alt="" class="featured-item-img">
                             <div class="featured-item-body">
                                 <div class="featured-item-tags">
                                     <span class="featured-item-tag tag-school"><?= schoolTypeLabel($fs['school_type']) ?></span>
@@ -225,9 +231,9 @@ function schoolTypeLabel($type) {
                                 <div class="featured-item-name"><?= htmlspecialchars($fs['name']) ?></div>
                                 <div class="featured-item-meta"><?= htmlspecialchars(($fs['city_name'] ?? '') . (($fs['city_name'] ?? '') && ($fs['state_name'] ?? '') ? ', ' : '') . ($fs['state_name'] ?? '')) ?></div>
                                 <div class="featured-item-actions">
-                                    <form method="POST" style="display:inline">
+                                    <form method="POST" action="featured_schools.php" style="display:inline">
                                         <input type="hidden" name="action" value="set_order">
-                                        <input type="hidden" name="school_id" value="<?= $fs['id'] ?>">
+                                        <input type="hidden" name="school_id" value="<?= (int)$fs['id'] ?>">
                                         <select name="featured_order" onchange="this.form.submit()">
                                             <option value="0" <?= empty($fs['featured_order']) ? 'selected' : '' ?>>Auto</option>
                                             <?php for ($i = 1; $i <= 6; $i++): ?>
@@ -235,9 +241,9 @@ function schoolTypeLabel($type) {
                                             <?php endfor; ?>
                                         </select>
                                     </form>
-                                    <form method="POST" style="display:inline" onsubmit="return confirm('Remove from featured?')">
+                                    <form method="POST" action="featured_schools.php" style="display:inline" onsubmit="return confirm('Remove from featured?')">
                                         <input type="hidden" name="action" value="toggle">
-                                        <input type="hidden" name="school_id" value="<?= $fs['id'] ?>">
+                                        <input type="hidden" name="school_id" value="<?= (int)$fs['id'] ?>">
                                         <button type="submit" class="btn btn-danger btn-sm"><i class="ph ph-x"></i> Remove</button>
                                     </form>
                                 </div>
@@ -245,19 +251,16 @@ function schoolTypeLabel($type) {
                         </div>
                         <?php endforeach; ?>
                     </div>
+                    <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+                        <form method="POST" action="featured_schools.php" onsubmit="return confirm('Remove ALL from featured?')">
+                            <input type="hidden" name="action" value="clear_all">
+                            <button type="submit" class="btn btn-danger"><i class="ph ph-trash"></i> Clear All Featured</button>
+                        </form>
+                    </div>
                     <?php else: ?>
                     <div style="text-align:center;padding:40px;color:#94a3b8">
                         <i class="ph ph-school" style="font-size:2.5rem;display:block;margin-bottom:12px;opacity:.15"></i>
                         <p>No featured schools yet. Add some below!</p>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if (!empty($featuredSchools)): ?>
-                    <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
-                        <form method="POST" onsubmit="return confirm('Remove ALL from featured?')">
-                            <input type="hidden" name="action" value="clear_all">
-                            <button type="submit" class="btn btn-danger"><i class="ph ph-trash"></i> Clear All Featured</button>
-                        </form>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -265,7 +268,7 @@ function schoolTypeLabel($type) {
                 <!-- Add to Featured -->
                 <div class="panel">
                     <div class="section-title"><i class="ph ph-plus-circle"></i> Add School to Featured</div>
-                    <p class="hint-text">Select a school below and mark it as featured. Maximum 6 featured schools.</p>
+                    <p class="hint-text">Select a school below and mark it as featured. Maximum 6.</p>
 
                     <?php if (count($featuredSchools) < 6): ?>
                     <div style="max-height:400px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px;">
@@ -287,9 +290,9 @@ function schoolTypeLabel($type) {
                                     <td style="padding:10px 16px; font-size:0.82rem;"><?= schoolTypeLabel($as['school_type']) ?></td>
                                     <td style="padding:10px 16px; font-size:0.82rem;"><?= !empty($as['overall_rating_avg']) && (float)$as['overall_rating_avg'] > 0 ? number_format((float)$as['overall_rating_avg'], 1) : '—' ?></td>
                                     <td style="padding:10px 16px;">
-                                        <form method="POST" style="display:inline">
+                                        <form method="POST" action="featured_schools.php" style="display:inline">
                                             <input type="hidden" name="action" value="toggle">
-                                            <input type="hidden" name="school_id" value="<?= $as['id'] ?>">
+                                            <input type="hidden" name="school_id" value="<?= (int)$as['id'] ?>">
                                             <button type="submit" class="btn btn-primary btn-sm"><i class="ph ph-plus"></i> Feature</button>
                                         </form>
                                     </td>
@@ -300,11 +303,10 @@ function schoolTypeLabel($type) {
                     </div>
                     <?php else: ?>
                     <div style="text-align:center;padding:24px;color:#f59e0b;background:#fef3c7;border-radius:8px;">
-                        <i class="ph ph-warning-circle" style="font-size:1.2rem;"></i> Maximum 6 featured schools reached. Remove one first to add another.
+                        <i class="ph ph-warning-circle" style="font-size:1.2rem;"></i> Maximum 6 featured schools reached.
                     </div>
                     <?php endif; ?>
                 </div>
-
             </div>
         </main>
     </div>
