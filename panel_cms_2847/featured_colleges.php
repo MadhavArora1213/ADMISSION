@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = "College not found in database.";
             }
         } else {
-            $error = "Invalid college ID. POST=" . json_encode($_POST);
+            $error = "Invalid college ID.";
         }
         $loc = "featured_colleges.php";
         if ($msg) $loc .= "?msg=" . urlencode($msg);
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (isset($_GET['msg'])) $msg = $_GET['msg'];
 if (isset($_GET['err'])) $error = $_GET['err'];
 
-$featuredColleges = $pdo->query("SELECT c.id, c.name, c.slug, c.college_type, c.is_featured, c.featured_order,
+$featuredColleges = $pdo->query("SELECT c.id AS college_id, c.name, c.slug, c.college_type, c.is_featured, c.featured_order,
     c.overall_rating_avg, c.ranking_nirf, c.naac_grade,
     s.name AS state_name, ci.name AS city_name, cm.cover_image_url
     FROM colleges c
@@ -86,7 +86,7 @@ $featuredColleges = $pdo->query("SELECT c.id, c.name, c.slug, c.college_type, c.
     WHERE c.status='active' AND c.is_featured=1
     ORDER BY c.featured_order ASC, c.overall_rating_avg DESC LIMIT 20")->fetchAll(PDO::FETCH_ASSOC);
 
-$availableColleges = $pdo->query("SELECT c.id, c.name, ci.name AS city_name, c.overall_rating_avg, c.ranking_nirf
+$availableColleges = $pdo->query("SELECT c.id AS college_id, c.name, ci.name AS city_name, c.overall_rating_avg, c.ranking_nirf
     FROM colleges c LEFT JOIN cities ci ON c.city_id=ci.id
     WHERE c.status='active' AND (c.is_featured=0 OR c.is_featured IS NULL)
     ORDER BY c.overall_rating_avg DESC, c.ranking_nirf ASC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
@@ -213,7 +213,7 @@ $availableColleges = $pdo->query("SELECT c.id, c.name, ci.name AS city_name, c.o
                                 <div class="featured-item-actions">
                                     <form method="POST" action="featured_colleges.php">
                                         <input type="hidden" name="action" value="set_order">
-                                        <input type="hidden" name="college_id" value="<?= (int)$fc['id'] ?>">
+                                        <input type="hidden" name="college_id" value="<?= (int)$fc['college_id'] ?>">
                                         <select name="featured_order" onchange="this.form.submit()">
                                             <option value="0" <?= empty($fc['featured_order']) ? 'selected' : '' ?>>Auto</option>
                                             <?php for ($i = 1; $i <= 6; $i++): ?>
@@ -223,7 +223,7 @@ $availableColleges = $pdo->query("SELECT c.id, c.name, ci.name AS city_name, c.o
                                     </form>
                                     <form method="POST" action="featured_colleges.php" onsubmit="return confirm('Remove from featured?')">
                                         <input type="hidden" name="action" value="toggle">
-                                        <input type="hidden" name="college_id" value="<?= (int)$fc['id'] ?>">
+                                        <input type="hidden" name="college_id" value="<?= (int)$fc['college_id'] ?>">
                                         <button type="submit" class="btn btn-danger btn-sm"><i class="ph ph-x"></i> Remove</button>
                                     </form>
                                 </div>
@@ -270,7 +270,7 @@ $availableColleges = $pdo->query("SELECT c.id, c.name, ci.name AS city_name, c.o
                                     <td style="padding:10px 16px">
                                         <form method="POST" action="featured_colleges.php">
                                             <input type="hidden" name="action" value="toggle">
-                                            <input type="hidden" name="college_id" value="<?= (int)$ac['id'] ?>">
+                                            <input type="hidden" name="college_id" value="<?= (int)$ac['college_id'] ?>">
                                             <button type="submit" class="btn btn-primary btn-sm"><i class="ph ph-plus"></i> Feature</button>
                                         </form>
                                     </td>

@@ -53,7 +53,7 @@ if (isset($pdo)) {
             <i class="ph ph-trophy"></i> Featured Colleges
         </a>
         <a href="featured_schools.php" class="<?php echo ($current_page == 'featured_schools.php') ? 'active' : ''; ?>">
-            <i class="ph ph-school"></i> Featured Schools
+            <i class="ph ph-star-half"></i> Featured Schools
         </a>
         <a href="seat_matrix.php" class="<?php echo ($current_page == 'seat_matrix.php') ? 'active' : ''; ?>">
             <i class="ph ph-table"></i> Seat Matrix

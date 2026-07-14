@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (isset($_GET['msg'])) $msg = $_GET['msg'];
 if (isset($_GET['err'])) $error = $_GET['err'];
 
-$featuredSchools = $pdo->query("SELECT sc.id, sc.name, sc.slug, sc.school_type, sc.is_featured, sc.featured_order,
+$featuredSchools = $pdo->query("SELECT sc.id AS school_id, sc.name, sc.slug, sc.school_type, sc.is_featured, sc.featured_order,
     sc.overall_rating_avg, sc.board_affiliation, sc.established_year, sc.total_students,
     st.name AS state_name, ci.name AS city_name, sm.cover_image_url
     FROM schools sc
@@ -85,19 +85,19 @@ $featuredSchools = $pdo->query("SELECT sc.id, sc.name, sc.slug, sc.school_type, 
     WHERE sc.status='active' AND sc.is_featured=1
     ORDER BY sc.featured_order ASC, sc.overall_rating_avg DESC LIMIT 20")->fetchAll(PDO::FETCH_ASSOC);
 
-$availableSchools = $pdo->query("SELECT sc.id, sc.name, ci.name AS city_name, sc.overall_rating_avg, sc.school_type, sc.board_affiliation
+$availableSchools = $pdo->query("SELECT sc.id AS school_id, sc.name, ci.name AS city_name, sc.overall_rating_avg, sc.school_type, sc.board_affiliation
     FROM schools sc LEFT JOIN cities ci ON sc.city_id=ci.id
     WHERE sc.status='active' AND (sc.is_featured=0 OR sc.is_featured IS NULL)
     ORDER BY sc.overall_rating_avg DESC, sc.name ASC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
 
 function schoolTypeLabel($type) {
-    return match($type) {
-        'govt' => 'Government',
-        'private' => 'Private',
-        'international' => 'International',
-        'boarding' => 'Boarding',
-        default => ucfirst($type ?? 'School')
-    };
+    switch ($type) {
+        case 'govt': return 'Government';
+        case 'private': return 'Private';
+        case 'international': return 'International';
+        case 'boarding': return 'Boarding';
+        default: return ucfirst($type ?? 'School');
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -165,7 +165,7 @@ function schoolTypeLabel($type) {
             <header class="topbar">
                 <div class="header-left">
                     <button onclick="toggleSidebar()" id="topbarToggle"><i class="ph ph-list"></i></button>
-                    <div style="font-weight:700;color:#0f172a"><i class="ph ph-school"></i> Featured Schools</div>
+                    <div style="font-weight:700;color:#0f172a"><i class="ph ph-graduation-cap"></i> Featured Schools</div>
                 </div>
                 <div class="header-right">
                     <span style="font-size:.88rem;color:rgba(15,23,42,.65)"><?= htmlspecialchars($_SESSION['admin_username'] ?? 'Admin') ?></span>
@@ -187,7 +187,7 @@ function schoolTypeLabel($type) {
                 <?php endif; ?>
 
                 <div class="panel">
-                    <div class="section-title"><i class="ph ph-school"></i> Current Featured (<?= count($featuredSchools) ?> / 6)</div>
+                    <div class="section-title"><i class="ph ph-graduation-cap"></i> Current Featured (<?= count($featuredSchools) ?> / 6)</div>
                     <p class="hint-text">These schools appear on the homepage. Set order 1-6 to control display order.</p>
                     <?php if (!empty($featuredSchools)): ?>
                     <div class="featured-grid">
@@ -218,7 +218,7 @@ function schoolTypeLabel($type) {
                                 <div class="featured-item-actions">
                                     <form method="POST" action="featured_schools.php">
                                         <input type="hidden" name="action" value="set_order">
-                                        <input type="hidden" name="school_id" value="<?= (int)$fs['id'] ?>">
+                                        <input type="hidden" name="school_id" value="<?= (int)$fs['school_id'] ?>">
                                         <select name="featured_order" onchange="this.form.submit()">
                                             <option value="0" <?= empty($fs['featured_order']) ? 'selected' : '' ?>>Auto</option>
                                             <?php for ($i = 1; $i <= 6; $i++): ?>
@@ -228,7 +228,7 @@ function schoolTypeLabel($type) {
                                     </form>
                                     <form method="POST" action="featured_schools.php" onsubmit="return confirm('Remove from featured?')">
                                         <input type="hidden" name="action" value="toggle">
-                                        <input type="hidden" name="school_id" value="<?= (int)$fs['id'] ?>">
+                                        <input type="hidden" name="school_id" value="<?= (int)$fs['school_id'] ?>">
                                         <button type="submit" class="btn btn-danger btn-sm"><i class="ph ph-x"></i> Remove</button>
                                     </form>
                                 </div>
@@ -244,7 +244,7 @@ function schoolTypeLabel($type) {
                     </div>
                     <?php else: ?>
                     <div style="text-align:center;padding:40px;color:#94a3b8">
-                        <i class="ph ph-school" style="font-size:2.5rem;display:block;margin-bottom:12px;opacity:.15"></i>
+                        <i class="ph ph-graduation-cap" style="font-size:2.5rem;display:block;margin-bottom:12px;opacity:.15"></i>
                         <p>No featured schools yet. Add some below!</p>
                     </div>
                     <?php endif; ?>
@@ -275,7 +275,7 @@ function schoolTypeLabel($type) {
                                     <td style="padding:10px 16px">
                                         <form method="POST" action="featured_schools.php">
                                             <input type="hidden" name="action" value="toggle">
-                                            <input type="hidden" name="school_id" value="<?= (int)$as['id'] ?>">
+                                            <input type="hidden" name="school_id" value="<?= (int)$as['school_id'] ?>">
                                             <button type="submit" class="btn btn-primary btn-sm"><i class="ph ph-plus"></i> Feature</button>
                                         </form>
                                     </td>
