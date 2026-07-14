@@ -9,13 +9,12 @@ require_once 'db.php';
 $msg = '';
 $error = '';
 
-// Handle form submissions — PRG pattern
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = isset($_POST['action']) ? trim($_POST['action']) : '';
 
     if ($action === 'toggle') {
-        $collegeId = isset($_POST['college_id']) ? (int) $_POST['college_id'] : 0;
-        if ($collegeId > 0) {
+        $collegeId = trim($_POST['college_id'] ?? '');
+        if ($collegeId !== '') {
             $checkStmt = $pdo->prepare("SELECT is_featured, featured_order FROM colleges WHERE id = ?");
             $checkStmt->execute([$collegeId]);
             $college = $checkStmt->fetch(PDO::FETCH_ASSOC);
@@ -29,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = "College not found in database.";
             }
         } else {
-            $error = "Invalid college ID. POST=" . json_encode($_POST);
+            $error = "No college ID received.";
         }
         $loc = "featured_colleges.php";
         if ($msg) $loc .= "?msg=" . urlencode($msg);
@@ -39,9 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'set_order') {
-        $collegeId = isset($_POST['college_id']) ? (int) $_POST['college_id'] : 0;
+        $collegeId = trim($_POST['college_id'] ?? '');
         $order = isset($_POST['featured_order']) ? (int) $_POST['featured_order'] : 0;
-        if ($collegeId > 0 && $order >= 0 && $order <= 6) {
+        if ($collegeId !== '' && $order >= 0 && $order <= 6) {
             if ($order > 0) {
                 $dupStmt = $pdo->prepare("SELECT id, name FROM colleges WHERE featured_order = ? AND id != ? AND is_featured = 1");
                 $dupStmt->execute([$order, $collegeId]);
@@ -76,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (isset($_GET['msg'])) $msg = $_GET['msg'];
 if (isset($_GET['err'])) $error = $_GET['err'];
 
-$featuredColleges = $pdo->query("SELECT c.id AS college_id, c.name, c.slug, c.college_type, c.is_featured, c.featured_order,
+$featuredColleges = $pdo->query("SELECT c.id AS cid, c.name, c.slug, c.college_type, c.is_featured, c.featured_order,
     c.overall_rating_avg, c.ranking_nirf, c.naac_grade,
     s.name AS state_name, ci.name AS city_name, cm.cover_image_url
     FROM colleges c
@@ -86,7 +85,7 @@ $featuredColleges = $pdo->query("SELECT c.id AS college_id, c.name, c.slug, c.co
     WHERE c.status='active' AND c.is_featured=1
     ORDER BY c.featured_order ASC, c.overall_rating_avg DESC LIMIT 20")->fetchAll(PDO::FETCH_ASSOC);
 
-$availableColleges = $pdo->query("SELECT c.id AS college_id, c.name, ci.name AS city_name, c.overall_rating_avg, c.ranking_nirf
+$availableColleges = $pdo->query("SELECT c.id AS cid, c.name, ci.name AS city_name, c.overall_rating_avg, c.ranking_nirf
     FROM colleges c LEFT JOIN cities ci ON c.city_id=ci.id
     WHERE c.status='active' AND (c.is_featured=0 OR c.is_featured IS NULL)
     ORDER BY c.overall_rating_avg DESC, c.ranking_nirf ASC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
@@ -213,7 +212,7 @@ $availableColleges = $pdo->query("SELECT c.id AS college_id, c.name, ci.name AS 
                                 <div class="featured-item-actions">
                                     <form method="POST" action="featured_colleges.php">
                                         <input type="hidden" name="action" value="set_order">
-                                        <input type="hidden" name="college_id" value="<?= (int)$fc['college_id'] ?>">
+                                        <input type="hidden" name="college_id" value="<?= htmlspecialchars($fc['cid']) ?>">
                                         <select name="featured_order" onchange="this.form.submit()">
                                             <option value="0" <?= empty($fc['featured_order']) ? 'selected' : '' ?>>Auto</option>
                                             <?php for ($i = 1; $i <= 6; $i++): ?>
@@ -223,7 +222,7 @@ $availableColleges = $pdo->query("SELECT c.id AS college_id, c.name, ci.name AS 
                                     </form>
                                     <form method="POST" action="featured_colleges.php" onsubmit="return confirm('Remove from featured?')">
                                         <input type="hidden" name="action" value="toggle">
-                                        <input type="hidden" name="college_id" value="<?= (int)$fc['college_id'] ?>">
+                                        <input type="hidden" name="college_id" value="<?= htmlspecialchars($fc['cid']) ?>">
                                         <button type="submit" class="btn btn-danger btn-sm"><i class="ph ph-x"></i> Remove</button>
                                     </form>
                                 </div>
@@ -247,7 +246,7 @@ $availableColleges = $pdo->query("SELECT c.id AS college_id, c.name, ci.name AS 
 
                 <div class="panel">
                     <div class="section-title"><i class="ph ph-plus-circle"></i> Add College to Featured</div>
-                    <p class="hint-text">Select a college below and mark it as featured. Maximum 6 featured colleges.</p>
+                    <p class="hint-text">Select a college below and mark it as featured. Maximum 6.</p>
                     <?php if (count($featuredColleges) < 6): ?>
                     <div style="max-height:400px;overflow-y:auto;border:1px solid var(--border-color);border-radius:8px">
                         <table style="width:100%;border-collapse:collapse;font-size:.88rem">
@@ -268,10 +267,9 @@ $availableColleges = $pdo->query("SELECT c.id AS college_id, c.name, ci.name AS 
                                     <td style="padding:10px 16px;font-size:.82rem"><?= !empty($ac['overall_rating_avg']) && (float)$ac['overall_rating_avg'] > 0 ? number_format((float)$ac['overall_rating_avg'], 1) : '—' ?></td>
                                     <td style="padding:10px 16px;font-size:.82rem"><?= !empty($ac['ranking_nirf']) ? '#' . htmlspecialchars($ac['ranking_nirf']) : '—' ?></td>
                                     <td style="padding:10px 16px">
-                                        <!-- DEBUG: <?= htmlspecialchars(json_encode(array_keys($ac))) ?> -->
                                         <form method="POST" action="featured_colleges.php">
                                             <input type="hidden" name="action" value="toggle">
-                                            <input type="hidden" name="college_id" value="<?= (int)($ac['college_id'] ?? $ac['id'] ?? 0) ?>">
+                                            <input type="hidden" name="college_id" value="<?= htmlspecialchars($ac['cid']) ?>">
                                             <button type="submit" class="btn btn-primary btn-sm"><i class="ph ph-plus"></i> Feature</button>
                                         </form>
                                     </td>

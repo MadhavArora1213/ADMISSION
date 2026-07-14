@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Fetch current hero slots
 function fetchHeroSlots($pdo) {
-    $cols = $pdo->query("SELECT c.id, c.name, c.slug, c.hero_priority, c.overall_rating_avg,
+    $cols = $pdo->query("SELECT c.id AS eid, c.name, c.slug, c.hero_priority, c.overall_rating_avg,
         s.name AS state_name, ci.name AS city_name, cm.cover_image_url,
         'college' AS entity_type
         FROM colleges c
@@ -86,7 +86,7 @@ function fetchHeroSlots($pdo) {
         WHERE c.hero_priority IS NOT NULL AND c.status='active'
         ORDER BY c.hero_priority ASC")->fetchAll(PDO::FETCH_ASSOC);
 
-    $unis = $pdo->query("SELECT u.id, u.name, u.slug, u.hero_priority, u.overall_rating_avg,
+    $unis = $pdo->query("SELECT u.id AS eid, u.name, u.slug, u.hero_priority, u.overall_rating_avg,
         s.name AS state_name, ci.name AS city_name, u.cover_image_url,
         'university' AS entity_type
         FROM universities u
@@ -95,7 +95,7 @@ function fetchHeroSlots($pdo) {
         WHERE u.hero_priority IS NOT NULL AND u.status='active'
         ORDER BY u.hero_priority ASC")->fetchAll(PDO::FETCH_ASSOC);
 
-    $schs = $pdo->query("SELECT sc.id, sc.name, sc.slug, sc.hero_priority, sc.overall_rating_avg,
+    $schs = $pdo->query("SELECT sc.id AS eid, sc.name, sc.slug, sc.hero_priority, sc.overall_rating_avg,
         s.name AS state_name, ci.name AS city_name, sm.cover_image_url,
         'school' AS entity_type
         FROM schools sc
@@ -113,9 +113,9 @@ function fetchHeroSlots($pdo) {
 $heroSlots = fetchHeroSlots($pdo);
 $occupiedSlots = array_column($heroSlots, 'hero_priority');
 
-$availableColleges = $pdo->query("SELECT c.id, c.name, ci.name AS city_name FROM colleges c LEFT JOIN cities ci ON c.city_id=ci.id WHERE c.status='active' AND (c.hero_priority IS NULL OR c.hero_priority = 0) ORDER BY c.is_featured DESC, c.overall_rating_avg DESC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
-$availableUnis = $pdo->query("SELECT u.id, u.name, ci.name AS city_name FROM universities u LEFT JOIN cities ci ON u.city_id=ci.id WHERE u.status='active' AND (u.hero_priority IS NULL OR u.hero_priority = 0) ORDER BY u.is_featured DESC, u.overall_rating_avg DESC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
-$availableSchools = $pdo->query("SELECT sc.id, sc.name, ci.name AS city_name FROM schools sc LEFT JOIN cities ci ON sc.city_id=ci.id WHERE sc.status='active' AND (sc.hero_priority IS NULL OR sc.hero_priority = 0) ORDER BY sc.is_featured DESC, sc.overall_rating_avg DESC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
+$availableColleges = $pdo->query("SELECT c.id AS eid, c.name, ci.name AS city_name FROM colleges c LEFT JOIN cities ci ON c.city_id=ci.id WHERE c.status='active' AND (c.hero_priority IS NULL OR c.hero_priority = 0) ORDER BY c.is_featured DESC, c.overall_rating_avg DESC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
+$availableUnis = $pdo->query("SELECT u.id AS eid, u.name, ci.name AS city_name FROM universities u LEFT JOIN cities ci ON u.city_id=ci.id WHERE u.status='active' AND (u.hero_priority IS NULL OR u.hero_priority = 0) ORDER BY u.is_featured DESC, u.overall_rating_avg DESC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
+$availableSchools = $pdo->query("SELECT sc.id AS eid, sc.name, ci.name AS city_name FROM schools sc LEFT JOIN cities ci ON sc.city_id=ci.id WHERE sc.status='active' AND (sc.hero_priority IS NULL OR sc.hero_priority = 0) ORDER BY sc.is_featured DESC, sc.overall_rating_avg DESC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -302,7 +302,7 @@ $availableSchools = $pdo->query("SELECT sc.id, sc.name, ci.name AS city_name FRO
                                 <form method="POST" style="display:inline">
                                     <input type="hidden" name="action" value="remove">
                                     <input type="hidden" name="entity_type" value="<?= $slotItem['entity_type'] ?>">
-                                    <input type="hidden" name="entity_id" value="<?= $slotItem['id'] ?>">
+                                    <input type="hidden" name="entity_id" value="<?= $slotItem['eid'] ?>">
                                     <button type="submit" class="hero-slot-remove" title="Remove from slot"><i class="ph ph-x"></i></button>
                                 </form>
                             <?php else: ?>
@@ -419,8 +419,8 @@ function renderEntityOptions(filter) {
     optionsEl.innerHTML = filtered.map(e => {
         const loc = e.city_name || '';
         const label = e.name + (loc ? ' — ' + loc : '');
-        const sel = String(e.id) === selectedValue ? ' selected' : '';
-        return '<div class="custom-select-option' + sel + '" data-value="' + e.id + '" onclick="selectEntity(this)" title="' + label.replace(/"/g, '&quot;') + '">' + label + '</div>';
+        const sel = String(e.eid) === selectedValue ? ' selected' : '';
+        return '<div class="custom-select-option' + sel + '" data-value="' + e.eid + '" onclick="selectEntity(this)" title="' + label.replace(/"/g, '&quot;') + '">' + label + '</div>';
     }).join('');
 }
 
