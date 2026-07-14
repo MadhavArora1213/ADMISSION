@@ -187,6 +187,26 @@ $availableSchools = $pdo->query("SELECT sc.id, sc.name, ci.name AS city_name FRO
 
         .hint-text { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
 
+        /* Custom Searchable Select */
+        .custom-select { position: relative; width: 100%; }
+        .custom-select-trigger { padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: space-between; min-height: 42px; word-break: break-word; }
+        .custom-select-trigger .placeholder { color: #999; }
+        .custom-select-trigger .arrow { flex-shrink: 0; margin-left: 8px; transition: transform 0.2s; font-size: 0.7rem; color: #999; }
+        .custom-select.open .custom-select-trigger { border-color: var(--primary); outline: none; }
+        .custom-select.open .custom-select-trigger .arrow { transform: rotate(180deg); }
+        .custom-select-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; margin-top: 4px; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.15); max-height: 50vh; overflow: hidden; flex-direction: column; }
+        .custom-select.open .custom-select-dropdown { display: flex; }
+        .custom-select-search { padding: 8px; border-bottom: 1px solid #eee; }
+        .custom-select-search input { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.85rem; outline: none; }
+        .custom-select-search input:focus { border-color: var(--primary); }
+        .custom-select-options { overflow-y: auto; max-height: 38vh; padding: 4px 0; }
+        .custom-select-option { padding: 10px 14px; cursor: pointer; font-size: 0.88rem; color: var(--text-dark); border-bottom: 1px solid #f5f5f5; }
+        .custom-select-option:last-child { border-bottom: none; }
+        .custom-select-option:hover { background: #f0f4ff; }
+        .custom-select-option.selected { background: var(--primary); color: #fff; }
+        .custom-select-option.no-results { color: #999; cursor: default; text-align: center; padding: 16px; }
+        .custom-select-option.no-results:hover { background: transparent; }
+
         /* Responsive — exact match with colleges.php */
         @media(max-width:1024px){
             .sidebar { transform:translateX(-100%) !important; }
@@ -329,9 +349,19 @@ $availableSchools = $pdo->query("SELECT sc.id, sc.name, ci.name AS city_name FRO
 
                         <div class="form-group">
                             <label>Institution</label>
-                            <select name="entity_id" id="entityId" required>
-                                <option value="">Select type first…</option>
-                            </select>
+                            <div class="custom-select" id="customEntitySelect">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect()">
+                                    <span class="placeholder">Select type first…</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <input type="hidden" name="entity_id" id="entityId" required>
+                                <div class="custom-select-dropdown">
+                                    <div class="custom-select-search">
+                                        <input type="text" placeholder="Search institution…" id="entitySearchInput" oninput="filterCustomOptions()" onkeydown="handleSearchKey(event)">
+                                    </div>
+                                    <div class="custom-select-options" id="entityOptions"></div>
+                                </div>
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-primary assign-btn"><i class="ph ph-check"></i> Assign</button>
@@ -349,23 +379,99 @@ const entities = {
     school: <?= json_encode($availableSchools) ?>
 };
 
-function toggleEntitySelect() {
-    const type = document.getElementById('entityType').value;
-    const select = document.getElementById('entityId');
-    select.innerHTML = '<option value="">Loading…</option>';
+let currentEntityType = '';
+let selectedValue = '';
 
-    if (!type || !entities[type]) {
-        select.innerHTML = '<option value="">Select type first…</option>';
+function toggleEntitySelect() {
+    currentEntityType = document.getElementById('entityType').value;
+    const wrap = document.getElementById('customEntitySelect');
+    const hidden = document.getElementById('entityId');
+    const trigger = wrap.querySelector('.custom-select-trigger');
+
+    selectedValue = '';
+    hidden.value = '';
+
+    if (!currentEntityType || !entities[currentEntityType]) {
+        trigger.innerHTML = '<span class="placeholder">Select type first…</span><span class="arrow">▼</span>';
+        renderEntityOptions();
         return;
     }
 
-    let html = '<option value="">Select institution…</option>';
-    entities[type].forEach(e => {
-        const loc = e.city_name || '';
-        html += '<option value="' + e.id + '">' + e.name + (loc ? ' — ' + loc : '') + '</option>';
-    });
-    select.innerHTML = html;
+    trigger.innerHTML = '<span class="placeholder">Select institution…</span><span class="arrow">▼</span>';
+    renderEntityOptions();
 }
+
+function renderEntityOptions(filter) {
+    const optionsEl = document.getElementById('entityOptions');
+    const items = entities[currentEntityType] || [];
+    const q = (filter || '').toLowerCase();
+
+    let filtered = items;
+    if (q) {
+        filtered = items.filter(e => e.name.toLowerCase().includes(q) || (e.city_name || '').toLowerCase().includes(q));
+    }
+
+    if (filtered.length === 0) {
+        optionsEl.innerHTML = '<div class="custom-select-option no-results">No results found</div>';
+        return;
+    }
+
+    optionsEl.innerHTML = filtered.map(e => {
+        const loc = e.city_name || '';
+        const label = e.name + (loc ? ' — ' + loc : '');
+        const sel = String(e.id) === selectedValue ? ' selected' : '';
+        return '<div class="custom-select-option' + sel + '" data-value="' + e.id + '" onclick="selectEntity(this)" title="' + label.replace(/"/g, '&quot;') + '">' + label + '</div>';
+    }).join('');
+}
+
+function selectEntity(el) {
+    selectedValue = el.dataset.value;
+    document.getElementById('entityId').value = selectedValue;
+
+    const wrap = document.getElementById('customEntitySelect');
+    const trigger = wrap.querySelector('.custom-select-trigger');
+    trigger.innerHTML = '<span>' + el.textContent + '</span><span class="arrow">▼</span>';
+
+    wrap.classList.remove('open');
+    document.getElementById('entitySearchInput').value = '';
+}
+
+function toggleCustomSelect() {
+    const wrap = document.getElementById('customEntitySelect');
+    const isOpen = wrap.classList.contains('open');
+
+    // Close all other custom selects
+    document.querySelectorAll('.custom-select.open').forEach(s => s.classList.remove('open'));
+
+    if (!isOpen) {
+        wrap.classList.add('open');
+        renderEntityOptions();
+        setTimeout(() => document.getElementById('entitySearchInput').focus(), 50);
+    }
+}
+
+function filterCustomOptions() {
+    const q = document.getElementById('entitySearchInput').value;
+    renderEntityOptions(q);
+}
+
+function handleSearchKey(e) {
+    if (e.key === 'Escape') {
+        document.getElementById('customEntitySelect').classList.remove('open');
+    }
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const opts = document.querySelectorAll('.custom-select-option:not(.no-results)');
+        if (opts.length) opts[0].focus();
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.custom-select')) {
+        document.querySelectorAll('.custom-select.open').forEach(s => s.classList.remove('open'));
+    }
+});
 
 function toggleSidebar() {
     document.querySelector('.sidebar').classList.toggle('open');
