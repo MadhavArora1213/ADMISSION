@@ -121,15 +121,6 @@
     </div>
   </div>
 
-  <!-- Trust Strip -->
-  <div class="nh-trust">
-    <div class="container nh-trust-inner">
-      <div class="nh-trust-item"><i class="ph ph-shield-check"></i> Verified Data</div>
-      <div class="nh-trust-item"><i class="ph ph-chart-line-up"></i> NIRF Rankings</div>
-      <div class="nh-trust-item"><i class="ph ph-headset"></i> Expert Guidance</div>
-      <div class="nh-trust-item"><i class="ph ph-check-circle"></i> 100% Free</div>
-    </div>
-  </div>
 </section>
 
 <script>

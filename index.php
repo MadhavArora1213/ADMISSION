@@ -73,14 +73,14 @@ foreach ($streamSlugMap as $slug => $cats) {
 }
 
 $sqlC = "SELECT c.id,c.name,c.slug,c.college_type,c.naac_grade,c.ranking_nirf,c.overall_rating_avg,c.total_reviews,
-                c.established_year,c.total_students,
+                c.established_year,c.total_students,c.is_featured,c.featured_order,
                 s.name AS state_name,ct.name AS city_name,cm.cover_image_url,cm.logo_url,
                 (SELECT MAX(avg_package_lpa) FROM college_placements cp WHERE cp.college_id=c.id) AS avg_package,
                 (SELECT MAX(highest_package_lpa) FROM college_placements cp WHERE cp.college_id=c.id) AS highest_package,
                 (SELECT MIN(annual_fee) FROM college_courses cc WHERE cc.college_id=c.id) AS min_fee
          FROM colleges c LEFT JOIN states s ON c.state_id=s.id LEFT JOIN cities ct ON c.city_id=ct.id
          LEFT JOIN college_media cm ON cm.college_id=c.id AND (cm.image_type IS NULL OR cm.image_type='cover' OR cm.image_type='campus')
-         WHERE c.status='active' AND c.is_featured=1 GROUP BY c.id ORDER BY (c.featured_order > 0) DESC, c.featured_order ASC, c.ranking_nirf ASC LIMIT 6";
+         WHERE c.status='active' AND c.is_featured=1 ORDER BY (c.featured_order > 0) DESC, c.featured_order ASC, c.overall_rating_avg DESC LIMIT 6";
 $featuredColleges = cAll($pdo, $sqlC);
 if (empty($featuredColleges)) $featuredColleges = cAll($pdo, str_replace("AND c.is_featured=1","AND c.overall_rating_avg>0",$sqlC));
 // Prefer colleges with actual data for rankings display
@@ -138,7 +138,7 @@ $featuredSchools = cAll($pdo, "SELECT s.id, s.name, s.slug, s.school_type, s.boa
     LEFT JOIN cities ci ON s.city_id = ci.id
     LEFT JOIN school_media sm ON sm.school_id = s.id AND (sm.image_type='cover' OR sm.image_type IS NULL)
     WHERE s.status = 'active' AND s.is_featured = 1
-    ORDER BY s.overall_rating_avg DESC, s.name ASC LIMIT 6");
+    ORDER BY (s.featured_order > 0) DESC, s.featured_order ASC, s.overall_rating_avg DESC, s.name ASC LIMIT 6");
 if (empty($featuredSchools)) {
     $featuredSchools = cAll($pdo, "SELECT s.id, s.name, s.slug, s.school_type, s.board_affiliation,
         s.overall_rating_avg, s.total_reviews, s.established_year, s.total_students,

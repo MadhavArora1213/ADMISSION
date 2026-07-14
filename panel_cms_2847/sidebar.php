@@ -49,6 +49,12 @@ if (isset($pdo)) {
         <a href="hero_banner.php" class="<?php echo ($current_page == 'hero_banner.php') ? 'active' : ''; ?>">
             <i class="ph ph-images"></i> Hero Banner
         </a>
+        <a href="featured_colleges.php" class="<?php echo ($current_page == 'featured_colleges.php') ? 'active' : ''; ?>">
+            <i class="ph ph-trophy"></i> Featured Colleges
+        </a>
+        <a href="featured_schools.php" class="<?php echo ($current_page == 'featured_schools.php') ? 'active' : ''; ?>">
+            <i class="ph ph-school"></i> Featured Schools
+        </a>
         <a href="seat_matrix.php" class="<?php echo ($current_page == 'seat_matrix.php') ? 'active' : ''; ?>">
             <i class="ph ph-table"></i> Seat Matrix
         </a>
