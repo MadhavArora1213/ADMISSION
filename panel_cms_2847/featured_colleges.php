@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = "College not found in database.";
             }
         } else {
-            $error = "Invalid college ID.";
+            $error = "Invalid college ID. POST=" . json_encode($_POST);
         }
         $loc = "featured_colleges.php";
         if ($msg) $loc .= "?msg=" . urlencode($msg);
@@ -268,9 +268,10 @@ $availableColleges = $pdo->query("SELECT c.id AS college_id, c.name, ci.name AS 
                                     <td style="padding:10px 16px;font-size:.82rem"><?= !empty($ac['overall_rating_avg']) && (float)$ac['overall_rating_avg'] > 0 ? number_format((float)$ac['overall_rating_avg'], 1) : '—' ?></td>
                                     <td style="padding:10px 16px;font-size:.82rem"><?= !empty($ac['ranking_nirf']) ? '#' . htmlspecialchars($ac['ranking_nirf']) : '—' ?></td>
                                     <td style="padding:10px 16px">
+                                        <!-- DEBUG: <?= htmlspecialchars(json_encode(array_keys($ac))) ?> -->
                                         <form method="POST" action="featured_colleges.php">
                                             <input type="hidden" name="action" value="toggle">
-                                            <input type="hidden" name="college_id" value="<?= (int)$ac['college_id'] ?>">
+                                            <input type="hidden" name="college_id" value="<?= (int)($ac['college_id'] ?? $ac['id'] ?? 0) ?>">
                                             <button type="submit" class="btn btn-primary btn-sm"><i class="ph ph-plus"></i> Feature</button>
                                         </form>
                                     </td>
