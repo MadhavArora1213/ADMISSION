@@ -128,7 +128,7 @@ if (mb_strlen($q) >= 2) {
         $pdo->prepare("INSERT INTO search_trending (query_text, trending_score, trending_period) VALUES (?, 1, 'daily') ON DUPLICATE KEY UPDATE trending_score = trending_score + 1")->execute([$q]);
     } catch (Exception $e) {}
 }
-?>
+
 $siteBase = defined('BASE_URL') ? BASE_URL : '/ADMISSION';
 $canonicalUrl = $siteBase . '/search.php?q=' . urlencode($q);
 $pageTitle = 'Search Results for "' . $q . '" - AdmissionSeason';
