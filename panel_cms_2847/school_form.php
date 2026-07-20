@@ -31,7 +31,7 @@ function linesToJsonList($text) {
 
 // Handle POST - Identity tab
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
-    $slug = !empty($_POST['slug']) ? $_POST['slug'] : strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $_POST['name'])));
+    $slug = !empty($_POST['slug']) ? schoolSlugify($_POST['slug']) : schoolSlugify($_POST['name']);
     
     $slugCheckQ = "SELECT id FROM schools WHERE slug = :slug";
     if ($is_edit) $slugCheckQ .= " AND id != :id";

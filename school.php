@@ -68,7 +68,7 @@ try {
 } catch(Exception $e) {}
 
 $siteBase = getBaseUrl();
-$canonicalUrl = $siteBase . '/school/' . $slug;
+$canonicalUrl = $siteBase . '/school/' . urlencode($slug);
 if ($tab !== 'overview') $canonicalUrl .= '/' . $tab;
 
 $pageTitle = $school['meta_title'] ?: ($school['name'] . ': Fees, Admission ' . date('Y') . ', Courses, Reviews');
@@ -773,7 +773,7 @@ $tabIcons = [
             <?php else: ?>
             <div class="college-reviews-list">
               <?php foreach ($updates as $up): ?>
-              <a href="<?= $siteBase ?>/school/<?= $slug ?>/news/<?= $up['id'] ?>" style="text-decoration:none;color:inherit;display:block">
+              <a href="<?= $siteBase ?>/school/<?= urlencode($slug) ?>/news/<?= $up['id'] ?>" style="text-decoration:none;color:inherit;display:block">
               <article class="college-review-card" style="cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
                 <div class="news-card-flex">
                   <?php if(!empty($up['image_url'])): ?>

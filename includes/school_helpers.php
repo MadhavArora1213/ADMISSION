@@ -1,12 +1,22 @@
 <?php
 declare(strict_types=1);
 
+if (!function_exists('schoolSlugify')) {
+    function schoolSlugify(string $name): string {
+        $slug = strtolower(trim($name));
+        $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
+        $slug = preg_replace('/[\s-]+/', '-', $slug);
+        $slug = trim($slug, '-');
+        return $slug;
+    }
+}
+
 if (!function_exists('schoolUrl')) {
     function schoolUrl(string $slug, string $tab = 'overview'): string {
         $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
-        $url = $base . '/school/' . $slug;
+        $url = $base . '/school/' . urlencode($slug);
         if ($tab !== 'overview') {
-            $url .= '/' . $tab;
+            $url .= '/' . urlencode($tab);
         }
         return $url;
     }
