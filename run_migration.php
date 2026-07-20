@@ -1,20 +1,19 @@
 <?php
 /**
- * Migration: Fix school slugs to use clean hyphens
- * Run once: php migrations/fix_school_slugs.php
+ * Run this once from browser to fix school slugs
+ * Access: https://yourdomain.com/run_migration.php
+ * DELETE THIS FILE AFTER RUNNING!
  */
 
-require_once __DIR__ . '/../panel_cms_2847/db.php';
+require_once __DIR__ . '/panel_cms_2847/db.php';
+
+header('Content-Type: text/plain');
 
 function slugify(string $name): string {
     $slug = strtolower(trim($name));
-    // Replace + and %20 with spaces first
     $slug = str_replace(['+', '%20'], ' ', $slug);
-    // Remove special chars except alphanumeric, spaces, hyphens
     $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
-    // Replace spaces and multiple hyphens with single hyphen
     $slug = preg_replace('/[\s-]+/', '-', $slug);
-    // Trim leading/trailing hyphens
     $slug = trim($slug, '-');
     return $slug;
 }
@@ -22,7 +21,6 @@ function slugify(string $name): string {
 try {
     $pdo->beginTransaction();
     
-    // Get all schools
     $stmt = $pdo->query("SELECT id, name, slug FROM schools");
     $schools = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -30,9 +28,7 @@ try {
     foreach ($schools as $school) {
         $cleanSlug = slugify($school['name']);
         
-        // Only update if slug has + signs, spaces, or is different from clean version
         if ($school['slug'] !== $cleanSlug || strpos($school['slug'], '+') !== false || strpos($school['slug'], ' ') !== false) {
-            // Check for duplicate slug
             $check = $pdo->prepare("SELECT id FROM schools WHERE slug = ? AND id != ?");
             $check->execute([$cleanSlug, $school['id']]);
             
@@ -51,9 +47,9 @@ try {
     
     $pdo->commit();
     echo "\nDone! Updated {$updated} school slugs.\n";
+    echo "\n⚠️ DELETE this file now: run_migration.php";
     
 } catch (Exception $e) {
     $pdo->rollBack();
-    echo "Error: " . $e->getMessage() . "\n";
-    exit(1);
+    echo "Error: " . $e->getMessage();
 }

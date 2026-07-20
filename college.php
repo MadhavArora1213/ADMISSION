@@ -111,7 +111,7 @@ if (isset($_SESSION['user_id'])) {
 }
 
 $siteBase = getBaseUrl();
-$canonicalUrl = $siteBase . '/college/' . urlencode($slug);
+$canonicalUrl = $siteBase . '/college/' . $slug;
 
 // College image for OG
 $collegeImage = '';

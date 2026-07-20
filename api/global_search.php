@@ -78,7 +78,7 @@ try {
             'title' => $r['name'],
             'subtitle' => $meta,
             'badge' => $badge,
-            'url' => BASE_URL . '/college/' . urlencode($r['slug']),
+            'url' => BASE_URL . '/college/' . $r['slug'],
             'relevance' => $rel,
         ];
         $total++;
@@ -107,7 +107,7 @@ try {
             'title' => $r['exam_name'] . $abbr,
             'subtitle' => $subtitle,
             'badge' => $badge,
-            'url' => BASE_URL . '/exam/' . urlencode($r['exam_slug']),
+            'url' => BASE_URL . '/exam/' . $r['exam_slug'],
             'relevance' => $rel,
         ];
         $total++;
@@ -135,7 +135,7 @@ try {
             'title' => $r['course_name'],
             'subtitle' => $badge . ($meta ? ' · ' . $meta : ''),
             'badge' => $badge,
-            'url' => BASE_URL . '/course/' . urlencode($r['course_slug']),
+            'url' => BASE_URL . '/course/' . $r['course_slug'],
             'relevance' => $rel,
         ];
         $total++;
@@ -162,7 +162,7 @@ try {
             'title' => $r['name'],
             'subtitle' => $subtitle,
             'badge' => $badge,
-            'url' => BASE_URL . '/career/' . urlencode($r['slug']),
+            'url' => BASE_URL . '/career/' . $r['slug'],
             'relevance' => $rel,
         ];
         $total++;
@@ -218,7 +218,7 @@ try {
             'title' => $title,
             'subtitle' => $meta,
             'badge' => $r['question_category'] ?: 'Q&A',
-            'url' => BASE_URL . '/question/' . urlencode($r['slug']),
+            'url' => BASE_URL . '/question/' . $r['slug'],
             'relevance' => $rel,
         ];
         $total++;

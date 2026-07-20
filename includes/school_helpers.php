@@ -14,9 +14,9 @@ if (!function_exists('schoolSlugify')) {
 if (!function_exists('schoolUrl')) {
     function schoolUrl(string $slug, string $tab = 'overview'): string {
         $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
-        $url = $base . '/school/' . urlencode($slug);
+        $url = $base . '/school/' . $slug;
         if ($tab !== 'overview') {
-            $url .= '/' . urlencode($tab);
+            $url .= '/' . $tab;
         }
         return $url;
     }
