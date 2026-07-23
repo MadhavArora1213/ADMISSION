@@ -4004,6 +4004,8 @@ select {
   box-shadow: 0 16px 48px rgba(11,36,71,0.15);
   z-index: 9998;
   padding: 8px 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 .nh-search-group { padding: 4px 0; }
 .nh-search-group-title {

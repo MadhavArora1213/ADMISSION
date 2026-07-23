@@ -225,6 +225,37 @@ try {
     }
 } catch (Exception $e) {}
 
+// ── Indian Universities (name, type, city, state) ──
+try {
+    $stmt = $pdo->prepare("
+        SELECT u.name, u.slug, u.university_type, u.ranking_nirf, u.naac_grade, u.id,
+               ci.name AS city, s.name AS state
+        FROM universities u
+        LEFT JOIN cities ci ON u.city_id = ci.id
+        LEFT JOIN states s ON u.state_id = s.id
+        WHERE u.status = 'active'
+          AND (u.name LIKE ? OR ci.name LIKE ? OR s.name LIKE ? OR u.university_type LIKE ?)
+        ORDER BY u.is_featured DESC, u.ranking_nirf ASC
+        LIMIT 5
+    ");
+    $stmt->execute([$like, $like, $like, $like]);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $meta = $r['city'] ? $r['city'] . ($r['state'] ? ', ' . $r['state'] : '') : ($r['state'] ?? '');
+        $badge = $r['naac_grade'] ? 'NAAC ' . $r['naac_grade'] : ($r['ranking_nirf'] ? 'NIRF #' . $r['ranking_nirf'] : ucfirst($r['university_type'] ?? ''));
+        $rel = relevanceScore($r['name'], $q);
+        $results[] = [
+            'type' => 'university',
+            'icon' => 'ph-graduation-cap',
+            'title' => $r['name'],
+            'subtitle' => $meta,
+            'badge' => $badge,
+            'url' => BASE_URL . '/university/' . $r['slug'],
+            'relevance' => $rel,
+        ];
+        $total++;
+    }
+} catch (Exception $e) {}
+
 // ── Foreign Universities (name, country) ──
 try {
     $stmt = $pdo->prepare("

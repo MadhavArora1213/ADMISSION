@@ -20,7 +20,7 @@ function searchRelevance(string $text, string $query): int {
     return 4;
 }
 
-$results = ['colleges' => [], 'exams' => [], 'courses' => [], 'careers' => [], 'articles' => [], 'questions' => [], 'universities' => []];
+$results = ['colleges' => [], 'exams' => [], 'courses' => [], 'careers' => [], 'articles' => [], 'questions' => [], 'indian_universities' => [], 'universities' => []];
 
 if (mb_strlen($q) >= 1) {
     $like = '%' . $q . '%';
@@ -87,6 +87,20 @@ if (mb_strlen($q) >= 1) {
         ");
         $stmt->execute([$like, $like]);
         $results['questions'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {}
+
+    try {
+        $stmt = $pdo->prepare("
+            SELECT u.name, u.slug, u.university_type, u.ranking_nirf, u.naac_grade, u.overall_rating_avg,
+                   ci.name AS city, s.name AS state
+            FROM universities u
+            LEFT JOIN cities ci ON u.city_id = ci.id
+            LEFT JOIN states s ON u.state_id = s.id
+            WHERE u.status = 'active' AND (u.name LIKE ? OR ci.name LIKE ? OR s.name LIKE ? OR u.university_type LIKE ?)
+            ORDER BY u.is_featured DESC, u.ranking_nirf ASC LIMIT 15
+        ");
+        $stmt->execute([$like, $like, $like, $like]);
+        $results['indian_universities'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {}
 
     try {
@@ -318,6 +332,29 @@ $metaKeywords = $q . ', search ' . $q . ', AdmissionSeason search, find ' . $q;
                 </div>
                 <?php if ($r['stream']): ?>
                 <span class="search-card-badge" style="background:rgba(234,88,12,0.08);color:#EA580C"><?= htmlspecialchars($r['stream']) ?></span>
+                <?php endif; ?>
+            </a>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+
+        <?php if (!empty($results['indian_universities'])): ?>
+        <div class="search-section">
+            <div class="search-section-title">
+                <i class="ph ph-graduation-cap" style="color:#0891B2"></i> Universities
+                <span class="count"><?= count($results['indian_universities']) ?></span>
+            </div>
+            <?php foreach ($results['indian_universities'] as $r): ?>
+            <a href="<?= $navBase ?>/university/<?= htmlspecialchars($r['slug']) ?>" class="search-card" data-track-click="<?= htmlspecialchars(json_encode(['type'=>'university','slug'=>$r['slug'],'q'=>$q])) ?>">
+                <div class="search-card-icon" style="background:rgba(8,145,178,0.08);color:#0891B2"><i class="ph ph-graduation-cap"></i></div>
+                <div class="search-card-body">
+                    <div class="search-card-title"><?= htmlspecialchars($r['name']) ?></div>
+                    <div class="search-card-sub"><?= htmlspecialchars(($r['city'] ?? '') . ($r['state'] ? ', ' . $r['state'] : '')) ?> <?= $r['overall_rating_avg'] ? '· ' . number_format((float)$r['overall_rating_avg'], 1) . ' rating' : '' ?></div>
+                </div>
+                <?php if ($r['naac_grade']): ?>
+                <span class="search-card-badge" style="background:rgba(8,145,178,0.08);color:#0891B2">NAAC <?= htmlspecialchars($r['naac_grade']) ?></span>
+                <?php elseif ($r['ranking_nirf']): ?>
+                <span class="search-card-badge" style="background:rgba(8,145,178,0.08);color:#0891B2">NIRF #<?= $r['ranking_nirf'] ?></span>
                 <?php endif; ?>
             </a>
             <?php endforeach; ?>

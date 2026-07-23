@@ -71,7 +71,7 @@ if (!isset($navColleges)) {
         }
 
         function typeLabel(type) {
-          const m = {college:'Colleges',exam:'Exams',course:'Courses',career:'Careers',article:'News & Articles',question:'Questions',university:'Foreign Universities'};
+          const m = {college:'Colleges',exam:'Exams',course:'Courses',career:'Careers',article:'News & Articles',question:'Questions',university:'Universities'};
           return m[type] || type;
         }
 

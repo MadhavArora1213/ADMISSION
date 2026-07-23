@@ -89,6 +89,19 @@ try {
     }
 } catch (Exception $e) {}
 
+try {
+    $stmt = $pdo->prepare("SELECT id, name, slug FROM universities WHERE status='active' AND name LIKE ? ORDER BY is_featured DESC, ranking_nirf ASC LIMIT 5");
+    $stmt->execute([$like]);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $results[] = [
+            'type' => 'university', 'label' => $r['name'],
+            'url' => BASE_URL . '/university/' . $r['slug'], 'icon' => 'ph-graduation-cap',
+            'title' => $r['name'], 'subtitle' => '', 'badge' => 'University',
+            'relevance' => relevanceScore($r['name'], $q),
+        ];
+    }
+} catch (Exception $e) {}
+
 usort($results, fn($a, $b) => ($a['relevance'] ?? 99) - ($b['relevance'] ?? 99));
 
 echo json_encode(['results' => $results]);
