@@ -3693,7 +3693,7 @@ select {
 .hero-sub{font-size:1.05rem;color:rgba(255,255,255,.85);line-height:1.6;margin-bottom:28px;text-shadow:0 1px 8px rgba(0,0,0,.3)}
 
 /* Hero Search Box */
-.hero-search-box{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.3);box-shadow:0 20px 60px rgba(0,0,0,.25);border-radius:16px;text-align:left;position:relative;margin:0 auto}
+.hero-search-box{background:rgba(255,255,255,.98);border:1px solid rgba(255,255,255,.3);box-shadow:0 20px 60px rgba(0,0,0,.25);border-radius:16px;text-align:left;position:relative;margin:0 auto}
 .hero-search-tabs{display:flex;border-bottom:1px solid rgba(15,23,42,.06);border-radius:16px 16px 0 0;overflow-x:auto;scrollbar-width:none}
 .hero-search-tabs::-webkit-scrollbar{display:none}
 .hero-search-tabs button{flex:1;padding:14px 14px;background:transparent;border:none;border-bottom:2px solid transparent;font-size:.88rem;font-weight:700;color:rgba(15,23,42,.4);cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
