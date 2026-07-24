@@ -737,11 +737,11 @@ body.bg-light{background:var(--cp-bg)}
 .college-faq-item summary{
   padding:16px 20px;font-weight:600;cursor:pointer;
   color:var(--cp-text);font-size:.92rem;
-  display:flex;justify-content:space-between;align-items:center;
+  display:flex;align-items:center;
   list-style:none;user-select:none;
 }
 .college-faq-item summary::after{
-  content:'+';font-size:1.3rem;color:var(--cp-blue);flex-shrink:0;margin-left:12px;
+  content:'+';font-size:1.3rem;color:var(--cp-blue);flex-shrink:0;margin-left:auto;
 }
 .college-faq-item[open] summary::after{content:'−'}
 .college-faq-item p{
