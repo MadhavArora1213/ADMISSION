@@ -5,6 +5,7 @@ if (!isset($_SESSION['admin_id'])) {
     // exit;
 }
 require_once 'db.php';
+require_once __DIR__ . '/../includes/school_helpers.php';
 
 $id = isset($_GET['id']) ? $_GET['id'] : null;
 $is_edit = $id !== null;
