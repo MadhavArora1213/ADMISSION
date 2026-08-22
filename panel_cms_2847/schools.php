@@ -24,6 +24,30 @@ if (isset($_GET['action']) && $_GET['action'] == 'restore' && isset($_GET['id'])
     exit;
 }
 
+// Handle Delete
+if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
+    $id = $_GET['id'];
+    try {
+        $pdo->beginTransaction();
+        $pdo->prepare("DELETE FROM school_media WHERE school_id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM school_contacts WHERE school_id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM school_content WHERE school_id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM school_infrastructure WHERE school_id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM school_courses WHERE school_id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM school_news WHERE school_id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM seo_meta WHERE page_type = 'school' AND page_id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM reviews WHERE school_id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM schools WHERE id = ?")->execute([$id]);
+        $pdo->commit();
+        header('Location: schools.php?msg=deleted');
+        exit;
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        header('Location: schools.php?msg=delete_error');
+        exit;
+    }
+}
+
 // Filters
 $search    = isset($_GET['q']) ? trim($_GET['q']) : '';
 $statusF  = isset($_GET['status']) ? trim($_GET['status']) : 'all';
@@ -320,6 +344,12 @@ $schools = $stmt->fetchAll();
                 <?php if(isset($_GET['msg']) && $_GET['msg'] == 'saved'): ?>
                 <div class="msg-alert"><i class="ph ph-check-circle"></i> School details saved successfully.</div>
                 <?php endif; ?>
+                <?php if(isset($_GET['msg']) && $_GET['msg'] == 'deleted'): ?>
+                <div class="msg-alert"><i class="ph ph-check-circle"></i> School has been permanently deleted.</div>
+                <?php endif; ?>
+                <?php if(isset($_GET['msg']) && $_GET['msg'] == 'delete_error'): ?>
+                <div class="msg-alert" style="background:rgba(220,38,38,0.06);color:#991b1b;border-color:rgba(220,38,38,0.12);"><i class="ph ph-warning-circle"></i> Failed to delete school. Please try again.</div>
+                <?php endif; ?>
 
                 <form method="GET" class="filter-bar">
                     <div class="filter-row">
@@ -438,6 +468,9 @@ $schools = $stmt->fetchAll();
                                                     <i class="ph ph-archive"></i>
                                                 </a>
                                                 <?php endif; ?>
+                                                <a href="schools.php?action=delete&id=<?= $school['id'] ?>" class="action-btn delete" title="Delete" onclick="return confirm('Are you sure you want to permanently delete this school? This cannot be undone.');">
+                                                    <i class="ph ph-trash"></i>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
@@ -465,6 +498,9 @@ $schools = $stmt->fetchAll();
                                             <i class="ph ph-archive"></i>
                                         </a>
                                         <?php endif; ?>
+                                        <a href="schools.php?action=delete&id=<?= $school['id'] ?>" class="action-btn delete" title="Delete" onclick="return confirm('Are you sure you want to permanently delete this school? This cannot be undone.');">
+                                            <i class="ph ph-trash"></i>
+                                        </a>
                                     </div>
                                 </div>
                                 <div class="card-details">
