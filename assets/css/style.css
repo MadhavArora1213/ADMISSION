@@ -3662,8 +3662,8 @@ select {
 }
 
 /* ═══ HERO BANNER — Rotating Background Carousel ═══ */
-.hero-banner{position:relative;z-index:1;min-height:580px;overflow:hidden;background:#0B2447;display:flex;flex-direction:column}
-.hero-slides{position:absolute;inset:0}
+.hero-banner{position:relative;z-index:1;min-height:580px;background:#0B2447;display:flex;flex-direction:column}
+.hero-slides{position:absolute;inset:0;overflow:hidden}
 .hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1s ease;z-index:0}
 .hero-slide.active{opacity:1;z-index:1}
 .hero-slide-bg{position:absolute;inset:0;background-size:cover;background-position:center;transform:scale(1.05);animation:heroZoom 8s ease infinite alternate}

@@ -1,0 +1,864 @@
+{
+  "universities": [
+    {
+      "core": {
+        "name": "Punjab Agricultural University",
+        "slug": "punjab-agricultural-university",
+        "university_type": "govt",
+        "ownership": "state",
+        "ranking_nirf": 15,
+        "state_name": "Punjab",
+        "city_name": "Ludhiana",
+        "established_year": 1962,
+        "naac_grade": "A++",
+        "ugc_approved": true,
+        "aicte_approved": false,
+        "about_text": "PAU is one of India's oldest and most prestigious agricultural universities, recognized as a Centre of Excellence in agricultural research and education."
+      },
+      "contact": {
+        "website_url": "https://www.pau.edu",
+        "email": "registrar@pau.edu",
+        "phone": "0161-2401960",
+        "address": "G.T. Road, Ludhiana, Punjab 141004"
+      },
+      "courses": [
+        {"course_name": "B.Sc Agriculture", "course_level": "UG", "duration_years": 4, "annual_fee": 45000, "total_fee": 180000, "seats_available": 280, "eligibility_criteria": "10+2 with PCB/PCM", "specializations": ["Agronomy", "Plant Breeding", "Soil Science"]},
+        {"course_name": "M.Sc Agriculture", "course_level": "PG", "duration_years": 2, "annual_fee": 55000, "total_fee": 110000, "seats_available": 120, "eligibility_criteria": "B.Sc Agriculture", "specializations": ["Entomology", "Plant Pathology", "Horticulture"]},
+        {"course_name": "PhD Agriculture", "course_level": "PhD", "duration_years": 5, "annual_fee": 60000, "total_fee": 300000, "seats_available": 60, "eligibility_criteria": "M.Sc in relevant field", "specializations": ["Genetics", "Soil Science", "Agricultural Economics"]}
+      ],
+      "placements": [
+        {"placement_year": 2024, "avg_package_lpa": 4.5, "highest_package_lpa": 12.0, "students_placed": 350, "top_recruiters": ["NABARD", "State Bank of India", "IFFCO", "Syngenta", "BASF"]}
+      ],
+      "admissions": {
+        "admission_process": "Admissions through PAU Common Entrance Test and state counseling",
+        "accepted_exams": ["PAU-CET", "ICAR AIEEA"],
+        "application_mode": "online",
+        "merit_based": true
+      },
+      "infrastructure": {"library": true, "library_books_count": 350000, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Agricultural Chemistry", "Plant Pathology", "Entomology", "Soil Science"], "sports_facilities": ["Cricket", "Football", "Hockey", "Tennis", "Swimming"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_capacity": 3000, "hostel_fee_annual": 35000, "mess_available": true, "mess_type": "both", "ac_available": false},
+      "scholarships": [{"scholarship_name": "PAU Merit Scholarship", "scholarship_type": "merit", "amount": 25000, "eligibility_criteria": "Top 10% in entrance exam", "renewable": true}],
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A++", "accreditation_year": 2021}]
+    },
+    {
+      "core": {
+        "name": "Guru Nanak Dev University",
+        "slug": "guru-nanak-dev-university",
+        "university_type": "govt",
+        "ownership": "state",
+        "ranking_nirf": 40,
+        "state_name": "Punjab",
+        "city_name": "Amritsar",
+        "established_year": 1969,
+        "naac_grade": "A++",
+        "ugc_approved": true,
+        "aicte_approved": false,
+        "about_text": "GNDU is a premier state university named after Guru Nanak Dev Ji, known for academic excellence, sports achievements, and NAAC A++ accreditation."
+      },
+      "contact": {
+        "website_url": "https://www.gndu.ac.in",
+        "email": "registrar@gndu.ac.in",
+        "phone": "0183-2258879",
+        "address": "Grand Trunk Road, Amritsar, Punjab 143005"
+      },
+      "courses": [
+        {"course_name": "B.Tech Computer Science", "course_level": "UG", "duration_years": 4, "annual_fee": 65000, "total_fee": 260000, "seats_available": 120, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["AI/ML", "Data Science", "Cybersecurity"]},
+        {"course_name": "MBA", "course_level": "PG", "duration_years": 2, "annual_fee": 80000, "total_fee": 160000, "seats_available": 60, "eligibility_criteria": "Graduation with 50% marks", "specializations": ["Finance", "Marketing", "HR"]},
+        {"course_name": "BA LLB", "course_level": "UG", "duration_years": 5, "annual_fee": 40000, "total_fee": 200000, "seats_available": 60, "eligibility_criteria": "10+2 with 45% marks", "specializations": []},
+        {"course_name": "PhD", "course_level": "PhD", "duration_years": 5, "annual_fee": 30000, "total_fee": 150000, "seats_available": 100, "eligibility_criteria": "Post graduation with 55% marks", "specializations": ["Science", "Humanities", "Engineering"]}
+      ],
+      "placements": [
+        {"placement_year": 2024, "avg_package_lpa": 5.2, "highest_package_lpa": 25.0, "placement_percentage": 75, "students_placed": 800, "top_recruiters": ["TCS", "Wipro", "Infosys", "HCL", "Bank of Baroda"]}
+      ],
+      "admissions": {
+        "admission_process": "Online application followed by entrance test and counseling",
+        "accepted_exams": ["GNDU Entrance Test", "JEE Main", "CAT", "CLAT"],
+        "application_mode": "online",
+        "merit_based": true
+      },
+      "infrastructure": {"library": true, "library_books_count": 500000, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Computer Science", "Physics", "Chemistry", "Biotechnology"], "sports_facilities": ["Cricket", "Hockey", "Football", "Athletics", "Swimming"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_capacity": 5000, "hostel_fee_annual": 40000, "mess_available": true, "mess_type": "both", "ac_available": true},
+      "scholarships": [{"scholarship_name": "GNDU Merit Scholarship", "scholarship_type": "merit", "amount": 30000, "eligibility_criteria": "Top performers in entrance exam", "renewable": true}],
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A++", "accreditation_year": 2019}]
+    },
+    {
+      "core": {
+        "name": "Punjabi University",
+        "slug": "punjabi-university",
+        "university_type": "govt",
+        "ownership": "state",
+        "ranking_nirf": 70,
+        "state_name": "Punjab",
+        "city_name": "Patiala",
+        "established_year": 1962,
+        "naac_grade": "A",
+        "ugc_approved": true,
+        "aicte_approved": false,
+        "about_text": "Punjabi University is a state university dedicated to the promotion of Punjabi language, culture and literature along with modern education."
+      },
+      "contact": {
+        "website_url": "https://www.punjabiuniversity.ac.in",
+        "email": "registrar@punjabiuniversity.ac.in",
+        "phone": "0175-2283183",
+        "address": "Serial No. 5, Rajpura Road, Patiala, Punjab 147002"
+      },
+      "courses": [
+        {"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 55000, "total_fee": 220000, "seats_available": 300, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["CSE", "ECE", "Mechanical"]},
+        {"course_name": "MA Punjabi", "course_level": "PG", "duration_years": 2, "annual_fee": 15000, "total_fee": 30000, "seats_available": 80, "eligibility_criteria": "BA with Punjabi", "specializations": []}
+      ],
+      "placements": [
+        {"placement_year": 2024, "avg_package_lpa": 4.0, "highest_package_lpa": 15.0, "students_placed": 500, "top_recruiters": ["TCS", "Wipro", "NTPC", "BHEL"]}
+      ],
+      "admissions": {
+        "admission_process": "Online application and merit-based counseling",
+        "accepted_exams": ["JEE Main", "Punjabi University Entrance"],
+        "application_mode": "online",
+        "merit_based": true
+      },
+      "infrastructure": {"library": true, "library_books_count": 400000, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Mechanical", "Civil"], "sports_facilities": ["Cricket", "Hockey", "Volleyball"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_capacity": 4000, "hostel_fee_annual": 30000, "mess_available": true, "mess_type": "both", "ac_available": false},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A", "accreditation_year": 2018}]
+    },
+    {
+      "core": {
+        "name": "IK Gujral Punjab Technical University",
+        "slug": "ik-gujral-punjab-technical-university",
+        "university_type": "govt",
+        "ownership": "state",
+        "ranking_nirf": null,
+        "state_name": "Punjab",
+        "city_name": "Kapurthala",
+        "established_year": 1997,
+        "naac_grade": "A+",
+        "ugc_approved": true,
+        "aicte_approved": true,
+        "about_text": "IKGPTU is the main technical university of Punjab, affiliating hundreds of engineering and management colleges across the state."
+      },
+      "contact": {
+        "website_url": "https://www.ikgujralptu.com",
+        "email": "registrar@ptu.ac.in",
+        "phone": "0182-2281136",
+        "address": "Jalandhar-Kapurthala Highway, Kapurthala, Punjab 144603"
+      },
+      "courses": [
+        {"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 70000, "total_fee": 280000, "seats_available": 500, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["CSE", "ECE", "ME", "Civil", "IT"]},
+        {"course_name": "MBA", "course_level": "PG", "duration_years": 2, "annual_fee": 80000, "total_fee": 160000, "seats_available": 120, "eligibility_criteria": "Graduation with 50% marks", "specializations": ["Finance", "Marketing", "HR"]},
+        {"course_name": "MCA", "course_level": "PG", "duration_years": 3, "annual_fee": 60000, "total_fee": 180000, "seats_available": 60, "eligibility_criteria": "BCA/B.Sc IT with 50%", "specializations": []}
+      ],
+      "placements": [
+        {"placement_year": 2024, "avg_package_lpa": 4.5, "highest_package_lpa": 20.0, "placement_percentage": 70, "students_placed": 2000, "top_recruiters": ["TCS", "Infosys", "Wipro", "HCL", "Tech Mahindra"]}
+      ],
+      "admissions": {
+        "admission_process": "JEE Main followed by state counseling via IKGPTU",
+        "accepted_exams": ["JEE Main", "CAT", "CMAT"],
+        "application_mode": "online",
+        "merit_based": true
+      },
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Computer Labs", "Electronics", "Mechanical Workshop"], "sports_facilities": ["Cricket", "Football", "Basketball"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 45000, "mess_available": true, "mess_type": "both", "ac_available": false},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A+", "accreditation_year": 2022}]
+    },
+    {
+      "core": {
+        "name": "Baba Farid University of Health Sciences",
+        "slug": "baba-farid-university-of-health-sciences",
+        "university_type": "govt",
+        "ownership": "state",
+        "ranking_nirf": null,
+        "state_name": "Punjab",
+        "city_name": "Faridkot",
+        "established_year": 1998,
+        "naac_grade": "A+",
+        "ugc_approved": true,
+        "aicte_approved": false,
+        "about_text": "BFUHS is the premier health sciences university of Punjab, affiliating medical, dental, nursing and paramedical colleges across the state."
+      },
+      "contact": {
+        "website_url": "https://www.bfuhs.ac.in",
+        "email": "registrar@bfuhs.ac.in",
+        "phone": "01632-241111",
+        "address": "Sadiq Road, Faridkot, Punjab 152004"
+      },
+      "courses": [
+        {"course_name": "MBBS", "course_level": "UG", "duration_years": 5, "annual_fee": 150000, "total_fee": 750000, "seats_available": 200, "eligibility_criteria": "10+2 with PCB, NEET", "specializations": []},
+        {"course_name": "BDS", "course_level": "UG", "duration_years": 5, "annual_fee": 100000, "total_fee": 500000, "seats_available": 100, "eligibility_criteria": "10+2 with PCB, NEET", "specializations": []},
+        {"course_name": "B.Sc Nursing", "course_level": "UG", "duration_years": 4, "annual_fee": 50000, "total_fee": 200000, "seats_available": 200, "eligibility_criteria": "10+2 with PCB", "specializations": []},
+        {"course_name": "MD", "course_level": "PG", "duration_years": 3, "annual_fee": 300000, "total_fee": 900000, "seats_available": 50, "eligibility_criteria": "MBBS + NEET PG", "specializations": ["Medicine", "Surgery", "Pediatrics"]}
+      ],
+      "placements": [
+        {"placement_year": 2024, "avg_package_lpa": 7.0, "highest_package_lpa": 20.0, "students_placed": 400, "top_recruiters": ["AIIMS", "PGIMER", "Fortis Hospital", "Max Hospital"]}
+      ],
+      "admissions": {
+        "admission_process": "NEET-based counseling through BFUHS",
+        "accepted_exams": ["NEET", "NEET PG"],
+        "application_mode": "online",
+        "merit_based": true
+      },
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Anatomy", "Physiology", "Biochemistry", "Microbiology"], "sports_facilities": ["Cricket", "Volleyball"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 50000, "mess_available": true, "mess_type": "both", "ac_available": true},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A+", "accreditation_year": 2020}]
+    },
+    {
+      "core": {
+        "name": "Central University of Punjab",
+        "slug": "central-university-of-punjab",
+        "university_type": "govt",
+        "ownership": "central",
+        "ranking_nirf": 85,
+        "state_name": "Punjab",
+        "city_name": "Bathinda",
+        "established_year": 2009,
+        "naac_grade": "A",
+        "ugc_approved": true,
+        "aicte_approved": false,
+        "about_text": "CUPB is a central university established by an Act of Parliament, offering diverse programs in sciences, humanities and professional courses."
+      },
+      "contact": {
+        "website_url": "https://www.cup.ac.in",
+        "email": "registrar@cup.ac.in",
+        "phone": "0164-2430011",
+        "address": "City Campus, Near Sidhu Canal, Bathinda, Punjab 151001"
+      },
+      "courses": [
+        {"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 30000, "total_fee": 120000, "seats_available": 60, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["AI/ML", "Data Science"]},
+        {"course_name": "M.Sc Physics", "course_level": "PG", "duration_years": 2, "annual_fee": 20000, "total_fee": 40000, "seats_available": 30, "eligibility_criteria": "B.Sc with Physics", "specializations": []},
+        {"course_name": "PhD", "course_level": "PhD", "duration_years": 5, "annual_fee": 15000, "total_fee": 75000, "seats_available": 50, "eligibility_criteria": "Post graduation with 55%", "specializations": ["Sciences", "Humanities", "Law"]}
+      ],
+      "placements": [
+        {"placement_year": 2024, "avg_package_lpa": 5.0, "highest_package_lpa": 15.0, "students_placed": 150, "top_recruiters": ["TCS", "Wipro", "NTPC", "DRDO"]}
+      ],
+      "admissions": {
+        "admission_process": "CUCET-based admissions",
+        "accepted_exams": ["CUCET"],
+        "application_mode": "online",
+        "merit_based": true
+      },
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Physics", "Chemistry", "Biotechnology", "Computer Science"], "sports_facilities": ["Cricket", "Football", "Volleyball"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 25000, "mess_available": true, "mess_type": "both", "ac_available": false},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A", "accreditation_year": 2023}]
+    },
+    {
+      "core": {
+        "name": "Chandigarh University",
+        "slug": "chandigarh-university",
+        "university_type": "private",
+        "ownership": "private_trust",
+        "ranking_nirf": 36,
+        "state_name": "Punjab",
+        "city_name": "Mohali",
+        "established_year": 2012,
+        "naac_grade": "A+",
+        "ugc_approved": true,
+        "aicte_approved": true,
+        "about_text": "Chandigarh University is a leading private university known for NAAC A+ grade, strong placements, and modern infrastructure with 200+ programs."
+      },
+      "contact": {
+        "website_url": "https://www.cuchd.in",
+        "email": "admissions@cuchd.in",
+        "phone": "0160-2424444",
+        "address": "NH-95, Chandigarh-Ludhiana Highway, Mohali, Punjab 140413"
+      },
+      "courses": [
+        {"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 180000, "total_fee": 720000, "seats_available": 600, "eligibility_criteria": "10+2 with PCM, CUCET/CUET", "specializations": ["AI/ML", "Data Science", "Cloud Computing", "Cybersecurity", "IoT"]},
+        {"course_name": "BBA", "course_level": "UG", "duration_years": 3, "annual_fee": 120000, "total_fee": 360000, "seats_available": 240, "eligibility_criteria": "10+2 with 50% marks", "specializations": ["Finance", "Marketing", "HR", "International Business"]},
+        {"course_name": "MBA", "course_level": "PG", "duration_years": 2, "annual_fee": 200000, "total_fee": 400000, "seats_available": 180, "eligibility_criteria": "Graduation with 50%, CAT/MAT/XAT", "specializations": ["Finance", "Marketing", "HR", "Business Analytics"]},
+        {"course_name": "BCA", "course_level": "UG", "duration_years": 3, "annual_fee": 100000, "total_fee": 300000, "seats_available": 200, "eligibility_criteria": "10+2 with any stream", "specializations": ["Cloud Computing", "AI"]}
+      ],
+      "placements": [
+        {"placement_year": 2024, "avg_package_lpa": 7.5, "highest_package_lpa": 54.75, "median_package_lpa": 6.0, "placement_percentage": 85, "students_placed": 8000, "top_recruiters": ["Microsoft", "Google", "Amazon", "IBM", "Deloitte", "TCS", "Wipro"]}
+      ],
+      "admissions": {
+        "admission_process": "CUCET/CUET entrance exam followed by counseling",
+        "accepted_exams": ["CUCET", "CUET UG", "CUET PG", "JEE Main", "CAT", "MAT"],
+        "application_mode": "online",
+        "merit_based": true
+      },
+      "infrastructure": {"library": true, "library_books_count": 200000, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Mechanical", "Civil", "Biotech", "Fashion"], "sports_facilities": ["Cricket", "Football", "Basketball", "Tennis", "Swimming", "Gymnasium"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_capacity": 8000, "hostel_fee_annual": 120000, "mess_available": true, "mess_type": "both", "ac_available": true},
+      "scholarships": [{"scholarship_name": "CU Merit Scholarship", "scholarship_type": "merit", "amount": 100000, "eligibility_criteria": "CUCET toppers", "renewable": true}, {"scholarship_name": "Sports Scholarship", "scholarship_type": "sports", "amount": 50000, "eligibility_criteria": "National/state level sports achievement", "renewable": true}],
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A+", "accreditation_year": 2022}]
+    },
+    {
+      "core": {
+        "name": "Lovely Professional University",
+        "slug": "lovely-professional-university",
+        "university_type": "private",
+        "ownership": "private_trust",
+        "ranking_nirf": 38,
+        "state_name": "Punjab",
+        "city_name": "Phagwara",
+        "established_year": 2005,
+        "naac_grade": "A+",
+        "ugc_approved": true,
+        "aicte_approved": true,
+        "about_text": "LPU is one of India's largest private universities with 30,000+ students, offering 200+ programs and known for international placements."
+      },
+      "contact": {
+        "website_url": "https://www.lpu.in",
+        "email": "admissions@lpu.co.in",
+        "phone": "01824-404404",
+        "address": "Jalandhar-Delhi G.T. Road, Phagwara, Punjab 144411"
+      },
+      "courses": [
+        {"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 160000, "total_fee": 640000, "seats_available": 1000, "eligibility_criteria": "10+2 with PCM, LPUNEST", "specializations": ["AI/ML", "Data Science", "Cloud DevOps", "Cybersecurity", "Full Stack"]},
+        {"course_name": "MBA", "course_level": "PG", "duration_years": 2, "annual_fee": 200000, "total_fee": 400000, "seats_available": 300, "eligibility_criteria": "Graduation with 55%, LPUNEST/CAT/MAT", "specializations": ["Finance", "Marketing", "HR", "Business Analytics"]},
+        {"course_name": "B.Sc Hotel Management", "course_level": "UG", "duration_years": 4, "annual_fee": 120000, "total_fee": 480000, "seats_available": 120, "eligibility_criteria": "10+2 with any stream", "specializations": []},
+        {"course_name": "PhD", "course_level": "PhD", "duration_years": 5, "annual_fee": 100000, "total_fee": 500000, "seats_available": 200, "eligibility_criteria": "Post graduation with 55%", "specializations": ["Engineering", "Management", "Sciences", "Humanities"]}
+      ],
+      "placements": [
+        {"placement_year": 2024, "avg_package_lpa": 7.0, "highest_package_lpa": 54.75, "median_package_lpa": 5.5, "placement_percentage": 90, "students_placed": 12000, "top_recruiters": ["Microsoft", "Google", "Amazon", "Cognizant", "TCS", "Wipro", "Capgemini"]}
+      ],
+      "admissions": {
+        "admission_process": "LPUNEST entrance exam or national level exam scores",
+        "accepted_exams": ["LPUNEST", "JEE Main", "NEET", "CAT", "MAT", "XAT"],
+        "application_mode": "online",
+        "merit_based": true
+      },
+      "infrastructure": {"library": true, "library_books_count": 300000, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Mechanical", "Civil", "Biotech", "Pharmacy"], "sports_facilities": ["Cricket", "Football", "Basketball", "Tennis", "Swimming", "Golf", "Gymnasium"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_capacity": 10000, "hostel_fee_annual": 100000, "mess_available": true, "mess_type": "both", "ac_available": true},
+      "scholarships": [{"scholarship_name": "LPU Merit Scholarship", "scholarship_type": "merit", "amount": 120000, "eligibility_criteria": "LPUNEST top rankers", "renewable": true}, {"scholarship_name": "Need Based Financial Aid", "scholarship_type": "need", "amount": 50000, "eligibility_criteria": "Family income below threshold", "renewable": true}],
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A+", "accreditation_year": 2021}]
+    },
+    {
+      "core": {
+        "name": "Thapar Institute of Engineering and Technology",
+        "slug": "thapar-institute-of-engineering-and-technology",
+        "university_type": "deemed",
+        "ownership": "private_trust",
+        "ranking_nirf": 22,
+        "state_name": "Punjab",
+        "city_name": "Patiala",
+        "established_year": 1956,
+        "naac_grade": "A+",
+        "ugc_approved": true,
+        "aicte_approved": true,
+        "about_text": "Thapar is a top-ranked deemed university known for engineering excellence, strong industry connections and impressive placement records."
+      },
+      "contact": {
+        "website_url": "https://www.thapar.edu",
+        "email": "admissions@thapar.edu",
+        "phone": "0175-2393033",
+        "address": "P.O. Box 32, Bhadson Road, Patiala, Punjab 147004"
+      },
+      "courses": [
+        {"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 320000, "total_fee": 1280000, "seats_available": 240, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["AI/ML", "Data Science", "Cybersecurity", "IoT"]},
+        {"course_name": "B.Tech ECE", "course_level": "UG", "duration_years": 4, "annual_fee": 280000, "total_fee": 1120000, "seats_available": 120, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["VLSI", "Embedded Systems"]},
+        {"course_name": "MBA", "course_level": "PG", "duration_years": 2, "annual_fee": 350000, "total_fee": 700000, "seats_available": 60, "eligibility_criteria": "Graduation with 50%, CAT/XAT/GMAT", "specializations": ["Finance", "Marketing", "Operations"]},
+        {"course_name": "PhD", "course_level": "PhD", "duration_years": 5, "annual_fee": 150000, "total_fee": 750000, "seats_available": 50, "eligibility_criteria": "Post graduation with 60%", "specializations": ["CSE", "ECE", "Mechanical", "Civil", "Chemical"]}
+      ],
+      "placements": [
+        {"placement_year": 2024, "avg_package_lpa": 12.0, "highest_package_lpa": 70.0, "median_package_lpa": 10.0, "placement_percentage": 92, "students_placed": 2200, "top_recruiters": ["Microsoft", "Amazon", "Google", "Goldman Sachs", "Deutsche Bank", "Adobe", "Cisco"]}
+      ],
+      "admissions": {
+        "admission_process": "JEE Main score followed by Thapar counseling",
+        "accepted_exams": ["JEE Main", "CAT", "XAT", "GMAT"],
+        "application_mode": "online",
+        "merit_based": true
+      },
+      "infrastructure": {"library": true, "library_books_count": 150000, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Mechanical", "Civil", "Chemical", "Biotechnology"], "sports_facilities": ["Cricket", "Football", "Basketball", "Tennis", "Swimming", "Gymnasium"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_capacity": 3500, "hostel_fee_annual": 150000, "mess_available": true, "mess_type": "both", "ac_available": true},
+      "scholarships": [{"scholarship_name": "Thapar Merit Scholarship", "scholarship_type": "merit", "amount": 200000, "eligibility_criteria": "JEE Main rank below 10000", "renewable": true}],
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A+", "accreditation_year": 2021}]
+    },
+    {
+      "core": {
+        "name": "Chitkara University",
+        "slug": "chitkara-university",
+        "university_type": "private",
+        "ownership": "private_trust",
+        "ranking_nirf": 64,
+        "state_name": "Punjab",
+        "city_name": "Rajpura",
+        "established_year": 2008,
+        "naac_grade": "A+",
+        "ugc_approved": true,
+        "aicte_approved": true,
+        "about_text": "Chitkara University is a private university known for engineering, pharmacy and management programs with strong industry ties."
+      },
+      "contact": {
+        "website_url": "https://www.chitkara.edu.in",
+        "email": "admissions@chitkara.edu.in",
+        "phone": "01762-506090",
+        "address": "Chitkara University, Chandigarh-Patiala National Highway, Rajpura, Punjab 140401"
+      },
+      "courses": [
+        {"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 195000, "total_fee": 780000, "seats_available": 300, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["AI/ML", "Data Science", "Cybersecurity"]},
+        {"course_name": "MBA", "course_level": "PG", "duration_years": 2, "annual_fee": 250000, "total_fee": 500000, "seats_available": 120, "eligibility_criteria": "Graduation with 50%", "specializations": ["Finance", "Marketing", "HR"]},
+        {"course_name": "B.Pharm", "course_level": "UG", "duration_years": 4, "annual_fee": 150000, "total_fee": 600000, "seats_available": 100, "eligibility_criteria": "10+2 with PCB", "specializations": []}
+      ],
+      "placements": [
+        {"placement_year": 2024, "avg_package_lpa": 6.5, "highest_package_lpa": 40.0, "placement_percentage": 85, "students_placed": 2500, "top_recruiters": ["TCS", "Wipro", "Infosys", "Capgemini", "Amazon"]}
+      ],
+      "admissions": {
+        "admission_process": "Direct admission based on 10+2 marks or JEE Main",
+        "accepted_exams": ["JEE Main", "CAT", "CMAT"],
+        "application_mode": "online",
+        "merit_based": true
+      },
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Mechanical", "Pharmacy"], "sports_facilities": ["Cricket", "Football", "Basketball", "Badminton"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 110000, "mess_available": true, "mess_type": "both", "ac_available": true},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A+", "accreditation_year": 2022}]
+    },
+    {
+      "core": {"name": "CT University", "slug": "ct-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Punjab", "city_name": "Ludhiana", "established_year": 2017, "naac_grade": null, "ugc_approved": true, "aicte_approved": true, "about_text": "CT University is a private university in Ludhiana offering engineering, management and other professional programs."},
+      "contact": {"website_url": "https://www.ctuniversity.in", "email": "info@ctuniversity.in", "phone": "0161-5011500", "address": "Ferozepur Road, Ludhiana, Punjab 142027"},
+      "courses": [{"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 120000, "total_fee": 480000, "seats_available": 180, "eligibility_criteria": "10+2 with PCM", "specializations": ["AI/ML", "Cloud Computing"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 4.0, "highest_package_lpa": 18.0, "students_placed": 500, "top_recruiters": ["TCS", "Wipro", "Infosys"]}],
+      "admissions": {"admission_process": "Direct admission based on 10+2 marks", "accepted_exams": ["JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE"], "sports_facilities": ["Cricket", "Football"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 80000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Desh Bhagat University", "slug": "desh-bhagat-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Punjab", "city_name": "Mandi Gobindgarh", "established_year": 1972, "naac_grade": "B+", "ugc_approved": true, "aicte_approved": true, "about_text": "Desh Bhagat University offers programs in engineering, pharmacy, nursing and management in Mandi Gobindgarh."},
+      "contact": {"website_url": "https://www.deshbhagatuniversity.in", "email": "info@deshbhagatuniversity.in", "phone": "01765-251046", "address": "Halwana Road, Mandi Gobindgarh, Punjab 147301"},
+      "courses": [{"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 80000, "total_fee": 320000, "seats_available": 120, "eligibility_criteria": "10+2 with PCM", "specializations": ["CSE", "ECE", "Mechanical"]}, {"course_name": "B.Pharm", "course_level": "UG", "duration_years": 4, "annual_fee": 60000, "total_fee": 240000, "seats_available": 60, "eligibility_criteria": "10+2 with PCB", "specializations": []}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.5, "highest_package_lpa": 10.0, "students_placed": 300, "top_recruiters": ["TCS", "Wipro", "HCL"]}],
+      "admissions": {"admission_process": "Direct admission", "accepted_exams": ["JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Mechanical", "Pharmacy"], "sports_facilities": ["Cricket", "Volleyball"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 60000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Rayat Bahra University", "slug": "rayat-bahra-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Punjab", "city_name": "Mohali", "established_year": 2001, "naac_grade": "A", "ugc_approved": true, "aicte_approved": true, "about_text": "Rayat Bahra University offers diverse programs in engineering, pharmacy, nursing and management in Mohali."},
+      "contact": {"website_url": "https://www.rayatbahrauniversity.ac.in", "email": "info@rayatbahrauniversity.ac.in", "phone": "0172-5069000", "address": "VPO Kharar, Mohali, Punjab 140307"},
+      "courses": [{"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 95000, "total_fee": 380000, "seats_available": 180, "eligibility_criteria": "10+2 with PCM", "specializations": ["CSE", "ECE", "Civil"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 4.0, "highest_package_lpa": 12.0, "students_placed": 400, "top_recruiters": ["TCS", "Wipro", "Infosys"]}],
+      "admissions": {"admission_process": "Direct admission", "accepted_exams": ["JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Civil"], "sports_facilities": ["Cricket", "Football"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 75000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "RIMT University", "slug": "rimt-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Punjab", "city_name": "Mandi Gobindgarh", "established_year": 2001, "naac_grade": "B++", "ugc_approved": true, "aicte_approved": true, "about_text": "RIMT University offers engineering, management and pharmacy programs in Mandi Gobindgarh, Punjab."},
+      "contact": {"website_url": "https://www.rimt.ac.in", "email": "info@rimt.ac.in", "phone": "01765-254020", "address": "Goniana Road, Mandi Gobindgarh, Punjab 147301"},
+      "courses": [{"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 75000, "total_fee": 300000, "seats_available": 120, "eligibility_criteria": "10+2 with PCM", "specializations": ["CSE", "ECE", "Mechanical"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.5, "highest_package_lpa": 8.0, "students_placed": 250, "top_recruiters": ["TCS", "Wipro", "HCL"]}],
+      "admissions": {"admission_process": "Direct admission", "accepted_exams": ["JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Mechanical"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 55000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Akal University", "slug": "akal-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Punjab", "city_name": "Bathinda", "established_year": 2015, "naac_grade": null, "ugc_approved": true, "aicte_approved": false, "about_text": "Akal University is a private university focused on holistic education with programs in sciences, arts and management."},
+      "contact": {"website_url": "https://www.akaluniversity.ac.in", "email": "info@akaluniversity.ac.in", "phone": "0164-2861100", "address": "Akal University Campus, Talwandi Sabo Road, Bathinda, Punjab 151302"},
+      "courses": [{"course_name": "B.Sc", "course_level": "UG", "duration_years": 3, "annual_fee": 40000, "total_fee": 120000, "seats_available": 60, "eligibility_criteria": "10+2 with Science", "specializations": ["Physics", "Chemistry", "Mathematics"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.0, "highest_package_lpa": 6.0, "students_placed": 100, "top_recruiters": ["Local companies", "Banks"]}],
+      "admissions": {"admission_process": "Direct admission based on 10+2 marks", "accepted_exams": [], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Physics", "Chemistry"], "sports_facilities": ["Cricket", "Volleyball"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 45000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Sant Baba Bhag Singh University", "slug": "sant-baba-bhag-singh-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Punjab", "city_name": "Jalandhar", "established_year": 2014, "naac_grade": "B+", "ugc_approved": true, "aicte_approved": false, "about_text": "SBBSU is a private university offering programs in education, sciences and management in Jalandhar."},
+      "contact": {"website_url": "https://www.sbbu.ac.in", "email": "info@sbbu.ac.in", "phone": "01826-274001", "address": "Padhiana, Jalandhar, Punjab 144030"},
+      "courses": [{"course_name": "B.Ed", "course_level": "UG", "duration_years": 2, "annual_fee": 45000, "total_fee": 90000, "seats_available": 100, "eligibility_criteria": "Graduation with 50%", "specializations": []}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.0, "highest_package_lpa": 5.0, "students_placed": 80, "top_recruiters": ["Schools", "Colleges"]}],
+      "admissions": {"admission_process": "Direct admission", "accepted_exams": [], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Science Labs"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 40000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Sri Guru Granth Sahib World University", "slug": "sri-guru-granth-sahib-world-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Punjab", "city_name": "Fatehgarh Sahib", "established_year": 1998, "naac_grade": "A", "ugc_approved": true, "aicte_approved": false, "about_text": "SGGSWU is a private university focused on Sikh studies, humanities and sciences in Fatehgarh Sahib."},
+      "contact": {"website_url": "https://www.sggswu.ac.in", "email": "info@sggswu.ac.in", "phone": "01763-236010", "address": "VPO Fatehgarh Sahib, Punjab 140406"},
+      "courses": [{"course_name": "BA", "course_level": "UG", "duration_years": 3, "annual_fee": 25000, "total_fee": 75000, "seats_available": 120, "eligibility_criteria": "10+2 with any stream", "specializations": ["English", "Punjabi", "History"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.0, "highest_package_lpa": 5.0, "students_placed": 80, "top_recruiters": ["Schools", "NGOs"]}],
+      "admissions": {"admission_process": "Direct admission", "accepted_exams": [], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Science"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 35000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Guru Kashi University", "slug": "guru-kashi-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Punjab", "city_name": "Talwandi Sabo", "established_year": 2011, "naac_grade": "B+", "ugc_approved": true, "aicte_approved": true, "about_text": "GKU is a private university offering engineering, agriculture and management programs in Talwandi Sabo."},
+      "contact": {"website_url": "https://www.gurukashiuniversity.in", "email": "info@gurukashiuniversity.in", "phone": "01655-222244", "address": "Dhuri Road, Talwandi Sabo, Bathinda, Punjab 151302"},
+      "courses": [{"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 70000, "total_fee": 280000, "seats_available": 120, "eligibility_criteria": "10+2 with PCM", "specializations": ["CSE", "ECE"]}, {"course_name": "B.Sc Agriculture", "course_level": "UG", "duration_years": 4, "annual_fee": 55000, "total_fee": 220000, "seats_available": 60, "eligibility_criteria": "10+2 with PCB/PCM", "specializations": []}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.5, "highest_package_lpa": 8.0, "students_placed": 200, "top_recruiters": ["TCS", "Wipro", "Local Industries"]}],
+      "admissions": {"admission_process": "Direct admission", "accepted_exams": ["JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Agriculture"], "sports_facilities": ["Cricket", "Football"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 50000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Adesh University", "slug": "adesh-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Punjab", "city_name": "Bathinda", "established_year": 2012, "naac_grade": "B+", "ugc_approved": true, "aicte_approved": true, "about_text": "Adesh University offers engineering, pharmacy and management programs in Bathinda."},
+      "contact": {"website_url": "https://www.adeshuniversity.ac.in", "email": "info@adeshuniversity.ac.in", "phone": "0164-2754001", "address": "NH-15, Bathinda, Punjab 151001"},
+      "courses": [{"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 75000, "total_fee": 300000, "seats_available": 120, "eligibility_criteria": "10+2 with PCM", "specializations": ["CSE", "ECE", "Mechanical"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.5, "highest_package_lpa": 8.0, "students_placed": 200, "top_recruiters": ["TCS", "Wipro", "HCL"]}],
+      "admissions": {"admission_process": "Direct admission", "accepted_exams": ["JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Mechanical"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 55000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {
+        "name": "Kurukshetra University",
+        "slug": "kurukshetra-university",
+        "university_type": "govt",
+        "ownership": "state",
+        "ranking_nirf": 75,
+        "state_name": "Haryana",
+        "city_name": "Kurukshetra",
+        "established_year": 1956,
+        "naac_grade": "A+",
+        "ugc_approved": true,
+        "aicte_approved": false,
+        "about_text": "Kurukshetra University is one of the oldest state universities in Haryana, known for academic excellence in sciences, arts and law."
+      },
+      "contact": {"website_url": "https://www.kuk.ac.in", "email": "registrar@kuk.ac.in", "phone": "01744-238167", "address": "Kurukshetra, Haryana 136119"},
+      "courses": [{"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 50000, "total_fee": 200000, "seats_available": 200, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["CSE", "ECE", "Mechanical"]}, {"course_name": "LLB", "course_level": "UG", "duration_years": 3, "annual_fee": 20000, "total_fee": 60000, "seats_available": 120, "eligibility_criteria": "Graduation with 45%", "specializations": []}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 4.0, "highest_package_lpa": 12.0, "students_placed": 600, "top_recruiters": ["TCS", "Wipro", "NTPC", "Bank of Baroda"]}],
+      "admissions": {"admission_process": "Online counseling based on entrance tests", "accepted_exams": ["JEE Main", "KUK Entrance"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "library_books_count": 400000, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Physics", "Chemistry"], "sports_facilities": ["Cricket", "Hockey", "Football"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_capacity": 4000, "hostel_fee_annual": 30000, "mess_available": true, "mess_type": "both", "ac_available": false},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A+", "accreditation_year": 2022}]
+    },
+    {
+      "core": {
+        "name": "Maharshi Dayanand University",
+        "slug": "maharshi-dayanand-university",
+        "university_type": "govt",
+        "ownership": "state",
+        "ranking_nirf": 60,
+        "state_name": "Haryana",
+        "city_name": "Rohtak",
+        "established_year": 1976,
+        "naac_grade": "A+",
+        "ugc_approved": true,
+        "aicte_approved": false,
+        "about_text": "MDU Rohtak is a prominent state university offering diverse programs in engineering, sciences, management and law."
+      },
+      "contact": {"website_url": "https://www.mdu.ac.in", "email": "registrar@mdu.ac.in", "phone": "01262-393004", "address": "Maharshi Dayanand University, Rohtak, Haryana 124001"},
+      "courses": [{"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 55000, "total_fee": 220000, "seats_available": 250, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["CSE", "ECE", "Civil", "Mechanical"]}, {"course_name": "MBA", "course_level": "PG", "duration_years": 2, "annual_fee": 60000, "total_fee": 120000, "seats_available": 60, "eligibility_criteria": "Graduation with 50%", "specializations": ["Finance", "HR"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 4.5, "highest_package_lpa": 15.0, "students_placed": 700, "top_recruiters": ["TCS", "Wipro", "HCL", "NTPC"]}],
+      "admissions": {"admission_process": "Online counseling", "accepted_exams": ["JEE Main", "CAT"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "library_books_count": 300000, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Civil", "Physics"], "sports_facilities": ["Cricket", "Hockey", "Football", "Athletics"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_capacity": 3500, "hostel_fee_annual": 30000, "mess_available": true, "mess_type": "both", "ac_available": false},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A+", "accreditation_year": 2022}]
+    },
+    {
+      "core": {"name": "Guru Jambheshwar University of Science and Technology", "slug": "guru-jambheshwar-university", "university_type": "govt", "ownership": "state", "ranking_nirf": null, "state_name": "Haryana", "city_name": "Hisar", "established_year": 1995, "naac_grade": "A+", "ugc_approved": true, "aicte_approved": true, "about_text": "GJUST is a state university in Hisar known for engineering, pharmacy and management programs."},
+      "contact": {"website_url": "https://www.gjust.ac.in", "email": "registrar@gjust.ac.in", "phone": "01662-263362", "address": "Hisar-Mirpur Road, Hisar, Haryana 125001"},
+      "courses": [{"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 50000, "total_fee": 200000, "seats_available": 200, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["CSE", "ECE", "Mechanical"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 4.0, "highest_package_lpa": 12.0, "students_placed": 400, "top_recruiters": ["TCS", "Wipro", "HCL"]}],
+      "admissions": {"admission_process": "Online counseling", "accepted_exams": ["JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Pharmacy"], "sports_facilities": ["Cricket", "Football"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 35000, "mess_available": true, "mess_type": "both", "ac_available": false},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A+", "accreditation_year": 2021}]
+    },
+    {
+      "core": {"name": "Chaudhary Charan Singh Haryana Agricultural University", "slug": "chaudhary-charan-singh-haryana-agricultural-university", "university_type": "govt", "ownership": "state", "ranking_nirf": 12, "state_name": "Haryana", "city_name": "Hisar", "established_year": 1970, "naac_grade": "A++", "ugc_approved": true, "aicte_approved": false, "about_text": "CCSHAU is one of India's top agricultural universities, known for Green Revolution contributions and agricultural research excellence."},
+      "contact": {"website_url": "https://www.hau.ac.in", "email": "registrar@hau.ac.in", "phone": "01662-289209", "address": "Hisar, Haryana 125004"},
+      "courses": [{"course_name": "B.Sc Agriculture", "course_level": "UG", "duration_years": 4, "annual_fee": 40000, "total_fee": 160000, "seats_available": 250, "eligibility_criteria": "10+2 with PCB/PCM", "specializations": ["Agronomy", "Plant Breeding", "Entomology"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 4.5, "highest_package_lpa": 10.0, "students_placed": 300, "top_recruiters": ["NABARD", "IFFCO", "State Bank of India"]}],
+      "admissions": {"admission_process": "Haryana DET and state counseling", "accepted_exams": ["ICAR AIEEA", "Haryana DET"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "library_books_count": 300000, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Agriculture", "Biotechnology", "Soil Science"], "sports_facilities": ["Cricket", "Hockey", "Football"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_capacity": 3000, "hostel_fee_annual": 30000, "mess_available": true, "mess_type": "both", "ac_available": false},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A++", "accreditation_year": 2021}]
+    },
+    {
+      "core": {"name": "National Dairy Research Institute", "slug": "national-dairy-research-institute", "university_type": "govt", "ownership": "central", "ranking_nirf": 5, "state_name": "Haryana", "city_name": "Karnal", "established_year": 1923, "naac_grade": "A++", "ugc_approved": true, "aicte_approved": false, "about_text": "NDRI Karnal is India's premier dairy research institute under ICAR, offering specialized programs in dairy science and technology."},
+      "contact": {"website_url": "https://www.ndri.res.in", "email": "director@ndri.res.in", "phone": "0184-2252501", "address": "Karnal, Haryana 132001"},
+      "courses": [{"course_name": "M.Tech Dairy Technology", "course_level": "PG", "duration_years": 2, "total_fee": 80000, "annual_fee": 40000, "seats_available": 30, "eligibility_criteria": "B.Tech/B.Sc in Dairy Science", "specializations": ["Dairy Chemistry", "Dairy Microbiology"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 6.0, "highest_package_lpa": 12.0, "students_placed": 50, "top_recruiters": ["Amul", "Mother Dairy", "Nestle", "Britannia"]}],
+      "admissions": {"admission_process": "ICAR counseling", "accepted_exams": ["ICAR AICEE"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Dairy Chemistry", "Dairy Microbiology", "Dairy Engineering"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 25000, "mess_available": true, "mess_type": "both", "ac_available": true}
+    },
+    {
+      "core": {"name": "Central University of Haryana", "slug": "central-university-of-haryana", "university_type": "govt", "ownership": "central", "ranking_nirf": null, "state_name": "Haryana", "city_name": "Mahendragarh", "established_year": 2009, "naac_grade": "A", "ugc_approved": true, "aicte_approved": false, "about_text": "CUH is a central university offering diverse programs in sciences, humanities, engineering and management."},
+      "contact": {"website_url": "https://www.cuh.ac.in", "email": "registrar@cuh.ac.in", "phone": "01285-256400", "address": "Jant-Pali, Mahendragarh, Haryana 123029"},
+      "courses": [{"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 25000, "total_fee": 100000, "seats_available": 60, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["CSE"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 5.0, "highest_package_lpa": 12.0, "students_placed": 100, "top_recruiters": ["TCS", "Wipro"]}],
+      "admissions": {"admission_process": "CUCET-based", "accepted_exams": ["CUCET"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "Physics", "Chemistry"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 20000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "BML Munjal University", "slug": "bml-munjal-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": 80, "state_name": "Haryana", "city_name": "Gurugram", "established_year": 2014, "naac_grade": "A", "ugc_approved": true, "aicte_approved": true, "about_text": "BMU is a Hero Group initiative offering engineering and management programs with a strong focus on experiential learning."},
+      "contact": {"website_url": "https://www.bmu.edu.in", "email": "admissions@bmu.edu.in", "phone": "01284-356000", "address": "55, Kheri Daula, Gurugram, Haryana 122102"},
+      "courses": [{"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 240000, "total_fee": 960000, "seats_available": 180, "eligibility_criteria": "10+2 with PCM, JEE Main/BMU-SAT", "specializations": ["AI/ML", "Data Science"]}, {"course_name": "MBA", "course_level": "PG", "duration_years": 2, "annual_fee": 350000, "total_fee": 700000, "seats_available": 60, "eligibility_criteria": "Graduation with 50%, CAT/XAT/GMAT", "specializations": ["Finance", "Marketing", "HR"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 8.0, "highest_package_lpa": 30.0, "placement_percentage": 85, "students_placed": 400, "top_recruiters": ["Hero MotoCorp", "Deloitte", "KPMG", "TCS", "Wipro"]}],
+      "admissions": {"admission_process": "BMU-SAT or national level exams", "accepted_exams": ["JEE Main", "CAT", "XAT", "GMAT", "BMU-SAT"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Mechanical"], "sports_facilities": ["Cricket", "Football", "Basketball", "Swimming"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 120000, "mess_available": true, "mess_type": "both", "ac_available": true},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A", "accreditation_year": 2023}]
+    },
+    {
+      "core": {"name": "O.P. Jindal Global University", "slug": "op-jindal-global-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": 30, "state_name": "Haryana", "city_name": "Sonipat", "established_year": 2009, "naac_grade": "A++", "ugc_approved": true, "aicte_approved": false, "about_text": "JGU is India's top-ranked private university for law, international affairs and liberal arts with global partnerships."},
+      "contact": {"website_url": "https://www.jgu.ac.in", "email": "admissions@jgu.ac.in", "phone": "0130-2417000", "address": "Sonipat-Narela Road, Sonipat, Haryana 131001"},
+      "courses": [{"course_name": "BA LLB", "course_level": "UG", "duration_years": 5, "annual_fee": 350000, "total_fee": 1750000, "seats_available": 120, "eligibility_criteria": "10+2 with 45%, LSAT/CLAT", "specializations": []}, {"course_name": "BBA", "course_level": "UG", "duration_years": 3, "annual_fee": 250000, "total_fee": 750000, "seats_available": 120, "eligibility_criteria": "10+2 with 50%", "specializations": ["Finance", "Marketing", "IB"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 10.0, "highest_package_lpa": 50.0, "placement_percentage": 85, "students_placed": 500, "top_recruiters": ["Cyril Amarchand", "AZB Partners", "Deloitte", "KPMG", "EY"]}],
+      "admissions": {"admission_process": "JSAT/national level exam based", "accepted_exams": ["LSAT", "CLAT", "CAT", "JSAT"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "library_books_count": 100000, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Law Moot Court", "Business Lab", "Media Lab"], "sports_facilities": ["Cricket", "Football", "Basketball", "Tennis", "Swimming"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 180000, "mess_available": true, "mess_type": "both", "ac_available": true},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A++", "accreditation_year": 2023}]
+    },
+    {
+      "core": {"name": "Amity University Haryana", "slug": "amity-university-haryana", "university_type": "private", "ownership": "private_trust", "ranking_nirf": 55, "state_name": "Haryana", "city_name": "Gurugram", "established_year": 2010, "naac_grade": "A+", "ugc_approved": true, "aicte_approved": true, "about_text": "Amity University Haryana is part of the Amity Education Group offering engineering, management and other professional programs."},
+      "contact": {"website_url": "https://www.amity.edu/haryana", "email": "admissions@amity.edu", "phone": "0124-2578830", "address": "Panchgaon, Mewat, Gurugram, Haryana 122103"},
+      "courses": [{"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 200000, "total_fee": 800000, "seats_available": 240, "eligibility_criteria": "10+2 with PCM, Amity JEE", "specializations": ["AI/ML", "Cloud Computing"]}, {"course_name": "MBA", "course_level": "PG", "duration_years": 2, "annual_fee": 300000, "total_fee": 600000, "seats_available": 120, "eligibility_criteria": "Graduation with 50%, CAT/MAT", "specializations": ["Finance", "Marketing", "HR"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 6.0, "highest_package_lpa": 25.0, "placement_percentage": 80, "students_placed": 1200, "top_recruiters": ["TCS", "Wipro", "Infosys", "Deloitte"]}],
+      "admissions": {"admission_process": "Amity JEE or direct admission", "accepted_exams": ["Amity JEE", "JEE Main", "CAT", "MAT"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Mechanical", "Biotech"], "sports_facilities": ["Cricket", "Football", "Basketball", "Swimming"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 120000, "mess_available": true, "mess_type": "both", "ac_available": true},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A+", "accreditation_year": 2022}]
+    },
+    {
+      "core": {"name": "The NorthCap University", "slug": "the-northcap-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Haryana", "city_name": "Gurugram", "established_year": 1996, "naac_grade": "A", "ugc_approved": true, "aicte_approved": true, "about_text": "NCU is a private university in Gurugram known for engineering, law and management programs."},
+      "contact": {"website_url": "https://www.ncuindia.edu", "email": "admissions@ncuindia.edu", "phone": "0124-2365800", "address": "Sector 23A, Gurugram, Haryana 122017"},
+      "courses": [{"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 210000, "total_fee": 840000, "seats_available": 180, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["AI/ML", "Data Science"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 7.0, "highest_package_lpa": 30.0, "placement_percentage": 82, "students_placed": 400, "top_recruiters": ["TCS", "Wipro", "Infosys", "Deloitte"]}],
+      "admissions": {"admission_process": "JEE Main based counseling", "accepted_exams": ["JEE Main", "CAT"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE"], "sports_facilities": ["Cricket", "Basketball"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 130000, "mess_available": true, "mess_type": "both", "ac_available": true}
+    },
+    {
+      "core": {"name": "Manav Rachna University", "slug": "manav-rachna-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Haryana", "city_name": "Faridabad", "established_year": 2004, "naac_grade": "A", "ugc_approved": true, "aicte_approved": true, "about_text": "MRU is a private university in Faridabad offering engineering, management and design programs."},
+      "contact": {"website_url": "https://www.manavrachna.ac.in", "email": "admissions@manavrachna.ac.in", "phone": "0129-4265555", "address": "Sector 43, Faridabad, Haryana 121003"},
+      "courses": [{"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 180000, "total_fee": 720000, "seats_available": 180, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["AI/ML", "Data Science"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 5.5, "highest_package_lpa": 20.0, "placement_percentage": 80, "students_placed": 500, "top_recruiters": ["TCS", "Wipro", "HCL", "Cognizant"]}],
+      "admissions": {"admission_process": "Direct admission or JEE Main", "accepted_exams": ["JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Mechanical"], "sports_facilities": ["Cricket", "Football"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 110000, "mess_available": true, "mess_type": "both", "ac_available": true}
+    },
+    {
+      "core": {"name": "Ashoka University", "slug": "ashoka-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": 45, "state_name": "Haryana", "city_name": "Sonipat", "established_year": 2014, "naac_grade": "A+", "ugc_approved": true, "aicte_approved": false, "about_text": "Ashoka University is India's leading liberal arts university offering interdisciplinary programs in sciences, humanities and social sciences."},
+      "contact": {"website_url": "https://www.ashoka.edu.in", "email": "admissions@ashoka.edu.in", "phone": "0130-2300000", "address": "Rajiv Gandhi Education City, Sonipat, Haryana 131029"},
+      "courses": [{"course_name": "BA (Hons)", "course_level": "UG", "duration_years": 4, "annual_fee": 550000, "total_fee": 2200000, "seats_available": 200, "eligibility_criteria": "10+2 with good marks, Ashoka Aptitude Test", "specializations": ["Economics", "Computer Science", "Psychology", "History", "Philosophy", "Politics"]}, {"course_name": "MSc Data Science", "course_level": "PG", "duration_years": 2, "annual_fee": 600000, "total_fee": 1200000, "seats_available": 50, "eligibility_criteria": "Graduation with 60%", "specializations": []}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 12.0, "highest_package_lpa": 45.0, "placement_percentage": 80, "students_placed": 300, "top_recruiters": ["McKinsey", "BCG", "Goldman Sachs", "Google", "Microsoft"]}],
+      "admissions": {"admission_process": "Ashoka Aptitude Test and interview", "accepted_exams": ["Ashoka Aptitude Test", "SAT", "JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "library_books_count": 100000, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Computer Science", "Psychology", "Science"], "sports_facilities": ["Cricket", "Football", "Basketball", "Tennis", "Swimming"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_capacity": 4000, "hostel_fee_annual": 150000, "mess_available": true, "mess_type": "both", "ac_available": true},
+      "scholarships": [{"scholarship_name": "Ashoka Need-Based Scholarship", "scholarship_type": "need", "amount": 500000, "eligibility_criteria": "Demonstrated financial need", "renewable": true}],
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A+", "accreditation_year": 2023}]
+    },
+    {
+      "core": {"name": "SRM University Delhi-NCR", "slug": "srm-university-delhi-ncr", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Haryana", "city_name": "Gurugram", "established_year": 2013, "naac_grade": "A+", "ugc_approved": true, "aicte_approved": true, "about_text": "SRM University Delhi-NCR is part of the SRM Group offering engineering, management and medical programs."},
+      "contact": {"website_url": "https://www.srmuniversity.ac.in", "email": "admissions@srmuniversity.ac.in", "phone": "0124-2573400", "address": "NH-8, Rajiv Gandhi Education City, Sonepat, Haryana 131029"},
+      "courses": [{"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 200000, "total_fee": 800000, "seats_available": 240, "eligibility_criteria": "10+2 with PCM, SRMJEEE", "specializations": ["AI/ML", "Data Science"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 6.0, "highest_package_lpa": 25.0, "placement_percentage": 80, "students_placed": 800, "top_recruiters": ["TCS", "Wipro", "Infosys", "Cognizant"]}],
+      "admissions": {"admission_process": "SRMJEEE entrance exam", "accepted_exams": ["SRMJEEE", "JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Mechanical", "Biotech"], "sports_facilities": ["Cricket", "Football", "Swimming"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 120000, "mess_available": true, "mess_type": "both", "ac_available": true}
+    },
+    {
+      "core": {"name": "Maharishi Markandeshwar University", "slug": "maharishi-markandeshwar-university", "university_type": "deemed", "ownership": "private_trust", "ranking_nirf": 65, "state_name": "Haryana", "city_name": "Ambala", "established_year": 1993, "naac_grade": "A+", "ugc_approved": true, "aicte_approved": true, "about_text": "MMU Mullana is a deemed university known for medical, dental, engineering and nursing programs."},
+      "contact": {"website_url": "https://www.mmumullana.org", "email": "admissions@mmumullana.org", "phone": "01731-304000", "address": "Mullana, Ambala, Haryana 133207"},
+      "courses": [{"course_name": "MBBS", "course_level": "UG", "duration_years": 5, "annual_fee": 1800000, "total_fee": 9000000, "seats_available": 150, "eligibility_criteria": "10+2 with PCB, NEET", "specializations": []}, {"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 150000, "total_fee": 600000, "seats_available": 180, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["AI/ML"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 5.0, "highest_package_lpa": 20.0, "students_placed": 600, "top_recruiters": ["TCS", "Wipro", "Fortis", "Max Hospital"]}],
+      "admissions": {"admission_process": "NEET for medical, JEE Main for engineering", "accepted_exams": ["NEET", "JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Medical", "Dental", "CSE", "ECE"], "sports_facilities": ["Cricket", "Football"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 80000, "mess_available": true, "mess_type": "both", "ac_available": true}
+    },
+    {
+      "core": {"name": "K.R. Mangalam University", "slug": "kr-mangalam-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Haryana", "city_name": "Gurugram", "established_year": 2013, "naac_grade": "A", "ugc_approved": true, "aicte_approved": true, "about_text": "KRMU is a private university offering engineering, management, law and journalism programs in Gurugram."},
+      "contact": {"website_url": "https://www.krmangalam.edu.in", "email": "admissions@krmangalam.edu.in", "phone": "0124-2650200", "address": "Sohna Road, Gurugram, Haryana 122103"},
+      "courses": [{"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 165000, "total_fee": 660000, "seats_available": 180, "eligibility_criteria": "10+2 with PCM", "specializations": ["AI/ML", "Data Science"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 5.0, "highest_package_lpa": 18.0, "placement_percentage": 75, "students_placed": 400, "top_recruiters": ["TCS", "Wipro", "HCL", "Cognizant"]}],
+      "admissions": {"admission_process": "Direct admission or JEE Main", "accepted_exams": ["JEE Main", "CAT", "CLAT"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE"], "sports_facilities": ["Cricket", "Basketball"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 100000, "mess_available": true, "mess_type": "both", "ac_available": true}
+    },
+    {
+      "core": {"name": "World University of Design", "slug": "world-university-of-design", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Haryana", "city_name": "Sonipat", "established_year": 2018, "naac_grade": null, "ugc_approved": true, "aicte_approved": false, "about_text": "WUD is a private university focused on design, art, fashion, media and architecture programs."},
+      "contact": {"website_url": "https://www.wud.ac.in", "email": "admissions@wud.ac.in", "phone": "0130-2568000", "address": "Rajiv Gandhi Education City, Sonipat, Haryana 131029"},
+      "courses": [{"course_name": "B.Des", "course_level": "UG", "duration_years": 4, "annual_fee": 300000, "total_fee": 1200000, "seats_available": 60, "eligibility_criteria": "10+2 with any stream, design aptitude", "specializations": ["Product Design", "Fashion Design", "Interior Design", "Graphic Design"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 5.0, "highest_package_lpa": 15.0, "students_placed": 100, "top_recruiters": ["Godrej", "Flipkart", "H&M", "Zara"]}],
+      "admissions": {"admission_process": "WUD entrance test and portfolio review", "accepted_exams": ["WUD DAT"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Design Studio", "Fashion Lab", "Media Lab"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 120000, "mess_available": true, "mess_type": "both", "ac_available": true}
+    },
+    {
+      "core": {"name": "Gurugram University", "slug": "gurugram-university", "university_type": "govt", "ownership": "state", "ranking_nirf": null, "state_name": "Haryana", "city_name": "Gurugram", "established_year": 2017, "naac_grade": null, "ugc_approved": true, "aicte_approved": false, "about_text": "Gurugram University is a state university established in 2017 offering programs in sciences, engineering and management."},
+      "contact": {"website_url": "https://www.gug.ac.in", "email": "registrar@gug.ac.in", "phone": "0124-2573400", "address": "Rajiv Gandhi Education City, Gurugram, Haryana 122103"},
+      "courses": [{"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 50000, "total_fee": 200000, "seats_available": 120, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["CSE"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 4.0, "highest_package_lpa": 10.0, "students_placed": 100, "top_recruiters": ["TCS", "Wipro"]}],
+      "admissions": {"admission_process": "State counseling", "accepted_exams": ["JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 30000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Chaudhary Bansi Lal University", "slug": "chaudhary-bansi-lal-university", "university_type": "govt", "ownership": "state", "ranking_nirf": null, "state_name": "Haryana", "city_name": "Bhiwani", "established_year": 2014, "naac_grade": null, "ugc_approved": true, "aicte_approved": false, "about_text": "CBLU is a state university in Bhiwani offering programs in sciences, arts, commerce and education."},
+      "contact": {"website_url": "https://www.cblu.ac.in", "email": "registrar@cblu.ac.in", "phone": "01664-242001", "address": "Bhiwani, Haryana 127021"},
+      "courses": [{"course_name": "BA", "course_level": "UG", "duration_years": 3, "annual_fee": 10000, "total_fee": 30000, "seats_available": 200, "eligibility_criteria": "10+2 with any stream", "specializations": ["English", "Hindi", "History"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.0, "highest_package_lpa": 5.0, "students_placed": 100, "top_recruiters": ["Schools", "Local companies"]}],
+      "admissions": {"admission_process": "Direct admission", "accepted_exams": [], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Science"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 15000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Chaudhary Ranbir Singh University", "slug": "chaudhary-ranbir-singh-university", "university_type": "govt", "ownership": "state", "ranking_nirf": null, "state_name": "Haryana", "city_name": "Jind", "established_year": 2014, "naac_grade": null, "ugc_approved": true, "aicte_approved": false, "about_text": "CRSU is a state university in Jind offering programs in engineering, sciences and management."},
+      "contact": {"website_url": "https://www.crsu.ac.in", "email": "registrar@crsu.ac.in", "phone": "01681-230123", "address": "Jind, Haryana 126102"},
+      "courses": [{"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 45000, "total_fee": 180000, "seats_available": 120, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["CSE", "ECE"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.5, "highest_package_lpa": 8.0, "students_placed": 150, "top_recruiters": ["TCS", "Wipro"]}],
+      "admissions": {"admission_process": "State counseling", "accepted_exams": ["JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 20000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Shri Vishwakarma Skill University", "slug": "shri-vishwakarma-skill-university", "university_type": "govt", "ownership": "state", "ranking_nirf": null, "state_name": "Haryana", "city_name": "Palwal", "established_year": 2016, "naac_grade": null, "ugc_approved": true, "aicte_approved": false, "about_text": "SVSU is Haryana's first skill university focused on vocational and skill-based education."},
+      "contact": {"website_url": "https://www.svsu.ac.in", "email": "info@svsu.ac.in", "phone": "01275-254000", "address": "Dhauj, Faridabad-Palwal Road, Palwal, Haryana 121102"},
+      "courses": [{"course_name": "B.Voc", "course_level": "UG", "duration_years": 3, "annual_fee": 60000, "total_fee": 180000, "seats_available": 60, "eligibility_criteria": "10+2 with any stream", "specializations": ["Automobile", "IT", "Tourism"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.5, "highest_package_lpa": 8.0, "students_placed": 100, "top_recruiters": ["Maruti Suzuki", "Hero MotoCorp"]}],
+      "admissions": {"admission_process": "Direct admission", "accepted_exams": [], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Automobile", "IT"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 30000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {
+        "name": "Himachal Pradesh University",
+        "slug": "himachal-pradesh-university",
+        "university_type": "govt",
+        "ownership": "state",
+        "ranking_nirf": null,
+        "state_name": "Himachal Pradesh",
+        "city_name": "Shimla",
+        "established_year": 1970,
+        "naac_grade": "A",
+        "ugc_approved": true,
+        "aicte_approved": false,
+        "about_text": "HPU Shimla is the premier state university of Himachal Pradesh offering programs in arts, sciences, law and management."
+      },
+      "contact": {"website_url": "https://www.hpuniv.ac.in", "email": "registrar@hpuniv.ac.in", "phone": "0177-2833557", "address": "Summer Hill, Shimla, Himachal Pradesh 171005"},
+      "courses": [{"course_name": "BA LLB", "course_level": "UG", "duration_years": 5, "annual_fee": 20000, "total_fee": 100000, "seats_available": 60, "eligibility_criteria": "10+2 with 45%", "specializations": []}, {"course_name": "M.Sc Physics", "course_level": "PG", "duration_years": 2, "annual_fee": 15000, "total_fee": 30000, "seats_available": 30, "eligibility_criteria": "B.Sc with Physics", "specializations": []}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.5, "highest_package_lpa": 8.0, "students_placed": 200, "top_recruiters": ["TCS", "Wipro", "HP Government"]}],
+      "admissions": {"admission_process": "Merit-based counseling", "accepted_exams": ["HP University Entrance"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Physics", "Chemistry", "Biology"], "sports_facilities": ["Cricket", "Football"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 25000, "mess_available": true, "mess_type": "both", "ac_available": false},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A", "accreditation_year": 2018}]
+    },
+    {
+      "core": {"name": "Central University of Himachal Pradesh", "slug": "central-university-of-himachal-pradesh", "university_type": "govt", "ownership": "central", "ranking_nirf": null, "state_name": "Himachal Pradesh", "city_name": "Dharamshala", "established_year": 2009, "naac_grade": "A", "ugc_approved": true, "aicte_approved": false, "about_text": "CUHP is a central university located in Dharamshala offering programs in sciences, arts, commerce and management."},
+      "contact": {"website_url": "https://www.cuhp.ac.in", "email": "registrar@cuhp.ac.in", "phone": "01892-235000", "address": " Shahpur, Kangra, Dharamshala, HP 176219"},
+      "courses": [{"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 25000, "total_fee": 100000, "seats_available": 60, "eligibility_criteria": "10+2 with PCM, CUCET", "specializations": ["CSE"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 4.5, "highest_package_lpa": 10.0, "students_placed": 80, "top_recruiters": ["TCS", "Wipro"]}],
+      "admissions": {"admission_process": "CUCET", "accepted_exams": ["CUCET"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "Physics", "Chemistry"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 20000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Dr. Y.S. Parmar University of Horticulture and Forestry", "slug": "dr-ys-parmar-university", "university_type": "govt", "ownership": "state", "ranking_nirf": null, "state_name": "Himachal Pradesh", "city_name": "Nauni", "established_year": 1985, "naac_grade": "A+", "ugc_approved": true, "aicte_approved": false, "about_text": "YS Parmar University is a specialized horticulture and forestry university in Nauni, Solan."},
+      "contact": {"website_url": "https://www.yspuniversity.ac.in", "email": "registrar@yspuniversity.ac.in", "phone": "01792-252306", "address": "Nauni, Solan, Himachal Pradesh 173230"},
+      "courses": [{"course_name": "B.Sc Horticulture", "course_level": "UG", "duration_years": 4, "annual_fee": 35000, "total_fee": 140000, "seats_available": 80, "eligibility_criteria": "10+2 with PCB/PCM", "specializations": ["Pomology", "Floriculture", "Forestry"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 4.0, "highest_package_lpa": 8.0, "students_placed": 100, "top_recruiters": ["Horticulture Department", "Forest Department", "NABARD"]}],
+      "admissions": {"admission_process": "ICAR and state counseling", "accepted_exams": ["ICAR AIEEA"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Horticulture", "Forestry", "Plant Pathology"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 25000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "CSK Himachal Pradesh Krishi Vishvavidyalaya", "slug": "csk-hp-krishi-vishvavidyalaya", "university_type": "govt", "ownership": "state", "ranking_nirf": null, "state_name": "Himachal Pradesh", "city_name": "Palampur", "established_year": 1978, "naac_grade": "A", "ugc_approved": true, "aicte_approved": false, "about_text": "CSK HPKV Palampur is the agricultural university of HP known for research in temperate agriculture and horticulture."},
+      "contact": {"website_url": "https://www.skhpkv.org", "email": "registrar@skhpkv.org", "phone": "01894-230090", "address": "Palampur, Himachal Pradesh 176062"},
+      "courses": [{"course_name": "B.Sc Agriculture", "course_level": "UG", "duration_years": 4, "annual_fee": 30000, "total_fee": 120000, "seats_available": 80, "eligibility_criteria": "10+2 with PCB/PCM", "specializations": ["Agriculture", "Horticulture"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 4.0, "highest_package_lpa": 8.0, "students_placed": 80, "top_recruiters": ["NABARD", "State Agriculture Dept"]}],
+      "admissions": {"admission_process": "ICAR and state counseling", "accepted_exams": ["ICAR AIEEA"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Agriculture", "Horticulture"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 20000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Shoolini University", "slug": "shoolini-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": 50, "state_name": "Himachal Pradesh", "city_name": "Solan", "established_year": 2009, "naac_grade": "A+", "ugc_approved": true, "aicte_approved": true, "about_text": "Shoolini University is a top private HP university known for biotechnology, management and engineering with strong research focus."},
+      "contact": {"website_url": "https://www.shooliniuniversity.com", "email": "admissions@shooliniuniversity.com", "phone": "01792-350000", "address": "Bajhol, Solan, Himachal Pradesh 173229"},
+      "courses": [{"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 150000, "total_fee": 600000, "seats_available": 180, "eligibility_criteria": "10+2 with PCM", "specializations": ["AI/ML", "Data Science"]}, {"course_name": "MBA", "course_level": "PG", "duration_years": 2, "annual_fee": 200000, "total_fee": 400000, "seats_available": 60, "eligibility_criteria": "Graduation with 50%", "specializations": ["Finance", "Marketing"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 6.0, "highest_package_lpa": 20.0, "placement_percentage": 80, "students_placed": 400, "top_recruiters": ["TCS", "Wipro", "Infosys", "Cognizant"]}],
+      "admissions": {"admission_process": "Direct admission or JEE Main", "accepted_exams": ["JEE Main", "CAT", "MAT"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "Biotech", "Pharmacy"], "sports_facilities": ["Cricket", "Football", "Basketball"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 80000, "mess_available": true, "mess_type": "both", "ac_available": true},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A+", "accreditation_year": 2022}]
+    },
+    {
+      "core": {"name": "Jaypee University of Information Technology", "slug": "jaypee-university-of-information-technology", "university_type": "deemed", "ownership": "private_trust", "ranking_nirf": 95, "state_name": "Himachal Pradesh", "city_name": "Waknaghat", "established_year": 2002, "naac_grade": "A", "ugc_approved": true, "aicte_approved": true, "about_text": "JUIT Waknaghat is a Jaypee Group university known for IT, biotech and civil engineering programs."},
+      "contact": {"website_url": "https://www.juit.ac.in", "email": "admissions@juit.ac.in", "phone": "01792-239301", "address": "Waknaghat, Solan, HP 173234"},
+      "courses": [{"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 190000, "total_fee": 760000, "seats_available": 180, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["CSE", "IT", "Biotech"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 6.0, "highest_package_lpa": 20.0, "placement_percentage": 80, "students_placed": 400, "top_recruiters": ["TCS", "Wipro", "Infosys", "Cognizant"]}],
+      "admissions": {"admission_process": "JEE Main based", "accepted_exams": ["JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Biotech", "Civil"], "sports_facilities": ["Cricket", "Football"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 90000, "mess_available": true, "mess_type": "both", "ac_available": true}
+    },
+    {
+      "core": {"name": "Maharaja Agrasen University", "slug": "maharaja-agrasen-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Himachal Pradesh", "city_name": "Baddi", "established_year": 2014, "naac_grade": "B+", "ugc_approved": true, "aicte_approved": true, "about_text": "MAU Baddi is a private university offering engineering, pharmacy and management programs."},
+      "contact": {"website_url": "https://www.mau.ac.in", "email": "info@mau.ac.in", "phone": "01796-253000", "address": "Baddi, Solan, HP 173205"},
+      "courses": [{"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 80000, "total_fee": 320000, "seats_available": 120, "eligibility_criteria": "10+2 with PCM", "specializations": ["CSE", "ECE"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.5, "highest_package_lpa": 8.0, "students_placed": 200, "top_recruiters": ["TCS", "Wipro"]}],
+      "admissions": {"admission_process": "Direct admission", "accepted_exams": ["JEE Main"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 60000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Abhilashi University", "slug": "abhilashi-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Himachal Pradesh", "city_name": "Chamba", "established_year": 2014, "naac_grade": null, "ugc_approved": true, "aicte_approved": true, "about_text": "Abhilashi University offers engineering, pharmacy and management programs in Chamba."},
+      "contact": {"website_url": "https://www.abhilashiuniversity.ac.in", "email": "info@abhilashiuniversity.ac.in", "phone": "01899-235000", "address": "Tilokpur, Chamba, HP 176110"},
+      "courses": [{"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 60000, "total_fee": 240000, "seats_available": 60, "eligibility_criteria": "10+2 with PCM", "specializations": ["CSE"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.0, "highest_package_lpa": 6.0, "students_placed": 80, "top_recruiters": ["TCS", "Local companies"]}],
+      "admissions": {"admission_process": "Direct admission", "accepted_exams": [], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 40000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Career Point University", "slug": "career-point-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Himachal Pradesh", "city_name": "Hamirpur", "established_year": 2017, "naac_grade": null, "ugc_approved": true, "aicte_approved": true, "about_text": "CPU Hamirpur is a private university offering engineering, pharmacy and management programs."},
+      "contact": {"website_url": "https://www.careerpointuniversity.ac.in", "email": "info@careerpointuniversity.ac.in", "phone": "01972-253000", "address": "Kala Amb, Hamirpur, HP 177026"},
+      "courses": [{"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 70000, "total_fee": 280000, "seats_available": 60, "eligibility_criteria": "10+2 with PCM", "specializations": ["CSE"]}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.0, "highest_package_lpa": 6.0, "students_placed": 80, "top_recruiters": ["TCS"]}],
+      "admissions": {"admission_process": "Direct admission", "accepted_exams": [], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 50000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {"name": "Eternal University", "slug": "eternal-university", "university_type": "private", "ownership": "private_trust", "ranking_nirf": null, "state_name": "Himachal Pradesh", "city_name": "Sirmaur", "established_year": 2015, "naac_grade": null, "ugc_approved": true, "aicte_approved": false, "about_text": "Eternal University is a private university offering nursing, pharmacy and management programs in Sirmaur."},
+      "contact": {"website_url": "https://www.eternaluniversity.edu.in", "email": "info@eternaluniversity.edu.in", "phone": "01702-350000", "address": "Baru Sahib, Sirmaur, HP 173101"},
+      "courses": [{"course_name": "B.Sc Nursing", "course_level": "UG", "duration_years": 4, "annual_fee": 60000, "total_fee": 240000, "seats_available": 60, "eligibility_criteria": "10+2 with PCB", "specializations": []}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 3.0, "highest_package_lpa": 5.0, "students_placed": 60, "top_recruiters": ["Hospitals", "Clinics"]}],
+      "admissions": {"admission_process": "Direct admission", "accepted_exams": [], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["Nursing"], "sports_facilities": ["Cricket"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_fee_annual": 45000, "mess_available": true, "mess_type": "both", "ac_available": false}
+    },
+    {
+      "core": {
+        "name": "Panjab University",
+        "slug": "panjab-university",
+        "university_type": "govt",
+        "ownership": "state",
+        "ranking_nirf": 35,
+        "state_name": "Chandigarh",
+        "city_name": "Chandigarh",
+        "established_year": 1882,
+        "naac_grade": "A+",
+        "ugc_approved": true,
+        "aicte_approved": false,
+        "about_text": "Panjab University Chandigarh is one of India's oldest and most prestigious universities, ranked among the top in the country."
+      },
+      "contact": {"website_url": "https://www.pu.ac.in", "email": "registrar@pu.ac.in", "phone": "0172-2534907", "address": "Sector 14, Chandigarh 160014"},
+      "courses": [{"course_name": "B.Tech", "course_level": "UG", "duration_years": 4, "annual_fee": 55000, "total_fee": 220000, "seats_available": 300, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["CSE", "ECE", "Mechanical"]}, {"course_name": "B.Sc", "course_level": "UG", "duration_years": 3, "annual_fee": 20000, "total_fee": 60000, "seats_available": 200, "eligibility_criteria": "10+2 with Science", "specializations": ["Physics", "Chemistry", "Mathematics"]}, {"course_name": "LLB", "course_level": "UG", "duration_years": 3, "annual_fee": 15000, "total_fee": 45000, "seats_available": 120, "eligibility_criteria": "Graduation with 45%", "specializations": []}],
+      "placements": [{"placement_year": 2024, "avg_package_lpa": 6.0, "highest_package_lpa": 25.0, "students_placed": 800, "top_recruiters": ["TCS", "Wipro", "Infosys", "NTPC", "IOCL"]}],
+      "admissions": {"admission_process": "PU-CET and JEE Main based", "accepted_exams": ["PU-CET", "JEE Main", "CLAT", "CAT"], "application_mode": "online", "merit_based": true},
+      "infrastructure": {"library": true, "library_books_count": 700000, "auditorium": true, "cafeteria": true, "wifi": true, "medical_facility": true, "transport": true, "labs": ["CSE", "ECE", "Physics", "Chemistry", "Biotech"], "sports_facilities": ["Cricket", "Hockey", "Football", "Athletics", "Swimming"]},
+      "hostels": {"hostel_available": true, "hostel_type": "both", "hostel_capacity": 5000, "hostel_fee_annual": 35000, "mess_available": true, "mess_type": "both", "ac_available": true},
+      "accreditations": [{"accreditation_body": "NAAC", "accreditation_grade": "A+", "accreditation_year": 2022}]
+    }
+  ],
+  "colleges": [
+    {
+      "core": {
+        "name": "Punjab Engineering College",
+        "slug": "punjab-engineering-college",
+        "college_type": "govt",
+        "ownership": "state",
+        "university_affiliation": "Panjab University",
+        "state_name": "Chandigarh",
+        "city_name": "Chandigarh",
+        "established_year": 1921,
+        "naac_grade": "A",
+        "total_students": 2500,
+        "about_text": "PEC Chandigarh is one of India's oldest engineering colleges, affiliated to Panjab University, known for strong placements in core engineering."
+      },
+      "contact": {"website_url": "https://www.pec.ac.in", "email": "registrar@pec.ac.in", "phone": "0172-2752174", "address": "Sector 12, Chandigarh 160012"},
+      "courses": [{"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 80000, "total_fee": 320000, "seats": 120, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["CSE", "ECE", "Civil", "Mechanical"]}],
+      "placements": [{"placement_year": 2024, "avg_lpa": 10.0, "highest_lpa": 45.0, "students_placed": 500, "top_recruiters": ["Microsoft", "Amazon", "Goldman Sachs", "TCS", "Wipro"]}]
+    },
+    {
+      "core": {"name": "NIT Kurukshetra", "slug": "nit-kurukshetra", "college_type": "govt", "ownership": "central", "university_affiliation": "NIT System", "state_name": "Haryana", "city_name": "Kurukshetra", "established_year": 1963, "naac_grade": "A+", "total_students": 4000, "about_text": "NIT Kurukshetra is a premier NIT known for engineering excellence and strong placement records."},
+      "contact": {"website_url": "https://www.nitkkr.ac.in", "email": "registrar@nitkkr.ac.in", "phone": "01744-233201", "address": "Kurukshetra, Haryana 136119"},
+      "courses": [{"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 150000, "total_fee": 600000, "seats": 120, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["CSE", "ECE", "Civil", "Mechanical"]}],
+      "placements": [{"placement_year": 2024, "avg_lpa": 12.0, "highest_lpa": 50.0, "students_placed": 600, "top_recruiters": ["Microsoft", "Amazon", "Google", "TCS", "Wipro"]}]
+    },
+    {
+      "core": {"name": "NIT Hamirpur", "slug": "nit-hamirpur", "college_type": "govt", "ownership": "central", "university_affiliation": "NIT System", "state_name": "Himachal Pradesh", "city_name": "Hamirpur", "established_year": 1986, "naac_grade": "A", "total_students": 3000, "about_text": "NIT Hamirpur is a premier NIT known for engineering programs with a scenic campus in Himachal Pradesh."},
+      "contact": {"website_url": "https://www.nith.ac.in", "email": "registrar@nith.ac.in", "phone": "01972-283201", "address": "Hamirpur, HP 177005"},
+      "courses": [{"course_name": "B.Tech CSE", "course_level": "UG", "duration_years": 4, "annual_fee": 150000, "total_fee": 600000, "seats": 90, "eligibility_criteria": "10+2 with PCM, JEE Main", "specializations": ["CSE", "ECE", "Civil", "Mechanical"]}],
+      "placements": [{"placement_year": 2024, "avg_lpa": 10.0, "highest_lpa": 40.0, "students_placed": 450, "top_recruiters": ["Microsoft", "Amazon", "TCS", "Wipro", "Infosys"]}]
+    },
+    {
+      "core": {"name": "Government College for Girls", "slug": "government-college-for-girls-chandigarh", "college_type": "govt", "ownership": "state", "university_affiliation": "Panjab University", "state_name": "Chandigarh", "city_name": "Chandigarh", "established_year": 1962, "total_students": 3000, "about_text": "Government College for Girls is a premier women's college affiliated to Panjab University in Sector 11, Chandigarh."},
+      "contact": {"website_url": "https://www.gcg11.ac.in", "email": "gcg11@pu.ac.in", "phone": "0172-2700112", "address": "Sector 11, Chandigarh 160011"},
+      "courses": [{"course_name": "BA", "course_level": "UG", "duration_years": 3, "annual_fee": 8000, "total_fee": 24000, "seats": 300, "eligibility_criteria": "10+2 with any stream", "specializations": ["English", "Hindi", "Economics", "Political Science"]}]
+    }
+  ]
+}

@@ -1,0 +1,758 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "universities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "core": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "university_type": {
+                "type": "string",
+                "enum": ["govt", "private", "deemed", "autonomous"]
+              },
+              "ownership": {
+                "type": "string",
+                "enum": ["central", "state", "private_trust", "minority"]
+              },
+              "ranking_nirf": {
+                "type": "integer"
+              },
+              "ranking_qs": {
+                "type": "integer"
+              },
+              "state_name": {
+                "type": "string"
+              },
+              "city_name": {
+                "type": "string"
+              },
+              "established_year": {
+                "type": "integer"
+              },
+              "campus_area_acres": {
+                "type": "number"
+              },
+              "total_students": {
+                "type": "integer"
+              },
+              "total_faculty": {
+                "type": "integer"
+              },
+              "naac_grade": {
+                "type": "string",
+                "enum": ["A++", "A+", "A", "B++", "B+", "B", "C", "None"]
+              },
+              "ugc_approved": {
+                "type": "boolean"
+              },
+              "aicte_approved": {
+                "type": "boolean"
+              },
+              "nba_approved": {
+                "type": "boolean"
+              },
+              "autonomous": {
+                "type": "boolean"
+              },
+              "about_text": {
+                "type": "string"
+              },
+              "logo_url": {
+                "type": "string"
+              },
+              "cover_image_url": {
+                "type": "string"
+              }
+            },
+            "required": ["name", "slug"]
+          },
+          "contact": {
+            "type": "object",
+            "properties": {
+              "website_url": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "address": {
+                "type": "string"
+              },
+              "pincode": {
+                "type": "string"
+              },
+              "latitude": {
+                "type": "number"
+              },
+              "longitude": {
+                "type": "number"
+              }
+            }
+          },
+          "courses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "course_name": {
+                  "type": "string"
+                },
+                "course_level": {
+                  "type": "string",
+                  "enum": ["UG", "PG", "Diploma", "PhD", "Certificate"]
+                },
+                "duration_years": {
+                  "type": "integer"
+                },
+                "total_fee": {
+                  "type": "number"
+                },
+                "annual_fee": {
+                  "type": "number"
+                },
+                "seats_available": {
+                  "type": "integer"
+                },
+                "eligibility_criteria": {
+                  "type": "string"
+                },
+                "specializations": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "placements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "placement_year": {
+                  "type": "integer"
+                },
+                "avg_package_lpa": {
+                  "type": "number"
+                },
+                "highest_package_lpa": {
+                  "type": "number"
+                },
+                "median_package_lpa": {
+                  "type": "number"
+                },
+                "placement_percentage": {
+                  "type": "number"
+                },
+                "students_placed": {
+                  "type": "integer"
+                },
+                "top_recruiters": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "admissions": {
+            "type": "object",
+            "properties": {
+              "admission_process": {
+                "type": "string"
+              },
+              "accepted_exams": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "application_mode": {
+                "type": "string",
+                "enum": ["online", "offline", "both"]
+              },
+              "merit_based": {
+                "type": "boolean"
+              },
+              "direct_admission": {
+                "type": "boolean"
+              },
+              "management_quota_seats": {
+                "type": "integer"
+              },
+              "nri_quota_seats": {
+                "type": "integer"
+              },
+              "selection_criteria": {
+                "type": "string"
+              }
+            }
+          },
+          "cutoffs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "exam_name": {
+                  "type": "string"
+                },
+                "course_name": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string",
+                  "enum": ["General", "OBC", "SC", "ST", "EWS", "PwD"]
+                },
+                "year": {
+                  "type": "integer"
+                },
+                "opening_rank": {
+                  "type": "integer"
+                },
+                "closing_rank": {
+                  "type": "integer"
+                },
+                "round_number": {
+                  "type": "integer"
+                },
+                "quota": {
+                  "type": "string",
+                  "enum": ["AI", "HS", "OS", "TF", "PwD"]
+                }
+              }
+            }
+          },
+          "scholarships": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "scholarship_name": {
+                  "type": "string"
+                },
+                "scholarship_type": {
+                  "type": "string",
+                  "enum": ["merit", "need", "sports", "minority"]
+                },
+                "amount": {
+                  "type": "number"
+                },
+                "eligibility_criteria": {
+                  "type": "string"
+                },
+                "renewable": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "infrastructure": {
+            "type": "object",
+            "properties": {
+              "library": {
+                "type": "boolean"
+              },
+              "library_books_count": {
+                "type": "integer"
+              },
+              "auditorium": {
+                "type": "boolean"
+              },
+              "cafeteria": {
+                "type": "boolean"
+              },
+              "wifi": {
+                "type": "boolean"
+              },
+              "medical_facility": {
+                "type": "boolean"
+              },
+              "transport": {
+                "type": "boolean"
+              },
+              "labs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "sports_facilities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "hostels": {
+            "type": "object",
+            "properties": {
+              "hostel_available": {
+                "type": "boolean"
+              },
+              "hostel_type": {
+                "type": "string",
+                "enum": ["boys", "girls", "both"]
+              },
+              "hostel_capacity": {
+                "type": "integer"
+              },
+              "hostel_fee_annual": {
+                "type": "number"
+              },
+              "mess_available": {
+                "type": "boolean"
+              },
+              "mess_type": {
+                "type": "string",
+                "enum": ["veg", "non-veg", "both"]
+              },
+              "ac_available": {
+                "type": "boolean"
+              }
+            }
+          },
+          "faculty": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "faculty_name": {
+                  "type": "string"
+                },
+                "designation": {
+                  "type": "string"
+                },
+                "department": {
+                  "type": "string"
+                },
+                "qualification": {
+                  "type": "string"
+                },
+                "experience_years": {
+                  "type": "integer"
+                },
+                "specialization": {
+                  "type": "string"
+                },
+                "research_papers": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "faqs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "question_text": {
+                  "type": "string"
+                },
+                "answer_text": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "accreditations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "accreditation_body": {
+                  "type": "string"
+                },
+                "accreditation_grade": {
+                  "type": "string"
+                },
+                "accreditation_year": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "colleges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "core": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "college_type": {
+                "type": "string",
+                "enum": ["govt", "private", "deemed", "autonomous"]
+              },
+              "ownership": {
+                "type": "string",
+                "enum": ["central", "state", "private_trust", "minority"]
+              },
+              "university_affiliation": {
+                "type": "string"
+              },
+              "state_name": {
+                "type": "string"
+              },
+              "city_name": {
+                "type": "string"
+              },
+              "established_year": {
+                "type": "integer"
+              },
+              "naac_grade": {
+                "type": "string"
+              },
+              "ugc_approved": {
+                "type": "boolean"
+              },
+              "aicte_approved": {
+                "type": "boolean"
+              },
+              "total_students": {
+                "type": "integer"
+              },
+              "total_faculty": {
+                "type": "integer"
+              },
+              "campus_area_acres": {
+                "type": "number"
+              },
+              "about_text": {
+                "type": "string"
+              }
+            },
+            "required": ["name", "slug"]
+          },
+          "contact": {
+            "type": "object",
+            "properties": {
+              "website_url": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "address": {
+                "type": "string"
+              },
+              "pincode": {
+                "type": "string"
+              },
+              "latitude": {
+                "type": "number"
+              },
+              "longitude": {
+                "type": "number"
+              }
+            }
+          },
+          "courses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "course_name": {
+                  "type": "string"
+                },
+                "course_level": {
+                  "type": "string",
+                  "enum": ["UG", "PG", "Diploma", "PhD", "Certificate"]
+                },
+                "duration_years": {
+                  "type": "integer"
+                },
+                "annual_fee": {
+                  "type": "number"
+                },
+                "total_fee": {
+                  "type": "number"
+                },
+                "seats": {
+                  "type": "integer"
+                },
+                "eligibility_criteria": {
+                  "type": "string"
+                },
+                "specializations": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "placements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "placement_year": {
+                  "type": "integer"
+                },
+                "avg_lpa": {
+                  "type": "number"
+                },
+                "highest_lpa": {
+                  "type": "number"
+                },
+                "median_lpa": {
+                  "type": "number"
+                },
+                "placed_pct": {
+                  "type": "number"
+                },
+                "students_placed": {
+                  "type": "integer"
+                },
+                "top_recruiters": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "admissions": {
+            "type": "object",
+            "properties": {
+              "admission_process": {
+                "type": "string"
+              },
+              "accepted_exams": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "application_mode": {
+                "type": "string",
+                "enum": ["online", "offline", "both"]
+              },
+              "merit_based": {
+                "type": "boolean"
+              },
+              "direct_admission": {
+                "type": "boolean"
+              },
+              "selection_criteria": {
+                "type": "string"
+              }
+            }
+          },
+          "cutoffs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "exam_name": {
+                  "type": "string"
+                },
+                "course_name": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string",
+                  "enum": ["General", "OBC", "SC", "ST", "EWS", "PWD"]
+                },
+                "year": {
+                  "type": "integer"
+                },
+                "opening_rank": {
+                  "type": "integer"
+                },
+                "closing_rank": {
+                  "type": "integer"
+                },
+                "round_number": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "scholarships": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "scholarship_name": {
+                  "type": "string"
+                },
+                "scholarship_type": {
+                  "type": "string",
+                  "enum": ["merit", "means", "sports", "reserved_category"]
+                },
+                "amount": {
+                  "type": "number"
+                },
+                "eligibility_criteria": {
+                  "type": "string"
+                },
+                "renewable": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "infrastructure": {
+            "type": "object",
+            "properties": {
+              "library": {
+                "type": "boolean"
+              },
+              "auditorium": {
+                "type": "boolean"
+              },
+              "cafeteria": {
+                "type": "boolean"
+              },
+              "wifi": {
+                "type": "boolean"
+              },
+              "medical_facility": {
+                "type": "boolean"
+              },
+              "transport": {
+                "type": "boolean"
+              },
+              "labs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "sports_facilities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "hostels": {
+            "type": "object",
+            "properties": {
+              "hostel_available": {
+                "type": "boolean"
+              },
+              "hostel_type": {
+                "type": "string",
+                "enum": ["boys", "girls", "both"]
+              },
+              "hostel_fee_annual": {
+                "type": "number"
+              },
+              "mess_available": {
+                "type": "boolean"
+              },
+              "ac_available": {
+                "type": "boolean"
+              }
+            }
+          },
+          "faculty": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "faculty_name": {
+                  "type": "string"
+                },
+                "designation": {
+                  "type": "string"
+                },
+                "department": {
+                  "type": "string"
+                },
+                "qualification": {
+                  "type": "string"
+                },
+                "experience_years": {
+                  "type": "integer"
+                },
+                "research_papers": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "faqs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "question": {
+                  "type": "string"
+                },
+                "answer": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "accreditations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "accreditation_body": {
+                  "type": "string"
+                },
+                "accreditation_grade": {
+                  "type": "string"
+                },
+                "accreditation_year": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": ["universities", "colleges"]
+}

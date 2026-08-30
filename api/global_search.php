@@ -11,10 +11,25 @@ if (mb_strlen($q) < 1) {
     exit;
 }
 
+$words = array_values(array_filter(explode(' ', $q), fn($w) => mb_strlen($w) >= 1));
 $like = '%' . $q . '%';
-$prefix = $q . '%';
 $results = [];
 $total = 0;
+
+function buildWordClauses(array $columns, array $words): array {
+    $wordClauses = [];
+    $wordParams = [];
+    foreach ($words as $w) {
+        $likeW = '%' . $w . '%';
+        $colOrs = [];
+        foreach ($columns as $col) {
+            $colOrs[] = "$col LIKE ?";
+            $wordParams[] = $likeW;
+        }
+        $wordClauses[] = '(' . implode(' OR ', $colOrs) . ')';
+    }
+    return [implode(' AND ', $wordClauses), $wordParams];
+}
 
 function relevanceScore(string $text, string $query): int {
     $lower = mb_strtolower($text);
@@ -56,6 +71,7 @@ function logSearchQuery(PDO $pdo, string $query, int $resultCount): void {
 
 // ── Colleges (name, city, state, type) ──
 try {
+    [$wordSql, $wordParams] = buildWordClauses(['c.name', 'ci.name', 's.name', 'c.college_type'], $words);
     $stmt = $pdo->prepare("
         SELECT c.name, c.slug, c.college_type, c.naac_grade, c.ranking_nirf, c.id,
                ci.name AS city, s.name AS state
@@ -63,11 +79,11 @@ try {
         LEFT JOIN cities ci ON c.city_id = ci.id
         LEFT JOIN states s ON c.state_id = s.id
         WHERE c.status = 'active'
-          AND (c.name LIKE ? OR ci.name LIKE ? OR s.name LIKE ? OR c.college_type LIKE ?)
+          AND $wordSql
         ORDER BY c.is_featured DESC, c.overall_rating_avg DESC
         LIMIT 6
     ");
-    $stmt->execute([$like, $like, $like, $like]);
+    $stmt->execute($wordParams);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $meta = $r['city'] ? $r['city'] . ($r['state'] ? ', ' . $r['state'] : '') : ($r['state'] ?? '');
         $badge = $r['naac_grade'] ? 'NAAC ' . $r['naac_grade'] : ($r['ranking_nirf'] ? 'NIRF #' . $r['ranking_nirf'] : ucfirst($r['college_type'] ?? ''));
@@ -85,17 +101,50 @@ try {
     }
 } catch (Exception $e) {}
 
+// ── Schools (name, city, state, board, type) ──
+try {
+    [$wordSql, $wordParams] = buildWordClauses(['sc.name', 'ci.name', 's.name', 'sc.board_affiliation', 'sc.school_type'], $words);
+    $stmt = $pdo->prepare("
+        SELECT sc.name, sc.slug, sc.school_type, sc.board, sc.naac_grade, sc.id,
+               ci.name AS city, s.name AS state
+        FROM schools sc
+        LEFT JOIN cities ci ON sc.city_id = ci.id
+        LEFT JOIN states s ON sc.state_id = s.id
+        WHERE sc.status = 'active'
+          AND $wordSql
+        ORDER BY sc.is_featured DESC, sc.overall_rating_avg DESC
+        LIMIT 6
+    ");
+    $stmt->execute($wordParams);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $meta = $r['city'] ? $r['city'] . ($r['state'] ? ', ' . $r['state'] : '') : ($r['state'] ?? '');
+        $badge = $r['naac_grade'] ? 'NAAC ' . $r['naac_grade'] : ($r['board_affiliation'] ?? ucfirst($r['school_type'] ?? ''));
+        $rel = relevanceScore($r['name'], $q);
+        $results[] = [
+            'type' => 'school',
+            'icon' => 'ph-graduation-cap',
+            'title' => $r['name'],
+            'subtitle' => $meta,
+            'badge' => $badge,
+            'url' => BASE_URL . '/school/' . $r['slug'],
+            'relevance' => $rel,
+        ];
+        $total++;
+    }
+} catch (Exception $e) {}
+
 // ── Exams (name, abbreviation, conducting body) ──
 try {
+    [$wordSql, $wordParams] = buildWordClauses(['exam_name', 'exam_abbreviation', 'conducting_body'], $words);
     $stmt = $pdo->prepare("
         SELECT exam_name, exam_abbreviation, exam_slug, exam_level, exam_mode, applicants_last_year, conducting_body
         FROM exams
         WHERE status != 'cancelled'
-          AND (exam_name LIKE ? OR exam_abbreviation LIKE ? OR conducting_body LIKE ?)
+          AND $wordSql
         ORDER BY applicants_last_year DESC
         LIMIT 5
     ");
-    $stmt->execute([$like, $like, $like]);
+    $stmt->execute($wordParams);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $badge = strtoupper($r['exam_abbreviation'] ?? mb_substr($r['exam_name'], 0, 4));
         $abbr = $r['exam_abbreviation'] ? ' (' . $r['exam_abbreviation'] . ')' : '';
@@ -116,15 +165,16 @@ try {
 
 // ── Courses (name, category, level) ──
 try {
+    [$wordSql, $wordParams] = buildWordClauses(['course_name', 'course_category', 'course_level'], $words);
     $stmt = $pdo->prepare("
         SELECT course_name, course_slug, course_level, course_category, avg_salary_lpa, total_colleges_offering
         FROM courses
         WHERE status = 'active'
-          AND (course_name LIKE ? OR course_category LIKE ? OR course_level LIKE ?)
+          AND $wordSql
         ORDER BY total_colleges_offering DESC
         LIMIT 5
     ");
-    $stmt->execute([$like, $like, $like]);
+    $stmt->execute($wordParams);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $badge = $r['course_level'] ?? 'UG';
         $meta = $r['course_category'] ?: ($r['total_colleges_offering'] ? $r['total_colleges_offering'] . '+ colleges' : '');
@@ -144,14 +194,15 @@ try {
 
 // ── Careers (name, stream, sub_stream) ──
 try {
+    [$wordSql, $wordParams] = buildWordClauses(['name', 'stream', 'sub_stream', 'skills_required'], $words);
     $stmt = $pdo->prepare("
         SELECT name, slug, stream, sub_stream, salary_range, is_popular
         FROM careers
-        WHERE name LIKE ? OR stream LIKE ? OR sub_stream LIKE ? OR skills_required LIKE ?
+        WHERE $wordSql
         ORDER BY is_popular DESC, name ASC
         LIMIT 4
     ");
-    $stmt->execute([$like, $like, $like, $like]);
+    $stmt->execute($wordParams);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $badge = $r['stream'] ?? '';
         $subtitle = $r['sub_stream'] ?? ($r['salary_range'] ?? '');
@@ -171,15 +222,16 @@ try {
 
 // ── Articles / News (title, type) ──
 try {
+    [$wordSql, $wordParams] = buildWordClauses(['article_title'], $words);
     $stmt = $pdo->prepare("
         SELECT article_title, article_slug, article_type, publish_at
         FROM articles
         WHERE status = 'published'
-          AND article_title LIKE ?
+          AND $wordSql
         ORDER BY publish_at DESC
         LIMIT 4
     ");
-    $stmt->execute([$like]);
+    $stmt->execute($wordParams);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $typeLabel = ucwords(str_replace('_', ' ', $r['article_type']));
         $date = $r['publish_at'] ? date('d M Y', strtotime($r['publish_at'])) : '';
@@ -199,15 +251,16 @@ try {
 
 // ── Questions / Q&A (question text, category) ──
 try {
+    [$wordSql, $wordParams] = buildWordClauses(['question_text', 'question_category'], $words);
     $stmt = $pdo->prepare("
         SELECT question_text, slug, question_category, views, answer_count
         FROM questions
         WHERE status IN ('open','answered')
-          AND (question_text LIKE ? OR question_category LIKE ?)
+          AND $wordSql
         ORDER BY views DESC
         LIMIT 4
     ");
-    $stmt->execute([$like, $like]);
+    $stmt->execute($wordParams);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $title = mb_strimwidth($r['question_text'], 0, 80, '...');
         $meta = $r['answer_count'] . ' answers · ' . number_format($r['views']) . ' views';
@@ -227,6 +280,7 @@ try {
 
 // ── Indian Universities (name, type, city, state) ──
 try {
+    [$wordSql, $wordParams] = buildWordClauses(['u.name', 'ci.name', 's.name', 'u.university_type'], $words);
     $stmt = $pdo->prepare("
         SELECT u.name, u.slug, u.university_type, u.ranking_nirf, u.naac_grade, u.id,
                ci.name AS city, s.name AS state
@@ -234,11 +288,11 @@ try {
         LEFT JOIN cities ci ON u.city_id = ci.id
         LEFT JOIN states s ON u.state_id = s.id
         WHERE u.status = 'active'
-          AND (u.name LIKE ? OR ci.name LIKE ? OR s.name LIKE ? OR u.university_type LIKE ?)
+          AND $wordSql
         ORDER BY u.is_featured DESC, u.ranking_nirf ASC
         LIMIT 5
     ");
-    $stmt->execute([$like, $like, $like, $like]);
+    $stmt->execute($wordParams);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $meta = $r['city'] ? $r['city'] . ($r['state'] ? ', ' . $r['state'] : '') : ($r['state'] ?? '');
         $badge = $r['naac_grade'] ? 'NAAC ' . $r['naac_grade'] : ($r['ranking_nirf'] ? 'NIRF #' . $r['ranking_nirf'] : ucfirst($r['university_type'] ?? ''));
@@ -258,14 +312,15 @@ try {
 
 // ── Foreign Universities (name, country) ──
 try {
+    [$wordSql, $wordParams] = buildWordClauses(['university_name', 'country', 'city'], $words);
     $stmt = $pdo->prepare("
         SELECT university_name, university_slug, country, qs_rank, city
         FROM foreign_universities
-        WHERE university_name LIKE ? OR country LIKE ? OR city LIKE ?
+        WHERE $wordSql
         ORDER BY qs_rank ASC
         LIMIT 3
     ");
-    $stmt->execute([$like, $like, $like]);
+    $stmt->execute($wordParams);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $badge = $r['qs_rank'] ? 'QS #' . $r['qs_rank'] : '';
         $subtitle = $r['city'] ? $r['city'] . ', ' . $r['country'] : $r['country'];

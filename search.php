@@ -20,96 +20,135 @@ function searchRelevance(string $text, string $query): int {
     return 4;
 }
 
-$results = ['colleges' => [], 'exams' => [], 'courses' => [], 'careers' => [], 'articles' => [], 'questions' => [], 'indian_universities' => [], 'universities' => []];
+$results = ['colleges' => [], 'schools' => [], 'exams' => [], 'courses' => [], 'careers' => [], 'articles' => [], 'questions' => [], 'indian_universities' => [], 'universities' => []];
 
 if (mb_strlen($q) >= 1) {
     $like = '%' . $q . '%';
+    $words = array_values(array_filter(explode(' ', $q), fn($w) => mb_strlen($w) >= 1));
+
+    function searchWordClauses(array $columns, array $words): array {
+        $wordClauses = [];
+        $wordParams = [];
+        foreach ($words as $w) {
+            $likeW = '%' . $w . '%';
+            $colOrs = [];
+            foreach ($columns as $col) {
+                $colOrs[] = "$col LIKE ?";
+                $wordParams[] = $likeW;
+            }
+            $wordClauses[] = '(' . implode(' OR ', $colOrs) . ')';
+        }
+        return [implode(' AND ', $wordClauses), $wordParams];
+    }
 
     try {
+        [$wordSql, $wordParams] = searchWordClauses(['c.name', 'ci.name', 's.name', 'c.college_type'], $words);
         $stmt = $pdo->prepare("
             SELECT c.name, c.slug, c.college_type, c.naac_grade, c.ranking_nirf, c.overall_rating_avg, c.total_students, c.total_reviews,
                    ci.name AS city, s.name AS state
             FROM colleges c
             LEFT JOIN cities ci ON c.city_id = ci.id
             LEFT JOIN states s ON c.state_id = s.id
-            WHERE c.status = 'active' AND (c.name LIKE ? OR ci.name LIKE ? OR s.name LIKE ?)
+            WHERE c.status = 'active' AND $wordSql
             ORDER BY c.is_featured DESC, c.overall_rating_avg DESC LIMIT 20
         ");
-        $stmt->execute([$like, $like, $like]);
+        $stmt->execute($wordParams);
         $results['colleges'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {}
 
     try {
+        [$wordSql, $wordParams] = searchWordClauses(['sc.name', 'ci.name', 's.name', 'sc.board_affiliation', 'sc.school_type'], $words);
+        $stmt = $pdo->prepare("
+            SELECT sc.name, sc.slug, sc.school_type, sc.board, sc.naac_grade, sc.overall_rating_avg,
+                   ci.name AS city, s.name AS state
+            FROM schools sc
+            LEFT JOIN cities ci ON sc.city_id = ci.id
+            LEFT JOIN states s ON sc.state_id = s.id
+            WHERE sc.status = 'active' AND $wordSql
+            ORDER BY sc.is_featured DESC, sc.overall_rating_avg DESC LIMIT 20
+        ");
+        $stmt->execute($wordParams);
+        $results['schools'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {}
+
+    try {
+        [$wordSql, $wordParams] = searchWordClauses(['exam_name', 'exam_abbreviation', 'conducting_body'], $words);
         $stmt = $pdo->prepare("
             SELECT exam_name, exam_abbreviation, exam_slug, exam_level, exam_mode, applicants_last_year, conducting_body
-            FROM exams WHERE status != 'cancelled' AND (exam_name LIKE ? OR exam_abbreviation LIKE ?)
+            FROM exams WHERE status != 'cancelled' AND $wordSql
             ORDER BY applicants_last_year DESC LIMIT 15
         ");
-        $stmt->execute([$like, $like]);
+        $stmt->execute($wordParams);
         $results['exams'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {}
 
     try {
+        [$wordSql, $wordParams] = searchWordClauses(['course_name', 'course_category', 'course_level'], $words);
         $stmt = $pdo->prepare("
             SELECT course_name, course_slug, course_level, course_category, avg_salary_lpa, total_colleges_offering
-            FROM courses WHERE status = 'active' AND (course_name LIKE ? OR course_category LIKE ?)
+            FROM courses WHERE status = 'active' AND $wordSql
             ORDER BY total_colleges_offering DESC LIMIT 15
         ");
-        $stmt->execute([$like, $like]);
+        $stmt->execute($wordParams);
         $results['courses'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {}
 
     try {
+        [$wordSql, $wordParams] = searchWordClauses(['name', 'stream', 'sub_stream', 'skills_required'], $words);
         $stmt = $pdo->prepare("
             SELECT name, slug, stream, sub_stream, salary_range, short_description
-            FROM careers WHERE name LIKE ? OR stream LIKE ? OR sub_stream LIKE ? OR skills_required LIKE ?
+            FROM careers WHERE $wordSql
             ORDER BY is_popular DESC LIMIT 10
         ");
-        $stmt->execute([$like, $like, $like, $like]);
+        $stmt->execute($wordParams);
         $results['careers'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {}
 
     try {
+        [$wordSql, $wordParams] = searchWordClauses(['article_title'], $words);
         $stmt = $pdo->prepare("
             SELECT article_title, article_slug, article_type, publish_at, featured_image_url, view_count
-            FROM articles WHERE status = 'published' AND article_title LIKE ?
+            FROM articles WHERE status = 'published' AND $wordSql
             ORDER BY publish_at DESC LIMIT 10
         ");
-        $stmt->execute([$like]);
+        $stmt->execute($wordParams);
         $results['articles'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {}
 
     try {
+        [$wordSql, $wordParams] = searchWordClauses(['question_text', 'question_category'], $words);
         $stmt = $pdo->prepare("
             SELECT question_text, slug, question_category, views, answer_count, created_at
-            FROM questions WHERE status IN ('open','answered') AND (question_text LIKE ? OR question_category LIKE ?)
+            FROM questions WHERE status IN ('open','answered') AND $wordSql
             ORDER BY views DESC LIMIT 10
         ");
-        $stmt->execute([$like, $like]);
+        $stmt->execute($wordParams);
         $results['questions'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {}
 
     try {
+        [$wordSql, $wordParams] = searchWordClauses(['u.name', 'ci.name', 's.name', 'u.university_type'], $words);
         $stmt = $pdo->prepare("
             SELECT u.name, u.slug, u.university_type, u.ranking_nirf, u.naac_grade, u.overall_rating_avg,
                    ci.name AS city, s.name AS state
             FROM universities u
             LEFT JOIN cities ci ON u.city_id = ci.id
             LEFT JOIN states s ON u.state_id = s.id
-            WHERE u.status = 'active' AND (u.name LIKE ? OR ci.name LIKE ? OR s.name LIKE ? OR u.university_type LIKE ?)
+            WHERE u.status = 'active' AND $wordSql
             ORDER BY u.is_featured DESC, u.ranking_nirf ASC LIMIT 15
         ");
-        $stmt->execute([$like, $like, $like, $like]);
+        $stmt->execute($wordParams);
         $results['indian_universities'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {}
 
     try {
+        [$wordSql, $wordParams] = searchWordClauses(['university_name', 'country', 'city'], $words);
         $stmt = $pdo->prepare("
             SELECT university_name, university_slug, country, qs_rank, city
-            FROM foreign_universities WHERE university_name LIKE ? OR country LIKE ? OR city LIKE ?
+            FROM foreign_universities WHERE $wordSql
             ORDER BY qs_rank ASC LIMIT 10
         ");
-        $stmt->execute([$like, $like, $like]);
+        $stmt->execute($wordParams);
         $results['universities'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {}
 }
@@ -273,6 +312,27 @@ $metaKeywords = $q . ', search ' . $q . ', AdmissionSeason search, find ' . $q;
                 <span class="search-card-badge" style="background:rgba(25,55,109,0.08);color:#19376D">NAAC <?= htmlspecialchars($r['naac_grade']) ?></span>
                 <?php elseif ($r['ranking_nirf']): ?>
                 <span class="search-card-badge" style="background:rgba(25,55,109,0.08);color:#19376D">NIRF #<?= $r['ranking_nirf'] ?></span>
+                <?php endif; ?>
+            </a>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+
+        <?php if (!empty($results['schools'])): ?>
+        <div class="search-section">
+            <div class="search-section-title">
+                <i class="ph ph-graduation-cap" style="color:#0B2447"></i> Schools
+                <span class="count"><?= count($results['schools']) ?></span>
+            </div>
+            <?php foreach ($results['schools'] as $r): ?>
+            <a href="<?= $navBase ?>/school/<?= htmlspecialchars($r['slug']) ?>" class="search-card" data-track-click="<?= htmlspecialchars(json_encode(['type'=>'school','slug'=>$r['slug'],'q'=>$q])) ?>">
+                <div class="search-card-icon" style="background:rgba(11,36,71,0.08);color:#0B2447"><i class="ph ph-graduation-cap"></i></div>
+                <div class="search-card-body">
+                    <div class="search-card-title"><?= htmlspecialchars($r['name']) ?></div>
+                    <div class="search-card-sub"><?= htmlspecialchars(($r['city'] ?? '') . ($r['state'] ? ', ' . $r['state'] : '')) ?> <?= $r['overall_rating_avg'] ? '· ' . number_format((float)$r['overall_rating_avg'], 1) . ' rating' : '' ?></div>
+                </div>
+                <?php if ($r['board_affiliation']): ?>
+                <span class="search-card-badge" style="background:rgba(11,36,71,0.08);color:#0B2447"><?= htmlspecialchars($r['board_affiliation']) ?></span>
                 <?php endif; ?>
             </a>
             <?php endforeach; ?>
