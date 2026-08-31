@@ -105,7 +105,7 @@ try {
 try {
     [$wordSql, $wordParams] = buildWordClauses(['sc.name', 'ci.name', 's.name', 'sc.board_affiliation', 'sc.school_type'], $words);
     $stmt = $pdo->prepare("
-        SELECT sc.name, sc.slug, sc.school_type, sc.board, sc.naac_grade, sc.id,
+        SELECT sc.name, sc.slug, sc.school_type, sc.board_affiliation, sc.id,
                ci.name AS city, s.name AS state
         FROM schools sc
         LEFT JOIN cities ci ON sc.city_id = ci.id
@@ -118,7 +118,7 @@ try {
     $stmt->execute($wordParams);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $meta = $r['city'] ? $r['city'] . ($r['state'] ? ', ' . $r['state'] : '') : ($r['state'] ?? '');
-        $badge = $r['naac_grade'] ? 'NAAC ' . $r['naac_grade'] : ($r['board_affiliation'] ?? ucfirst($r['school_type'] ?? ''));
+        $badge = $r['board_affiliation'] ?? ucfirst($r['school_type'] ?? '');
         $rel = relevanceScore($r['name'], $q);
         $results[] = [
             'type' => 'school',

@@ -59,7 +59,7 @@ if (mb_strlen($q) >= 1) {
     try {
         [$wordSql, $wordParams] = searchWordClauses(['sc.name', 'ci.name', 's.name', 'sc.board_affiliation', 'sc.school_type'], $words);
         $stmt = $pdo->prepare("
-            SELECT sc.name, sc.slug, sc.school_type, sc.board, sc.naac_grade, sc.overall_rating_avg,
+            SELECT sc.name, sc.slug, sc.school_type, sc.board_affiliation, sc.overall_rating_avg,
                    ci.name AS city, s.name AS state
             FROM schools sc
             LEFT JOIN cities ci ON sc.city_id = ci.id
