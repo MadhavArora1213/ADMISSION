@@ -66,17 +66,17 @@ if (!isset($navColleges)) {
         }
 
         function iconFor(type) {
-          const m = {college:'ph-buildings',exam:'ph-clipboard-text',course:'ph-books',career:'ph-briefcase',article:'ph-newspaper',question:'ph-chat-circle-question',university:'ph-globe-hemisphere-west'};
+          const m = {college:'ph-buildings',school:'ph-graduation-cap',exam:'ph-clipboard-text',course:'ph-books',career:'ph-briefcase',article:'ph-newspaper',question:'ph-chat-circle-question',university:'ph-globe-hemisphere-west'};
           return m[type] || 'ph-arrow-right';
         }
 
         function typeLabel(type) {
-          const m = {college:'Colleges',exam:'Exams',course:'Courses',career:'Careers',article:'News & Articles',question:'Questions',university:'Universities'};
+          const m = {college:'Colleges',school:'Schools',exam:'Exams',course:'Courses',career:'Careers',article:'News & Articles',question:'Questions',university:'Universities'};
           return m[type] || type;
         }
 
         function typeColor(type) {
-          const m = {college:'#19376D',exam:'#7C3AED',course:'#059669',career:'#EA580C',article:'#D97706',question:'#2563EB',university:'#0891B2'};
+          const m = {college:'#19376D',school:'#0B2447',exam:'#7C3AED',course:'#059669',career:'#EA580C',article:'#D97706',question:'#2563EB',university:'#0891B2'};
           return m[type] || '#64748B';
         }
 
@@ -92,7 +92,7 @@ if (!isset($navColleges)) {
             groups[r.type].push(r);
           });
           let html = '';
-          const order = ['college','exam','course','career','university','article','question'];
+          const order = ['college','school','exam','course','career','university','article','question'];
           order.forEach(type => {
             if (!groups[type]) return;
             html += '<div class="nav-search-group">';
