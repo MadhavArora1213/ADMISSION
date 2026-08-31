@@ -30,20 +30,23 @@ $where = ["s.status = 'active'"];
 $params = [];
 
 if ($type !== 'all') {
-    $where[] = 's.school_type = :type';
-    $params['type'] = $type;
+    $where[] = 's.school_type = ?';
+    $params[] = $type;
 }
 if ($board !== 'all') {
-    $where[] = 's.board_affiliation = :board';
-    $params['board'] = $board;
+    $where[] = 's.board_affiliation = ?';
+    $params[] = $board;
 }
 if ($state > 0) {
-    $where[] = 's.state_id = :state';
-    $params['state'] = $state;
+    $where[] = 's.state_id = ?';
+    $params[] = $state;
 }
 if ($search !== '') {
-    $where[] = '(s.name LIKE :q OR ci.name LIKE :q OR st.name LIKE :q)';
-    $params['q'] = '%' . $search . '%';
+    $likeQ = '%' . $search . '%';
+    $where[] = '(s.name LIKE ? OR ci.name LIKE ? OR st.name LIKE ?)';
+    $params[] = $likeQ;
+    $params[] = $likeQ;
+    $params[] = $likeQ;
 }
 
 $whereSql = implode(' AND ', $where);

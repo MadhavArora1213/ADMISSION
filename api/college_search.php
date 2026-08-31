@@ -11,9 +11,10 @@ $stmt = $pdo->prepare("
          (SELECT COUNT(*) FROM college_courses WHERE college_id=c.id) AS course_count
   FROM colleges c
   LEFT JOIN cities ci ON c.city_id = ci.id
-  WHERE c.status='active' AND (c.name LIKE :q OR ci.name LIKE :q)
+  WHERE c.status='active' AND (c.name LIKE ? OR ci.name LIKE ?)
   ORDER BY c.ranking_nirf ASC, c.name ASC
   LIMIT 15
 ");
-$stmt->execute(['q' => '%' . $q . '%']);
+$likeQ = '%' . $q . '%';
+$stmt->execute([$likeQ, $likeQ]);
 echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));

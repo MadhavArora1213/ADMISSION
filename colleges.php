@@ -26,20 +26,24 @@ $where = ["c.status = 'active'"];
 $params = [];
 
 if ($type !== 'all') {
-    $where[] = 'c.college_type = :type';
-    $params['type'] = $type;
+    $where[] = 'c.college_type = ?';
+    $params[] = $type;
 }
 if ($state > 0) {
-    $where[] = 'c.state_id = :state';
-    $params['state'] = $state;
+    $where[] = 'c.state_id = ?';
+    $params[] = $state;
 }
 if ($course !== '') {
-    $where[] = 'EXISTS (SELECT 1 FROM college_courses cc WHERE cc.college_id = c.id AND cc.course_name LIKE :course)';
-    $params['course'] = '%' . $course . '%';
+    $where[] = 'EXISTS (SELECT 1 FROM college_courses cc WHERE cc.college_id = c.id AND cc.course_name LIKE ?)';
+    $params[] = '%' . $course . '%';
 }
 if ($search !== '') {
-    $where[] = '(c.name LIKE :q OR c.slug LIKE :q OR ci.name LIKE :q OR s.name LIKE :q)';
-    $params['q'] = '%' . $search . '%';
+    $likeQ = '%' . $search . '%';
+    $where[] = '(c.name LIKE ? OR c.slug LIKE ? OR ci.name LIKE ? OR s.name LIKE ?)';
+    $params[] = $likeQ;
+    $params[] = $likeQ;
+    $params[] = $likeQ;
+    $params[] = $likeQ;
 }
 
 $whereSql = implode(' AND ', $where);
