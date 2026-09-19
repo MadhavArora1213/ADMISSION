@@ -122,8 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
                 $filename = 'college_logo_' . time() . '_' . uniqid() . '.' . $ext;
                 if (move_uploaded_file($_FILES['logo_file']['tmp_name'], $upload_dir . $filename)) {
                     $_POST['logo_url'] = 'uploads/' . $filename;
-                    require_once __DIR__ . '/upload_sync.php';
-                    sync_to_github('uploads/' . $filename);
                 }
             }
 
@@ -133,8 +131,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
                 $filename = 'college_cover_' . time() . '_' . uniqid() . '.' . $ext;
                 if (move_uploaded_file($_FILES['cover_file']['tmp_name'], $upload_dir . $filename)) {
                     $_POST['cover_image_url'] = 'uploads/' . $filename;
-                    require_once __DIR__ . '/upload_sync.php';
-                    sync_to_github('uploads/' . $filename);
                 }
             }
 
@@ -300,8 +296,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'identity') {
             $filename = 'college_og_' . time() . '_' . uniqid() . '.' . $ext;
             if (move_uploaded_file($_FILES['og_image_file']['tmp_name'], $upload_dir . $filename)) {
                 $_POST['og_image_url'] = 'uploads/' . $filename;
-                require_once __DIR__ . '/upload_sync.php';
-                sync_to_github('uploads/' . $filename);
             }
         }
         

@@ -90,8 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
                     
                     if (move_uploaded_file($tmp_name, $target_path)) {
                         $logo = 'uploads/recruiters/' . $file_name;
-                        require_once __DIR__ . '/upload_sync.php';
-                        sync_to_github('uploads/recruiters/' . $file_name);
+
                     }
                 }
 

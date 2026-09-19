@@ -37,8 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
                 
                 if (move_uploaded_file($_FILES["conducting_body_logo_file"]["tmp_name"], $target_file)) {
                     $logo_url = "uploads/" . $new_filename;
-                    require_once __DIR__ . '/upload_sync.php';
-                    sync_to_github('uploads/' . $new_filename);
                 }
             }
 
@@ -116,8 +114,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
                 $file_extension = strtolower(pathinfo($_FILES[$file_input_name]["name"], PATHINFO_EXTENSION));
                 $new_filename = uniqid('exam_doc_') . '.' . $file_extension;
                 if (move_uploaded_file($_FILES[$file_input_name]["tmp_name"], $target_dir . $new_filename)) {
-                    require_once __DIR__ . '/upload_sync.php';
-                    sync_to_github('uploads/' . $new_filename);
                     return "uploads/" . $new_filename;
                 }
             }
@@ -175,8 +171,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
                     $file_extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
                     $new_filename = uniqid('sp_') . '.' . $file_extension;
                     if (move_uploaded_file($_FILES['new_sp_files']['tmp_name'][$index], $target_dir . $new_filename)) {
-                        require_once __DIR__ . '/upload_sync.php';
-                        sync_to_github('uploads/' . $new_filename);
                         $sample_papers[] = [
                             'year' => $_POST['new_sp_years'][$index],
                             'subject' => $_POST['new_sp_subjects'][$index] ?? '',
@@ -228,8 +222,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $current_tab == 'basic') {
                     $file_extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
                     $new_filename = uniqid('co_') . '.' . $file_extension;
                     if (move_uploaded_file($_FILES['new_co_files']['tmp_name'][$index], $target_dir . $new_filename)) {
-                        require_once __DIR__ . '/upload_sync.php';
-                        sync_to_github('uploads/' . $new_filename);
                         $cutoff_pdfs[] = [
                             'year' => $_POST['new_co_years'][$index],
                             'subject' => $_POST['new_co_subjects'][$index] ?? '',
